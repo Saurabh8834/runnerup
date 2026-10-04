@@ -478,14 +478,26 @@ function PaymentRegistrationFormInner() {
       const scriptOk = await loadRazorpayScript();
       if (!scriptOk) throw new Error("Could not load payment gateway. Please check internet connection.");
 
-      const token = await getToken();
+      let token = await getToken();
       if (!token) throw new Error("Session expired. Please sign in again.");
 
-      const regRes = await fetch(getApiUrl("/api/registrations"), {
+      let regRes = await fetch(getApiUrl("/api/registrations"), {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify(payload),
       });
+
+      if (regRes.status === 401) {
+        const freshToken = await getToken({ skipCache: true });
+        if (freshToken) {
+          token = freshToken;
+          regRes = await fetch(getApiUrl("/api/registrations"), {
+            method: "POST",
+            headers: authHeaders(token),
+            body: JSON.stringify(payload),
+          });
+        }
+      }
 
       if (!regRes.ok) throw new Error(await readApiError(regRes, "Registration could not be created"));
       const regJson = await regRes.json();
@@ -494,11 +506,23 @@ function PaymentRegistrationFormInner() {
 
       if (!registrationId) throw new Error("Invalid registration response from server");
 
-      const payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+      let payRes = await fetch(getApiUrl("/api/payments/create-order"), {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({ registrationId }),
       });
+
+      if (payRes.status === 401) {
+        const freshToken = await getToken({ skipCache: true });
+        if (freshToken) {
+          token = freshToken;
+          payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+            method: "POST",
+            headers: authHeaders(token),
+            body: JSON.stringify({ registrationId }),
+          });
+        }
+      }
 
       if (!payRes.ok) throw new Error(await readApiError(payRes, "Payment order failed"));
       const payJson = await payRes.json();
