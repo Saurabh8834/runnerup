@@ -4,8 +4,8 @@
   "description": "Join India's premier virtual running events. Register with UPI, track with GPS, earn medals & certificates.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fcfbf9",
-  "theme_color": "#0d9488",
+  "background_color": "#14242a",
+  "theme_color": "#244855",
   "orientation": "portrait-primary",
   "icons": [
     {

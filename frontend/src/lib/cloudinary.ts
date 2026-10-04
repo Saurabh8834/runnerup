@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { getApiUrl } from "./api";
 
 export interface UploadResult {
   url: string;
@@ -22,7 +22,7 @@ export async function uploadImage(
   file: string,
   folder?: string
 ): Promise<UploadResult> {
-  const response = await fetch(`${API_BASE}/upload/image`, {
+  const response = await fetch(getApiUrl("/api/uploads/image"), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ export async function uploadImage(
  * Get upload configuration from backend
  */
 export async function getUploadConfig(): Promise<UploadConfig> {
-  const response = await fetch(`${API_BASE}/upload/config`, {
+  const response = await fetch(getApiUrl("/api/uploads/config"), {
     credentials: 'include',
   });
 

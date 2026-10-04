@@ -16,12 +16,25 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: publishableKey,
   },
 
-  // ── Webhook proxy ─────────────────────────────────────────
-  // Razorpay webhook URL points to relentlessrun.in (Vercel).
-  // This rewrite forwards it to the Railway backend so the
-  // Express handler can process the raw body + signature.
+  // ── Backend API & Webhook proxy ─────────────────────────
+  // Forwards /api/* and /health to the backend server (locally or configured URL)
+  // so external clients accessing runnerup.in can reach the API without CORS or mixed-content issues.
   async rewrites() {
-    const list = [
+    const backendTarget = (
+      process.env.INTERNAL_API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://127.0.0.1:4000"
+    ).replace(/\/+$/, "");
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendTarget}/api/:path*`,
+      },
+      {
+        source: "/health",
+        destination: `${backendTarget}/health`,
+      },
       {
         source: "/images/club-push.png",
         destination: "/images/club-push.svg",
@@ -43,13 +56,6 @@ const nextConfig: NextConfig = {
         destination: "/images/weekend-long-run.svg",
       },
     ];
-    if (apiUrl) {
-      list.push({
-        source: "/api/payments/webhook",
-        destination: `${apiUrl.replace(/\/+$/, "")}/api/payments/webhook`,
-      });
-    }
-    return list;
   },
 
   // ── Image optimisation ───────────────────────────────────
@@ -73,16 +79,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ── Compression ──────────────────────────────────────────
-  compress: true,
-
-  // ── Experimental perf ────────────────────────────────────
-  experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "framer-motion",
-      "@clerk/nextjs",
-    ],
+  // ── Edge Cache for Public Static Assets ─────────────────
+  async headers() {
+    return [
+      {
+        source: "/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff2|webmanifest)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
   },
 };
 

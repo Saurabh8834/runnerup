@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://relentlessrun.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 interface BreadcrumbItem {
   name: string;

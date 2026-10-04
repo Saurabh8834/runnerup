@@ -162,7 +162,7 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                     </p>
                     <p style="margin:0 0 16px;font-size:11px;color:${GOLD};letter-spacing:0.2em;text-transform:uppercase;">── Every Finish Has a Story ──</p>
                     <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#ffffff;">Mountain Run Team</p>
-                    <p style="margin:0 0 16px;font-size:11px;color:rgba(255,255,255,0.4);">Organizer · relentlessrun.in</p>
+                    <p style="margin:0 0 16px;font-size:11px;color:rgba(255,255,255,0.4);">Organizer · runnerup.in</p>
                     <table width="200" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
                       <tr>
                         <td width="66" height="3" style="background:#FF9933;border-radius:2px 0 0 2px;"></td>

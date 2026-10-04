@@ -24,13 +24,13 @@ export function EventCta({ event }: { event: PublicEvent }) {
     <section className="event-classic-cta relative overflow-hidden">
       <div className="container-page py-14 sm:py-20">
         <Reveal>
-          <div className="event-classic-cta-card relative overflow-hidden border border-(--gold-line) bg-gradient-to-b from-(--gold-soft) via-(--panel) to-(--panel) px-6 py-12 text-center shadow-premium sm:px-12 sm:py-16">
+          <div className="event-classic-cta-card relative overflow-hidden border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 via-(--panel) to-(--panel) px-6 py-12 text-center shadow-premium sm:px-12 sm:py-16">
             <div
               aria-hidden
               className="sun-pulse pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(240,217,135,0.5) 0%, rgba(201,162,39,0.16) 45%, transparent 70%)",
+                  "radial-gradient(circle, rgba(230,72,51,0.4) 0%, rgba(135,79,65,0.16) 45%, transparent 70%)",
               }}
             />
             <div
@@ -39,7 +39,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
             />
 
             <div className="relative mx-auto flex max-w-2xl flex-col items-center">
-              <div className="medal-float w-28 drop-shadow-[0_25px_30px_rgba(122,92,8,0.35)] sm:w-36">
+              <div className="medal-float w-28 drop-shadow-[0_25px_30px_rgba(230,72,51,0.25)] sm:w-36">
                 <Medal3D className="h-auto w-full" />
               </div>
 

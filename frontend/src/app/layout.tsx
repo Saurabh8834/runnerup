@@ -8,7 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { StructuredData } from "./components/structured-data";
 import "./globals.css";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://relentlessrun.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — Relentless Run",
-    template: "%s | Relentless Run",
+    default: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
+    template: "%s | RUNNERUP",
   },
   description:
     "India's premier GPS-verified virtual running platform. Register with UPI, run anywhere with Strava/Garmin, earn heavy metal finisher medals, DRI-FIT t-shirts, and instant E-certificates. Compete in 1.5K, 5K, 10K, and 21K challenges.",
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     "virtual running",
     "virtual running events india",
     "virtual marathon india",
-    "relentless run",
-    "relentless running india",
+    "runnerup",
+    "runnerup virtual marathon",
     "online running challenge india",
     "virtual 5k run",
     "virtual 10k race",
@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     "fitness challenge india",
     "virtual race registration",
   ],
-  authors: [{ name: "Relentless Run" }],
-  creator: "Relentless Run",
-  publisher: "Relentless Run",
+  authors: [{ name: "RUNNERUP" }],
+  creator: "RUNNERUP",
+  publisher: "RUNNERUP",
   category: "Sports & Fitness",
   robots: {
     index: true,
@@ -67,8 +67,8 @@ export const metadata: Metadata = {
     locale: "en_IN",
     alternateLocale: ["en_US"],
     url: SITE_URL,
-    siteName: "Relentless Run",
-    title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — Relentless Run",
+    siteName: "RUNNERUP",
+    title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
     description:
       "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates.",
     images: [
@@ -76,22 +76,26 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Relentless Run - Virtual Running Events India",
+        alt: "RUNNERUP - Virtual Running Events India",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — Relentless Run",
+    title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
     description:
       "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates.",
     images: ["/og-image.png"],
-    creator: "@relentlessrun",
+    creator: "@runnerup",
   },
 
   icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
+    icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
@@ -103,7 +107,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0a0a0c",
+  themeColor: "#244855",
 };
 
 const publishableKey =
@@ -126,24 +130,24 @@ export default function RootLayout({
     >
       <head>
         {/* Preconnect to external origins to reduce latency */}
-        <link rel="preconnect" href="https://clerk.relentlessrun.in" />
-        <link rel="preconnect" href="https://api.relentlessrun.in" />
-        <link rel="dns-prefetch" href="https://clerk.relentlessrun.in" />
-        <link rel="dns-prefetch" href="https://api.relentlessrun.in" />
+        <link rel="preconnect" href="https://clerk.runnerup.in" />
+        <link rel="preconnect" href="https://api.runnerup.in" />
+        <link rel="dns-prefetch" href="https://clerk.runnerup.in" />
+        <link rel="dns-prefetch" href="https://api.runnerup.in" />
         <StructuredData />
       </head>
-      <body className="relative min-h-full flex flex-col bg-[#090d16] text-[#f0f0f0] overflow-x-hidden">
+      <body className="relative min-h-full flex flex-col bg-[#14242a] text-[#fcf8f2] overflow-x-hidden">
         {/* Global Runner Backdrop Image Overlay */}
         <div
           aria-hidden="true"
           className="pointer-events-none fixed inset-0 z-[-1] select-none overflow-hidden"
         >
           <img
-            src="/runner-img.jpg"
+            src="/runner-img.webp"
             alt=""
-            className="h-full w-full object-cover object-center opacity-25 scale-105 filter blur-[4px] brightness-75 contrast-125 transition-opacity duration-1000"
+            className="h-full w-full object-cover object-center opacity-20 scale-105 filter blur-[4px] brightness-75 contrast-125 transition-opacity duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#090d16]/75 via-[#090d16]/85 to-[#090d16]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#14242a]/80 via-[#14242a]/90 to-[#14242a]" />
         </div>
 
         <ThemeProvider>
@@ -151,7 +155,7 @@ export default function RootLayout({
             publishableKey={publishableKey || undefined}
             appearance={{
               variables: {
-                colorPrimary: "#0d9488",
+                colorPrimary: "#e64833",
                 borderRadius: "0.75rem",
               },
               elements: {

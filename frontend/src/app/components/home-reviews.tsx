@@ -39,26 +39,26 @@ function deriveAchievement(role: string): string {
 
 /* ─── Trust Bar ─── */
 const trustStats = [
-  { value: "4.9/5", label: "Average Rating", icon: Star, iconColor: "text-amber-400 fill-amber-400" },
-  { value: "25,000+", label: "Registered Runners", icon: Users, iconColor: "text-[#38bdf8]" },
-  { value: "98%", label: "Finish Rate", icon: Award, iconColor: "text-emerald-400" },
-  { value: "1,800+", label: "Verified Reviews", icon: ShieldCheck, iconColor: "text-[#38bdf8]" },
+  { value: "4.9/5", label: "Average Rating", icon: Star, iconColor: "text-[#fbe9d0] fill-[#fbe9d0]" },
+  { value: "25,000+", label: "Registered Runners", icon: Users, iconColor: "text-[#90aead]" },
+  { value: "98%", label: "Finish Rate", icon: Award, iconColor: "text-[#e64833]" },
+  { value: "1,800+", label: "Verified Reviews", icon: ShieldCheck, iconColor: "text-[#90aead]" },
 ];
 
 function TrustBar() {
   return (
-    <div className="mb-12 grid grid-cols-2 gap-4 rounded-2xl border border-white/10 bg-[#0d1322] p-5 shadow-2xl sm:grid-cols-4 sm:gap-6 sm:p-7">
+    <div className="mb-12 grid grid-cols-2 gap-4 rounded-2xl border border-[#90aead]/20 bg-[#172c34] p-5 shadow-2xl sm:grid-cols-4 sm:gap-6 sm:p-7">
       {trustStats.map((stat) => {
         const Icon = stat.icon;
         return (
           <div key={stat.label} className="flex flex-col items-center justify-center text-center p-2">
             <div className="flex items-center gap-2 mb-1">
               <Icon className={`h-5 w-5 ${stat.iconColor}`} />
-              <span className="font-display text-2xl font-black tracking-tight text-[#f0f0f0] sm:text-3xl">
+              <span className="font-display text-2xl font-black tracking-tight text-[#fbe9d0] sm:text-3xl">
                 {stat.value}
               </span>
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#90aead]">
               {stat.label}
             </span>
           </div>
@@ -78,7 +78,7 @@ function AvatarCircle({ name }: { name: string }) {
     .toUpperCase();
 
   return (
-    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600 font-bold text-white text-sm shadow-md ring-2 ring-sky-400/50">
+    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e64833] to-[#874f41] font-bold text-[#fbe9d0] text-sm shadow-md ring-2 ring-[#e64833]/50">
       {initials}
     </span>
   );
@@ -90,50 +90,50 @@ function ReviewCard({ review }: { review: HomeTestimonial }) {
   const achievement = deriveAchievement(review.role);
 
   return (
-    <article className="group relative flex w-[330px] sm:w-[380px] shrink-0 flex-col justify-between rounded-2xl border border-white/10 bg-[#0d1322] p-6 sm:p-7 shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#38bdf8]">
+    <article className="group relative flex w-[285px] sm:w-[380px] shrink-0 flex-col justify-between rounded-2xl border border-[#90aead]/20 bg-[#172c34] p-5 sm:p-7 shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]">
       {/* Quotation watermark */}
       <Quote
         aria-hidden="true"
-        className="absolute top-5 right-5 h-12 w-12 text-slate-800 transition-colors duration-300 group-hover:text-[#2563eb]/30"
+        className="absolute top-5 right-5 h-12 w-12 text-[#244855]/40 transition-colors duration-300 group-hover:text-[#e64833]/20"
       />
 
       <div>
         {/* Header Badge */}
         <div className="flex items-center justify-between gap-2 mb-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-[#38bdf8]">
-            <BadgeCheck className="h-3.5 w-3.5 text-[#38bdf8]" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#874f41]/40 bg-[#874f41]/20 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-[#fbe9d0]">
+            <BadgeCheck className="h-3.5 w-3.5 text-[#e64833]" />
             {badge}
           </span>
 
-          <div className="flex items-center gap-1 text-amber-400 text-xs font-semibold">
+          <div className="flex items-center gap-1 text-[#fbe9d0] text-xs font-semibold">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                <Star key={i} className="h-3.5 w-3.5 fill-[#fbe9d0] text-[#fbe9d0]" />
               ))}
             </div>
-            <span className="ml-1 text-[#f0f0f0] font-bold">{review.rating}.0</span>
+            <span className="ml-1 text-[#fbe9d0] font-bold">{review.rating}.0</span>
           </div>
         </div>
 
         {/* Quote content */}
         <blockquote className="mb-6">
-          <p className="text-sm sm:text-base leading-relaxed text-slate-200 font-medium">
+          <p className="text-sm sm:text-base leading-relaxed text-[#fbe9d0]/90 font-medium">
             &ldquo;{review.quote}&rdquo;
           </p>
         </blockquote>
       </div>
 
       {/* User Info Footer */}
-      <div className="pt-4 border-t border-white/10 flex items-center gap-3">
+      <div className="pt-4 border-t border-[#90aead]/15 flex items-center gap-3">
         <AvatarCircle name={review.name} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="truncate text-sm font-bold text-[#f0f0f0]">
+            <span className="truncate text-sm font-bold text-[#fbe9d0]">
               {review.name}
             </span>
-            <BadgeCheck className="h-4 w-4 shrink-0 text-[#38bdf8]" />
+            <BadgeCheck className="h-4 w-4 shrink-0 text-[#90aead]" />
           </div>
-          <p className="truncate text-xs text-slate-400 font-medium">
+          <p className="truncate text-xs text-[#90aead] font-medium">
             {achievement} {review.city ? `· ${review.city}` : ""}
           </p>
         </div>
@@ -152,18 +152,16 @@ export function HomeReviews({ testimonials: initial }: { testimonials?: HomeTest
   const marqueeReviews = [...reviews, ...reviews];
 
   return (
-    <section className="relative py-16 sm:py-24 border-t border-white/10 overflow-hidden bg-[#090d16] text-[#f0f0f0]">
+    <section className="relative py-16 sm:py-24 border-t border-[#90aead]/15 overflow-hidden bg-[#14242a] text-[#fbe9d0]">
       {/* Background glow effects */}
-      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[450px] w-[600px] rounded-full bg-blue-600/10 blur-[120px]" />
+      <div aria-hidden="true" className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[450px] w-[600px] rounded-full bg-[#244855]/30 blur-[120px]" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        <TrustBar />
-
         <HomeSectionHeader
           theme="dark"
           action={
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-5 py-3 font-bold text-white text-sm hover:from-sky-400 hover:to-blue-500 transition-all shadow-lg shadow-sky-500/20 group"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 py-3 font-bold text-[#fbe9d0] text-sm hover:brightness-110 transition-all shadow-lg shadow-[#e64833]/25 group"
               href="/events"
             >
               Explore Events
@@ -177,8 +175,8 @@ export function HomeReviews({ testimonials: initial }: { testimonials?: HomeTest
         {/* Infinite Auto-scrolling Marquee Track */}
         <div className="relative mt-8 w-full overflow-hidden rounded-3xl py-2">
           {/* Left and Right Fade Gradient Masks */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 sm:w-24 bg-gradient-to-r from-[#090d16] via-[#090d16]/80 to-transparent" />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 sm:w-24 bg-gradient-to-l from-[#090d16] via-[#090d16]/80 to-transparent" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 sm:w-24 bg-gradient-to-r from-[#14242a] via-[#14242a]/80 to-transparent" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 sm:w-24 bg-gradient-to-l from-[#14242a] via-[#14242a]/80 to-transparent" />
 
           {/* Marquee Row */}
           <div className="animate-marquee-slow flex gap-6">

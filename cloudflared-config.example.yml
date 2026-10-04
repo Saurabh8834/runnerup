@@ -1,0 +1,9 @@
+tunnel: <your-tunnel-uuid>
+credentials-file: C:\Users\<username>\.cloudflared\<your-tunnel-uuid>.json
+
+ingress:
+  - hostname: runnerup.in
+    service: http://localhost:3000
+  - hostname: www.runnerup.in
+    service: http://localhost:3000
+  - service: http_status:404

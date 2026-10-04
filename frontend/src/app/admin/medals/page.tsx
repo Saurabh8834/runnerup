@@ -217,7 +217,7 @@ export default function AdminMedalDispatchPage() {
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = downloadUrl;
-      a.download = `relentlessrun-medal-dispatch-${new Date().toISOString().split("T")[0]}.csv`;
+      a.download = `runnerup-medal-dispatch-${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();

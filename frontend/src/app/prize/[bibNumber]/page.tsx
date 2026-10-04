@@ -36,13 +36,13 @@ type PrizeData = {
 };
 
 const statusColors: Record<PrizeStatus, { bg: string; text: string; icon: string }> = {
-  sent: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#0d9488" },
-  ready: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#0d9488" },
-  delivered: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#0d9488" },
-  dispatched: { bg: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400", icon: "#d97706" },
-  processing: { bg: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400", icon: "#d97706" },
-  pending: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#94a3b8" },
-  not_eligible: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#94a3b8" },
+  sent: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
+  ready: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
+  delivered: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
+  dispatched: { bg: "bg-[#874f41]/20", text: "text-[#fbe9d0]", icon: "#e64833" },
+  processing: { bg: "bg-[#874f41]/20", text: "text-[#fbe9d0]", icon: "#e64833" },
+  pending: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#90aead" },
+  not_eligible: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#90aead" },
 };
 
 const prizeIcons: Record<string, typeof Award> = {

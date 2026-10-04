@@ -40,7 +40,7 @@ function parseOriginList(raw: string) {
 }
 
 const configuredFrontendOrigins = parseOriginList(
-  readEnv("FRONTEND_URL", "https://relentlessrun.in"),
+  readEnv("FRONTEND_URL", "https://runnerup.in"),
 );
 
 /** Browser origins allowed for CORS + Clerk token verification. */
@@ -50,8 +50,8 @@ const allowedOrigins = Array.from(
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:49154",
-    "https://relentlessrun.in",
-    "https://www.relentlessrun.in",
+    "https://runnerup.in",
+    "https://www.runnerup.in",
   ]),
 );
 
@@ -102,7 +102,7 @@ function normalizeResendFrom(raw: string | undefined): string {
 
 export const env = {
   port: Number(process.env.PORT ?? 4000),
-  frontendUrl: configuredFrontendOrigins[0] ?? "https://relentlessrun.in",
+  frontendUrl: configuredFrontendOrigins[0] ?? "https://runnerup.in",
   allowedOrigins,
   nodeEnv: process.env.NODE_ENV ?? "development",
   razorpayKeyId: process.env.RAZORPAY_KEY_ID ?? "",

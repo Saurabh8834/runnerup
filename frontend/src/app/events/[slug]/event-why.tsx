@@ -6,37 +6,37 @@ const cards = [
     icon: MapPinned,
     title: "Run anywhere",
     desc: "Park, road, treadmill or your own street — no travel, no city limits.",
-    tile: "from-emerald-500/15 to-teal-500/5 text-emerald-700",
+    tile: "from-[#e64833]/20 to-[#874f41]/10 text-[#e64833]",
   },
   {
     icon: Route,
     title: "Choose your distance",
     desc: "From a friendly 1.6 km to a full 21 km. Run, walk or cycle your way in.",
-    tile: "from-[#d9b137]/15 to-[#c9a227]/5 text-[#9a7a12]",
+    tile: "from-[#244855]/40 to-[#244855]/15 text-[#90aead]",
   },
   {
     icon: Smartphone,
     title: "Track your run",
     desc: "Use Strava, Garmin or your phone — any GPS app you already love.",
-    tile: "from-sky-500/15 to-blue-500/5 text-sky-700",
+    tile: "from-[#90aead]/25 to-[#244855]/15 text-[#fbe9d0]",
   },
   {
     icon: ShieldCheck,
     title: "Submit proof",
     desc: "Upload your GPS activity. A real team verifies every single finish.",
-    tile: "from-violet-500/15 to-indigo-500/5 text-violet-700",
+    tile: "from-[#874f41]/25 to-[#874f41]/10 text-[#fbe9d0]",
   },
   {
     icon: Clock3,
     title: "Your pace, your time",
     desc: "Finish at sunrise or midnight — any hour within the event window.",
-    tile: "from-rose-500/15 to-pink-500/5 text-rose-700",
+    tile: "from-[#e64833]/20 to-[#244855]/20 text-[#e64833]",
   },
   {
     icon: Bike,
     title: "Rewards at your door",
     desc: "Medal, certificate and kit delivered free across India. Zero hassles.",
-    tile: "from-[#0d9488]/15 to-emerald-500/5 text-[#0d9488]",
+    tile: "from-[#90aead]/20 to-[#244855]/25 text-[#90aead]",
   },
 ];
 

@@ -164,7 +164,7 @@ function ShieldIcon() {
 function BrandMark({ size = 28 }: { size?: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img alt="Mountain Run" height={size} src="/logo-mark.svg" width={size} />
+    <img alt="RunnerUp" height={size} src="/logo-mark.svg" width={size} />
   );
 }
 

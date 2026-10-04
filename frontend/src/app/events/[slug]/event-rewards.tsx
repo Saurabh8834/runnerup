@@ -51,8 +51,8 @@ export function EventRewards() {
           <div className="space-y-3.5">
             {items.map(({ icon: Icon, title, desc }, i) => (
               <Reveal key={title} delay={i * 0.06}>
-                <article className="group flex items-start gap-4 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-(--gold-line) hover:shadow-premium sm:p-5">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-(--gold-line) bg-gradient-to-br from-(--gold-soft) to-white text-(--gold-deep) shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <article className="group flex items-start gap-4 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e64833]/40 hover:shadow-premium sm:p-5">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#90aead]/20 bg-gradient-to-br from-[#e64833]/15 to-[#874f41]/10 text-[#e64833] shadow-sm transition-transform duration-300 group-hover:scale-105">
                     <Icon className="h-5 w-5" strokeWidth={1.75} />
                   </span>
                   <div className="min-w-0">
@@ -68,18 +68,18 @@ export function EventRewards() {
 
           {/* Product showcase */}
           <Reveal delay={0.1} className="lg:sticky lg:top-28">
-            <div className="relative overflow-hidden rounded-[2rem] border border-(--gold-line) bg-gradient-to-b from-(--gold-soft) via-(--panel) to-(--panel)">
+            <div className="relative overflow-hidden rounded-[2rem] border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 via-(--panel) to-(--panel)">
               <div
                 aria-hidden
                 className="sun-pulse pointer-events-none absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full blur-3xl"
                 style={{
                   background:
-                    "radial-gradient(circle, rgba(240,217,135,0.55) 0%, rgba(201,162,39,0.18) 45%, transparent 70%)",
+                    "radial-gradient(circle, rgba(230,72,51,0.35) 0%, rgba(135,79,65,0.15) 45%, transparent 70%)",
                 }}
               />
 
               <div className="relative flex items-center justify-center px-6 pt-10">
-                <div className="medal-float w-44 drop-shadow-[0_35px_40px_rgba(122,92,8,0.35)] sm:w-56">
+                <div className="medal-float w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
                   <Medal3D className="h-auto w-full" />
                 </div>
               </div>

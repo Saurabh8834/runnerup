@@ -1,6 +1,6 @@
-# Relentless Run
+# Runner Up
 
-Relentless Run is India's premier GPS-verified virtual running platform, split into a Next.js frontend and an Express/Prisma backend.
+Runner Up is India's premier GPS-verified virtual running platform, split into a Next.js frontend and an Express/Prisma backend.
 
 ## Project Structure
 

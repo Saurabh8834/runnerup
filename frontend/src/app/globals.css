@@ -1,110 +1,53 @@
 @import "tailwindcss";
 
-/* ── Dark (Permanent Global Default) ─────────────────────── */
+/* ── Palette Tokens: #244855, #E64833, #874F41, #90AEAD, #FBE9D0 ──── */
 :root,
 html,
 html.dark,
 html[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0a0a0c;
-  --foreground: #f4f4f5;
-  --muted: #a1a1aa;
-  --muted-soft: #71717a;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
-  --panel: #121216;
-  --panel-soft: #18181f;
-  --panel-glass: rgba(18, 18, 22, 0.82);
-  --panel-glass-strong: rgba(18, 18, 22, 0.94);
-  --header-bg: rgba(10, 10, 12, 0.82);
-  --accent: #f4f4f5;
-  --accent-hover: #e4e4e7;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --on-accent: #0a0a0c;
-  --sage: #2dd4bf;
-  --sage-soft: rgba(45, 212, 191, 0.12);
-  --gold: #e2b93f;
-  --gold-deep: #c9a227;
-  --gold-soft: rgba(226, 185, 63, 0.12);
-  --gold-line: rgba(226, 185, 63, 0.3);
+  --background: #14242a;
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #648180;
+  --line: rgba(144, 174, 173, 0.16);
+  --line-strong: rgba(144, 174, 173, 0.28);
+  --panel: #1b323b;
+  --panel-soft: #244855;
+  --panel-glass: rgba(27, 50, 59, 0.85);
+  --panel-glass-strong: rgba(36, 72, 85, 0.95);
+  --header-bg: rgba(20, 36, 42, 0.92);
+  --accent: #e64833;
+  --accent-hover: #ea5a47;
+  --accent-soft: rgba(230, 72, 51, 0.16);
+  --on-accent: #ffffff;
+  --sage: #90aead;
+  --sage-soft: rgba(144, 174, 173, 0.15);
+  --gold: #fbe9d0;
+  --gold-deep: #874f41;
+  --gold-soft: rgba(251, 233, 208, 0.15);
+  --gold-line: rgba(251, 233, 208, 0.3);
+  --terracotta: #874f41;
+  --cream: #fbe9d0;
   --success: #34d399;
-  --danger: #fb7185;
-  --eyebrow-color: #2dd4bf;
+  --danger: #e64833;
+  --eyebrow-color: #e64833;
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 4px 30px -4px rgba(0, 0, 0, 0.45), 0 2px 10px -2px rgba(0, 0, 0, 0.35);
-  --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.55), 0 10px 20px -5px rgba(0, 0, 0, 0.4);
-  --focus-ring: rgba(255, 255, 255, 0.14);
-  --input-bg: #18181f;
-  --selection-bg: rgba(45, 212, 191, 0.25);
-  --overlay: rgba(0, 0, 0, 0.65);
-  --hero-grid: rgba(255, 255, 255, 0.04);
-  --trust-pill-bg: rgba(18, 18, 22, 0.75);
-  --glass-pill-bg: rgba(18, 18, 22, 0.7);
-  --glass-pill-border: rgba(255, 255, 255, 0.1);
-  --glass-card-bg: rgba(18, 18, 22, 0.55);
-  --glass-card-border: rgba(255, 255, 255, 0.1);
-  --gradient-premium: linear-gradient(135deg, #f4f4f5 0%, #2dd4bf 50%, #818cf8 100%);
-  --feature-icon-bg: linear-gradient(180deg, #1a1a22 0%, var(--panel-soft) 100%);
-}
-
-/* ── Dark (public site only; admin has separate tokens) ──── */
-html.dark,
-html[data-theme="dark"] {
-  color-scheme: dark;
-  --background: #0a0a0c;
-  --foreground: #f4f4f5;
-  --muted: #a1a1aa;
-  --muted-soft: #71717a;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
-  --panel: #121216;
-  --panel-soft: #18181f;
-  --panel-glass: rgba(18, 18, 22, 0.82);
-  --panel-glass-strong: rgba(18, 18, 22, 0.94);
-  --header-bg: rgba(10, 10, 12, 0.82);
-  --accent: #f4f4f5;
-  --accent-hover: #e4e4e7;
-  --accent-soft: rgba(255, 255, 255, 0.08);
-  --on-accent: #0a0a0c;
-  --background: #090d16;
-  --foreground: #f0f0f0;
-  --muted: #94a3b8;
-  --muted-soft: #64748b;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
-  --panel: #0f172a;
-  --panel-soft: #1e293b;
-  --panel-glass: rgba(15, 23, 42, 0.82);
-  --panel-glass-strong: rgba(15, 23, 42, 0.94);
-  --header-bg: rgba(9, 13, 22, 0.85);
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --accent-soft: rgba(59, 130, 246, 0.15);
-  --on-accent: #ffffff;
-  --sage: #38bdf8;
-  --sage-soft: rgba(56, 189, 248, 0.12);
-  --gold: #38bdf8;
-  --gold-deep: #0284c7;
-  --gold-soft: rgba(56, 189, 248, 0.12);
-  --gold-line: rgba(56, 189, 248, 0.3);
-  --success: #34d399;
-  --danger: #fb7185;
-  --eyebrow-color: #38bdf8;
-  --shadow: 0 4px 30px -4px rgba(0, 0, 0, 0.45);
-  --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.55);
-  --focus-ring: rgba(59, 130, 246, 0.25);
-  --input-bg: #1e293b;
-  --selection-bg: rgba(56, 189, 248, 0.25);
-  --overlay: rgba(9, 13, 22, 0.75);
-  --hero-grid: rgba(255, 255, 255, 0.04);
-  --trust-pill-bg: rgba(15, 23, 42, 0.75);
-  --glass-pill-bg: rgba(15, 23, 42, 0.7);
-  --glass-pill-border: rgba(255, 255, 255, 0.1);
-  --glass-card-bg: rgba(15, 23, 42, 0.55);
-  --glass-card-border: rgba(255, 255, 255, 0.1);
-  --gradient-premium: linear-gradient(135deg, #f0f0f0 0%, #38bdf8 50%, #3b82f6 100%);
-  --feature-icon-bg: linear-gradient(180deg, #1e293b 0%, var(--panel-soft) 100%);
+  --shadow: 0 4px 30px -4px rgba(0, 0, 0, 0.55), 0 2px 10px -2px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.65), 0 10px 20px -5px rgba(230, 72, 51, 0.25);
+  --focus-ring: rgba(230, 72, 51, 0.35);
+  --input-bg: #1f3944;
+  --selection-bg: rgba(230, 72, 51, 0.3);
+  --overlay: rgba(14, 26, 31, 0.85);
+  --hero-grid: rgba(144, 174, 173, 0.05);
+  --trust-pill-bg: rgba(27, 50, 59, 0.8);
+  --glass-pill-bg: rgba(27, 50, 59, 0.75);
+  --glass-pill-border: rgba(144, 174, 173, 0.18);
+  --glass-card-bg: rgba(27, 50, 59, 0.75);
+  --glass-card-border: rgba(144, 174, 173, 0.2);
+  --gradient-premium: linear-gradient(135deg, #fbe9d0 0%, #e64833 55%, #874f41 100%);
+  --feature-icon-bg: linear-gradient(180deg, #244855 0%, var(--panel-soft) 100%);
 }
 
 @theme inline {
@@ -114,7 +57,7 @@ html[data-theme="dark"] {
   --font-mono: var(--font-geist-mono);
 }
 
-/* ── Deep Charcoal Navy & Electric Blue Palette ── */
+/* ── Deep Spruce & Vermilion Flame Palette ── */
 .font-display {
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -124,62 +67,62 @@ html[data-theme="dark"] {
 }
 
 .glass-card-dark {
-  background: rgba(11, 16, 26, 0.75);
+  background: rgba(27, 50, 59, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(144, 174, 173, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
 }
 
 .glass-card-accent {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.14) 0%, rgba(11, 16, 26, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(230, 72, 51, 0.18) 0%, rgba(36, 72, 85, 0.85) 100%);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.25);
+  border: 1px solid rgba(230, 72, 51, 0.4);
+  box-shadow: 0 20px 40px -10px rgba(230, 72, 51, 0.25);
 }
 
 .glass-pill-bar {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(27, 50, 59, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(144, 174, 173, 0.2);
 }
 
 .neon-btn-blue, .neon-btn-orange {
   position: relative;
-  background: linear-gradient(135deg, #0284c7 0%, #2563eb 55%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #e64833 0%, #db3e29 55%, #bd311f 100%);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(251, 233, 208, 0.35);
   box-shadow: 
     inset 0 1px 1px rgba(255, 255, 255, 0.4),
     inset 0 -1px 2px rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(56, 189, 248, 0.4),
-    0 4px 14px rgba(2, 132, 199, 0.35);
+    0 0 22px rgba(230, 72, 51, 0.45),
+    0 4px 14px rgba(230, 72, 51, 0.35);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
 .neon-btn-blue:hover, .neon-btn-orange:hover {
   transform: translateY(-2px) scale(1.02);
-  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #2563eb 100%);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #ea5a47 0%, #e64833 50%, #c93b27 100%);
+  border-color: rgba(251, 233, 208, 0.6);
   box-shadow: 
     inset 0 1px 2px rgba(255, 255, 255, 0.6),
     inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-    0 0 32px rgba(56, 189, 248, 0.75),
-    0 8px 24px rgba(37, 99, 235, 0.5);
+    0 0 35px rgba(230, 72, 51, 0.75),
+    0 8px 24px rgba(135, 79, 65, 0.5);
 }
 
 .flame-text, .flame-text-orange {
-  background: linear-gradient(135deg, #38bdf8 0%, #00d2ff 100%);
+  background: linear-gradient(135deg, #e64833 0%, #fbe9d0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .runner-glow-bg {
-  background: radial-gradient(circle at 60% 40%, rgba(37, 99, 235, 0.22) 0%, rgba(9, 13, 22, 0.95) 70%);
+  background: radial-gradient(circle at 60% 40%, rgba(230, 72, 51, 0.25) 0%, rgba(20, 36, 42, 0.95) 70%);
 }
 
 * {
@@ -506,11 +449,11 @@ img:not([width]) {
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, #f0d987 0%, #c9a227 55%, #9a7a12 100%);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 16px 36px -16px rgba(201, 162, 39, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  text-shadow: 0 1px 2px rgba(122, 92, 8, 0.35);
+  background: linear-gradient(135deg, #e64833 0%, #d83d28 55%, #874f41 100%);
+  color: #fbe9d0;
+  border: 1px solid rgba(251, 233, 208, 0.35);
+  box-shadow: 0 16px 36px -16px rgba(230, 72, 51, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  text-shadow: 0 1px 2px rgba(36, 72, 85, 0.4);
 }
 
 .btn-gold:hover {
@@ -1644,21 +1587,21 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 
 .event-classic-hero {
   background:
-    radial-gradient(circle at 15% 10%, rgba(224,183,94,.16), transparent 22rem),
-    linear-gradient(135deg, #13242c, #101a20 55%, #142129);
+    radial-gradient(circle at 15% 10%, rgba(230,72,51,.16), transparent 22rem),
+    linear-gradient(135deg, #172c34, #14242a 55%, #1b323b);
 }
 .event-classic-hero .hero-mesh-bg { opacity: .22; }
-.event-classic-hero .page-breadcrumb { background: rgba(16,26,32,.58); }
+.event-classic-hero .page-breadcrumb { background: rgba(20,36,42,.65); }
 .event-classic-title { letter-spacing: -.06em !important; }
 .event-classic-title .text-gradient-premium {
   background: none;
-  color: #e4bb64;
+  color: #e64833;
   -webkit-text-fill-color: currentColor;
 }
 .event-classic-poster {
-  border-color: rgba(235, 210, 145, .66) !important;
+  border-color: rgba(144, 174, 173, .5) !important;
   border-radius: 0 !important;
-  box-shadow: 14px 14px 0 rgba(190,142,49,.2), 0 28px 65px rgba(0,0,0,.38) !important;
+  box-shadow: 14px 14px 0 rgba(230,72,51,.2), 0 28px 65px rgba(0,0,0,.45) !important;
 }
 .event-classic-poster::before {
   content: "OFFICIAL MOUNTAIN RUN • EST. 2026";
@@ -1666,67 +1609,67 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   z-index: 2;
   top: .85rem;
   right: 1rem;
-  color: rgba(255,255,255,.78);
+  color: rgba(251,233,208,.85);
   font-size: .56rem;
   font-weight: 800;
   letter-spacing: .16em;
 }
 
-.event-classic-stats { background: #101a20; }
+.event-classic-stats { background: #14242a; }
 .event-classic-stats .container-page > div { transform: translateY(-.6rem); }
-.event-classic-stats .container-page > div > div { border-color: rgba(235,210,145,.28); }
-.event-classic-stats .container-page > div > div > div { background: #15242b; }
-.event-classic-stats .container-page > div > div > div:hover { background: #1a2b33; }
+.event-classic-stats .container-page > div > div { border-color: rgba(144,174,173,.25); }
+.event-classic-stats .container-page > div > div > div { background: #172c34; }
+.event-classic-stats .container-page > div > div > div:hover { background: #1b323b; }
 .event-classic-stats .container-page > div > div > div > span:first-child {
   border-radius: 999px;
-  border-color: rgba(224,183,94,.42);
-  background: rgba(224,183,94,.08);
-  color: #e0b75e;
+  border-color: rgba(230,72,51,.42);
+  background: rgba(230,72,51,.12);
+  color: #e64833;
 }
 
 .event-classic .text-gradient-premium {
   background: none;
-  color: #e0b75e;
+  color: #e64833;
   -webkit-text-fill-color: currentColor;
 }
 .event-classic .rounded-3xl { border-radius: 1rem; }
 .event-classic .rounded-2xl { border-radius: .75rem; }
 .event-classic .shadow-premium { box-shadow: 0 18px 45px -25px rgba(0,0,0,.78); }
-.event-classic [class*="grad-gold"] { background: #d7aa52; }
+.event-classic [class*="grad-gold"] { background: #e64833; }
 
-.event-classic-cta { background: #101a20; }
+.event-classic-cta { background: #14242a; }
 .event-classic-cta-card {
   border-radius: 0 !important;
-  background: linear-gradient(145deg, rgba(224,183,94,.14), #15242b 35%, #132129) !important;
-  box-shadow: 12px 12px 0 rgba(190,142,49,.18), 0 28px 65px rgba(0,0,0,.35) !important;
+  background: linear-gradient(145deg, rgba(230,72,51,.18), #172c34 35%, #14242a) !important;
+  box-shadow: 12px 12px 0 rgba(230,72,51,.2), 0 28px 65px rgba(0,0,0,.45) !important;
 }
 .event-classic-cta-card h2 { font-size: clamp(2.1rem, 4vw, 3.3rem); }
 
 @media (max-width: 639px) {
-  .event-classic-poster { box-shadow: 7px 7px 0 rgba(190,142,49,.2), 0 20px 44px rgba(0,0,0,.35) !important; }
+  .event-classic-poster { box-shadow: 7px 7px 0 rgba(230,72,51,.2), 0 20px 44px rgba(0,0,0,.4) !important; }
   .event-classic-poster::before { display: none; }
-  .event-classic-cta-card { box-shadow: 7px 7px 0 rgba(190,142,49,.18), 0 20px 44px rgba(0,0,0,.3) !important; }
+  .event-classic-cta-card { box-shadow: 7px 7px 0 rgba(230,72,51,.18), 0 20px 44px rgba(0,0,0,.35) !important; }
 }
 
 /* Event catalogue — the browsing page is deliberately quieter than an event
    detail, with a collectible race-program feel. */
 .events-classic {
-  --background: #101a20;
-  --panel: #142129;
-  --panel-soft: #192a32;
-  --line: rgba(238, 223, 190, .14);
-  --line-strong: rgba(238, 223, 190, .28);
-  --foreground: #f4f0e5;
-  --muted: #adbbb6;
-  --muted-soft: #7f918d;
-  --sage: #d9ae58;
-  --sage-soft: rgba(217,174,88,.12);
-  background: #101a20;
+  --background: #14242a;
+  --panel: #172c34;
+  --panel-soft: #1b323b;
+  --line: rgba(144, 174, 173, .16);
+  --line-strong: rgba(144, 174, 173, .28);
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #90aead;
+  --sage: #90aead;
+  --sage-soft: rgba(144,174,173,.14);
+  background: #14242a;
 }
 .events-classic-hero {
   background:
-    radial-gradient(circle at 80% -10%, rgba(224,183,94,.18), transparent 26rem),
-    linear-gradient(135deg, #13242c, #101a20 68%);
+    radial-gradient(circle at 80% -10%, rgba(230,72,51,.18), transparent 26rem),
+    linear-gradient(135deg, #172c34, #14242a 68%);
 }
 .events-classic-hero::after {
   content: "MOUNTAIN RUN • OPEN RACES • MOUNTAIN RUN • OPEN RACES • MOUNTAIN RUN";
@@ -1735,7 +1678,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   left: 0;
   width: 100%;
   overflow: hidden;
-  color: rgba(231,190,102,.17);
+  color: rgba(251,233,208,.15);
   font-size: .58rem;
   font-weight: 800;
   letter-spacing: .22em;
@@ -1744,62 +1687,62 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 }
 .events-classic-title,
 .events-classic-heading { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.05em; }
-.events-classic-title { color: #f4f0e5; }
-.events-classic .eyebrow { color: #e0b75e; }
-.events-classic .lede { color: #adbbb6; }
-.events-classic .page-breadcrumb { background: rgba(16,26,32,.56); }
-.events-classic-body { background: #101a20; }
-.events-classic .btn-primary { background: #e0b75e; color: #132027; border-color: #f2d48d; }
-.events-classic .btn-primary:hover { background: #f0c974; }
-.events-classic .btn-secondary { border-color: rgba(235,217,177,.35); }
+.events-classic-title { color: #fcf8f2; }
+.events-classic .eyebrow { color: #e64833; }
+.events-classic .lede { color: #90aead; }
+.events-classic .page-breadcrumb { background: rgba(20,36,42,.6); }
+.events-classic-body { background: #14242a; }
+.events-classic .btn-primary { background: #e64833; color: #fbe9d0; border-color: rgba(251,233,208,.3); }
+.events-classic .btn-primary:hover { background: #d83d28; }
+.events-classic .btn-secondary { border-color: rgba(144,174,173,.35); color: #fbe9d0; }
 .events-classic .btn-secondary:hover { background: rgba(255,255,255,.06); }
 
 .events-classic-card {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.23) !important;
-  box-shadow: 8px 8px 0 rgba(190,142,49,.1);
+  border-color: rgba(144,174,173,.23) !important;
+  box-shadow: 8px 8px 0 rgba(230,72,51,.12);
 }
 .events-classic-card:hover {
-  border-color: rgba(224,183,94,.65) !important;
-  box-shadow: 10px 10px 0 rgba(190,142,49,.2), 0 22px 40px -26px rgba(0,0,0,.8) !important;
+  border-color: rgba(230,72,51,.65) !important;
+  box-shadow: 10px 10px 0 rgba(230,72,51,.22), 0 22px 40px -26px rgba(0,0,0,.8) !important;
   transform: translate(-2px, -2px);
 }
 .events-classic-card > div:first-child { min-height: 11rem; }
 .events-classic-card h3 { font-family: Georgia, "Times New Roman", serif; font-size: 1.3rem; }
 .events-classic-card .btn { border-radius: .4rem; }
-.events-classic-card .btn-primary { background: #e0b75e; color: #132027; }
-.events-classic-card .btn-secondary { border-color: rgba(235,217,177,.35); }
+.events-classic-card .btn-primary { background: #e64833; color: #fbe9d0; }
+.events-classic-card .btn-secondary { border-color: rgba(144,174,173,.35); }
 .events-classic-card .rounded-md { border-radius: .25rem; }
-.events-classic .border-t { border-color: rgba(238,223,190,.14); }
+.events-classic .border-t { border-color: rgba(144,174,173,.14); }
 
 @media (max-width: 639px) {
-  .events-classic-card { box-shadow: 5px 5px 0 rgba(190,142,49,.1); }
+  .events-classic-card { box-shadow: 5px 5px 0 rgba(230,72,51,.12); }
   .events-classic-card > div:first-child { min-height: 9.5rem; }
 }
 
 /* Gallery — designed as an album of race memories rather than a plain image grid. */
 .gallery-classic {
-  --background: #101a20;
-  --panel: #142129;
-  --panel-soft: #192a32;
-  --line: rgba(238,223,190,.14);
-  --line-strong: rgba(238,223,190,.28);
-  --foreground: #f4f0e5;
-  --muted: #adbbb6;
-  --muted-soft: #7f918d;
-  --sage: #d9ae58;
-  --sage-soft: rgba(217,174,88,.12);
-  --on-accent: #132027;
-  background: #101a20;
+  --background: #14242a;
+  --panel: #172c34;
+  --panel-soft: #1b323b;
+  --line: rgba(144,174,173,.14);
+  --line-strong: rgba(144,174,173,.28);
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #90aead;
+  --sage: #90aead;
+  --sage-soft: rgba(144,174,173,.14);
+  --on-accent: #14242a;
+  background: #14242a;
 }
 .gallery-classic > .page-section { padding-top: 1.5rem; }
-.gallery-classic .page-breadcrumb { background: rgba(16,26,32,.6); }
-.gallery-classic .eyebrow { color: #e0b75e; }
-.gallery-classic .lede { color: #adbbb6; }
+.gallery-classic .page-breadcrumb { background: rgba(20,36,42,.6); }
+.gallery-classic .eyebrow { color: #e64833; }
+.gallery-classic .lede { color: #90aead; }
 .gallery-classic-hero {
   background:
-    radial-gradient(circle at 82% -16%, rgba(224,183,94,.18), transparent 28rem),
-    linear-gradient(135deg, #13242c, #101a20 70%);
+    radial-gradient(circle at 82% -16%, rgba(230,72,51,.18), transparent 28rem),
+    linear-gradient(135deg, #172c34, #14242a 70%);
 }
 .gallery-classic-hero::after {
   content: "THE MOUNTAIN RUN ALBUM • THE MOUNTAIN RUN ALBUM • THE MOUNTAIN RUN ALBUM";
@@ -1807,7 +1750,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   bottom: .45rem;
   left: 0;
   width: 100%;
-  color: rgba(231,190,102,.16);
+  color: rgba(251,233,208,.16);
   font-size: .58rem;
   font-weight: 800;
   letter-spacing: .21em;
@@ -1817,23 +1760,22 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 .gallery-classic-title { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
 .gallery-classic-stat {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.24) !important;
-  background: #15242b !important;
+  border-color: rgba(144,174,173,.24) !important;
+  background: #172c34 !important;
 }
-.gallery-classic-stat span { border-radius: 50% !important; border-color: rgba(224,183,94,.35) !important; color: #e0b75e !important; }
-.gallery-classic-body { background: #101a20; }
-.gallery-classic-body button[aria-pressed="true"] { background: #e0b75e !important; color: #132027 !important; border-color: #f2d48d !important; }
+.gallery-classic-stat span { border-radius: 50% !important; border-color: rgba(230,72,51,.4) !important; color: #e64833 !important; }
+.gallery-classic-body { background: #14242a; }
+.gallery-classic-body button[aria-pressed="true"] { background: #e64833 !important; color: #fbe9d0 !important; border-color: rgba(251,233,208,.35) !important; }
 
 .gallery-classic-card {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.24) !important;
-  box-shadow: 7px 7px 0 rgba(190,142,49,.1) !important;
+  border-color: rgba(144,174,173,.24) !important;
+  box-shadow: 7px 7px 0 rgba(230,72,51,.12) !important;
 }
-.gallery-classic-card:hover { border-color: rgba(224,183,94,.65) !important; box-shadow: 10px 10px 0 rgba(190,142,49,.2), 0 22px 40px -26px rgba(0,0,0,.8) !important; }
-.gallery-classic-card .rounded-full { border-radius: .25rem; background: rgba(16,26,32,.66); }
+.gallery-classic-card:hover { border-color: rgba(230,72,51,.65) !important; box-shadow: 10px 10px 0 rgba(230,72,51,.22), 0 22px 40px -26px rgba(0,0,0,.8) !important; }
+.gallery-classic-card .rounded-full { border-radius: .25rem; background: rgba(20,36,42,.66); }
 
-/* Make catalogue cards feel like a selected race kit: brighter poster crop,
-   brass details, clear hierarchy and friendlier actions. */
+/* Make catalogue cards feel like a selected race kit */
 .events-classic-card > div:first-child::after {
   content: "MOUNTAIN RUN";
   position: absolute;
@@ -1846,34 +1788,34 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   letter-spacing: .16em;
 }
 .events-classic-card > div:first-child {
-  border-bottom: 3px solid rgba(224,183,94,.85);
+  border-bottom: 3px solid rgba(230,72,51,.85);
 }
 .events-classic-card > div:nth-child(2) { padding: 1.25rem !important; }
 .events-classic-card h3 { line-height: 1.08; }
-.events-classic-card h3:hover { color: #e7bd68; }
-.events-classic-card [class*="rounded-md"] { border-color: rgba(224,183,94,.24); background: rgba(224,183,94,.07); }
-.events-classic-card .btn-primary { box-shadow: 0 7px 18px -11px rgba(224,183,94,.8); }
+.events-classic-card h3:hover { color: #e64833; }
+.events-classic-card [class*="rounded-md"] { border-color: rgba(230,72,51,.3); background: rgba(230,72,51,.1); }
+.events-classic-card .btn-primary { box-shadow: 0 7px 18px -11px rgba(230,72,51,.8); }
 .events-classic-card .btn-secondary { background: rgba(255,255,255,.025); }
 
 /* Leaderboard — turn live rankings into a confident, official race board. */
 .leaderboard-classic {
-  --background: #101a20;
-  --panel: #142129;
-  --panel-soft: #192a32;
-  --line: rgba(238,223,190,.14);
-  --line-strong: rgba(238,223,190,.28);
-  --foreground: #f4f0e5;
-  --muted: #adbbb6;
-  --muted-soft: #7f918d;
-  --sage: #d9ae58;
-  --sage-soft: rgba(217,174,88,.12);
-  background: #101a20;
+  --background: #14242a;
+  --panel: #172c34;
+  --panel-soft: #1b323b;
+  --line: rgba(144,174,173,.14);
+  --line-strong: rgba(144,174,173,.28);
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #90aead;
+  --sage: #90aead;
+  --sage-soft: rgba(144,174,173,.14);
+  background: #14242a;
 }
-.leaderboard-classic .page-breadcrumb { background: rgba(16,26,32,.58); }
+.leaderboard-classic .page-breadcrumb { background: rgba(20,36,42,.6); }
 .leaderboard-classic-hero {
   background:
-    radial-gradient(circle at 82% -12%, rgba(224,183,94,.2), transparent 25rem),
-    linear-gradient(135deg, #13242c, #101a20 68%);
+    radial-gradient(circle at 82% -12%, rgba(230,72,51,.2), transparent 25rem),
+    linear-gradient(135deg, #172c34, #14242a 68%);
 }
 .leaderboard-classic-hero::after {
   content: "OFFICIAL RESULTS • GPS VERIFIED • OFFICIAL RESULTS • GPS VERIFIED • OFFICIAL RESULTS";
@@ -1881,7 +1823,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   bottom: .42rem;
   left: 0;
   width: 100%;
-  color: rgba(231,190,102,.16);
+  color: rgba(251,233,208,.16);
   font-size: .58rem;
   font-weight: 800;
   letter-spacing: .2em;
@@ -1889,126 +1831,126 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   pointer-events: none;
 }
 .leaderboard-classic-title { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.06em; }
-.leaderboard-classic .lede { color: #adbbb6; }
-.leaderboard-classic-content { background: #101a20; }
-.leaderboard-classic-content > section { border-color: rgba(238,223,190,.14); }
-.leaderboard-classic .btn-primary { background: #e0b75e; color: #132027; border-color: #f2d48d; }
-.leaderboard-classic .btn-secondary { border-color: rgba(235,217,177,.35); }
+.leaderboard-classic .lede { color: #90aead; }
+.leaderboard-classic-content { background: #14242a; }
+.leaderboard-classic-content > section { border-color: rgba(144,174,173,.16); }
+.leaderboard-classic .btn-primary { background: #e64833; color: #fbe9d0; border-color: rgba(251,233,208,.3); }
+.leaderboard-classic .btn-secondary { border-color: rgba(144,174,173,.35); }
 .leaderboard-classic .btn-secondary:hover { background: rgba(255,255,255,.06); }
 
 .leaderboard-podium-card {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.28) !important;
-  background: #15242b !important;
-  box-shadow: 7px 7px 0 rgba(190,142,49,.1);
+  border-color: rgba(144,174,173,.28) !important;
+  background: #172c34 !important;
+  box-shadow: 7px 7px 0 rgba(230,72,51,.12);
 }
-.leaderboard-podium-card:hover { box-shadow: 10px 10px 0 rgba(190,142,49,.2), 0 20px 35px -26px rgba(0,0,0,.8) !important; }
-.leaderboard-podium-card[class*="ring-amber"] { background: linear-gradient(180deg, rgba(224,183,94,.15), #15242b 42%) !important; }
+.leaderboard-podium-card:hover { box-shadow: 10px 10px 0 rgba(230,72,51,.22), 0 20px 35px -26px rgba(0,0,0,.8) !important; }
+.leaderboard-podium-card[class*="ring-amber"] { background: linear-gradient(180deg, rgba(230,72,51,.18), #172c34 42%) !important; }
 .leaderboard-podium-card .rounded-xl { border-radius: .4rem; }
 .leaderboard-podium-card h3 { font-family: Georgia, "Times New Roman", serif; }
 
 .leaderboard-table-shell {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.26) !important;
-  box-shadow: 8px 8px 0 rgba(190,142,49,.1);
+  border-color: rgba(144,174,173,.26) !important;
+  box-shadow: 8px 8px 0 rgba(230,72,51,.12);
 }
-.leaderboard-table-shell > div:first-child { background: rgba(224,183,94,.08); }
+.leaderboard-table-shell > div:first-child { background: rgba(230,72,51,.12); }
 .leaderboard-table-shell thead { background: rgba(255,255,255,.035); }
-.leaderboard-table-shell tbody tr:hover { background: rgba(224,183,94,.055) !important; }
+.leaderboard-table-shell tbody tr:hover { background: rgba(230,72,51,.08) !important; }
 .leaderboard-classic input,
-.leaderboard-classic select { border-color: rgba(235,210,145,.25); background: #15242b; }
+.leaderboard-classic select { border-color: rgba(144,174,173,.25); background: #172c34; color: #fcf8f2; }
 
 @media (max-width: 639px) {
-  .leaderboard-podium-card { box-shadow: 5px 5px 0 rgba(190,142,49,.1); }
-  .leaderboard-table-shell { box-shadow: 5px 5px 0 rgba(190,142,49,.1); }
+  .leaderboard-podium-card { box-shadow: 5px 5px 0 rgba(230,72,51,.12); }
+  .leaderboard-table-shell { box-shadow: 5px 5px 0 rgba(230,72,51,.12); }
 }
 
 /* Authentication entry pages */
 .auth-classic {
-  --background: #101a20;
-  --panel: #142129;
-  --panel-soft: #192a32;
-  --line: rgba(238,223,190,.14);
-  --line-strong: rgba(238,223,190,.28);
-  --foreground: #f4f0e5;
-  --muted: #adbbb6;
-  --muted-soft: #7f918d;
-  --sage: #d9ae58;
-  --sage-soft: rgba(217,174,88,.12);
-  background: #101a20;
+  --background: #14242a;
+  --panel: #172c34;
+  --panel-soft: #1b323b;
+  --line: rgba(144,174,173,.14);
+  --line-strong: rgba(144,174,173,.28);
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #90aead;
+  --sage: #90aead;
+  --sage-soft: rgba(144,174,173,.12);
+  background: #14242a;
 }
 .auth-classic-shell {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 18% 20%, rgba(224,183,94,.16), transparent 23rem),
-    linear-gradient(135deg, #13242c, #101a20 62%, #142129);
+    radial-gradient(circle at 18% 20%, rgba(230,72,51,.16), transparent 23rem),
+    linear-gradient(135deg, #172c34, #14242a 62%, #1b323b);
 }
 .auth-classic-shell::before {
   content: "MOUNTAIN RUN • RUN YOUR WAY • MOUNTAIN RUN • RUN YOUR WAY";
   position: absolute;
   right: -7rem;
   top: 50%;
-  color: rgba(231,190,102,.09);
+  color: rgba(251,233,208,.09);
   font-size: .62rem;
   font-weight: 800;
   letter-spacing: .25em;
   transform: rotate(-90deg);
   white-space: nowrap;
 }
-.auth-classic-kicker { color: #e0b75e; font-size: .68rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
-.auth-classic-title { color: #f4f0e5; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.25rem, 5vw, 5.25rem); font-weight: 700; letter-spacing: -.065em; line-height: .94; }
+.auth-classic-kicker { color: #e64833; font-size: .68rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.auth-classic-title { color: #fcf8f2; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.25rem, 5vw, 5.25rem); font-weight: 700; letter-spacing: -.065em; line-height: .94; }
 .auth-classic-form {
   position: relative;
-  border: 1px solid rgba(235,210,145,.38);
-  background: #15242b;
-  box-shadow: 12px 12px 0 rgba(190,142,49,.16), 0 25px 60px rgba(0,0,0,.3);
+  border: 1px solid rgba(144,174,173,.35);
+  background: #172c34;
+  box-shadow: 12px 12px 0 rgba(230,72,51,.16), 0 25px 60px rgba(0,0,0,.4);
   padding: 2rem;
 }
-.auth-classic-form-title { color: #f4f0e5; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.85rem, 3vw, 2.45rem); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
-.auth-classic .cl-card { border-color: rgba(235,210,145,.2) !important; background: #192a32 !important; border-radius: .65rem !important; }
-.auth-classic .cl-formButtonPrimary { background: #e0b75e !important; color: #132027 !important; }
-.auth-classic .cl-formButtonPrimary:hover { background: #f0c974 !important; }
-.auth-classic .cl-socialButtonsBlockButton { border-color: rgba(235,210,145,.22) !important; background: #142129 !important; }
-.auth-classic .cl-dividerLine { background: rgba(238,223,190,.15) !important; }
+.auth-classic-form-title { color: #fcf8f2; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.85rem, 3vw, 2.45rem); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
+.auth-classic .cl-card { border-color: rgba(144,174,173,.2) !important; background: #1b323b !important; border-radius: .65rem !important; }
+.auth-classic .cl-formButtonPrimary { background: #e64833 !important; color: #fbe9d0 !important; }
+.auth-classic .cl-formButtonPrimary:hover { background: #d83d28 !important; }
+.auth-classic .cl-socialButtonsBlockButton { border-color: rgba(144,174,173,.22) !important; background: #172c34 !important; color: #fcf8f2 !important; }
+.auth-classic .cl-dividerLine { background: rgba(144,174,173,.15) !important; }
 
 @media (max-width: 639px) {
-  .auth-classic-form { padding: 1.35rem; box-shadow: 6px 6px 0 rgba(190,142,49,.14), 0 18px 42px rgba(0,0,0,.28); }
+  .auth-classic-form { padding: 1.35rem; box-shadow: 6px 6px 0 rgba(230,72,51,.14), 0 18px 42px rgba(0,0,0,.35); }
 }
 
 /* Runner dashboard — operational information with the same composed race-club finish. */
 .dashboard-classic {
-  --background: #101a20;
-  --panel: #142129;
-  --panel-soft: #192a32;
-  --line: rgba(238,223,190,.14);
-  --line-strong: rgba(238,223,190,.28);
-  --foreground: #f4f0e5;
-  --muted: #adbbb6;
-  --muted-soft: #7f918d;
-  --sage: #d9ae58;
-  --sage-soft: rgba(217,174,88,.12);
-  --on-accent: #132027;
-  background: #101a20;
+  --background: #14242a;
+  --panel: #172c34;
+  --panel-soft: #1b323b;
+  --line: rgba(144,174,173,.14);
+  --line-strong: rgba(144,174,173,.28);
+  --foreground: #fcf8f2;
+  --muted: #90aead;
+  --muted-soft: #90aead;
+  --sage: #90aead;
+  --sage-soft: rgba(144,174,173,.12);
+  --on-accent: #14242a;
+  background: #14242a;
 }
-.dashboard-classic-content { background: #101a20; }
-.dashboard-classic .btn-primary { background: #e0b75e; color: #132027; border-color: #f2d48d; }
-.dashboard-classic .btn-primary:hover { background: #f0c974; }
-.dashboard-classic .btn-secondary { border-color: rgba(235,217,177,.35); }
+.dashboard-classic-content { background: #14242a; }
+.dashboard-classic .btn-primary { background: #e64833; color: #fbe9d0; border-color: rgba(251,233,208,.3); }
+.dashboard-classic .btn-primary:hover { background: #d83d28; }
+.dashboard-classic .btn-secondary { border-color: rgba(144,174,173,.35); color: #fbe9d0; }
 .dashboard-classic .btn-secondary:hover { background: rgba(255,255,255,.06); }
 
 .dashboard-classic-hero {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.34) !important;
-  background: linear-gradient(135deg, #172a32, #142129 58%, #192a32) !important;
-  box-shadow: 10px 10px 0 rgba(190,142,49,.16), 0 25px 55px -30px rgba(0,0,0,.8) !important;
+  border-color: rgba(144,174,173,.34) !important;
+  background: linear-gradient(135deg, #172c34, #14242a 58%, #1b323b) !important;
+  box-shadow: 10px 10px 0 rgba(230,72,51,.16), 0 25px 55px -30px rgba(0,0,0,.8) !important;
 }
 .dashboard-classic-hero::after {
   content: "RUNNER PORTAL • VERIFIED MILES • RUNNER PORTAL";
   position: absolute;
   right: -2rem;
   top: .7rem;
-  color: rgba(231,190,102,.15);
+  color: rgba(251,233,208,.15);
   font-size: .55rem;
   font-weight: 800;
   letter-spacing: .16em;
@@ -2018,26 +1960,26 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 .dashboard-classic-hero h1,
 .dashboard-classic h2,
 .dashboard-classic h3 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
-.dashboard-classic-hero > div:last-child { border-color: rgba(238,223,190,.14); }
+.dashboard-classic-hero > div:last-child { border-color: rgba(144,174,173,.14); }
 .dashboard-classic-hero [class*="rounded-2xl"] { border-radius: .4rem; }
 
 .dashboard-classic-content > div:nth-child(4) button { border-radius: .35rem; }
-.dashboard-classic-content > div:nth-child(4) button[class*="bg-(--sage)"] { background: #e0b75e; color: #132027; }
+.dashboard-classic-content > div:nth-child(4) button[class*="bg-(--sage)"] { background: #e64833; color: #fbe9d0; }
 .dashboard-race-card {
   border-radius: 0 !important;
-  border-color: rgba(235,210,145,.25) !important;
-  box-shadow: 7px 7px 0 rgba(190,142,49,.1);
+  border-color: rgba(144,174,173,.25) !important;
+  box-shadow: 7px 7px 0 rgba(230,72,51,.12);
 }
-.dashboard-race-card:hover { border-color: rgba(224,183,94,.6) !important; box-shadow: 10px 10px 0 rgba(190,142,49,.17), 0 20px 42px -30px rgba(0,0,0,.8) !important; }
-.dashboard-race-card > div:first-child { background: rgba(224,183,94,.055) !important; }
+.dashboard-race-card:hover { border-color: rgba(230,72,51,.6) !important; box-shadow: 10px 10px 0 rgba(230,72,51,.2), 0 20px 42px -30px rgba(0,0,0,.8) !important; }
+.dashboard-race-card > div:first-child { background: rgba(230,72,51,.08) !important; }
 .dashboard-race-card > div:first-child h2 { font-size: clamp(1.3rem, 2.5vw, 1.65rem); }
 .dashboard-race-card .rounded-full { border-radius: .25rem; }
 .dashboard-classic .rounded-3xl { border-radius: 1rem; }
 .dashboard-classic .rounded-2xl { border-radius: .65rem; }
 
 @media (max-width: 639px) {
-  .dashboard-classic-hero { box-shadow: 6px 6px 0 rgba(190,142,49,.14), 0 18px 42px -28px rgba(0,0,0,.75) !important; }
-  .dashboard-race-card { box-shadow: 5px 5px 0 rgba(190,142,49,.1); }
+  .dashboard-classic-hero { box-shadow: 6px 6px 0 rgba(230,72,51,.14), 0 18px 42px -28px rgba(0,0,0,.75) !important; }
+  .dashboard-race-card { box-shadow: 5px 5px 0 rgba(230,72,51,.12); }
 }
 
 /* Continuous Marquee Ticker */

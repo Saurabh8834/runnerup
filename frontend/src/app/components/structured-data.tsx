@@ -1,10 +1,10 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://relentlessrun.in';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://runnerup.in';
 
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'SportsOrganization',
-  name: 'RelentlessRun',
-  alternateName: ['RelentlessRun India', 'RelentlessRun Virtual Races'],
+  name: 'RunnerUp',
+  alternateName: ['RunnerUp India', 'RunnerUp Virtual Races'],
   url: SITE_URL,
   logo: `${SITE_URL}/logo-mark.svg`,
   image: `${SITE_URL}/og-image.png`,
@@ -12,9 +12,9 @@ const organizationSchema = {
     "India's premier GPS-verified virtual running events platform. Register with UPI, run anywhere with Strava or Garmin, earn heavy metal finisher medals, DRI-FIT t-shirts, and instant verified E-certificates.",
   sport: ['Running', 'Marathon', 'Trail Running', 'Cycling', 'Walking'],
   sameAs: [
-    'https://instagram.com/relentlessrunofficial',
-    'https://facebook.com/relentlessrunofficial',
-    'https://twitter.com/relentlessrun',
+    'https://instagram.com/runnerupofficial',
+    'https://facebook.com/runnerupofficial',
+    'https://twitter.com/runnerup',
     'https://wa.me/917518418960',
   ],
   address: {
@@ -24,7 +24,7 @@ const organizationSchema = {
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',
-    email: 'relentlessrunofficial@gmail.com',
+    email: 'runnerupofficial@gmail.com',
     telephone: '+91-7518418960',
     areaServed: 'IN',
     availableLanguage: ['English', 'Hindi'],
@@ -34,8 +34,8 @@ const organizationSchema = {
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'RelentlessRun',
-  alternateName: 'RelentlessRun - Virtual Running Events India',
+  name: 'RunnerUp',
+  alternateName: 'RunnerUp - Virtual Running Events India',
   url: SITE_URL,
   description:
     'Join India’s top virtual running challenges, marathons, 5K, 10K, and 21K races. Run anywhere across India, submit GPS tracking proof, and receive authentic metal medals and digital certificates.',
@@ -56,10 +56,10 @@ const homeFaqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What is virtual running and how does RelentlessRun work in India?',
+      name: 'What is virtual running and how does RunnerUp work in India?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Virtual running allows you to run anywhere at your own pace and schedule. Register for any RelentlessRun challenge, complete your chosen distance (1.5K, 5K, 10K, 21K) using any GPS tracking app (Strava, Garmin, Nike Run Club, Google Fit), and upload your activity screenshot on your runner dashboard. Once verified by our race arbiters, your official E-Certificate is generated instantly and your heavy physical finisher medal is dispatched to your doorstep.',
+        text: 'Virtual running allows you to run anywhere at your own pace and schedule. Register for any RunnerUp challenge, complete your chosen distance (1.5K, 5K, 10K, 21K) using any GPS tracking app (Strava, Garmin, Nike Run Club, Google Fit), and upload your activity screenshot on your runner dashboard. Once verified by our race arbiters, your official E-Certificate is generated instantly and your heavy physical finisher medal is dispatched to your doorstep.',
       },
     },
     {
@@ -91,7 +91,7 @@ const homeFaqSchema = {
       name: 'Can runners and walkers from any Indian city participate?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! RelentlessRun welcomes runners, joggers, and walkers from all 28 states and union territories in India—including Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, Jaipur, Lucknow, and tier-2/tier-3 cities. We deliver medals to all 19,000+ Indian pincodes.',
+        text: 'Yes! RunnerUp welcomes runners, joggers, and walkers from all 28 states and union territories in India—including Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, Jaipur, Lucknow, and tier-2/tier-3 cities. We deliver medals to all 19,000+ Indian pincodes.',
       },
     },
   ],

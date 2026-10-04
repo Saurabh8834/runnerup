@@ -19,7 +19,7 @@ import { EventFaq } from "./faq-accordion";
 import { EventStickyCta } from "./sticky-cta-bar";
 import { Reveal, SectionHeader } from "./reveal";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://relentlessrun.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

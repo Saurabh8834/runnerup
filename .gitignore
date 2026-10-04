@@ -44,3 +44,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 **/next-env.d.ts
+
+# cloudflare local config
+cloudflared-config.yml
+*.log
+backend_log.txt
+

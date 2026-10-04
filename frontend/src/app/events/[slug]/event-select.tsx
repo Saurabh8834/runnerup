@@ -13,9 +13,9 @@ const WHATSAPP_URL = "https://wa.me/917518418960";
 type Activity = { key: string; label: string; icon: typeof Footprints; active: string };
 
 const activities: Activity[] = [
-  { key: "run", label: "Run", icon: Footprints, active: "border-[#0d9488] bg-[#0d9488] text-white shadow-[0_10px_24px_-10px_rgba(13,148,136,0.6)]" },
-  { key: "walk", label: "Walk", icon: Route, active: "border-sky-500 bg-sky-500 text-white shadow-[0_10px_24px_-10px_rgba(14,165,233,0.6)]" },
-  { key: "cycle", label: "Cycle", icon: Bike, active: "border-violet-500 bg-violet-500 text-white shadow-[0_10px_24px_-10px_rgba(139,92,246,0.6)]" },
+  { key: "run", label: "Run", icon: Footprints, active: "border-[#e64833] bg-[#e64833] text-[#fbe9d0] shadow-[0_10px_24px_-10px_rgba(230,72,51,0.6)]" },
+  { key: "walk", label: "Walk", icon: Route, active: "border-[#244855] bg-[#244855] text-[#fbe9d0] shadow-[0_10px_24px_-10px_rgba(36,72,85,0.6)]" },
+  { key: "cycle", label: "Cycle", icon: Bike, active: "border-[#874f41] bg-[#874f41] text-[#fbe9d0] shadow-[0_10px_24px_-10px_rgba(135,79,65,0.6)]" },
 ];
 
 function distanceNum(d: string) {
@@ -24,13 +24,13 @@ function distanceNum(d: string) {
 }
 
 function tier(km: number, activity: string) {
-  if (activity === "walk" && km >= 5) return { label: "Power walk", chip: "border-sky-200 bg-sky-50 text-sky-700", bar: "bg-sky-500" };
-  if (activity === "cycle") return { label: "Ride", chip: "border-violet-200 bg-violet-50 text-violet-700", bar: "bg-violet-500" };
-  if (km <= 3.2) return { label: "Easy starter", chip: "border-emerald-200 bg-emerald-50 text-emerald-700", bar: "bg-emerald-500" };
-  if (km === 5) return { label: "Classic 5K", chip: "border-[#0d9488] bg-[#f0fdfa] text-[#0d9488]", bar: "bg-[#0d9488]" };
-  if (km === 10) return { label: "10K challenge", chip: "border-violet-200 bg-violet-50 text-violet-700", bar: "bg-violet-500" };
-  if (km >= 21) return { label: "Half marathon", chip: "border-[#c9a227] bg-[#fdf8ec] text-[#9a7a12]", bar: "bg-[#c9a227]" };
-  return { label: "Challenge", chip: "border-slate-200 bg-slate-50 text-slate-600", bar: "bg-slate-400" };
+  if (activity === "walk" && km >= 5) return { label: "Power walk", chip: "border-[#90aead]/30 bg-[#244855]/20 text-[#fbe9d0]", bar: "bg-[#90aead]" };
+  if (activity === "cycle") return { label: "Ride", chip: "border-[#874f41]/40 bg-[#874f41]/20 text-[#fbe9d0]", bar: "bg-[#874f41]" };
+  if (km <= 3.2) return { label: "Easy starter", chip: "border-[#90aead]/30 bg-[#244855]/20 text-[#90aead]", bar: "bg-[#90aead]" };
+  if (km === 5) return { label: "Classic 5K", chip: "border-[#e64833]/50 bg-[#e64833]/15 text-[#e64833]", bar: "bg-[#e64833]" };
+  if (km === 10) return { label: "10K challenge", chip: "border-[#874f41]/40 bg-[#874f41]/20 text-[#fbe9d0]", bar: "bg-[#874f41]" };
+  if (km >= 21) return { label: "Half marathon", chip: "border-[#e64833]/60 bg-[#e64833]/25 text-[#fbe9d0]", bar: "bg-[#e64833]" };
+  return { label: "Challenge", chip: "border-[#90aead]/30 bg-[#172c34] text-[#90aead]", bar: "bg-[#244855]" };
 }
 
 function formatPrice(price: string) {
@@ -92,7 +92,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                       Early bird price · kit included
                     </p>
                   </div>
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl grad-gold text-white shadow-gold">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e64833] to-[#874f41] text-[#fbe9d0] shadow-md shadow-[#e64833]/25">
                     <IndianRupee className="h-5 w-5" />
                   </span>
                 </div>

@@ -1343,7 +1343,7 @@ export async function adminExportMedalsCsv(
     ),
   ];
 
-  const filename = `relentlessrun-dispatch-${new Date().toISOString().split("T")[0]}.csv`;
+  const filename = `runnerup-dispatch-${new Date().toISOString().split("T")[0]}.csv`;
   response.setHeader("Content-Type", "text/csv; charset=utf-8");
   response.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   response.send(lines.join("\n"));

@@ -1,8 +1,12 @@
 import { MetadataRoute } from 'next';
 import { allPublicEvents } from './data/events';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://relentlessrun.in';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.relentlessrun.in';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://runnerup.in';
+const API_URL =
+  process.env.INTERNAL_API_URL ||
+  (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("api.runnerup.in")
+    ? process.env.NEXT_PUBLIC_API_URL
+    : "http://127.0.0.1:4000");
 
 interface EventData {
   id?: string;

@@ -104,7 +104,7 @@ export function EventReviews() {
                   &ldquo;{review.quote}&rdquo;
                 </blockquote>
                 <div className="mt-6 flex items-center gap-3 border-t border-(--line) pt-5">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full grad-gold text-xs font-black text-white shadow-gold">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e64833] to-[#874f41] text-xs font-black text-[#fbe9d0] shadow-sm shadow-[#e64833]/20">
                     {initials(review.name)}
                   </span>
                   <div className="min-w-0">

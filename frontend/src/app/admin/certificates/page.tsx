@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getApiUrl } from "../../../lib/api";
 import { adminFetch, formatDateTime } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
 import {
@@ -83,8 +84,7 @@ function EmailPreviewModal({
       setError(null);
       try {
         const token = await getToken().catch(() => null);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
-        const res = await fetch(`${apiUrl}/api/admin/certificates/${certId}/email-preview`, {
+        const res = await fetch(getApiUrl(`/api/admin/certificates/${certId}/email-preview`), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Could not load preview");
@@ -251,8 +251,8 @@ function ResendAllModal({
               disabled={busy}
               className="btn btn-primary flex-1 gap-2 disabled:opacity-40"
               style={{
-                background: busy ? undefined : "linear-gradient(135deg, #1a3a2e, #0d5c45)",
-                border: "1px solid #c9a227",
+                background: busy ? undefined : "linear-gradient(135deg, #172c34, #244855)",
+                border: "1px solid #e64833",
               }}
             >
               {busy ? (
@@ -513,11 +513,11 @@ export default function AdminCertificatesPage() {
               onClick={() => setShowResendModal(true)}
               className="btn h-9 gap-2 text-sm disabled:opacity-40 font-semibold"
               style={{
-                background: "linear-gradient(135deg, #1a3a2e, #0d5c45)",
-                color: "#ffffff",
-                border: "1.5px solid #c9a227",
+                background: "linear-gradient(135deg, #172c34, #244855)",
+                color: "#fbe9d0",
+                border: "1.5px solid #e64833",
                 borderRadius: "var(--radius-sm)",
-                boxShadow: "0 2px 8px rgba(26,58,46,0.25)",
+                boxShadow: "0 2px 8px rgba(36,72,85,0.25)",
               }}
               title="Resend the new premium certificate email to ALL participants"
             >

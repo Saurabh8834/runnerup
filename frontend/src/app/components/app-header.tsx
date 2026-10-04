@@ -25,9 +25,10 @@ import { ThemeToggle } from "./theme-toggle";
 
 /* ─── Nav items with icons ─── */
 const publicNav = [
-  ["Events",      "/events",      Calendar],
-  ["Gallery",     "/gallery",     Camera  ],
-  ["Leaderboard", "/leaderboard", Trophy  ],
+  { label: "Events", href: "/events", icon: Calendar },
+  { label: "How It Works", href: "/#how-it-works", icon: Zap },
+  { label: "Gallery", href: "/gallery", icon: Camera },
+  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
 ] as const;
 
 /* ─── Animated hamburger button ─── */
@@ -218,6 +219,8 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
   );
 }
 
+
+
 function NavLink({
   href,
   label,
@@ -227,24 +230,27 @@ function NavLink({
   href: string;
   label: string;
   active: boolean;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className={`relative rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
+      className={`relative inline-flex items-center rounded-full px-3.5 sm:px-4 py-1.5 text-xs sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
         active
-          ? "text-white font-extrabold"
-          : "text-white/70 hover:text-white hover:bg-white/[0.04]"
+          ? "text-[#fbe9d0] font-semibold"
+          : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
       }`}
     >
-      {label}
+      {active && (
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#e64833] shadow-[0_0_8px_#e64833] mr-1.5 shrink-0" />
+      )}
+      <span className="whitespace-nowrap shrink-0">{label}</span>
       {active && (
         <motion.span
-          layoutId="nav-pill"
-          className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-sky-500/30 via-sky-400/25 to-blue-600/30 border border-sky-400/50 shadow-[0_0_16px_rgba(56,189,248,0.35)]"
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          layoutId="nav-capsule-active"
+          className="absolute inset-0 -z-10 rounded-full bg-[#e64833]/15 border border-[#e64833]/40 shadow-[0_0_14px_rgba(230,72,51,0.25)]"
+          transition={{ type: "spring", stiffness: 450, damping: 35 }}
         />
       )}
     </Link>
@@ -262,8 +268,37 @@ export function AppHeader() {
   const { user, isSignedIn, isLoaded } = useUser();
   const { signOut } = useClerk();
 
-  const isActive = (href: string) =>
-    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  const isActive = (href: string) => {
+    if (href === "/#how-it-works") return false;
+    return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  };
+
+  const handleNavClick = (href: string, e?: React.MouseEvent) => {
+    if (href.startsWith("/#") && pathname === "/") {
+      e?.preventDefault();
+      const id = href.replace("/#", "");
+      const elem = document.getElementById(id);
+      if (elem) {
+        elem.scrollIntoView({ behavior: "smooth" });
+        window.history.pushState(null, "", href);
+      }
+    }
+  };
+
+  const handleMobileNavClick = (href: string, e?: React.MouseEvent) => {
+    setOpen(false);
+    if (href.startsWith("/#") && pathname === "/") {
+      e?.preventDefault();
+      const id = href.replace("/#", "");
+      setTimeout(() => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.scrollIntoView({ behavior: "smooth" });
+          window.history.pushState(null, "", href);
+        }
+      }, 300);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -302,154 +337,150 @@ export function AppHeader() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ease-in-out ${
-        scrolled
-          ? "bg-[#090d16]/92 backdrop-blur-3xl border-b border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85),inset_0_-1px_0_rgba(255,255,255,0.06)] py-2 sm:py-2.5 px-4 sm:px-6 lg:px-8"
-          : "bg-transparent border-b border-transparent py-3 sm:pt-4 px-4 sm:px-6 lg:px-8"
-      }`}
-    >
-      {/* ─── Desktop bar ─── */}
-      <div className="hidden w-full max-w-7xl mx-auto md:block">
-        <div>
-          <div className="relative flex h-12 items-center justify-between gap-4 px-2 sm:h-13">
-            {/* Left — Brand */}
+        className={`fixed inset-x-0 top-3 sm:top-4 z-50 flex justify-center px-4 sm:px-6 pointer-events-none transition-all duration-300 ${
+          scrolled ? "top-2 sm:top-3" : "top-3 sm:top-4"
+        }`}
+      >
+        <div
+          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-4 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
+            scrolled ? "bg-[#112026]/98 border-[#90aead]/25 shadow-[0_20px_48px_rgba(0,0,0,0.85)]" : ""
+          }`}
+        >
+          {/* Subtle top edge luminous highlight line */}
+          <div className="pointer-events-none absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#fbe9d0]/25 to-transparent" />
+
+          {/* Left — Brand Logo */}
+          <div className="flex items-center shrink-0">
             <Link
               href="/"
-              aria-label="Relentless Run home"
-              className="group relative flex min-w-0 shrink-0 items-center gap-3"
+              aria-label="RUNNERUP home"
+              className="group relative flex min-w-0 shrink-0 items-center transition-transform hover:scale-[1.02]"
             >
-              <div className="relative flex items-center rounded-2xl bg-[#0d1322] p-1.5 shadow-[0_8px_25px_rgba(0,0,0,0.7)] border border-white/10 transition-all duration-300 group-hover:shadow-[0_8px_30px_rgba(56,189,248,0.3)]">
-                <motion.img
-                  src="/3d-header-logo.png"
-                  alt="Relentless Run"
-                  width={200}
-                  height={52}
-                  animate={{ y: [0, -2, 0], scale: [1, 1.02, 1] }}
-                  transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                  whileHover={{ scale: 1.05 }}
-                  className="h-10 sm:h-11 lg:h-12 w-auto rounded-lg object-contain drop-shadow-[0_4px_16px_rgba(56,189,248,0.4)]"
-                />
-              </div>
+              <motion.img
+                src="/runnerup-logo.png"
+                alt="RUNNERUP"
+                width={180}
+                height={40}
+                animate={{ y: [0, -1.5, 0] }}
+                transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                whileHover={{ scale: 1.04 }}
+                className="h-8 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)]"
+              />
             </Link>
+          </div>
 
-            {/* Center — Nav pill strictly mathematically centered to screen */}
-            <nav
-              className="hidden items-center gap-1 rounded-full border border-white/15 bg-[#090d16]/90 backdrop-blur-xl px-3.5 py-1.5 shadow-2xl lg:flex absolute left-1/2 -translate-x-1/2 z-10"
-              aria-label="Main navigation"
-            >
-              {publicNav.map(([label, href]) => (
-                <NavLink
-                  key={href}
-                  active={isActive(href)}
-                  href={href}
-                  label={label}
-                />
-              ))}
+          {/* Center — Distinct Nav Capsule Pill */}
+          <div className="hidden lg:flex items-center shrink-0 rounded-full bg-[#1f3741]/95 border border-[#90aead]/20 px-2.5 lg:px-3.5 py-1 lg:py-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.35)]">
+            <nav className="flex items-center gap-0.5 sm:gap-1" aria-label="Main navigation">
+              {publicNav.map(({ label, href }) => {
+                const active = isActive(href);
+                return (
+                  <NavLink
+                    key={href}
+                    active={active}
+                    href={href}
+                    label={label}
+                    onClick={(e) => handleNavClick(href, e)}
+                  />
+                );
+              })}
             </nav>
+          </div>
 
-            {/* Right — Actions cleanly on the right */}
-            <div className="flex items-center gap-3 shrink-0 ml-auto z-10">
+          {/* Right — Actions & High-contrast CTA */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Desktop Actions (lg and up) */}
+            <div className="hidden lg:flex items-center gap-2.5 xl:gap-3 shrink-0">
               {isLoaded && !isSignedIn && (
                 <>
                   <Link
-                    className="hidden h-9 items-center rounded-full border border-white/15 bg-[#090d16]/90 backdrop-blur-xl px-4 text-xs font-bold uppercase tracking-wider text-slate-200 transition-all hover:text-white hover:border-white/30 shadow-md sm:inline-flex"
+                    className="inline-flex h-9 items-center rounded-full px-3.5 text-xs font-semibold text-[#fbe9d0] transition-colors hover:text-white hover:bg-white/[0.06] whitespace-nowrap"
                     href="/sign-in"
                   >
                     Sign in
                   </Link>
                   <Link
-                    className="neon-btn-blue hidden h-9 items-center rounded-full px-5 text-xs font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105 sm:inline-flex"
-                    href="/register"
+                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.4),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(230,72,51,0.7),0_6px_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
+                    href="/events"
                   >
-                    Register Now
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                    <span className="relative z-10 text-[#fbe9d0]">Browse events</span>
+                    <ArrowRight className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </>
               )}
               {isLoaded && isSignedIn && (
-                <DashboardProfileDropdown />
+                <div className="flex items-center gap-2.5">
+                  <Link
+                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-sm hover:shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                    href="/events"
+                  >
+                    <span>Browse events</span>
+                    <ArrowRight className="h-3 w-3 text-[#fbe9d0]" />
+                  </Link>
+                  <DashboardProfileDropdown />
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ─── Mobile bar ─── */}
-      <div className="flex w-full items-center justify-between md:hidden">
-        <div className="flex h-12 w-full items-center justify-between px-2 py-1">
-          <Link href="/" aria-label="Relentless Run home" className="group flex min-w-0 shrink-0 items-center">
-            <div className="rounded-xl bg-[#0d1322] p-1 border border-white/10 shadow-md">
-              <motion.img
-                src="/3d-header-logo.png"
-                alt="Relentless Run"
-                width={160}
-                height={42}
-                animate={{ y: [0, -2, 0], scale: [1, 1.02, 1] }}
-                transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                whileHover={{ scale: 1.06 }}
-                className="h-8 sm:h-9 w-auto object-contain shrink-0 drop-shadow-[0_4px_12px_rgba(56,189,248,0.25)]"
-              />
+            {/* Mobile Controls (below lg) - Browse Events is hidden from the top bar and housed in the hamburger menu */}
+            <div className="flex lg:hidden items-center gap-2">
+              {isLoaded && isSignedIn && (
+                <DashboardProfileDropdown isMobile />
+              )}
+              <Hamburger open={open} onClick={() => setOpen((v) => !v)} />
             </div>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            {isLoaded && isSignedIn && (
-              <DashboardProfileDropdown isMobile />
-            )}
-            <Hamburger open={open} onClick={() => setOpen((v) => !v)} />
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    {/* ─── Production-Grade Slide-Over Mobile Drawer Sheet (Portaled to document.body) ─── */}
-    {mounted && typeof document !== "undefined" && createPortal(
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-[99999] md:hidden pointer-events-auto">
-            {/* Backdrop Overlay with Blur */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="fixed inset-0 bg-black/75 backdrop-blur-md"
-              onClick={() => setOpen(false)}
-              onTouchMove={(e) => e.preventDefault()}
-            />
+      {/* ─── Production-Grade Slide-Over Mobile Drawer Sheet (Portaled to document.body) ─── */}
+      {mounted && typeof document !== "undefined" && createPortal(
+        <AnimatePresence>
+          {open && (
+            <div className="fixed inset-0 z-[99999] lg:hidden pointer-events-auto">
+              {/* Backdrop Overlay with Blur */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="fixed inset-0 bg-black/75 backdrop-blur-md"
+                onClick={() => setOpen(false)}
+                onTouchMove={(e) => e.preventDefault()}
+              />
 
-            {/* Glowing Accent Orb behind drawer */}
-            <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-sky-500/20 blur-[120px]" />
+              {/* Glowing Accent Orb behind drawer */}
+              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-sky-500/20 blur-[120px]" />
 
-            {/* Slide-Over Drawer Sheet */}
-            <motion.nav
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 280 }}
-              className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[85%] max-w-[340px] flex-col overflow-hidden rounded-l-[32px] border-l border-white/20 bg-slate-950/98 backdrop-blur-3xl shadow-[-25px_0_60px_rgba(0,0,0,0.85)] text-white"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mobile Navigation"
-            >
-              {/* Top Neon Accent Line */}
-              <div className="h-1 w-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 shrink-0" />
+              {/* Slide-Over Drawer Sheet */}
+              <motion.nav
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 28, stiffness: 280 }}
+                className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[85%] max-w-[340px] flex-col overflow-hidden rounded-l-[32px] border-l border-white/20 bg-slate-950/98 backdrop-blur-3xl shadow-[-25px_0_60px_rgba(0,0,0,0.85)] text-white"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Mobile Navigation"
+              >
+                {/* Top Neon Accent Line */}
+                <div className="h-1 w-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 shrink-0" />
 
-              {/* Drawer Header: Brand Logo + Close Pill */}
-              <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/10 shrink-0">
-                <Link
-                  href="/"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 shrink-0"
-                >
-                  <div className="flex items-center rounded-xl bg-[#0d1322] px-2.5 py-1 border border-white/15 shadow-md">
+                {/* Drawer Header: Brand Logo + Close Pill */}
+                <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/10 shrink-0">
+                  <Link
+                    href="/"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 shrink-0"
+                  >
                     <img
-                      src="/3d-header-logo.png"
-                      alt="Relentless Run"
-                      style={{ height: "26px", width: "auto" }}
-                      className="h-6.5 max-h-[28px] w-auto object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(56,189,248,0.35)]"
+                      src="/runnerup-logo.png"
+                      alt="RUNNERUP"
+                      style={{ height: "28px", width: "auto" }}
+                      className="h-7 max-h-[30px] w-auto object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(56,189,248,0.35)]"
                     />
-                  </div>
-                </Link>
+                  </Link>
 
                 {/* Circular Glass Close Button */}
                 <button
@@ -497,6 +528,24 @@ export function AppHeader() {
                   </div>
                 ) : null}
 
+                {/* Featured Primary CTA: Browse Events */}
+                <Link
+                  href="/events"
+                  onClick={() => setOpen(false)}
+                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-sky-500/25 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
+                      <Calendar className="h-4.5 w-4.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="block text-xs font-black uppercase tracking-wider">Browse Events</span>
+                      <span className="block text-[0.65rem] font-medium text-sky-100 normal-case">Explore 1.5K, 5K, 10K & 21K Races</span>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+
                 {/* Section Header */}
                 <div className="px-1 pt-1">
                   <span className="text-[0.65rem] font-black uppercase tracking-widest text-slate-400">
@@ -506,13 +555,13 @@ export function AppHeader() {
 
                 {/* Navigation Links */}
                 <div className="space-y-2">
-                  {publicNav.map(([label, href, Icon]) => {
+                  {publicNav.map(({ label, href, icon: Icon }) => {
                     const active = isActive(href);
                     return (
                       <Link
                         key={href}
                         href={href}
-                        onClick={() => setOpen(false)}
+                        onClick={(e) => handleMobileNavClick(href, e)}
                         className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
                           active
                             ? "bg-gradient-to-r from-sky-500/30 via-blue-600/25 to-sky-500/15 border border-sky-400/60 text-white shadow-[0_0_16px_rgba(56,189,248,0.25)] backdrop-blur-xl"
@@ -625,7 +674,7 @@ export function AppHeader() {
                 )}
                 
                 <p className="text-center text-[0.62rem] text-slate-500 font-medium pt-0.5">
-                  Relentless Run © 2026 • Virtual Marathon Platform
+                  RUNNERUP © 2026 • Virtual Marathon Platform
                 </p>
               </div>
             </motion.nav>

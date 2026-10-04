@@ -1,11 +1,10 @@
 export function BrandText({ className = "" }: { className?: string }) {
   return (
     <span className={className}>
-      Relentless{" "}
-      <span className="bg-gradient-to-r from-[#38bdf8] via-[#2563eb] to-[#00d2ff] bg-clip-text font-extrabold text-transparent">
-        Run
+      Runner{" "}
+      <span className="bg-gradient-to-r from-[#e64833] to-[#874f41] bg-clip-text font-extrabold text-transparent">
+        Up
       </span>
     </span>
   );
 }
-

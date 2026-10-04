@@ -1,11 +1,30 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4000";
+const BACKEND_INTERNAL_URL =
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:4000";
+
+const CONFIGURED_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
 
 export function getApiUrl(path = "") {
-  if (!path) {
-    return API_URL;
+  const isServer = typeof window === "undefined";
+  const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
+
+  if (isServer) {
+    return `${BACKEND_INTERNAL_URL.replace(/\/+$/, "")}${cleanPath}`;
   }
 
-  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  // In the browser: if an external HTTPS API URL is configured (e.g. Railway or api subdomain), use it.
+  // Otherwise, use relative path so Next.js proxies to backend and eliminates Mixed Content & CORS.
+  const isLocalApi =
+    !CONFIGURED_API_URL ||
+    CONFIGURED_API_URL.includes("127.0.0.1") ||
+    CONFIGURED_API_URL.includes("localhost");
+
+  if (isLocalApi) {
+    return cleanPath;
+  }
+
+  return `${CONFIGURED_API_URL.replace(/\/+$/, "")}${cleanPath}`;
 }
 
 export function authHeaders(token: string | null | undefined, init: HeadersInit = {}): HeadersInit {

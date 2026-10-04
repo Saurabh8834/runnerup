@@ -142,13 +142,13 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               className="w-full h-auto max-h-[520px] object-contain sm:object-cover aspect-[16/9] sm:aspect-[16/8] lg:aspect-[21/9]"
             />
 
-            {/* golden sunrise glow */}
+            {/* warm sunrise glow */}
             <div
               aria-hidden
               className="sun-pulse pointer-events-none absolute -top-16 right-8 h-40 w-40 rounded-full blur-3xl sm:h-64 sm:w-64"
               style={{
                 background:
-                  "radial-gradient(circle, rgba(240,217,135,0.75) 0%, rgba(201,162,39,0.25) 45%, transparent 70%)",
+                  "radial-gradient(circle, rgba(230,72,51,0.5) 0%, rgba(135,79,65,0.2) 45%, transparent 70%)",
               }}
             />
             {/* soft vignette */}
@@ -160,8 +160,8 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
             {/* status badge */}
             <span className="glass-pill absolute left-2.5 top-2.5 sm:left-5 sm:top-5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6rem] sm:text-xs font-bold uppercase tracking-wider text-white shadow-md">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#e64833] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#e64833]" />
               </span>
               {isPast ? "Event completed" : "Open for registration"}
             </span>

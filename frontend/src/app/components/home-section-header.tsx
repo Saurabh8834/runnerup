@@ -19,17 +19,17 @@ export function HomeSectionHeader({
 }) {
   const isLight = theme === "light";
   const titleClass = isLight
-    ? "mt-3 font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-[#090d16]"
-    : "mt-3 font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-[#f0f0f0]";
+    ? "mt-2.5 sm:mt-3 font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#14242a]"
+    : "mt-2.5 sm:mt-3 font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#fbe9d0]";
   const leadClass = isLight
-    ? "mt-3 text-base text-slate-600 max-w-xl font-medium"
-    : "mt-3 text-base text-slate-300 max-w-xl";
+    ? "mt-2.5 sm:mt-3 text-xs sm:text-base text-[#244855]/90 max-w-xl font-medium"
+    : "mt-2.5 sm:mt-3 text-xs sm:text-base text-[#90aead] max-w-xl";
 
   if (align === "split") {
     return (
       <div className="flex flex-col gap-4 sm:gap-5 md:flex-row md:items-end md:justify-between mb-8">
         <div className="min-w-0">
-          <span className="inline-block rounded-full border border-sky-500/30 bg-sky-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-sky-600 dark:text-[#38bdf8]">
+          <span className="inline-block rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
             {eyebrow}
           </span>
           <h2 className={titleClass}>
@@ -48,7 +48,7 @@ export function HomeSectionHeader({
 
   return (
     <div className="mb-8">
-      <span className="inline-block rounded-full border border-sky-500/30 bg-sky-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-sky-600 dark:text-[#38bdf8]">
+      <span className="inline-block rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
         {eyebrow}
       </span>
       <h2 className={titleClass}>

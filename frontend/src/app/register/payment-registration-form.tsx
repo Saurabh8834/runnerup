@@ -497,9 +497,9 @@ function PaymentRegistrationFormInner() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency ?? "INR",
-        name: "Mountain Run",
+        name: "RUNNERUP",
         description: `${activeEvent.label} · ${selectedDistance}`,
-        image: "https://relentlessrun.in/icon.png",
+        image: "https://runnerup.in/icon.png",
         order_id: order.orderId,
         prefill: {
           name: payload.name,
@@ -862,12 +862,11 @@ function PaymentRegistrationFormInner() {
             {/* Top Bar */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-(--sage) text-slate-950 font-black text-xs">
-                  MR
-                </span>
-                <span className="text-xs font-black tracking-widest uppercase text-white/90">
-                  MOUNTAIN RUN
-                </span>
+                <img
+                  src="/runnerup-logo.png"
+                  alt="RUNNERUP"
+                  className="h-5 sm:h-6 w-auto object-contain"
+                />
               </div>
               <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 text-[0.6rem] font-black uppercase tracking-wider text-amber-400">
                 OFFICIAL ATHLETE
@@ -930,7 +929,7 @@ function PaymentRegistrationFormInner() {
             </p>
             <p className="flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              <span>Ranked position on the Mountain Run Official Leaderboard</span>
+              <span>Ranked position on the RUNNERUP Official Leaderboard</span>
             </p>
           </div>
         </div>

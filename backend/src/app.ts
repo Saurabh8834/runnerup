@@ -61,12 +61,12 @@ app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_request, response) => {
-  response.json({ status: "ok", service: "relentlessrun-api" });
+  response.json({ status: "ok", service: "runnerup-api" });
 });
 
 app.get("/", (_request, response) => {
   response.json({
-    service: "relentlessrun-api",
+    service: "runnerup-api",
     status: "ok",
     health: "/health",
     docs: "API routes are under /api/*",

@@ -132,12 +132,12 @@ function Podium3D({
 
   return (
     <div className="relative mx-auto w-full max-w-xl px-2 py-4">
-      {/* Radiant Golden/Cyan Spotlight Glow behind Podium */}
-      <div className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 h-56 w-72 rounded-full bg-amber-500/15 blur-[80px]" />
-      <div className="pointer-events-none absolute left-1/2 bottom-0 -translate-x-1/2 h-20 w-80 rounded-full bg-sky-500/20 blur-[60px]" />
+      {/* Radiant Glow behind Podium */}
+      <div className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 h-56 w-72 rounded-full bg-[#fbe9d0]/15 blur-[80px]" />
+      <div className="pointer-events-none absolute left-1/2 bottom-0 -translate-x-1/2 h-20 w-80 rounded-full bg-[#e64833]/20 blur-[60px]" />
 
       {/* 3D Pillars Grid: 2nd (Left), 1st (Center), 3rd (Right) */}
-      <div className="relative z-10 flex items-end justify-center gap-2 sm:gap-4 pt-12 pb-2">
+      <div className="relative z-10 flex items-end justify-center gap-1.5 sm:gap-4 pt-12 pb-2">
         
         {/* ═══ 2nd Place Pillar (Left) ═══ */}
         {topThree.second ? (
@@ -145,43 +145,43 @@ function Podium3D({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-1 flex-col items-center max-w-[130px] sm:max-w-[170px]"
+            className="flex flex-1 min-w-0 flex-col items-center max-w-[100px] sm:max-w-[170px]"
           >
             {/* Avatar */}
-            <div className="relative mb-2">
-              <div className="flex h-13 w-13 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-200 via-slate-400 to-slate-200 text-slate-950 font-black text-sm sm:text-base ring-3 ring-slate-300 shadow-[0_0_15px_rgba(203,213,225,0.4)]">
+            <div className="relative mb-1.5 sm:mb-2">
+              <div className="flex h-11 w-11 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-200 via-slate-400 to-slate-200 text-slate-950 font-black text-xs sm:text-base ring-2 sm:ring-3 ring-slate-300 shadow-[0_0_15px_rgba(203,213,225,0.4)]">
                 {getInitials(topThree.second.runnerName)}
               </div>
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-slate-300 text-[0.65rem] sm:text-xs font-black text-slate-950 shadow">
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-slate-300 text-[0.55rem] sm:text-xs font-black text-slate-950 shadow">
                 2
               </span>
             </div>
 
             {/* Runner Name */}
-            <p className="w-full truncate text-center text-xs sm:text-sm font-bold text-slate-200">
+            <p className="w-full truncate text-center text-[11px] sm:text-sm font-bold text-slate-200">
               {topThree.second.runnerName}
             </p>
 
             {/* Time / Pace Badge */}
-            <div className="mt-1.5 mb-2.5 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[0.6rem] sm:text-[0.68rem] font-bold text-slate-300 backdrop-blur-md shadow-sm whitespace-nowrap">
+            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 sm:px-2.5 py-0.5 text-[0.55rem] sm:text-[0.68rem] font-bold text-slate-300 backdrop-blur-md shadow-sm whitespace-nowrap">
               <span>{formatTime(topThree.second.finishTimeSeconds)}</span>
-              <Flame className="h-3 w-3 text-orange-400 fill-orange-400" />
+              <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-400 fill-orange-400" />
             </div>
 
             {/* 3D Pillar Box #2 */}
             <div className="relative w-full">
               {/* 3D Top Bevel Face */}
-              <div className="h-5 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-slate-400/50 via-slate-300/40 to-slate-500/50 border-t border-x border-white/30 shadow-inner" />
+              <div className="h-4 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-slate-400/50 via-slate-300/40 to-slate-500/50 border-t border-x border-white/30 shadow-inner" />
               {/* Front Face */}
-              <div className="relative flex h-28 sm:h-36 md:h-40 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-700/80 via-slate-800/95 to-[#0b101c] border-x border-b border-white/15 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
-                <span className="font-display font-black text-4xl sm:text-6xl text-slate-400/60 select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              <div className="relative flex h-24 sm:h-36 md:h-40 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-700/80 via-slate-800/95 to-[#0b101c] border-x border-b border-white/15 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
+                <span className="font-display font-black text-3xl sm:text-6xl text-slate-400/60 select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                   2
                 </span>
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className="flex-1 max-w-[130px] sm:max-w-[170px]" />
+          <div className="flex-1 min-w-0 max-w-[100px] sm:max-w-[170px]" />
         )}
 
         {/* ═══ 1st Place Pillar (Center - Tallest) ═══ */}
@@ -190,7 +190,7 @@ function Podium3D({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-1 flex-col items-center max-w-[145px] sm:max-w-[190px] -mt-6"
+            className="flex flex-1 min-w-0 flex-col items-center max-w-[115px] sm:max-w-[190px] -mt-5 sm:-mt-6"
           >
             {/* Floating Crown / Trophy on Top */}
             <motion.div
@@ -198,17 +198,17 @@ function Podium3D({
               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
               className="mb-1 flex items-center justify-center"
             >
-              <span className="text-2xl sm:text-3xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
+              <span className="text-xl sm:text-3xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
                 🏆
               </span>
             </motion.div>
 
             {/* Avatar */}
-            <div className="relative mb-2">
-              <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-500 text-slate-950 font-black text-base sm:text-xl ring-4 ring-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.7)]">
+            <div className="relative mb-1.5 sm:mb-2">
+              <div className="flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-500 text-slate-950 font-black text-sm sm:text-xl ring-3 sm:ring-4 ring-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.7)]">
                 {getInitials(topThree.first.runnerName)}
               </div>
-              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-xs sm:text-sm font-black text-slate-950 shadow-md">
+              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-[0.65rem] sm:text-sm font-black text-slate-950 shadow-md">
                 1
               </span>
             </div>
@@ -219,18 +219,18 @@ function Podium3D({
             </p>
 
             {/* Time / Pace Badge */}
-            <div className="mt-1.5 mb-2.5 inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-500/20 px-3 py-0.5 text-[0.65rem] sm:text-xs font-black text-amber-300 backdrop-blur-md shadow-[0_0_10px_rgba(251,191,36,0.3)] whitespace-nowrap">
+            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-500/20 px-2 sm:px-3 py-0.5 text-[0.6rem] sm:text-xs font-black text-amber-300 backdrop-blur-md shadow-[0_0_10px_rgba(251,191,36,0.3)] whitespace-nowrap">
               <span>{formatTime(topThree.first.finishTimeSeconds)}</span>
-              <Flame className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+              <Flame className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 fill-amber-400" />
             </div>
 
             {/* 3D Pillar Box #1 */}
             <div className="relative w-full">
               {/* 3D Top Bevel Face */}
-              <div className="h-6 sm:h-7 w-full rounded-t-xl bg-gradient-to-r from-amber-300/60 via-yellow-200/50 to-amber-400/60 border-t border-x border-amber-300/60 shadow-inner" />
+              <div className="h-5 sm:h-7 w-full rounded-t-xl bg-gradient-to-r from-amber-300/60 via-yellow-200/50 to-amber-400/60 border-t border-x border-amber-300/60 shadow-inner" />
               {/* Front Face */}
-              <div className="relative flex h-38 sm:h-48 md:h-52 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-600/90 via-slate-800 to-[#090d16] border-x border-b border-amber-400/40 shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(251,191,36,0.2)]">
-                <span className="font-display font-black text-5xl sm:text-7xl text-white/90 select-none drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]">
+              <div className="relative flex h-32 sm:h-48 md:h-52 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-600/90 via-slate-800 to-[#14242a] border-x border-b border-amber-400/40 shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(251,191,36,0.2)]">
+                <span className="font-display font-black text-4xl sm:text-7xl text-white/90 select-none drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]">
                   1
                 </span>
               </div>
@@ -244,43 +244,43 @@ function Podium3D({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-1 flex-col items-center max-w-[130px] sm:max-w-[170px]"
+            className="flex flex-1 min-w-0 flex-col items-center max-w-[100px] sm:max-w-[170px]"
           >
             {/* Avatar */}
-            <div className="relative mb-2">
-              <div className="flex h-13 w-13 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-700 via-amber-600 to-amber-800 text-white font-black text-sm sm:text-base ring-3 ring-amber-700 shadow-[0_0_15px_rgba(180,83,9,0.4)]">
+            <div className="relative mb-1.5 sm:mb-2">
+              <div className="flex h-11 w-11 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#874f41] via-[#a36152] to-[#874f41] text-[#fbe9d0] font-black text-xs sm:text-base ring-2 sm:ring-3 ring-[#874f41] shadow-[0_0_15px_rgba(135,79,65,0.4)]">
                 {getInitials(topThree.third.runnerName)}
               </div>
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-amber-700 text-[0.65rem] sm:text-xs font-black text-white shadow">
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-[#874f41] text-[0.55rem] sm:text-xs font-black text-[#fbe9d0] shadow">
                 3
               </span>
             </div>
 
             {/* Runner Name */}
-            <p className="w-full truncate text-center text-xs sm:text-sm font-bold text-slate-200">
+            <p className="w-full truncate text-center text-[11px] sm:text-sm font-bold text-[#fbe9d0]">
               {topThree.third.runnerName}
             </p>
 
             {/* Time / Pace Badge */}
-            <div className="mt-1.5 mb-2.5 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2.5 py-0.5 text-[0.6rem] sm:text-[0.68rem] font-bold text-slate-300 backdrop-blur-md shadow-sm whitespace-nowrap">
+            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-[#874f41]/40 bg-[#874f41]/20 px-2 sm:px-2.5 py-0.5 text-[0.55rem] sm:text-[0.68rem] font-bold text-[#fbe9d0] backdrop-blur-md shadow-sm whitespace-nowrap">
               <span>{formatTime(topThree.third.finishTimeSeconds)}</span>
-              <Flame className="h-3 w-3 text-orange-400 fill-orange-400" />
+              <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#e64833] fill-[#e64833]" />
             </div>
 
             {/* 3D Pillar Box #3 */}
             <div className="relative w-full">
               {/* 3D Top Bevel Face */}
-              <div className="h-5 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-amber-700/50 via-amber-600/40 to-amber-800/50 border-t border-x border-amber-600/30 shadow-inner" />
+              <div className="h-4 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-[#874f41]/60 via-[#a36152]/50 to-[#874f41]/60 border-t border-x border-[#874f41]/40 shadow-inner" />
               {/* Front Face */}
-              <div className="relative flex h-22 sm:h-28 md:h-32 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-800/80 via-slate-900/95 to-[#0b101c] border-x border-b border-white/15 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
-                <span className="font-display font-black text-3xl sm:text-5xl text-amber-600/70 select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              <div className="relative flex h-20 sm:h-28 md:h-32 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-800/80 via-slate-900/95 to-[#14242a] border-x border-b border-[#874f41]/30 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
+                <span className="font-display font-black text-2xl sm:text-5xl text-[#874f41] select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                   3
                 </span>
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className="flex-1 max-w-[130px] sm:max-w-[170px]" />
+          <div className="flex-1 min-w-0 max-w-[100px] sm:max-w-[170px]" />
         )}
       </div>
 
@@ -481,10 +481,10 @@ export function LeaderboardClient() {
   return (
     <div className="min-w-0">
 
-      {/* ── SECTION 1: HERO & CONTROLS (OFF-WHITE #f8fafc) ──────────── */}
-      <section className="relative overflow-hidden border-b border-slate-200 pt-24 pb-12 sm:pt-28 sm:pb-16 isolate text-[#090d16] bg-[#f8fafc]">
-        <div aria-hidden className="pointer-events-none absolute top-1/3 left-1/2 -z-10 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-sky-200/40 blur-[140px]" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 -z-10 h-[250px] w-[250px] rounded-full bg-blue-100/50 blur-[100px]" />
+      {/* ── SECTION 1: HERO & CONTROLS (WARM IVORY #fbf6ee) ──────────── */}
+      <section className="relative overflow-hidden border-b border-[#90aead]/20 pt-24 pb-12 sm:pt-28 sm:pb-16 isolate text-[#14242a] bg-[#fbf6ee]">
+        <div aria-hidden className="pointer-events-none absolute top-1/3 left-1/2 -z-10 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[#90aead]/25 blur-[140px]" />
+        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 -z-10 h-[250px] w-[250px] rounded-full bg-[#e64833]/15 blur-[100px]" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -493,35 +493,35 @@ export function LeaderboardClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-600/30 bg-sky-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#0284c7] mb-4 shadow-sm">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#e64833] mb-4 shadow-sm">
               <Trophy className="h-3.5 w-3.5" />
               OFFICIAL NATIONAL LEADERBOARD
             </span>
-            <h1 className="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight text-[#090d16]">
+            <h1 className="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight text-[#14242a]">
               THE FINISHERS&apos;{" "}
-              <span className="text-[#0284c7]">
+              <span className="text-[#e64833]">
                 BOARD
               </span>
             </h1>
-            <p className="mt-4 text-sm sm:text-base text-slate-600 max-w-xl mx-auto font-medium leading-relaxed">
+            <p className="mt-4 text-sm sm:text-base text-[#244855]/90 max-w-xl mx-auto font-medium leading-relaxed">
               Explore real-time rankings across all distance categories. Every finish is verified with Strava & Garmin GPS tracking.
             </p>
           </motion.div>
 
           {/* Filter Bar Box */}
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 sm:p-7 shadow-xl space-y-5">
+          <div className="mt-10 rounded-3xl border border-[#90aead]/20 bg-white p-5 sm:p-7 shadow-xl space-y-5">
             {/* Event Selector & Search Input */}
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
               {/* Event Select */}
               <div className="lg:col-span-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#244855] mb-2">
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-[#0284c7]" /> Select Event
+                    <Calendar className="h-4 w-4 text-[#e64833]" /> Select Event
                   </span>
                 </label>
                 <div className="relative">
                   <select
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-[#090d16] outline-none transition focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20 cursor-pointer"
+                    className="w-full rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] px-4 py-3 text-sm font-bold text-[#14242a] outline-none transition focus:border-[#e64833] focus:ring-2 focus:ring-[#e64833]/20 cursor-pointer"
                     value={selectedSlug}
                     onChange={(e) => {
                       setSelectedSlug(e.target.value);
@@ -529,7 +529,7 @@ export function LeaderboardClient() {
                     }}
                   >
                     {events.map((ev) => (
-                      <option key={ev.slug} value={ev.slug} className="bg-white text-[#090d16]">
+                      <option key={ev.slug} value={ev.slug} className="bg-white text-[#14242a]">
                         {ev.name}
                       </option>
                     ))}
@@ -539,28 +539,28 @@ export function LeaderboardClient() {
 
               {/* Instant Search Bar */}
               <div className="lg:col-span-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#244855] mb-2">
                   <span className="flex items-center gap-1.5">
-                    <Search className="h-4 w-4 text-[#0284c7]" /> Search Runner, City or Bib #
+                    <Search className="h-4 w-4 text-[#e64833]" /> Search Runner, City or Bib #
                   </span>
                 </label>
                 <div className="relative flex items-center">
                   <Search
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#90aead]"
                   />
                   <input
                     type="text"
                     placeholder="Search runner name, city, or bib (e.g. MR-5K-101)..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-10 py-3 text-sm text-[#090d16] placeholder-slate-400 outline-none transition focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/20"
+                    className="w-full rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] pl-11 pr-10 py-3 text-sm text-[#14242a] placeholder-[#90aead]/60 outline-none transition focus:border-[#e64833] focus:ring-2 focus:ring-[#e64833]/20"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700 cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#90aead] hover:bg-slate-200 hover:text-[#14242a] cursor-pointer"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -570,8 +570,8 @@ export function LeaderboardClient() {
             </div>
 
             {/* Distance Category Pills */}
-            <div className="pt-2 border-t border-slate-100">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-500">
+            <div className="pt-2 border-t border-[#90aead]/15">
+              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#90aead]">
                 Choose Distance Category:
               </p>
               <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -587,11 +587,11 @@ export function LeaderboardClient() {
                       }}
                       className={`group relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
                         isSelected
-                          ? "bg-[#0284c7] text-white shadow-lg shadow-sky-600/30 border border-[#0284c7]"
-                          : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
+                          ? "bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0] shadow-lg shadow-[#e64833]/30 border border-[#e64833]"
+                          : "border border-[#90aead]/20 bg-[#fbf6ee] text-[#244855] hover:border-[#90aead]/40 hover:bg-[#f5ecdd]"
                       }`}
                     >
-                      <Ruler className={`h-3.5 w-3.5 ${isSelected ? "text-white" : "text-slate-400 group-hover:text-[#0284c7]"}`} />
+                      <Ruler className={`h-3.5 w-3.5 ${isSelected ? "text-[#fbe9d0]" : "text-[#90aead] group-hover:text-[#e64833]"}`} />
                       <span>{dist}</span>
                       {isSelected && (
                         <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[0.6rem] font-mono font-bold">
@@ -607,22 +607,22 @@ export function LeaderboardClient() {
         </div>
       </section>
 
-      {/* ── SECTION 2: PODIUM & RANKINGS TABLE (DARK #090d16) ────────── */}
-      <section className="relative py-16 sm:py-20 bg-[#090d16] text-[#f0f0f0] border-b border-white/10 overflow-hidden isolate">
-        <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#0284c7]/15 blur-[130px]" />
+      {/* ── SECTION 2: PODIUM & RANKINGS TABLE (DARK #14242a) ────────── */}
+      <section className="relative py-16 sm:py-20 bg-[#14242a] text-[#fbe9d0] border-b border-[#90aead]/15 overflow-hidden isolate">
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#244855]/30 blur-[130px]" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 
           {/* Dual Tab Switcher & GPS Badge */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-[#90aead]/15 pb-5">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setActiveTab("verified")}
                 className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "verified"
-                    ? "bg-[#0284c7] text-white shadow-md shadow-sky-600/20 border border-[#0284c7]"
-                    : "border border-white/15 bg-white/[0.04] text-slate-300 hover:border-white/30"
+                    ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
+                    : "border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0]/80 hover:border-[#90aead]/40"
                 }`}
               >
                 <Trophy className="h-4 w-4 shrink-0" />
@@ -634,8 +634,8 @@ export function LeaderboardClient() {
                 onClick={() => setActiveTab("participants")}
                 className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "participants"
-                    ? "bg-[#0284c7] text-white shadow-md shadow-sky-600/20 border border-[#0284c7]"
-                    : "border border-white/15 bg-white/[0.04] text-slate-300 hover:border-white/30"
+                    ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
+                    : "border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0]/80 hover:border-[#90aead]/40"
                 }`}
               >
                 <Users className="h-4 w-4 shrink-0" />
@@ -659,17 +659,17 @@ export function LeaderboardClient() {
                   className="flex flex-col gap-4 rounded-3xl border border-amber-500/40 bg-amber-500/10 p-5 sm:flex-row sm:items-center sm:justify-between shadow-2xl"
                 >
                   <div className="flex items-center gap-3.5">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 font-black shadow text-lg">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e64833] text-white font-black shadow text-lg">
                       #{userStanding.rankedEntry.rank}
                     </span>
                     <div>
                       <p className="font-display font-black text-base text-white uppercase tracking-tight">
-                        You are ranked <span className="text-amber-400">#{userStanding.rankedEntry.rank}</span> in {selectedDistance}!
+                        You are ranked <span className="text-[#e64833]">#{userStanding.rankedEntry.rank}</span> in {selectedDistance}!
                       </p>
                       <p className="mt-0.5 text-xs font-medium text-slate-300">
                         Time: <span className="font-mono font-bold text-white">{formatTime(userStanding.rankedEntry.finishTimeSeconds)}</span>
                         {" · "}
-                        Pace: <span className="font-mono font-bold text-[#38bdf8]">{formatPace(userStanding.rankedEntry.finishTimeSeconds, selectedDistance)}</span>
+                        Pace: <span className="font-mono font-bold text-[#e64833]">{formatPace(userStanding.rankedEntry.finishTimeSeconds, selectedDistance)}</span>
                         {userStanding.rankedEntry.bibNumber && ` · Bib: ${userStanding.rankedEntry.bibNumber}`}
                       </p>
                     </div>
@@ -685,7 +685,7 @@ export function LeaderboardClient() {
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col gap-3 rounded-3xl border border-white/15 bg-[#0d1322] p-5 sm:flex-row sm:items-center sm:justify-between shadow-xl"
+                  className="flex flex-col gap-3 rounded-3xl border border-[#90aead]/20 bg-[#172c34] p-5 sm:flex-row sm:items-center sm:justify-between shadow-xl"
                 >
                   <p className="text-xs sm:text-sm font-medium text-slate-300">
                     You are registered for <span className="font-bold text-white">{userStanding.otherDistanceReg.distance}</span> in this event.
@@ -693,7 +693,7 @@ export function LeaderboardClient() {
                   <button
                     type="button"
                     onClick={() => setSelectedDistance(userStanding.otherDistanceReg!.distance)}
-                    className="text-xs font-bold uppercase tracking-wider text-[#38bdf8] hover:underline w-fit cursor-pointer"
+                    className="text-xs font-bold uppercase tracking-wider text-[#e64833] hover:underline w-fit cursor-pointer"
                   >
                     Switch to {userStanding.otherDistanceReg.distance} Leaderboard →
                   </button>
@@ -704,8 +704,8 @@ export function LeaderboardClient() {
 
           {/* Loading / Error States */}
           {loading ? (
-            <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0d1322] py-16 shadow-2xl">
-              <div className="h-8 w-8 animate-spin rounded-full border-3 border-white/10 border-t-[#38bdf8]" />
+            <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border border-[#90aead]/20 bg-[#172c34] py-16 shadow-2xl">
+              <div className="h-8 w-8 animate-spin rounded-full border-3 border-white/10 border-t-[#e64833]" />
               <p className="mt-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400">
                 Loading {selectedDistance} rankings...
               </p>
@@ -727,7 +727,7 @@ export function LeaderboardClient() {
                           PODIUM FINISHERS
                         </span>
                         <h2 className="mt-3 font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-white">
-                          TOP 3 CHAMPIONS · <span className="text-[#38bdf8]">{selectedDistance}</span>
+                          TOP 3 CHAMPIONS · <span className="text-[#e64833]">{selectedDistance}</span>
                         </h2>
                       </div>
 
@@ -739,12 +739,12 @@ export function LeaderboardClient() {
                   )}
 
                   {/* Full Rankings: Mobile Card List + Desktop Table */}
-                  <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#0d1322] shadow-2xl">
+                  <div className="overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-2xl">
                     <div className="border-b border-white/10 bg-white/[0.04] px-5 sm:px-6 py-4 flex items-center justify-between">
                       <h3 className="font-display font-black text-sm sm:text-base uppercase tracking-tight text-white">
                         All Verified Finishers · {selectedDistance}
                       </h3>
-                      <span className="text-xs font-mono font-bold text-slate-400">
+                      <span className="text-xs font-mono font-bold text-[#90aead]">
                         {filteredEntries.length} verified runner{filteredEntries.length === 1 ? "" : "s"}
                       </span>
                     </div>
@@ -764,7 +764,7 @@ export function LeaderboardClient() {
                             transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.25) }}
                             className={`rounded-2xl border p-3.5 transition-all ${
                               isYou
-                                ? "bg-sky-500/15 border-sky-400/50 shadow-md shadow-sky-500/10"
+                                ? "bg-[#e64833]/15 border-[#e64833]/50 shadow-md shadow-[#e64833]/10"
                                 : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06]"
                             }`}
                           >
@@ -789,12 +789,12 @@ export function LeaderboardClient() {
                                   <p className="truncate font-bold text-xs text-white flex items-center gap-1.5">
                                     {row.runnerName}
                                     {isYou && (
-                                      <span className="rounded-full bg-[#0284c7] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
+                                      <span className="rounded-full bg-[#e64833] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
                                         You
                                       </span>
                                     )}
                                   </p>
-                                  <p className="text-[0.65rem] text-slate-400 font-mono mt-0.5 truncate">
+                                  <p className="text-[0.65rem] text-[#90aead] font-mono mt-0.5 truncate">
                                     {row.bibNumber || `MR-${parseKm(selectedDistance)}K-${100 + row.rank}`}
                                     {row.city && ` · ${row.city}`}
                                   </p>
@@ -806,7 +806,7 @@ export function LeaderboardClient() {
                                 <p className="font-mono text-sm font-black text-white">
                                   {formatTime(row.finishTimeSeconds)}
                                 </p>
-                                <p className="font-mono text-[0.65rem] font-bold text-[#38bdf8]">
+                                <p className="font-mono text-[0.65rem] font-bold text-[#fbe9d0]">
                                   {formatPace(row.finishTimeSeconds, selectedDistance)}
                                 </p>
                               </div>
@@ -844,7 +844,7 @@ export function LeaderboardClient() {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.3) }}
                                 className={`transition-colors hover:bg-white/[0.04] ${
-                                  isYou ? "bg-sky-500/15 font-semibold" : ""
+                                  isYou ? "bg-[#e64833]/15 font-semibold" : ""
                                 }`}
                               >
                                 {/* Rank */}
@@ -880,7 +880,7 @@ export function LeaderboardClient() {
                                       <p className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm">
                                         {row.runnerName}
                                         {isYou && (
-                                          <span className="rounded-full bg-[#0284c7] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                                          <span className="rounded-full bg-[#e64833] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
                                             You
                                           </span>
                                         )}
@@ -905,7 +905,7 @@ export function LeaderboardClient() {
                                 </td>
 
                                 {/* Pace */}
-                                <td className="px-4 py-3.5 font-mono text-xs font-bold text-[#38bdf8]">
+                                <td className="px-4 py-3.5 font-mono text-xs font-bold text-[#fbe9d0]">
                                   {formatPace(row.finishTimeSeconds, selectedDistance)}
                                 </td>
 
@@ -939,7 +939,7 @@ export function LeaderboardClient() {
               {/* ── TAB 2: PARTICIPANTS ROSTER ─────────────────────── */}
               {activeTab === "participants" && (
                 <div className="mt-8 space-y-6">
-                  <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#0d1322] shadow-2xl">
+                  <div className="overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-2xl">
                     <div className="border-b border-white/10 bg-white/[0.04] px-5 sm:px-6 py-4 flex items-center justify-between">
                       <div>
                         <h3 className="font-display font-black text-sm sm:text-base uppercase tracking-tight text-white">
@@ -966,7 +966,7 @@ export function LeaderboardClient() {
                             key={`mob-part-${p.rosterNumber}-${p.bibNumber}`}
                             className={`rounded-2xl border p-3 transition-all ${
                               isYou
-                                ? "bg-sky-500/15 border-sky-400/50"
+                                ? "bg-[#e64833]/15 border-[#e64833]/50"
                                 : "bg-white/[0.03] border-white/10"
                             }`}
                           >
@@ -979,7 +979,7 @@ export function LeaderboardClient() {
                                   <p className="truncate font-bold text-xs text-white flex items-center gap-1.5">
                                     {p.runnerName}
                                     {isYou && (
-                                      <span className="rounded-full bg-[#0284c7] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
+                                      <span className="rounded-full bg-[#e64833] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
                                         You
                                       </span>
                                     )}
@@ -996,13 +996,13 @@ export function LeaderboardClient() {
                                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                                     : p.status === "Under Review"
                                       ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                                      : "bg-sky-500/10 text-sky-400 border-sky-500/30"
+                                      : "bg-[#90aead]/15 text-[#90aead] border-[#90aead]/30"
                                 }`}
                               >
                                 {p.status === "Verified Finisher" ? (
                                   <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                 ) : (
-                                  <Clock className="h-3 w-3 text-slate-400" />
+                                  <Clock className="h-3 w-3 text-[#90aead]" />
                                 )}
                                 {p.status}
                               </span>
@@ -1035,7 +1035,7 @@ export function LeaderboardClient() {
                               <tr
                                 key={`${p.rosterNumber}-${p.bibNumber}`}
                                 className={`transition-colors hover:bg-white/[0.04] ${
-                                  isYou ? "bg-sky-500/15 font-semibold" : ""
+                                  isYou ? "bg-[#e64833]/15 font-semibold" : ""
                                 }`}
                               >
                                 <td className="px-4 py-3.5 font-mono text-xs text-slate-400 font-bold">
@@ -1049,7 +1049,7 @@ export function LeaderboardClient() {
                                     <p className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm">
                                       {p.runnerName}
                                       {isYou && (
-                                        <span className="rounded-full bg-[#0284c7] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                                        <span className="rounded-full bg-[#e64833] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
                                           You
                                         </span>
                                       )}
@@ -1072,13 +1072,13 @@ export function LeaderboardClient() {
                                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                                         : p.status === "Under Review"
                                           ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                                          : "bg-sky-500/10 text-sky-400 border-sky-500/30"
+                                          : "bg-[#90aead]/15 text-[#90aead] border-[#90aead]/30"
                                     }`}
                                   >
                                     {p.status === "Verified Finisher" ? (
                                       <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                     ) : (
-                                      <Clock className="h-3 w-3 text-slate-400" />
+                                      <Clock className="h-3 w-3 text-[#90aead]" />
                                     )}
                                     {p.status}
                                   </span>
@@ -1103,19 +1103,19 @@ export function LeaderboardClient() {
         </div>
       </section>
 
-      {/* ── SECTION 3: CLAIM YOUR RANK / GPS BANNER (OFF-WHITE #f8fafc) ── */}
-      <section className="relative py-16 sm:py-20 bg-[#f8fafc] text-[#090d16] overflow-hidden isolate border-b border-slate-200">
+      {/* ── SECTION 3: CLAIM YOUR RANK / GPS BANNER (WARM IVORY #fbf6ee) ── */}
+      <section className="relative py-16 sm:py-20 bg-[#fbf6ee] text-[#14242a] overflow-hidden isolate border-b border-[#90aead]/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="relative overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-xl text-center md:text-left">
-              <span className="inline-flex items-center gap-2 rounded-full border border-sky-600/30 bg-sky-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#0284c7]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#e64833]/30 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#e64833]">
                 <Zap className="h-3.5 w-3.5" />
                 CLAIM YOUR TIMING
               </span>
-              <h2 className="mt-4 font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-[#090d16]">
-                WANT YOUR NAME ON THE <span className="text-[#0284c7]">LEADERBOARD?</span>
+              <h2 className="mt-4 font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-[#14242a]">
+                WANT YOUR NAME ON THE <span className="text-[#e64833]">LEADERBOARD?</span>
               </h2>
-              <p className="mt-3 text-sm text-slate-600 font-medium leading-relaxed">
+              <p className="mt-3 text-sm text-[#244855] font-medium leading-relaxed">
                 Upload your Strava or Garmin GPS activity proof from the dashboard to claim your verified ranking, pace splits, and medal dispatch.
               </p>
             </div>
@@ -1123,17 +1123,17 @@ export function LeaderboardClient() {
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
               <Link
                 href="/dashboard"
-                className="neon-btn-blue inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-xl hover:scale-105 active:scale-95 transition-transform"
+                className="neon-btn-blue inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-xl hover:scale-105 active:scale-95 transition-transform"
               >
                 <span>Upload GPS Proof</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#90aead]/30 bg-[#fbf6ee] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[#244855] hover:bg-[#fbe9d0]/60 transition-all"
               >
                 <span>Browse Races</span>
-                <ArrowUpRight className="h-4 w-4 text-slate-400" />
+                <ArrowUpRight className="h-4 w-4 text-[#90aead]" />
               </Link>
             </div>
           </div>

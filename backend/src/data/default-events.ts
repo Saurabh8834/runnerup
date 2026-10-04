@@ -11,34 +11,66 @@ export type DefaultEvent = {
   city: string;
   medalIncluded?: boolean;
   benefits?: string[];
+  featured?: boolean;
+  bannerImageUrl?: string;
+  banner?: string;
+  reward?: string;
+  highlight?: string;
+  finishers?: number;
+  verifiedResults?: number;
+  cities?: number;
+  resultNote?: string;
 };
 
 export const defaultEvents: DefaultEvent[] = [
+  {
+    title: "Independence Day Virtual Run 2026 🇮🇳",
+    slug: "independence-day-virtual-run-2026",
+    description:
+      "Celebrate India's Independence Day by running from anywhere in the country. Complete your chosen distance at your own pace during the event window. Every finisher receives an official digital certificate, premium finisher medal, exclusive event T-shirt and exciting goodies.",
+    startsAt: new Date("2026-10-15T00:00:00.000Z"),
+    endsAt: new Date("2026-11-20T23:59:59.000Z"),
+    proofClosesAt: new Date("2026-11-25T23:59:59.000Z"),
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "15 km", "20 km", "25 km", "30 km"],
+    priceInPaise: 34900,
+    status: "OPEN",
+    city: "Virtual (All India)",
+    featured: true,
+    bannerImageUrl:
+      "https://res.cloudinary.com/yppcqzt6/image/upload/v1785155314/relentlessrun/admin/uvujs4wpdunrnmz9rfqt.jpg",
+    banner: "Flagship run",
+    reward: "Premium medal + T-shirt + certificate",
+    highlight: "Flagship virtual run with official finisher medals and e-certificates.",
+    benefits: [
+      "Official Physical Heavy Metal Finisher Medal",
+      "Instant Verifiable QR E-Certificate",
+      "Official Bib with Name & Number",
+      "Exclusive Runner Up Quick-Dry T-Shirt",
+      "Free Express Courier Across India",
+    ],
+  },
   {
     title: "Monsoon Mountain Miles",
     slug: "monsoon-mountain-miles",
     description:
       "A premium virtual running challenge with GPS proof verification, e-certificate, leaderboard placement, and medal delivery.",
-    startsAt: new Date("2026-07-11T00:00:00.000Z"),
-    endsAt: new Date("2026-07-17T23:59:59.000Z"),
-    proofClosesAt: new Date("2026-07-18T23:59:59.000Z"),
+    startsAt: new Date("2026-11-01T00:00:00.000Z"),
+    endsAt: new Date("2026-11-15T23:59:59.000Z"),
+    proofClosesAt: new Date("2026-11-18T23:59:59.000Z"),
     distances: ["3 km", "5 km", "10 km", "21 km"],
     priceInPaise: 49900,
     status: "OPEN",
     city: "Virtual",
-  },
-  {
-    title: "Independence Endurance Run",
-    slug: "independence-endurance-run",
-    description:
-      "A pan-India endurance event built for verified finish times, fair ranking, and medal delivery tracking.",
-    startsAt: new Date("2026-08-10T00:00:00.000Z"),
-    endsAt: new Date("2026-08-16T23:59:59.000Z"),
-    proofClosesAt: new Date("2026-08-17T23:59:59.000Z"),
-    distances: ["5 km", "10 km", "25 km"],
-    priceInPaise: 64900,
-    status: "OPEN",
-    city: "Virtual",
+    featured: true,
+    banner: "Rain-ready challenge",
+    reward: "Medal + certificate",
+    highlight: "Ideal for first virtual races and running clubs.",
+    benefits: [
+      "GPS Verified Leaderboard",
+      "Commemorative Trail Finisher Medal",
+      "Digital Certificate of Achievement",
+      "Free Home Delivery",
+    ],
   },
   {
     title: "Himalayan Winter Sprint",
@@ -52,6 +84,38 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 39900,
     status: "OPEN",
     city: "Virtual",
+    featured: true,
+    banner: "Fast festive sprint",
+    reward: "Digital kit + medal",
+    highlight: "Quick, beginner-friendly participation.",
+    benefits: [
+      "Finisher Medal with Ribbon",
+      "Instant Digital Bib",
+      "QR Verified Certificate",
+    ],
+  },
+  {
+    title: "Independence Endurance Run",
+    slug: "independence-endurance-run",
+    description:
+      "A pan-India endurance event built for verified finish times, fair ranking, and medal delivery tracking.",
+    startsAt: new Date("2026-12-20T00:00:00.000Z"),
+    endsAt: new Date("2026-12-28T23:59:59.000Z"),
+    proofClosesAt: new Date("2026-12-30T23:59:59.000Z"),
+    distances: ["5 km", "10 km", "25 km"],
+    priceInPaise: 64900,
+    status: "OPEN",
+    city: "Virtual",
+    featured: false,
+    banner: "Flagship endurance week",
+    reward: "Premium medal + T-shirt",
+    highlight: "Built for runners chasing a longer verified effort.",
+    benefits: [
+      "Heavy Cast 3D Finisher Medal",
+      "Technical Running Tee",
+      "Custom E-Certificate with Split Times",
+      "Tracked Postal Delivery",
+    ],
   },
   {
     title: "Spring Valley Dash",
@@ -65,6 +129,13 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 44900,
     status: "COMPLETED",
     city: "Virtual",
+    banner: "Season opener",
+    reward: "Medal + certificate",
+    highlight: "Completed · Strong beginner turnout across 40+ cities.",
+    finishers: 1842,
+    verifiedResults: 1620,
+    cities: 48,
+    resultNote: "This event is closed. Browse the recap below or open an upcoming race to register.",
   },
   {
     title: "Holi Color Virtual Run",
@@ -78,6 +149,13 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 34900,
     status: "COMPLETED",
     city: "Virtual",
+    banner: "Festival run",
+    reward: "Digital kit + medal",
+    highlight: "Completed · Festival favorite for clubs and first-timers.",
+    finishers: 2560,
+    verifiedResults: 2314,
+    cities: 62,
+    resultNote: "Registration is closed. View what finishers received, then join the next open event.",
   },
   {
     title: "New Year Night Miles",

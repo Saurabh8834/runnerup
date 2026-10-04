@@ -59,12 +59,12 @@ export function EventHow({ event }: { event: PublicEvent }) {
                     />
                   ) : null}
 
-                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl grad-gold text-white shadow-gold">
+                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#e64833] to-[#874f41] text-[#fbe9d0] shadow-md shadow-[#e64833]/25">
                     <Icon className="h-5 w-5" strokeWidth={1.75} />
                   </span>
 
-                  <div className="flex-1 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-1 hover:border-(--gold-line) hover:shadow-premium sm:w-full sm:p-5">
-                    <p className="text-[0.6rem] font-black uppercase tracking-widest text-(--gold-deep)">
+                  <div className="flex-1 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#e64833]/40 hover:shadow-premium sm:w-full sm:p-5">
+                    <p className="text-[0.6rem] font-black uppercase tracking-widest text-[#e64833]">
                       Step {i + 1}
                     </p>
                     <h3 className="mt-1.5 text-sm font-bold tracking-tight text-(--foreground)">

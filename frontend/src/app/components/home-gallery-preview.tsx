@@ -40,19 +40,19 @@ export function HomeGalleryPreview({
   }
 
   return (
-    <section className="relative py-20 bg-[#090d16] text-[#f0f0f0] border-t border-white/10 overflow-hidden">
+    <section className="relative py-20 bg-[#14242a] text-[#fbe9d0] border-t border-[#90aead]/15 overflow-hidden">
       <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <HomeSectionHeader
           theme="dark"
           action={
             <Link
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-xs font-black uppercase tracking-wider text-[#f0f0f0] shadow-md transition-all hover:bg-white/20 hover:border-white/30"
+              className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#244855]/60 px-6 py-3 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md transition-all hover:bg-[#244855] hover:border-[#e64833]/50"
               href="/gallery"
             >
               <span>Explore Community Gallery</span>
               <ArrowUpRight
                 aria-hidden="true"
-                className="h-4 w-4 text-[#38bdf8] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                className="h-4 w-4 text-[#e64833] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </Link>
           }
@@ -66,10 +66,10 @@ export function HomeGalleryPreview({
           {moments.map((moment, index) => (
             <Link
               key={moment.id ?? `${moment.title}-${index}`}
-              className="group block overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-xl transition-all duration-300 hover:border-[#38bdf8]/50 hover:bg-white/[0.06] hover:shadow-2xl hover:-translate-y-1.5"
+              className="group block overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-xl transition-all duration-300 hover:border-[#e64833]/50 hover:bg-[#1b323b] hover:shadow-2xl hover:-translate-y-1.5"
               href="/gallery"
             >
-              <div className="relative aspect-4/3 overflow-hidden bg-slate-900">
+              <div className="relative aspect-4/3 overflow-hidden bg-[#14242a]">
                 <Image
                   alt={moment.title}
                   className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
@@ -79,16 +79,16 @@ export function HomeGalleryPreview({
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"
                 />
-                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#090d16]/80 via-transparent to-transparent pointer-events-none" />
-                <span className="absolute left-3.5 bottom-3.5 z-10 rounded-full border border-white/20 bg-slate-900/80 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#38bdf8] backdrop-blur-md shadow-md">
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#14242a]/90 via-transparent to-transparent pointer-events-none" />
+                <span className="absolute left-3.5 bottom-3.5 z-10 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#90aead] backdrop-blur-md shadow-md">
                   {moment.meta}
                 </span>
               </div>
               <div className="p-5">
-                <h3 className="font-display font-extrabold text-lg uppercase tracking-tight text-[#f0f0f0] transition-colors group-hover:text-[#38bdf8]">
+                <h3 className="font-display font-extrabold text-lg uppercase tracking-tight text-[#fbe9d0] transition-colors group-hover:text-[#e64833]">
                   {moment.title}
                 </h3>
-                <p className="mt-1 text-xs text-slate-400 font-medium">{moment.meta}</p>
+                <p className="mt-1 text-xs text-[#90aead] font-medium">{moment.meta}</p>
               </div>
             </Link>
           ))}

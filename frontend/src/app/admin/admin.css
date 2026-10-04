@@ -43,9 +43,9 @@
   --line: #f1f5f9;
   --line-strong: #e2e8f0;
   --panel: #ffffff;
-  --panel-soft: #f8fafc;
-  --sage: #0d9488;
-  --sage-soft: #f0fdfa;
+  --panel-soft: #fbf6ee;
+  --sage: #e64833;
+  --sage-soft: rgba(230,72,51,0.08);
   --success: #059669;
   --danger: #e11d48;
   --warn: #d97706;

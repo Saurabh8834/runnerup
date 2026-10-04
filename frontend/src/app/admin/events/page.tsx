@@ -366,7 +366,7 @@ export default function AdminEventsPage() {
                         const res = await fetch(getApiUrl("/api/uploads/image"), {
                           method: "POST",
                           headers: authHeaders(token),
-                          body: JSON.stringify({ file: base64, folder: "relentlessrun/admin" }),
+                          body: JSON.stringify({ file: base64, folder: "runnerup/admin" }),
                         });
                         if (!res.ok) { toast("error", "Upload failed. Try again."); return; }
                         const json = await res.json();

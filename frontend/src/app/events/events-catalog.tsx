@@ -79,11 +79,11 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   }, []);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d1322] shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#38bdf8] hover:shadow-[0_12px_40px_rgba(56,189,248,0.25)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)]">
       {/* Banner / Poster — 65% Height */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-64 sm:h-72 bg-[#090d16]" : "h-64 sm:h-72 bg-gradient-to-br from-[#0284c7] via-sky-600 to-sky-800"
+          hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
         {event.bannerImageUrl ? (
@@ -98,18 +98,18 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         {hasBannerImage && (
           <div
             aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-[#0d1322]/95 via-[#0d1322]/40 to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-[#172c34]/95 via-[#172c34]/40 to-transparent"
           />
         )}
 
         {/* Top Badges */}
         <div className="relative z-10 p-4 flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e64833] px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg">
             <Flame className="h-3 w-3 animate-bounce fill-white" />
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-[#090d16]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white shadow-md">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -120,38 +120,38 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
         {/* Reward / Medal Highlight Strip */}
         <div className="absolute bottom-3.5 left-4 right-4 z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
-            <Medal className="h-3.5 w-3.5 text-[#38bdf8] shrink-0" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
+            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
           </div>
         </div>
       </div>
 
       {/* Body Content */}
-      <div className="flex flex-1 flex-col p-5 sm:p-6 bg-[#0d1322]">
+      <div className="flex flex-1 flex-col p-5 sm:p-6 bg-[#172c34]">
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-[0.68rem]">
-            <span className="font-semibold text-sky-400 flex items-center gap-1">
-              <Zap className="h-3 w-3 text-sky-400" /> Only {scarcity.bibsLeft} Bibs Remaining
+            <span className="font-semibold text-[#e64833] flex items-center gap-1">
+              <Zap className="h-3 w-3 text-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
             </span>
-            <span className="text-slate-400 font-mono font-medium">
+            <span className="text-[#90aead] font-mono font-medium">
               {scarcity.percent}% filled
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-white/10 p-0.5 border border-white/10">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-black/30 p-0.5 border border-[#90aead]/20">
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${scarcity.percent}%` }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full rounded-full bg-gradient-to-r from-sky-400 via-[#38bdf8] to-blue-500"
+              className="h-full rounded-full bg-gradient-to-r from-[#874f41] via-[#e64833] to-[#fbe9d0]"
             />
           </div>
         </div>
 
         {/* Title & Distance */}
-        <h3 className="font-display font-black text-xl uppercase tracking-tight text-white transition-colors group-hover:text-[#38bdf8]">
+        <h3 className="font-display font-black text-xl uppercase tracking-tight text-[#fbe9d0] transition-colors group-hover:text-[#e64833]">
           {event.name}
         </h3>
 
@@ -159,30 +159,30 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           {event.distance.split(",").map((d) => (
             <span
               key={d}
-              className="rounded-lg bg-sky-500/15 border border-sky-400/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-sky-300"
+              className="rounded-lg bg-[#244855] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#fbe9d0]"
             >
               {d.trim()}
             </span>
           ))}
         </div>
 
-        <p className="mt-3 flex-1 text-xs leading-relaxed text-slate-300 line-clamp-2">
+        <p className="mt-3 flex-1 text-xs leading-relaxed text-[#90aead] line-clamp-2">
           {event.highlight}
         </p>
 
         {/* Countdown & Price Footer */}
-        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[0.72rem] text-slate-400">
-            <Timer className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+        <div className="mt-4 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-[0.72rem] text-[#90aead]">
+            <Timer className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span>Closes in:</span>
-            <span className="font-mono font-bold text-white">
+            <span className="font-mono font-bold text-[#fbe9d0]">
               {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
             </span>
           </div>
 
           <div className="text-right">
-            <span className="text-lg sm:text-xl font-black font-mono text-white flex items-center justify-end gap-0.5">
-              <IndianRupee className="h-4 w-4 text-[#38bdf8]" />
+            <span className="text-lg sm:text-xl font-black font-mono text-[#fbe9d0] flex items-center justify-end gap-0.5">
+              <IndianRupee className="h-4 w-4 text-[#e64833]" />
               {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "")}
             </span>
           </div>
@@ -191,15 +191,15 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         {/* CTA Buttons */}
         <div className="mt-4 flex items-center gap-2.5">
           <Link
-            className="flex-1 h-10 rounded-full border border-white/20 bg-white/[0.06] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md hover:bg-white/15 transition-all"
+            className="flex-1 h-10 rounded-full border border-[#90aead]/30 bg-[#244855]/60 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-md hover:bg-[#244855] transition-all"
             href={`/events/${event.slug}`}
           >
             <span>Details</span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />
+            <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
           <Link
-            className="neon-btn-blue flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="flex-1 h-10 rounded-full bg-gradient-to-r from-[#e64833] to-[#c93b27] inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg transition-transform hover:scale-105 active:scale-95 hover:brightness-110"
             href={`/register?event=${encodeURIComponent(event.slug)}`}
           >
             <span>Register</span>
@@ -211,14 +211,14 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   );
 }
 
-/* ─── Archive Race Card (Off-White #f8fafc Theme) ─── */
+/* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const hasBannerImage = Boolean(event.bannerImageUrl);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-[#0284c7] hover:shadow-2xl hover:shadow-sky-100/80">
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-2xl">
       {/* Banner / Poster — 65% Height */}
-      <div className="h-64 sm:h-72 relative overflow-hidden bg-slate-900">
+      <div className="h-64 sm:h-72 relative overflow-hidden bg-[#14242a]">
         {event.bannerImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -249,7 +249,7 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
         {/* Reward / Medal Highlight Strip */}
         <div className="absolute bottom-3.5 left-4 right-4 z-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
-            <Medal className="h-3.5 w-3.5 text-[#38bdf8] shrink-0" />
+            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
           </div>
         </div>
@@ -257,7 +257,7 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
 
       {/* Body Content */}
       <div className="flex flex-1 flex-col p-5 sm:p-6 bg-white">
-        <h3 className="font-display font-black text-xl uppercase tracking-tight text-[#090d16] transition-colors group-hover:text-[#0284c7]">
+        <h3 className="font-display font-black text-xl uppercase tracking-tight text-[#14242a] transition-colors group-hover:text-[#e64833]">
           {event.name}
         </h3>
 
@@ -265,46 +265,46 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
           {event.distance.split(",").map((d) => (
             <span
               key={d}
-              className="rounded-lg bg-sky-50 border border-sky-200 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-sky-700"
+              className="rounded-lg bg-[#fbf6ee] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#244855]"
             >
               {d.trim()}
             </span>
           ))}
         </div>
 
-        <p className="mt-3 flex-1 text-xs leading-relaxed text-slate-600 line-clamp-2">
+        <p className="mt-3 flex-1 text-xs leading-relaxed text-[#244855]/80 line-clamp-2">
           {event.highlight}
         </p>
 
         {/* Stats Strip */}
         {(event.finishers || event.cities) && (
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center">
+          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] p-3 text-center">
             {[
               { label: "Finishers", value: event.finishers, icon: Users },
               { label: "Verified", value: event.verifiedResults, icon: BadgeCheck },
               { label: "Cities", value: event.cities, icon: MapPin },
             ].map(({ label, value, icon: Icon }) => (
               <div key={label}>
-                <Icon className="mx-auto h-3.5 w-3.5 text-[#0284c7]" />
-                <p className="mt-1 text-sm font-black tracking-tight text-[#090d16] font-mono">
+                <Icon className="mx-auto h-3.5 w-3.5 text-[#e64833]" />
+                <p className="mt-1 text-sm font-black tracking-tight text-[#14242a] font-mono">
                   {typeof value === "number" ? value.toLocaleString("en-IN") : "—"}
                 </p>
-                <p className="text-[0.55rem] uppercase font-bold tracking-wider text-slate-500">{label}</p>
+                <p className="text-[0.55rem] uppercase font-bold tracking-wider text-[#90aead]">{label}</p>
               </div>
             ))}
           </div>
         )}
 
         {/* Footer */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[0.72rem] text-slate-500">
-            <CalendarDays className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="mt-4 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-[0.72rem] text-[#90aead]">
+            <CalendarDays className="h-3.5 w-3.5 text-[#90aead] shrink-0" />
             <span>{event.date}</span>
           </div>
 
           <div className="text-right">
-            <span className="text-lg sm:text-xl font-black font-mono text-[#090d16] flex items-center justify-end gap-0.5">
-              <IndianRupee className="h-4 w-4 text-[#0284c7]" />
+            <span className="text-lg sm:text-xl font-black font-mono text-[#14242a] flex items-center justify-end gap-0.5">
+              <IndianRupee className="h-4 w-4 text-[#e64833]" />
               {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "")}
             </span>
           </div>
@@ -313,15 +313,15 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
         {/* CTA Buttons */}
         <div className="mt-4 flex items-center gap-2.5">
           <Link
-            className="flex-1 h-10 rounded-full border border-slate-200 bg-slate-50 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-100 transition-all"
+            className="flex-1 h-10 rounded-full border border-[#90aead]/20 bg-[#fbf6ee] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#14242a] hover:bg-[#f5ecdd] transition-all"
             href={`/events/${event.slug}`}
           >
             <span>View Recap</span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />
+            <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
           <Link
-            className="flex-1 h-10 rounded-full border border-sky-200 bg-sky-50 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#0284c7] hover:bg-sky-100 transition-all"
+            className="flex-1 h-10 rounded-full border border-[#e64833]/30 bg-[#e64833]/10 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#e64833] hover:bg-[#e64833]/20 transition-all"
             href="/leaderboard"
           >
             <span>Results</span>
@@ -361,21 +361,21 @@ export function EventsCatalog() {
 
   return (
     <div className="min-w-0">
-      {/* ─── Section 2: OPEN RACES (DARK BACKGROUND #090d16) ─── */}
-      <section className="relative py-16 sm:py-20 bg-[#090d16] text-[#f0f0f0] overflow-hidden isolate border-b border-white/10">
-        <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#0284c7]/15 blur-[130px]" />
+      {/* ─── Section 2: OPEN RACES (DARK BACKGROUND #14242a) ─── */}
+      <section className="relative py-16 sm:py-20 bg-[#14242a] text-[#fbe9d0] overflow-hidden isolate border-b border-[#90aead]/15">
+        <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#244855]/30 blur-[130px]" />
 
         <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#90aead]/15 pb-5">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/30 bg-sky-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#38bdf8]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
                 REGISTRATION OPEN
               </span>
-              <h2 className="mt-3 font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white">
-                OPEN RACES & <span className="text-[#38bdf8]">CHALLENGES</span>
+              <h2 className="mt-3 font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#fbe9d0]">
+                OPEN RACES & <span className="text-[#e64833]">CHALLENGES</span>
               </h2>
             </div>
-            <p className="text-xs font-mono text-slate-300 bg-white/[0.06] px-4 py-2 rounded-full border border-white/10 shadow-sm w-fit">
+            <p className="text-xs font-mono text-[#fbe9d0] bg-[#172c34] px-4 py-2 rounded-full border border-[#90aead]/20 shadow-sm w-fit">
               {upcoming.length} active race{upcoming.length === 1 ? "" : "s"}
               {source === "api" ? " · live server" : ""}
             </p>
@@ -390,34 +390,34 @@ export function EventsCatalog() {
               ))}
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0d1322] px-6 py-14 text-center shadow-2xl">
-              <Sparkles className="h-8 w-8 text-[#38bdf8]" />
-              <p className="mt-3 text-base font-bold text-white">No open events right now</p>
-              <p className="mt-1 text-xs text-slate-400">Check back soon for new race releases.</p>
+            <div className="mt-8 flex flex-col items-center justify-center rounded-3xl border border-[#90aead]/20 bg-[#172c34] px-6 py-14 text-center shadow-2xl">
+              <Sparkles className="h-8 w-8 text-[#e64833]" />
+              <p className="mt-3 text-base font-bold text-[#fbe9d0]">No open events right now</p>
+              <p className="mt-1 text-xs text-[#90aead]">Check back soon for new race releases.</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* ─── Section 3: RACE ARCHIVE (OFF-WHITE BACKGROUND #f8fafc) ─── */}
+      {/* ─── Section 3: RACE ARCHIVE (WARM CREAM BACKGROUND #fbf6ee) ─── */}
       {past.length > 0 && (
-        <section className="relative py-16 sm:py-20 bg-[#f8fafc] text-[#090d16] border-b border-slate-200">
+        <section className="relative py-16 sm:py-20 bg-[#fbf6ee] text-[#14242a] border-b border-[#90aead]/20">
           <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#90aead]/20 pb-5">
               <div>
-                <span className="rounded-full border border-sky-600/30 bg-sky-50 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#0284c7]">
+                <span className="rounded-full border border-[#874f41]/40 bg-[#874f41]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#874f41]">
                   COMPLETED EDITIONS
                 </span>
-                <h2 className="mt-3 font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#090d16]">
-                  RACE ARCHIVE & <span className="text-[#0284c7]">RESULTS</span>
+                <h2 className="mt-3 font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#14242a]">
+                  RACE ARCHIVE & <span className="text-[#874f41]">RESULTS</span>
                 </h2>
               </div>
-              <p className="text-xs font-mono font-bold text-slate-600 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm w-fit">
+              <p className="text-xs font-mono font-bold text-[#244855] bg-white px-4 py-2 rounded-full border border-[#90aead]/20 shadow-sm w-fit">
                 {past.length} completed race{past.length === 1 ? "" : "s"}
               </p>
             </div>
 
-            <p className="mt-4 max-w-xl text-sm text-slate-600 font-medium">
+            <p className="mt-4 max-w-xl text-sm text-[#244855]/90 font-medium">
               Races that have already concluded. Tap any event to inspect route distances, finisher rewards, and leaderboard rankings.
             </p>
 

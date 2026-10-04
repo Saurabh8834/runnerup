@@ -33,7 +33,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
   // Live countdown state
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 14 + (index * 6) % 24,
+    hours: 14 + ((index * 6) % 24),
     minutes: 32,
     seconds: 45,
   });
@@ -51,17 +51,11 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   }, []);
 
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="group flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-sky-400 hover:shadow-2xl"
-    >
-      {/* Banner / Poster - 65% Card Height */}
+    <article className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] text-[#fbe9d0]">
+      {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-64 sm:h-72 bg-[#090d16]" : "h-64 sm:h-72 bg-gradient-to-br from-[#0284c7] via-sky-600 to-sky-800"
+          hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
         {event.bannerImageUrl ? (
@@ -72,95 +66,95 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
             src={event.bannerImageUrl}
           />
         ) : null}
-        {hasBannerImage ? (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-[#090d16]/95 via-[#090d16]/40 to-transparent"
-          />
-        ) : null}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-[#172c34] via-[#172c34]/40 to-[#14242a]/30"
+        />
 
-        {/* Top Badges */}
+        {/* Top Urgency Badges */}
         <div className="relative z-10 p-4 flex items-start justify-between gap-2">
-          {/* Live Pulsating Scarcity Badge */}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0284c7] px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg">
-            <Flame className="h-3 w-3 animate-bounce fill-white" />
+          {/* Scarcity Badge */}
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e64833] backdrop-blur-md px-3 py-1 text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg">
+            <Flame className="h-3.5 w-3.5 animate-bounce fill-white" />
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          {/* Registration Live Badge */}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-[#090d16]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#f0f0f0] shadow-md">
+          {/* Active Race Badge */}
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-            <span className="text-[#f0f0f0]">Active Race</span>
+            <span>Registration Open</span>
           </span>
         </div>
 
         {/* Reward / Medal Highlight Strip */}
         <div className="absolute bottom-3 left-4 right-4 z-10">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-[#f0f0f0] drop-shadow-md">
-            <Medal className="h-4 w-4 text-[#38bdf8] shrink-0" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-md">
+            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
           </div>
         </div>
       </div>
 
       {/* Body Content */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-6">
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
-          <div className="flex items-center justify-between text-[0.68rem]">
-            <span className="font-semibold text-sky-600 flex items-center gap-1">
-              <Zap className="h-3 w-3" /> Only {scarcity.bibsLeft} Bibs Remaining
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-[#e64833] flex items-center gap-1">
+              <Zap className="h-3.5 w-3.5 fill-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
             </span>
-            <span className="text-slate-500 font-mono">
-              {scarcity.percent}% filled
+            <span className="text-[#90aead] font-mono text-[0.72rem]">
+              {scarcity.percent}% Filled
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 p-0.5 border border-slate-200">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-black/30 p-0.5 border border-[#90aead]/20">
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${scarcity.percent}%` }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full rounded-full bg-gradient-to-r from-sky-500 via-[#0284c7] to-blue-700"
+              className="h-full rounded-full bg-gradient-to-r from-[#874f41] via-[#e64833] to-[#fbe9d0]"
             />
           </div>
         </div>
 
-        {/* Title & Distance */}
-        <h3 className="font-display font-extrabold text-xl uppercase tracking-tight text-[#090d16] transition-colors group-hover:text-[#0284c7]">
+        {/* Title */}
+        <h3 className="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-[#fbe9d0] transition-colors group-hover:text-[#e64833]">
           {event.name}
         </h3>
 
-        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        {/* Multi-Distance Tags */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {event.distance.split(",").map((d) => (
             <span
               key={d}
-              className="rounded-lg bg-sky-50 border border-sky-200 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-sky-700"
+              className="rounded-lg bg-[#244855] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#fbe9d0]"
             >
               {d.trim()}
             </span>
           ))}
         </div>
 
-        <p className="mt-3 flex-1 text-xs leading-relaxed text-slate-600 line-clamp-2">
+        <p className="mt-3 flex-1 text-xs sm:text-sm leading-relaxed text-[#90aead] font-medium line-clamp-2">
           {event.highlight}
         </p>
 
         {/* Countdown & Price Footer */}
-        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1 text-[0.7rem] text-slate-500 font-medium">
-            <Timer className="h-3.5 w-3.5 text-sky-600 shrink-0" />
+        <div className="mt-5 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-[#90aead] font-medium">
+            <Timer className="h-4 w-4 text-[#e64833] shrink-0" />
             <span>Closes in:</span>
-            <span className="font-mono font-bold text-[#090d16]">
+            <span className="font-mono font-bold text-[#fbe9d0]">
               {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
             </span>
           </div>
 
-          <div className="text-right">
-            <span className="font-mono text-lg font-black text-[#090d16]">
+          <div className="flex items-baseline gap-2 text-right">
+            <span className="text-xs text-[#90aead]/60 line-through font-mono">₹549</span>
+            <span className="font-mono text-xl font-black text-[#fbe9d0]">
               {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "₹")}
             </span>
           </div>
@@ -168,26 +162,42 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Primary CTA */}
         <Link
-          className="neon-btn-blue mt-4 w-full text-xs font-black uppercase tracking-wider py-3 rounded-full flex items-center justify-center gap-2 shadow-lg"
+          className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)] transition-all"
           href={`/events/${event.slug}`}
         >
-          <Sparkles className="h-3.5 w-3.5" />
+          <Sparkles className="h-4 w-4 text-[#fbe9d0]" />
           <span>Claim Your Bib & Medal</span>
-          <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>
-    </motion.article>
-
-
+    </article>
   );
 }
 
-export function HomeEvents({ initial = staticUpcoming.slice(0, 3) }: { initial?: PublicEvent[] }) {
-  const events = initial;
+export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
+  const combined = useMemo(() => {
+    const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [];
+    for (const item of staticUpcoming) {
+      if (list.length >= 3) break;
+      if (!list.some((existing) => existing.slug === item.slug)) {
+        list.push(item);
+      }
+    }
+    return list.slice(0, 3).map((ev) => {
+      const match = staticUpcoming.find((s) => s.slug === ev.slug);
+      return {
+        ...ev,
+        bannerImageUrl: ev.bannerImageUrl || match?.bannerImageUrl,
+        highlight: ev.highlight || match?.highlight || "Verified virtual marathon challenge.",
+        banner: ev.banner || match?.banner || "Open event",
+        reward: ev.reward || match?.reward || "Finisher medal + E-Certificate",
+      };
+    });
+  }, [initial]);
 
   return (
-    <div className="mt-8 grid grid-cols-1 gap-5 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
-      {events.map((event, i) => (
+    <div className="mt-8 grid grid-cols-1 gap-6 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3">
+      {combined.map((event, i) => (
         <EventCard key={event.slug} event={event} index={i} />
       ))}
     </div>
