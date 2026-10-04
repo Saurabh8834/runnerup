@@ -48,14 +48,14 @@ export function HomeHero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display font-black text-3xl sm:text-5xl md:text-6xl xl:text-[4.2rem] tracking-tight uppercase leading-[1.08] sm:leading-[1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+              className="font-display font-black text-3xl sm:text-5xl md:text-6xl xl:text-[4.5rem] tracking-tight uppercase leading-[1.08] sm:leading-[1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
             >
-              <span className="block text-[#fbe9d0]">Push Your Limits,</span>
+              <span className="block text-[#fbe9d0]">Run.</span>
               <span className="block text-[#e64833] italic font-black drop-shadow-[0_0_30px_rgba(230,72,51,0.55)] mt-1">
-                Chase Your Goals,
+                Achieve.
               </span>
               <span className="block text-white mt-1">
-                Own Your Journey
+                Repeat.
               </span>
             </motion.h1>
 
@@ -66,7 +66,7 @@ export function HomeHero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mt-4 sm:mt-6 max-w-xl text-xs sm:text-base md:text-lg text-[#fbe9d0]/85 font-medium leading-relaxed"
             >
-              Every mile tells a story. Pick your route, record with Strava, Garmin or Apple Watch, and earn official heavy-metal finisher medals delivered straight to your door across India.
+              Track your run with Strava, Garmin, or Apple Watch and earn your finisher medal.
             </motion.p>
 
             {/* ─── Mobile Hero Image Card (visible ONLY on < lg screens) ─── */}
