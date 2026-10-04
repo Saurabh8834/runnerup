@@ -20,10 +20,11 @@ const nextConfig: NextConfig = {
   // Forwards /api/* and /health to the backend server (locally or configured URL)
   // so external clients accessing runnerup.in can reach the API without CORS or mixed-content issues.
   async rewrites() {
+    const isDev = process.env.NODE_ENV !== "production";
     const backendTarget = (
       process.env.INTERNAL_API_URL ||
       process.env.NEXT_PUBLIC_API_URL ||
-      "http://127.0.0.1:4000"
+      (isDev ? "http://127.0.0.1:4000" : "https://api.runnerup.in")
     ).replace(/\/+$/, "");
 
     return [

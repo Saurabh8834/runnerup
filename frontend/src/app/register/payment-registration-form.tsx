@@ -72,6 +72,20 @@ const TSHIRT_SIZES = [
 
 const fallbackEvents: RegisterEventOption[] = [
   {
+    label: "October Runner 🍁",
+    value: "october-runner",
+    amount: "₹1",
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+    activityTypes: ["running", "cycling", "walking"],
+  },
+  {
+    label: "Independence Day Virtual Run 2026 🇮🇳",
+    value: "independence-day-virtual-run-2026",
+    amount: "₹349",
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "15 km", "20 km", "25 km", "30 km"],
+    activityTypes: ["running", "cycling", "walking"],
+  },
+  {
     label: "Monsoon Mountain Miles",
     value: "monsoon-mountain-miles",
     amount: "₹499",
@@ -648,10 +662,10 @@ function PaymentRegistrationFormInner() {
               <input
                 aria-invalid={Boolean(errors.email)}
                 autoComplete="email"
-                className={`${inputClass} bg-(--panel-soft)`}
+                className={inputClass}
                 defaultValue={defaultEmail}
                 name="email"
-                readOnly
+                placeholder="runner@example.com"
                 required
                 type="email"
               />
