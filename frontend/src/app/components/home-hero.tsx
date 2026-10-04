@@ -48,14 +48,14 @@ export function HomeHero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display font-black text-3xl sm:text-5xl md:text-6xl xl:text-[4.5rem] tracking-tight uppercase leading-[1.08] sm:leading-[1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+              className="font-display font-black text-3xl sm:text-5xl md:text-6xl xl:text-[4.2rem] tracking-tight uppercase leading-[1.08] sm:leading-[1] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
             >
-              <span className="block text-[#fbe9d0]">Run.</span>
+              <span className="block text-[#fbe9d0]">Push Your Limits,</span>
               <span className="block text-[#e64833] italic font-black drop-shadow-[0_0_30px_rgba(230,72,51,0.55)] mt-1">
-                Achieve.
+                Chase Your Goals,
               </span>
               <span className="block text-white mt-1">
-                Repeat.
+                Own Your Journey
               </span>
             </motion.h1>
 
