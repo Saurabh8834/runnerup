@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Calendar,
   CheckCircle2,
@@ -295,7 +295,6 @@ export function LeaderboardClient() {
   const initialEventParam = searchParams.get("event") || "";
   const initialDistanceParam = searchParams.get("distance") || "";
 
-  const reduce = useReducedMotion();
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
   const currentClerkId = user?.id ?? null;
@@ -489,7 +488,7 @@ export function LeaderboardClient() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             className="mx-auto max-w-3xl text-center"
-            initial={reduce ? false : { opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -759,7 +758,7 @@ export function LeaderboardClient() {
                         return (
                           <motion.div
                             key={`mob-${row.rank}-${row.bibNumber || row.runnerName}`}
-                            initial={reduce ? false : { opacity: 0, y: 6 }}
+                            initial={false}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.25) }}
                             className={`rounded-2xl border p-3.5 transition-all ${
@@ -840,7 +839,7 @@ export function LeaderboardClient() {
                             return (
                               <motion.tr
                                 key={`${row.rank}-${row.bibNumber || row.runnerName}`}
-                                initial={reduce ? false : { opacity: 0, x: -6 }}
+                                initial={false}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.3) }}
                                 className={`transition-colors hover:bg-white/[0.04] ${

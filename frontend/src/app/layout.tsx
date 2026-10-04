@@ -125,15 +125,16 @@ export default function RootLayout({
       lang="en"
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       data-theme="dark"
+      data-scroll-behavior="smooth"
       style={{ colorScheme: "dark" }}
       suppressHydrationWarning
     >
       <head>
         {/* Preconnect to external origins to reduce latency */}
-        <link rel="preconnect" href="https://clerk.runnerup.in" />
-        <link rel="preconnect" href="https://api.runnerup.in" />
-        <link rel="dns-prefetch" href="https://clerk.runnerup.in" />
-        <link rel="dns-prefetch" href="https://api.runnerup.in" />
+        <link rel="preconnect" href="https://tidy-haddock-9482.clerk.accounts.dev" />
+        <link rel="preconnect" href="https://img.clerk.com" />
+        <link rel="dns-prefetch" href="https://tidy-haddock-9482.clerk.accounts.dev" />
+        <link rel="dns-prefetch" href="https://img.clerk.com" />
         <StructuredData />
       </head>
       <body className="relative min-h-full flex flex-col bg-[#14242a] text-[#fcf8f2] overflow-x-hidden">

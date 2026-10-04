@@ -35,13 +35,11 @@ export function SearchableSelect({
   const [query, setQuery] = useState(selected);
 
   // Sync query with external value changes
-  const prevValueRef = useRef(value);
-  if (value !== prevValueRef.current) {
-    prevValueRef.current = value;
+  useEffect(() => {
     if (value !== undefined) {
       setQuery(value);
     }
-  }
+  }, [value]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();

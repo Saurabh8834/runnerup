@@ -74,7 +74,7 @@ function GalleryCard({
     <motion.button
       type="button"
       onClick={() => onOpen(item)}
-      initial={reduce ? false : { opacity: 0, y: 16 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-6%" }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.05, 0.3), ease: [0.22, 1, 0.36, 1] }}
@@ -519,7 +519,7 @@ export function GalleryClient() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             className="mx-auto max-w-3xl text-center"
-            initial={reduce ? false : { opacity: 0, y: 16 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -540,7 +540,7 @@ export function GalleryClient() {
           {/* 4 Stats Cards */}
           <motion.div
             className="mx-auto mt-8 grid max-w-4xl grid-cols-2 gap-3 sm:mt-10 sm:gap-4 md:grid-cols-4"
-            initial={reduce ? false : { opacity: 0, y: 12 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           >
