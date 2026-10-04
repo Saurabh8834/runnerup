@@ -61,6 +61,9 @@ const FALLBACK_EVENT_IMAGES: Record<string, string> = {
   "monsoon-mountain-miles": "/events/monsoon-mountain-miles.jpg",
   "himalayan-winter-sprint": "/events/himalayan-winter-sprint.jpg",
   "independence-endurance-run": "/events/independence-endurance-run.jpg",
+  "spring-valley-dash": "/events/spring-valley-dash.jpg",
+  "holi-color-virtual-run": "/events/holi-color-virtual-run.jpg",
+  "new-year-night-miles": "/events/new-year-night-miles.jpg",
 };
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
@@ -232,18 +235,28 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
 /* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
-  const hasBannerImage = Boolean(event.bannerImageUrl);
+  const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
+  const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
+
+  useEffect(() => {
+    setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+  }, [event.bannerImageUrl, event.slug]);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-2xl">
       {/* Banner / Poster — 65% Height */}
       <div className="h-64 sm:h-72 relative overflow-hidden bg-[#14242a]">
-        {event.bannerImageUrl ? (
+        {imgSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt={`${event.name} banner`}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            src={event.bannerImageUrl}
+            src={imgSrc}
+            onError={() => {
+              if (fallbackImg && imgSrc !== fallbackImg) {
+                setImgSrc(fallbackImg);
+              }
+            }}
           />
         ) : null}
         
