@@ -362,7 +362,7 @@ export function EventsCatalog() {
   return (
     <div className="min-w-0">
       {/* ─── Section 2: OPEN RACES (DARK BACKGROUND #14242a) ─── */}
-      <section className="relative py-16 sm:py-20 bg-[#14242a] text-[#fbe9d0] overflow-hidden isolate border-b border-[#90aead]/15">
+      <section className="relative pt-6 pb-16 sm:pt-8 sm:pb-20 bg-[#14242a] text-[#fbe9d0] overflow-hidden isolate border-b border-[#90aead]/15">
         <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#244855]/30 blur-[130px]" />
 
         <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
