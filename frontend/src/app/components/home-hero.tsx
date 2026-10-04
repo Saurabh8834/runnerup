@@ -17,7 +17,7 @@ import {
 
 export function HomeHero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[100dvh] lg:h-[100dvh] flex flex-col justify-center pt-16 pb-6 sm:pt-18 sm:pb-8 lg:pt-14 lg:pb-6">
+    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[100dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-24 pb-12 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
       {/* ─── Ambient Atmospheric Background Glows ─── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         <div className="absolute top-1/4 left-1/2 -z-10 h-[260px] w-[300px] sm:h-[400px] sm:w-[600px] -translate-x-1/2 rounded-full bg-[#244855]/40 blur-[90px] sm:blur-[130px]" />
@@ -25,7 +25,7 @@ export function HomeHero() {
         <div className="absolute bottom-6 left-10 -z-10 h-[150px] w-[150px] sm:h-[240px] sm:w-[240px] rounded-full bg-[#244855]/30 blur-[70px]" />
       </div>
 
-      <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full my-auto">
+      <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full lg:my-auto">
         {/* ─── Responsive Grid: Stacked on Mobile, 2-Column on Desktop ─── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center">
           
