@@ -55,10 +55,24 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
   );
 }
 
+const FALLBACK_EVENT_IMAGES: Record<string, string> = {
+  "october-runner": "/events/october-runner.jpg",
+  "independence-day-virtual-run-2026": "/events/independence-day-run.jpg",
+  "monsoon-mountain-miles": "/events/monsoon-mountain-miles.jpg",
+  "himalayan-winter-sprint": "/events/himalayan-winter-sprint.jpg",
+  "independence-endurance-run": "/events/independence-endurance-run.jpg",
+};
+
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
-  const hasBannerImage = Boolean(event.bannerImageUrl);
+  const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
+  const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
+  const hasBannerImage = Boolean(imgSrc);
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
+
+  useEffect(() => {
+    setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+  }, [event.bannerImageUrl, event.slug]);
 
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
     hours: 14 + (index * 6) % 24,
@@ -86,12 +100,17 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
-        {event.bannerImageUrl ? (
+        {imgSrc ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             alt={`${event.name} banner`}
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            src={event.bannerImageUrl}
+            src={imgSrc}
+            onError={() => {
+              if (fallbackImg && imgSrc !== fallbackImg) {
+                setImgSrc(fallbackImg);
+              }
+            }}
           />
         ) : null}
         
