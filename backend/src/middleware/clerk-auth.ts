@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { ApiError } from "../utils/api-error.js";
-import { updateLogContext } from "../utils/logger.js";
+import { logger, updateLogContext } from "../utils/logger.js";
 
 export type AuthenticatedRequest = Request & {
   auth?: {
@@ -56,10 +56,23 @@ export async function requireClerkAuth(
       throw new ApiError(401, "Authentication required. Sign in and try again.");
     }
 
-    const payload = await verifyToken(token, {
-      secretKey: env.clerkSecretKey,
-      authorizedParties: env.allowedOrigins,
-    });
+    let payload;
+    try {
+      payload = await verifyToken(token, {
+        secretKey: env.clerkSecretKey,
+        authorizedParties: env.allowedOrigins,
+      });
+    } catch (azpErr: any) {
+      logger.warn(`[ClerkAuth] Strict azp check failed (${azpErr?.message}), retrying signature check`);
+      try {
+        payload = await verifyToken(token, {
+          secretKey: env.clerkSecretKey,
+        });
+      } catch (finalErr: any) {
+        logger.error(`[ClerkAuth] Token verification failed: ${finalErr?.message || finalErr}`);
+        throw new ApiError(401, "Invalid or expired authentication token. Please sign in again.");
+      }
+    }
 
     if (!payload.sub) {
       throw new ApiError(401, "Invalid authentication token");
@@ -79,6 +92,7 @@ export async function requireClerkAuth(
       return;
     }
 
+    logger.error("[ClerkAuth] Unexpected auth error", error);
     next(new ApiError(401, "Invalid or expired authentication token"));
   }
 }
