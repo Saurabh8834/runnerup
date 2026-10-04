@@ -40,7 +40,7 @@ const stats = [
 
 export function HomeStatsTicker() {
   return (
-    <section className="relative z-20 -mt-6 sm:-mt-8 mb-6 sm:mb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section className="relative z-20 pt-10 sm:pt-16 mb-8 sm:mb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-2xl p-4 sm:p-7 shadow-[0_20px_50px_rgba(20,36,42,0.85)] grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-[#90aead]/15">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
