@@ -95,15 +95,18 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
       }
     }
 
+    const shouldBeSuperAdmin = Boolean(email && env.adminEmails.includes(email));
+
     return prisma.user.update({
       where: { id: existing.id },
       data: {
-        clerkId: existing.clerkId ?? clerkId,
+        clerkId,
         email,
         name: name || existing.name,
         username: nextUsername,
         phone: phone ?? existing.phone,
         avatarUrl: avatarUrl ?? existing.avatarUrl,
+        ...(shouldBeSuperAdmin ? { role: "SUPER_ADMIN" } : {}),
       },
     });
   }
@@ -126,6 +129,7 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
       username: uniqueUsername,
       phone,
       avatarUrl,
+      role: env.adminEmails.includes(email) ? "SUPER_ADMIN" : "RUNNER",
     },
   });
 }
