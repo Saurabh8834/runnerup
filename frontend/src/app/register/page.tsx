@@ -22,7 +22,7 @@ export default function RegisterPage() {
           ))}
         </div>
 
-        <div className="container-page py-6 sm:py-8 md:py-10">
+        <div className="container-page pt-24 pb-8 sm:pt-28 sm:pb-10 md:pt-32 md:pb-12">
           <div className="mx-auto max-w-xl text-center">
             <p className="eyebrow">Registration</p>
             <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-(--foreground) sm:text-5xl">

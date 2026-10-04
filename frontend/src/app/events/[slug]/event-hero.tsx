@@ -48,7 +48,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
         }}
       />
 
-      <div className="container-page pb-16 pt-5 sm:pt-7">
+      <div className="container-page pb-16 pt-24 sm:pt-28">
 
         {/* ─── Headline block ─── */}
         <motion.div
