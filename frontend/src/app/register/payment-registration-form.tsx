@@ -508,7 +508,7 @@ function PaymentRegistrationFormInner() {
       setMessage("Complete payment in the Razorpay window...");
 
       const checkout = new window.Razorpay!({
-        key: order.keyId,
+        key: order?.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TjmOBLaIqe8Kz0",
         amount: order.amount,
         currency: order.currency ?? "INR",
         name: "RUNNERUP",
