@@ -123,6 +123,11 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
 
   if (!user) return null;
   const name = user.fullName ?? user.firstName ?? "Account";
+  const role = user.publicMetadata?.role as string | undefined;
+  const isAdmin =
+    role === "admin" ||
+    role === "super_admin" ||
+    user.primaryEmailAddress?.emailAddress === "realblack009@gmail.com";
 
   return (
     <div className="relative" ref={ref}>
@@ -168,7 +173,7 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
               <div className="flex items-center justify-between">
                 <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{name}</p>
                 <span className="rounded-full bg-sky-500/25 border border-sky-400/40 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-sky-300">
-                  Athlete ⚡
+                  {isAdmin ? "Admin 🛡️" : "Athlete ⚡"}
                 </span>
               </div>
               <p className="truncate text-[0.65rem] text-slate-300 font-medium mt-0.5">
@@ -177,6 +182,17 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
             </div>
 
             <div className="p-2 space-y-1">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl border border-amber-400/40 bg-amber-500/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-amber-200 transition-all duration-200 hover:bg-amber-500/30 hover:border-amber-400/60 hover:text-white"
+                >
+                  <Award className="h-4 w-4 text-amber-400" />
+                  Admin Console 🛡️
+                </Link>
+              )}
+
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
@@ -267,6 +283,12 @@ export function AppHeader() {
   const router = useRouter();
   const { user, isSignedIn, isLoaded } = useUser();
   const { signOut } = useClerk();
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isAdmin =
+    role === "admin" ||
+    role === "super_admin" ||
+    user?.primaryEmailAddress?.emailAddress === "realblack009@gmail.com";
 
   const isActive = (href: string) => {
     if (href === "/#how-it-works") return false;
@@ -634,6 +656,23 @@ export function AppHeader() {
                       >
                         <path d="m6 4 4 4-4 4" />
                       </svg>
+                    </Link>
+                  )}
+
+                  {/* Admin Console Link (if admin) */}
+                  {isLoaded && isSignedIn && isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setOpen(false)}
+                      className="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] border border-amber-400/40 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30 hover:text-white backdrop-blur-xl"
+                    >
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/30 text-amber-400 border border-amber-400/50">
+                        <Award className="h-4 w-4" strokeWidth={2.2} />
+                      </span>
+                      <span className="flex-1">Admin Console</span>
+                      <span className="rounded-full bg-amber-500/30 border border-amber-400/50 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-amber-300">
+                        🛡️ Owner
+                      </span>
                     </Link>
                   )}
                 </div>
