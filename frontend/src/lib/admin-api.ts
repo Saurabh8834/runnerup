@@ -1,17 +1,33 @@
 import { authHeaders, getApiUrl, readApiError } from "./api";
 
+export class AdminApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "AdminApiError";
+    this.status = status;
+  }
+}
+
 export async function adminFetch<T = unknown>(
   path: string,
   token: string | null | undefined,
   init: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(getApiUrl(path), {
-    ...init,
-    headers: authHeaders(token, init.headers),
-  });
+  let response: Response;
+  try {
+    response = await fetch(getApiUrl(path), {
+      ...init,
+      headers: authHeaders(token, init.headers),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to connect to backend server";
+    throw new AdminApiError(msg, 0);
+  }
 
   if (!response.ok) {
-    throw new Error(await readApiError(response, `Request failed (${response.status})`));
+    const errorMsg = await readApiError(response, `Request failed (${response.status})`);
+    throw new AdminApiError(errorMsg, response.status);
   }
 
   if (response.status === 204) {

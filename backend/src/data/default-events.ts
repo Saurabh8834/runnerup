@@ -58,9 +58,9 @@ export const defaultEvents: DefaultEvent[] = [
     proofClosesAt: new Date("2026-11-25T23:59:59.000Z"),
     distances: ["1.5 km", "3 km", "5 km", "10 km", "15 km", "20 km", "25 km", "30 km"],
     priceInPaise: 34900,
-    status: "OPEN",
+    status: "CLOSED",
     city: "Virtual (All India)",
-    featured: true,
+    featured: false,
     bannerImageUrl:
       "https://res.cloudinary.com/yppcqzt6/image/upload/v1785155314/relentlessrun/admin/uvujs4wpdunrnmz9rfqt.jpg",
     banner: "Flagship run",

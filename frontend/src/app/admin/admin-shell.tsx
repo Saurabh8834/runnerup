@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch } from "../../lib/admin-api";
+import { adminFetch, AdminApiError } from "../../lib/admin-api";
 import { AdminThemeProvider, AdminThemeToggle, useAdminTheme } from "./admin-theme";
 import { BrandText } from "../components/brand-text";
 import "./admin.css";
@@ -313,6 +313,100 @@ function GateRestricted({
   );
 }
 
+/* ── Gate: server / network / tunnel offline (530, 502, 500, etc.) ── */
+function GateServerError({
+  email,
+  error,
+  status,
+  onRetry,
+}: {
+  email?: string;
+  error: string | null;
+  status?: number | null;
+  onRetry: () => void;
+}) {
+  return (
+    <AdminThemed className="admin-app admin-gate">
+      <motion.div
+        className="admin-gate-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="admin-gate-logo">
+          <div className="admin-gate-logo-icon">
+            <BrandMark size={22} />
+          </div>
+          <span className="admin-gate-logo-text">
+            <BrandText />
+          </span>
+        </div>
+
+        <div className="admin-gate-lock" style={{ color: "#f59e0b" }}>
+          <svg
+            fill="none"
+            height="26"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            viewBox="0 0 24 24"
+            width="26"
+          >
+            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+            <path d="m2 2 20 20" />
+          </svg>
+        </div>
+
+        <h1>Backend Server Offline</h1>
+        <p>{error ?? (status ? `Request failed (${status})` : "Unable to reach backend server")}</p>
+
+        <div
+          className="admin-gate-restricted"
+          style={{
+            marginTop: "1rem",
+            borderColor: "rgba(245, 158, 11, 0.3)",
+            background: "rgba(245, 158, 11, 0.08)",
+          }}
+        >
+          {email ? (
+            <div className="admin-gate-restricted-email" style={{ marginBottom: "0.5rem" }}>
+              <span>Signed in as</span>
+              <strong>{email}</strong>
+            </div>
+          ) : null}
+          <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--foreground)", lineHeight: 1.5 }}>
+            {status === 530 ? (
+              <>
+                <strong>Cloudflare Tunnel Error 1033 (530):</strong> The tunnel for <code>api.runnerup.in</code> is offline.
+                Your account is an admin, but the backend server or Cloudflare tunnel on your machine is not running.
+              </>
+            ) : (
+              <>
+                Your account has admin credentials, but the frontend could not connect to the backend server.
+                Please ensure the backend API (port 4000) is running.
+              </>
+            )}
+          </p>
+        </div>
+
+        <div className="admin-gate-actions">
+          <button className="btn btn-primary" onClick={onRetry} type="button">
+            Retry connection
+          </button>
+          <Link className="btn btn-ghost" href="/">
+            Back to site
+          </Link>
+        </div>
+
+        <div className="admin-gate-divider">
+          Tip: Run <code style={{ background: "var(--panel-soft)", color: "var(--sage)", padding: "0.1rem 0.3rem", borderRadius: 4, fontSize: "0.7rem" }}>start-live.bat</code> to launch backend & tunnel
+        </div>
+      </motion.div>
+    </AdminThemed>
+  );
+}
+
 /* ── Gate: loading ──────────────────────────────────────── */
 function GateLoading() {
   return (
@@ -419,12 +513,14 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [me, setMe] = useState<AdminMe | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const loadMe = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setErrorStatus(null);
     try {
       let token: string | null = null;
       for (let attempt = 0; attempt < 6; attempt += 1) {
@@ -436,7 +532,13 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       setMe(json.data);
     } catch (err) {
       setMe(null);
-      setError(err instanceof Error ? err.message : "Admin access denied");
+      if (err instanceof AdminApiError) {
+        setErrorStatus(err.status);
+        setError(err.message);
+      } else {
+        setErrorStatus(null);
+        setError(err instanceof Error ? err.message : "Admin access denied");
+      }
     } finally {
       setLoading(false);
     }
@@ -448,6 +550,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       setLoading(false);
       setMe(null);
       setError(null);
+      setErrorStatus(null);
       return;
     }
     void loadMe();
@@ -463,6 +566,25 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
 
   if (!isSignedIn) {
     return <GateSignIn />;
+  }
+
+  const isServerOrNetworkError =
+    errorStatus === 530 ||
+    errorStatus === 0 ||
+    (errorStatus !== null && errorStatus >= 500) ||
+    Boolean(error?.includes("530")) ||
+    Boolean(error?.includes("Failed to connect")) ||
+    Boolean(error?.includes("Failed to fetch"));
+
+  if (isServerOrNetworkError) {
+    return (
+      <GateServerError
+        email={user?.primaryEmailAddress?.emailAddress}
+        error={error}
+        status={errorStatus}
+        onRetry={() => void loadMe()}
+      />
+    );
   }
 
   if (error || !me) {

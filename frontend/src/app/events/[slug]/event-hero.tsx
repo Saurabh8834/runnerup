@@ -13,6 +13,7 @@ import {
   Trophy,
   Truck,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { PublicEvent } from "../../data/events";
 import { Breadcrumb } from "../../components/breadcrumb";
 import { RegisterCta } from "../../components/register-cta";
@@ -28,6 +29,11 @@ const rewardBadges = [
 ];
 
 export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boolean }) {
+  const [heroImg, setHeroImg] = useState(event.bannerImageUrl ?? "/images/mountain-run-hero.svg");
+
+  useEffect(() => {
+    setHeroImg(event.bannerImageUrl ?? "/images/mountain-run-hero.svg");
+  }, [event.bannerImageUrl]);
   const distances = event.distance.split(" / ");
   const priceLabel =
     event.price.toLowerCase().includes("free")
@@ -137,9 +143,16 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
           <div className="event-classic-poster relative overflow-hidden border border-(--line) bg-slate-950 shadow-premium">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={event.bannerImageUrl ?? "/images/mountain-run-hero.svg"}
+              src={heroImg}
               alt={`${event.name} — run toward the mountains`}
               className="w-full h-auto max-h-[520px] object-contain sm:object-cover aspect-[16/9] sm:aspect-[16/8] lg:aspect-[21/9]"
+              onError={() => {
+                if (heroImg && heroImg.endsWith(".webp")) {
+                  setHeroImg(heroImg.replace(".webp", ".jpg"));
+                } else if (heroImg !== "/images/mountain-run-hero.svg") {
+                  setHeroImg("/images/mountain-run-hero.svg");
+                }
+              }}
             />
 
             {/* warm sunrise glow */}

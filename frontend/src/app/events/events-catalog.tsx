@@ -56,25 +56,29 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 }
 
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
-  "october-runner": "/events/october-runner.jpg",
-  "independence-day-virtual-run-2026": "/events/independence-day-run.jpg",
-  "monsoon-mountain-miles": "/events/monsoon-mountain-miles.jpg",
-  "himalayan-winter-sprint": "/events/himalayan-winter-sprint.jpg",
-  "independence-endurance-run": "/events/independence-endurance-run.jpg",
-  "spring-valley-dash": "/events/spring-valley-dash.jpg",
-  "holi-color-virtual-run": "/events/holi-color-virtual-run.jpg",
-  "new-year-night-miles": "/events/new-year-night-miles.jpg",
+  "october-runner": "/events/october-runner.webp",
+  "independence-day-virtual-run-2026": "/events/independence-day-run.webp",
+  "monsoon-mountain-miles": "/events/monsoon-mountain-miles.webp",
+  "himalayan-winter-sprint": "/events/himalayan-winter-sprint.webp",
+  "independence-endurance-run": "/events/independence-endurance-run.webp",
+  "spring-valley-dash": "/events/spring-valley-dash.webp",
+  "holi-color-virtual-run": "/events/holi-color-virtual-run.webp",
+  "new-year-night-miles": "/events/new-year-night-miles.webp",
 };
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
   const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
-  const hasBannerImage = Boolean(imgSrc);
+  const [imgFailed, setImgFailed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const hasBannerImage = Boolean(imgSrc) && !imgFailed;
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
 
   useEffect(() => {
     setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+    setImgFailed(false);
+    setImgLoaded(false);
   }, [event.bannerImageUrl, event.slug]);
 
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
@@ -103,19 +107,45 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
-        {imgSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`${event.name} banner`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            src={imgSrc}
-            onError={() => {
-              if (fallbackImg && imgSrc !== fallbackImg) {
-                setImgSrc(fallbackImg);
-              }
-            }}
-          />
-        ) : null}
+        {imgSrc && !imgFailed ? (
+          <>
+            {!imgLoaded && (
+              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              src={imgSrc}
+              loading={index < 3 ? "eager" : "lazy"}
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => {
+                if (imgSrc && imgSrc.endsWith(".webp")) {
+                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
+                } else if (fallbackImg && imgSrc !== fallbackImg) {
+                  setImgSrc(fallbackImg);
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
+            <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
+              <Flame className="h-7 w-7 text-[#e64833]" />
+            </div>
+            <span className="font-display font-black text-xl uppercase tracking-wider text-[#fbe9d0]">
+              {event.name}
+            </span>
+            <span className="mt-1 font-mono text-xs text-[#90aead]">
+              {event.distance}
+            </span>
+          </div>
+        )}
         
         {hasBannerImage && (
           <div
@@ -237,28 +267,58 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
   const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
+  const [imgFailed, setImgFailed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
     setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+    setImgFailed(false);
+    setImgLoaded(false);
   }, [event.bannerImageUrl, event.slug]);
 
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-2xl">
       {/* Banner / Poster — 65% Height */}
       <div className="h-64 sm:h-72 relative overflow-hidden bg-[#14242a]">
-        {imgSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`${event.name} banner`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            src={imgSrc}
-            onError={() => {
-              if (fallbackImg && imgSrc !== fallbackImg) {
-                setImgSrc(fallbackImg);
-              }
-            }}
-          />
-        ) : null}
+        {imgSrc && !imgFailed ? (
+          <>
+            {!imgLoaded && (
+              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              src={imgSrc}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => {
+                if (imgSrc && imgSrc.endsWith(".webp")) {
+                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
+                } else if (fallbackImg && imgSrc !== fallbackImg) {
+                  setImgSrc(fallbackImg);
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
+            <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
+              <Medal className="h-7 w-7 text-[#e64833]" />
+            </div>
+            <span className="font-display font-black text-xl uppercase tracking-wider text-[#fbe9d0]">
+              {event.name}
+            </span>
+            <span className="mt-1 font-mono text-xs text-[#90aead]">
+              {event.distance}
+            </span>
+          </div>
+        )}
         
         <div
           aria-hidden

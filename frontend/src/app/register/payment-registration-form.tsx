@@ -79,13 +79,6 @@ const fallbackEvents: RegisterEventOption[] = [
     activityTypes: ["running", "cycling", "walking"],
   },
   {
-    label: "Independence Day Virtual Run 2026 🇮🇳",
-    value: "independence-day-virtual-run-2026",
-    amount: "₹349",
-    distances: ["1.5 km", "3 km", "5 km", "10 km", "15 km", "20 km", "25 km", "30 km"],
-    activityTypes: ["running", "cycling", "walking"],
-  },
-  {
     label: "Monsoon Mountain Miles",
     value: "monsoon-mountain-miles",
     amount: "₹499",

@@ -28,8 +28,17 @@ function getEventScarcity(slug: string) {
 }
 
 function EventCard({ event, index }: { event: PublicEvent; index: number }) {
-  const hasBannerImage = Boolean(event.bannerImageUrl);
+  const [imgSrc, setImgSrc] = useState(event.bannerImageUrl);
+  const [imgFailed, setImgFailed] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const hasBannerImage = Boolean(imgSrc) && !imgFailed;
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
+
+  useEffect(() => {
+    setImgSrc(event.bannerImageUrl);
+    setImgFailed(false);
+    setImgLoaded(false);
+  }, [event.bannerImageUrl]);
 
   // Live countdown state
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
@@ -58,14 +67,43 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
-        {event.bannerImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`${event.name} banner`}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            src={event.bannerImageUrl}
-          />
-        ) : null}
+        {imgSrc && !imgFailed ? (
+          <>
+            {!imgLoaded && (
+              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt=""
+              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                imgLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              src={imgSrc}
+              loading={index < 3 ? "eager" : "lazy"}
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => {
+                if (imgSrc && imgSrc.endsWith(".webp")) {
+                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
+            <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
+              <Flame className="h-7 w-7 text-[#e64833]" />
+            </div>
+            <span className="font-display font-black text-xl uppercase tracking-wider text-[#fbe9d0]">
+              {event.name}
+            </span>
+            <span className="mt-1 font-mono text-xs text-[#90aead]">
+              {event.distance}
+            </span>
+          </div>
+        )}
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-t from-[#172c34] via-[#172c34]/40 to-[#14242a]/30"
@@ -176,23 +214,19 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
 export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
   const combined = useMemo(() => {
-    const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [];
-    for (const item of staticUpcoming) {
-      if (list.length >= 3) break;
-      if (!list.some((existing) => existing.slug === item.slug)) {
-        list.push(item);
-      }
-    }
-    return list.slice(0, 3).map((ev) => {
-      const match = staticUpcoming.find((s) => s.slug === ev.slug);
-      return {
-        ...ev,
-        bannerImageUrl: ev.bannerImageUrl || match?.bannerImageUrl,
-        highlight: ev.highlight || match?.highlight || "Verified virtual marathon challenge.",
-        banner: ev.banner || match?.banner || "Open event",
-        reward: ev.reward || match?.reward || "Finisher medal + E-Certificate",
-      };
-    });
+    const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [...staticUpcoming];
+    return list
+      .filter((ev) => ev.status === "upcoming")
+      .map((ev) => {
+        const match = staticUpcoming.find((s) => s.slug === ev.slug);
+        return {
+          ...ev,
+          bannerImageUrl: ev.bannerImageUrl || match?.bannerImageUrl,
+          highlight: ev.highlight || match?.highlight || "Verified virtual marathon challenge.",
+          banner: ev.banner || match?.banner || "Open event",
+          reward: ev.reward || match?.reward || "Finisher medal + E-Certificate",
+        };
+      });
   }, [initial]);
 
   return (
