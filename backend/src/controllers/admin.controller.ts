@@ -108,7 +108,14 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
 
   const paymentWhere: Prisma.PaymentWhereInput = {
     status: "PAID",
-    ...(sinceDate ? { createdAt: { gte: sinceDate } } : {}),
+    ...(sinceDate
+      ? {
+          OR: [
+            { paidAt: { gte: sinceDate } },
+            { createdAt: { gte: sinceDate } },
+          ],
+        }
+      : {}),
     ...(eventFilter ? { registration: { eventId: eventFilter } } : {}),
   };
 
@@ -149,7 +156,7 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     }),
     prisma.payment.findMany({
       where: paymentWhere,
-      select: { id: true, amountInPaise: true, createdAt: true, registrationId: true },
+      select: { id: true, amountInPaise: true, createdAt: true, paidAt: true, registrationId: true },
     }),
     prisma.registration.findMany({
       where: regWhere,
@@ -225,7 +232,8 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
 
   // Backfill daily trend from filtered payments and registrations
   for (const pay of filteredPayments) {
-    const key = pay.createdAt.toISOString().split("T")[0];
+    const payDate = pay.paidAt ?? pay.createdAt;
+    const key = payDate.toISOString().split("T")[0];
     if (dailyTrendMap.has(key)) {
       const existing = dailyTrendMap.get(key)!;
       existing.revenuePaise += pay.amountInPaise;

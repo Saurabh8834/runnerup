@@ -1,0 +1,10 @@
+{
+  "name": "runnerup",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix backend run postinstall",
+    "build": "npm --prefix backend run build",
+    "start": "npm --prefix backend run start"
+  }
+}

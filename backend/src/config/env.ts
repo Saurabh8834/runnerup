@@ -100,6 +100,33 @@ function normalizeResendFrom(raw: string | undefined): string {
   return fallback;
 }
 
+function parseCloudinaryConfig() {
+  const directName = readEnv("CLOUDINARY_CLOUD_NAME");
+  const directKey = readEnv("CLOUDINARY_API_KEY");
+  const directSecret = readEnv("CLOUDINARY_API_SECRET");
+  if (directName && directKey && directSecret) {
+    return { cloudName: directName, apiKey: directKey, apiSecret: directSecret };
+  }
+  const cloudinaryUrl = readEnv("CLOUDINARY_URL");
+  if (cloudinaryUrl && cloudinaryUrl.startsWith("cloudinary://")) {
+    try {
+      const parsed = new URL(cloudinaryUrl);
+      return {
+        cloudName: parsed.hostname,
+        apiKey: parsed.username,
+        apiSecret: parsed.password,
+      };
+    } catch {}
+  }
+  return {
+    cloudName: directName,
+    apiKey: directKey,
+    apiSecret: directSecret,
+  };
+}
+
+const cloudinaryConfig = parseCloudinaryConfig();
+
 export const env = {
   port: Number(process.env.PORT ?? 4000),
   frontendUrl: configuredFrontendOrigins[0] ?? "https://runnerup.in",
@@ -110,9 +137,9 @@ export const env = {
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ?? "",
   resendApiKey: readEnv("RESEND_API_KEY"),
   resendFromEmail: normalizeResendFrom(process.env.RESEND_FROM_EMAIL),
-  cloudinaryCloudName: readEnv("CLOUDINARY_CLOUD_NAME"),
-  cloudinaryApiKey: readEnv("CLOUDINARY_API_KEY"),
-  cloudinaryApiSecret: readEnv("CLOUDINARY_API_SECRET"),
+  cloudinaryCloudName: cloudinaryConfig.cloudName,
+  cloudinaryApiKey: cloudinaryConfig.apiKey,
+  cloudinaryApiSecret: cloudinaryConfig.apiSecret,
   /** When true, proof approve auto-generates + emails certificate. */
   certificateAutoSend:
     readEnv("CERTIFICATE_AUTO_SEND", "true").toLowerCase() !== "false",

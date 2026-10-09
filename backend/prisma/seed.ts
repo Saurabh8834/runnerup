@@ -5,10 +5,14 @@ const prisma = new PrismaClient();
 
 async function main() {
   for (const event of defaultEvents) {
+    const data = {
+      ...event,
+      benefits: event.benefits ?? [],
+    };
     await prisma.event.upsert({
       where: { slug: event.slug },
-      create: event,
-      update: event,
+      create: data,
+      update: data,
     });
   }
 }
