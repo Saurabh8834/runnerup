@@ -433,7 +433,7 @@ export function AppHeader() {
                   >
                     <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                     <Zap className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] fill-[#fbe9d0]" />
-                    <span className="relative z-10 text-[#fbe9d0]">Register & Pay</span>
+                    <span className="relative z-10 text-[#fbe9d0]">Register Now</span>
                     <ArrowRight className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </>
@@ -445,7 +445,7 @@ export function AppHeader() {
                     href="/register"
                   >
                     <Zap className="h-3 w-3 text-[#fbe9d0] fill-[#fbe9d0]" />
-                    <span>Register & Pay</span>
+                    <span>Register Now</span>
                     <ArrowRight className="h-3 w-3 text-[#fbe9d0]" />
                   </Link>
                   <DashboardProfileDropdown />
@@ -569,8 +569,8 @@ export function AppHeader() {
                       <Zap className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
-                      <span className="block text-xs font-black uppercase tracking-wider">Register & Pay</span>
-                      <span className="block text-[0.65rem] font-medium text-[#fbe9d0] normal-case">Instant UPI Checkout · 1.5K, 5K, 10K & 21K</span>
+                      <span className="block text-xs font-black uppercase tracking-wider">Register Now</span>
+                      <span className="block text-[0.65rem] font-medium text-[#fbe9d0] normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
                     </div>
                   </div>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

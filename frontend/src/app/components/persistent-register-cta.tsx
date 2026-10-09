@@ -36,7 +36,7 @@ export function PersistentRegisterCta() {
           ───────────────────────────────────────────────────────────── */}
       {!isEventDetail && (
         <aside
-          aria-label="Quick registration and payment"
+          aria-label="Quick registration"
           className="fixed inset-x-0 bottom-0 z-40 bg-[#122329]/95 backdrop-blur-xl border-t border-[#90aead]/25 shadow-[0_-12px_36px_rgba(0,0,0,0.7)] px-3.5 py-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] md:hidden"
         >
           {/* Subtle neon glowing accent line */}
@@ -59,7 +59,7 @@ export function PersistentRegisterCta() {
                   </span>
                 </div>
                 <p className="text-[9.5px] font-medium text-[#90aead] truncate">
-                  Medals · DRI-FIT Bib · UPI Pay
+                  Medals · DRI-FIT Bib · Official Kits
                 </p>
               </div>
             </div>
@@ -70,7 +70,7 @@ export function PersistentRegisterCta() {
               className="group relative inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 sm:px-4 py-2 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-[0_0_16px_rgba(230,72,51,0.5)] active:scale-95 transition-all shrink-0 border border-white/20 whitespace-nowrap"
             >
               <Zap className="h-3.5 w-3.5 text-[#fbe9d0] fill-[#fbe9d0]" />
-              <span>Register & Pay</span>
+              <span>Register Now</span>
               <ArrowRight className="h-3.5 w-3.5 text-[#fbe9d0] transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
@@ -83,7 +83,7 @@ export function PersistentRegisterCta() {
           with a live pulse beacon and instant checkout link.
           ───────────────────────────────────────────────────────────── */}
       <aside
-        aria-label="Quick registration and payment"
+        aria-label="Quick registration"
         className="fixed bottom-6 right-6 z-40 hidden md:flex items-center"
       >
         <Link
@@ -104,7 +104,7 @@ export function PersistentRegisterCta() {
                 Registrations Open
               </span>
               <span className="text-[9px] font-semibold text-[#90aead]">
-                UPI / QR · Instant Entry
+                Instant Entry · Limited Slots
               </span>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function PersistentRegisterCta() {
           {/* Vermilion Button Pill */}
           <span className="relative z-10 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_rgba(230,72,51,0.5)] group-hover:shadow-[0_0_24px_rgba(230,72,51,0.85)] transition-all">
             <Sparkles className="h-3 w-3 text-[#fbe9d0]" />
-            <span>Register & Pay</span>
+            <span>Register Now</span>
             <ArrowRight className="h-3 w-3 text-[#fbe9d0] transition-transform duration-200 group-hover:translate-x-1" />
           </span>
         </Link>
