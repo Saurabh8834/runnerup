@@ -56,29 +56,38 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 }
 
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
-  "october-runner": "/events/october-runner.webp",
-  "independence-day-virtual-run-2026": "/events/independence-day-run.webp",
-  "monsoon-mountain-miles": "/events/monsoon-mountain-miles.webp",
-  "himalayan-winter-sprint": "/events/himalayan-winter-sprint.webp",
-  "independence-endurance-run": "/events/independence-endurance-run.webp",
-  "spring-valley-dash": "/events/spring-valley-dash.webp",
-  "holi-color-virtual-run": "/events/holi-color-virtual-run.webp",
-  "new-year-night-miles": "/events/new-year-night-miles.webp",
+  "october-runner":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
+  "independence-day-virtual-run-2026":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
+  "monsoon-mountain-miles":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
+  "independence-endurance-run":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
+  "himalayan-winter-sprint":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
+  "spring-valley-dash":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
+  "holi-color-virtual-run":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
+  "new-year-night-miles":
+    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
 };
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
-  const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
-  const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
+  const defaultPoster =
+    event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+  const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
 
   useEffect(() => {
-    setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+    const nextPoster =
+      event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+    setImgSrc(nextPoster);
     setImgFailed(false);
-    setImgLoaded(false);
   }, [event.bannerImageUrl, event.slug]);
 
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
@@ -108,31 +117,23 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         }`}
       >
         {imgSrc && !imgFailed ? (
-          <>
-            {!imgLoaded && (
-              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              src={imgSrc}
-              loading={index < 3 ? "eager" : "lazy"}
-              decoding="async"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => {
-                if (imgSrc && imgSrc.endsWith(".webp")) {
-                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
-                } else if (fallbackImg && imgSrc !== fallbackImg) {
-                  setImgSrc(fallbackImg);
-                } else {
-                  setImgFailed(true);
-                }
-              }}
-            />
-          </>
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            src={imgSrc}
+            loading={index < 3 ? "eager" : "lazy"}
+            decoding="async"
+            onError={() => {
+              if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
+                setImgSrc(`/events/${event.slug}.webp`);
+              } else if (imgSrc && imgSrc.endsWith(".webp")) {
+                setImgSrc(`/events/${event.slug}.jpg`);
+              } else {
+                setImgFailed(true);
+              }
+            }}
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
             <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
@@ -265,15 +266,16 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
 /* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
-  const fallbackImg = FALLBACK_EVENT_IMAGES[event.slug];
-  const [imgSrc, setImgSrc] = useState<string | undefined>(event.bannerImageUrl || fallbackImg);
+  const defaultPoster =
+    event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+  const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
-    setImgSrc(event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug]);
+    const nextPoster =
+      event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+    setImgSrc(nextPoster);
     setImgFailed(false);
-    setImgLoaded(false);
   }, [event.bannerImageUrl, event.slug]);
 
   return (
@@ -281,31 +283,23 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
       {/* Banner / Poster — 65% Height */}
       <div className="h-64 sm:h-72 relative overflow-hidden bg-[#14242a]">
         {imgSrc && !imgFailed ? (
-          <>
-            {!imgLoaded && (
-              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              src={imgSrc}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => {
-                if (imgSrc && imgSrc.endsWith(".webp")) {
-                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
-                } else if (fallbackImg && imgSrc !== fallbackImg) {
-                  setImgSrc(fallbackImg);
-                } else {
-                  setImgFailed(true);
-                }
-              }}
-            />
-          </>
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            src={imgSrc}
+            loading="lazy"
+            decoding="async"
+            onError={() => {
+              if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
+                setImgSrc(`/events/${event.slug}.webp`);
+              } else if (imgSrc && imgSrc.endsWith(".webp")) {
+                setImgSrc(`/events/${event.slug}.jpg`);
+              } else {
+                setImgFailed(true);
+              }
+            }}
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
             <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">

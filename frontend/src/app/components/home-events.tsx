@@ -28,17 +28,15 @@ function getEventScarcity(slug: string) {
 }
 
 function EventCard({ event, index }: { event: PublicEvent; index: number }) {
-  const [imgSrc, setImgSrc] = useState(event.bannerImageUrl);
+  const [imgSrc, setImgSrc] = useState(event.bannerImageUrl || `/events/${event.slug}.webp`);
   const [imgFailed, setImgFailed] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
 
   useEffect(() => {
-    setImgSrc(event.bannerImageUrl);
+    setImgSrc(event.bannerImageUrl || `/events/${event.slug}.webp`);
     setImgFailed(false);
-    setImgLoaded(false);
-  }, [event.bannerImageUrl]);
+  }, [event.bannerImageUrl, event.slug]);
 
   // Live countdown state
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
@@ -68,29 +66,23 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         }`}
       >
         {imgSrc && !imgFailed ? (
-          <>
-            {!imgLoaded && (
-              <div className="absolute inset-0 bg-[#172c34] animate-pulse" />
-            )}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              alt=""
-              className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imgLoaded ? "opacity-100" : "opacity-0"
-              }`}
-              src={imgSrc}
-              loading={index < 3 ? "eager" : "lazy"}
-              decoding="async"
-              onLoad={() => setImgLoaded(true)}
-              onError={() => {
-                if (imgSrc && imgSrc.endsWith(".webp")) {
-                  setImgSrc(imgSrc.replace(".webp", ".jpg"));
-                } else {
-                  setImgFailed(true);
-                }
-              }}
-            />
-          </>
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            src={imgSrc}
+            loading={index < 3 ? "eager" : "lazy"}
+            decoding="async"
+            onError={() => {
+              if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
+                setImgSrc(`/events/${event.slug}.webp`);
+              } else if (imgSrc && imgSrc.endsWith(".webp")) {
+                setImgSrc(`/events/${event.slug}.jpg`);
+              } else {
+                setImgFailed(true);
+              }
+            }}
+          />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
             <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">

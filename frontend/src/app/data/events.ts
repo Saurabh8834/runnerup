@@ -49,7 +49,8 @@ export const allPublicEvents: PublicEvent[] = [
       "Join the October Runner 1 Rupee virtual challenge! Celebrate the running season with verified GPS tracking, an instant verifiable E-Certificate, and an official digital bib. Complete your chosen distance anywhere, anytime.",
     highlight: "Special ₹1 October Challenge · Instant verified certificate for all finishers.",
     banner: "Special ₹1 Challenge",
-    bannerImageUrl: "/events/october-runner.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
     reward: "Instant QR E-Certificate + Digital Bib",
     status: "upcoming",
     compareAtPrice: "Rs. 99",
@@ -73,7 +74,8 @@ export const allPublicEvents: PublicEvent[] = [
       "Celebrate India's Independence Day by running from anywhere in the country. Complete your chosen distance at your own pace during the event window. Every finisher receives an official digital certificate, premium finisher medal, exclusive event T-shirt and exciting goodies.",
     highlight: "Flagship virtual run with official finisher medals and e-certificates.",
     banner: "Flagship run",
-    bannerImageUrl: "/events/independence-day-run.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
     reward: "Premium medal + T-shirt + certificate",
     status: "past",
     compareAtPrice: "Rs. 699",
@@ -88,7 +90,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A clean virtual mountain challenge with verified finishes, certificates, leaderboard rank, and medal delivery.",
     highlight: "Ideal for first virtual races and running clubs.",
     banner: "Rain-ready challenge",
-    bannerImageUrl: "/events/monsoon-mountain-miles.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
     reward: "Medal + certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 850",
@@ -103,7 +106,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A pan-India endurance event with longer distance options, fair ranking, and premium finisher rewards.",
     highlight: "Built for runners chasing a longer verified effort.",
     banner: "Flagship endurance week",
-    bannerImageUrl: "/events/independence-endurance-run.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
     reward: "Premium medal + T-shirt",
     status: "upcoming",
     compareAtPrice: "Rs. 1100",
@@ -118,7 +122,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A short winter sprint for beginners and families who want a simple, polished finish-line experience.",
     highlight: "Quick, beginner-friendly participation.",
     banner: "Fast festive sprint",
-    bannerImageUrl: "/events/himalayan-winter-sprint.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
     reward: "Digital kit + medal",
     status: "upcoming",
     compareAtPrice: "Rs. 700",
@@ -133,7 +138,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A spring season virtual dash with city-wide participation, GPS proof checks, and finisher medals shipped nationwide.",
     highlight: "Completed · Strong beginner turnout across 40+ cities.",
     banner: "Season opener",
-    bannerImageUrl: "/events/spring-valley-dash.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
     reward: "Medal + certificate",
     status: "past",
     finishers: 1842,
@@ -152,7 +158,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A festive family-friendly virtual run celebrating Holi with digital kits, fun finish photos, and verified 2 km and 5 km results.",
     highlight: "Completed · Festival favorite for clubs and first-timers.",
     banner: "Festival run",
-    bannerImageUrl: "/events/holi-color-virtual-run.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
     reward: "Digital kit + medal",
     status: "past",
     finishers: 2560,
@@ -171,7 +178,8 @@ export const allPublicEvents: PublicEvent[] = [
       "A year-end virtual challenge for runners chasing a strong close to the season with verified times and premium finisher medals.",
     highlight: "Completed · Highest 21 km completion rate of the season.",
     banner: "Year-end challenge",
-    bannerImageUrl: "/events/new-year-night-miles.webp",
+    bannerImageUrl:
+      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
     reward: "Premium medal + certificate",
     status: "past",
     finishers: 1295,
