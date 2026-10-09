@@ -204,23 +204,23 @@ export function getEventBySlug(slug: string) {
 
 export const galleryMoments = [
   {
-    title: "Sunrise Finish",
+    title: "Sunrise finish",
     meta: "5 km finisher",
-    image: "/events/monsoon-mountain-miles.webp",
+    image: "/images/sunrise-finish.svg",
   },
   {
-    title: "Club Leaderboard Push",
+    title: "Club leaderboard push",
     meta: "10 km team effort",
-    image: "/runner-hd.webp",
+    image: "/images/club-push.svg",
   },
   {
-    title: "First Medal Day",
+    title: "First medal day",
     meta: "New runner story",
-    image: "/runner-img.webp",
+    image: "/images/first-medal.svg",
   },
   {
-    title: "Weekend Long Run",
+    title: "Weekend long run",
     meta: "21 km verified",
-    image: "/events/himalayan-winter-sprint.webp",
+    image: "/images/weekend-long-run.svg",
   },
 ];

@@ -7,20 +7,23 @@ import { galleryMoments } from "../data/events";
 import type { HomeMoment } from "../../lib/events-api";
 import { HomeSectionHeader } from "./home-section-header";
 
-const photoMap: Record<string, string> = {
-  "sunrise finish": "/events/monsoon-mountain-miles.webp",
-  "club leaderboard push": "/runner-hd.webp",
-  "first medal day": "/runner-img.webp",
-  "weekend long run": "/events/himalayan-winter-sprint.webp",
+const artworkMap: Record<string, string> = {
+  "sunrise finish": "/images/sunrise-finish.svg",
+  "club leaderboard push": "/images/club-push.svg",
+  "first medal day": "/images/first-medal.svg",
+  "weekend long run": "/images/weekend-long-run.svg",
 };
 
-function resolveAlternateImage(title: string, src?: string): string {
+function resolveArtworkImage(title: string, src?: string): string {
   const key = (title || "").toLowerCase().trim();
-  if (photoMap[key]) return photoMap[key];
-  if (src && !src.endsWith(".svg") && (src.endsWith(".webp") || src.endsWith(".jpg") || src.endsWith(".png") || src.startsWith("http"))) {
-    return src;
+  if (artworkMap[key]) return artworkMap[key];
+  if (src) {
+    if (src.includes("sunrise-finish")) return "/images/sunrise-finish.svg";
+    if (src.includes("club-push")) return "/images/club-push.svg";
+    if (src.includes("first-medal")) return "/images/first-medal.svg";
+    if (src.includes("weekend-long-run")) return "/images/weekend-long-run.svg";
   }
-  return photoMap[key] || "/events/monsoon-mountain-miles.webp";
+  return artworkMap[key] || src || "/images/sunrise-finish.svg";
 }
 
 const fallbackMoments: HomeMoment[] = galleryMoments.map((m, i) => ({
@@ -46,7 +49,7 @@ export function HomeGalleryPreview({
       seen.add(key);
       moments.push({
         ...item,
-        image: resolveAlternateImage(item.title, item.image),
+        image: resolveArtworkImage(item.title, item.image),
       });
       if (moments.length === 4) break;
     }
@@ -60,7 +63,7 @@ export function HomeGalleryPreview({
         seen.add(key);
         moments.push({
           ...fb,
-          image: resolveAlternateImage(fb.title, fb.image),
+          image: resolveArtworkImage(fb.title, fb.image),
         });
         if (moments.length === 4) break;
       }
