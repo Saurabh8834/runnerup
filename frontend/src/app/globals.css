@@ -127,10 +127,12 @@ html[data-theme="dark"] {
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -142,6 +144,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Smooth momentum scrolling across all browsers & devices */
+.overflow-x-auto,
+.overflow-y-auto,
+.no-scrollbar {
+  -webkit-overflow-scrolling: touch;
 }
 
 ::selection {
@@ -1148,44 +1158,45 @@ html[data-theme="dark"] .badge-danger {
   aspect-ratio: 4 / 3;
 }
 
-/* ── Mobile scroll glitch fixes ─────────────────────────
-   Large `filter: blur()` and `backdrop-filter` layers force
-   constant GPU repaints on phone browsers during scroll,
-   causing torn/flickering rendering. Clean them up on small
-   screens only — desktop keeps the premium glass look. */
+/* ── Mobile performance & scroll smoothness ─────────────────
+   Lightweight GPU acceleration and clean containment on small
+   screens so mobile phones scroll with buttery 60/120fps. */
 @media (max-width: 767px) {
   .hero-mesh-bg,
   .sun-pulse,
-  .glass-pill,
-  .glass-card,
   .shine-sweep::after,
   .card-premium-glow::before {
     filter: none;
     -webkit-filter: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 
-  [data-floating-contact] {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Tailwind blur utilities (blur-3xl, blur-2xl, etc.) */
+  /* Keep decorative ambient glow orbs smooth and subtle on mobile without sharp edges */
   .blur-2xl,
-  .blur-3xl,
+  .blur-3xl {
+    filter: blur(28px) !important;
+    -webkit-filter: blur(28px) !important;
+    opacity: 0.16 !important;
+    transform: translateZ(0);
+  }
+
+  /* Lightened backdrop filters on mobile for instant 60fps scrolling */
   .backdrop-blur-md,
   .backdrop-blur-lg,
   .backdrop-blur-xl,
-  .backdrop-blur-sm {
-    filter: none;
-    -webkit-filter: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl,
+  .glass-card-dark,
+  .glass-card-accent {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
   }
 
-  /* Sticky CTA bar — translucent glass becomes solid without backdrop
-     so content scrolling beneath stays clean on low-end phones. */
+  [data-floating-contact] {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* Sticky CTA bar on phones — solid backdrop prevents background bleed */
   .fixed[class*="inset-x-0"][class*="bottom-0"] {
     background: var(--background) !important;
   }
@@ -1992,6 +2003,10 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   display: flex;
   width: max-content;
   animation: marquee 40s linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 .animate-marquee-slow:hover {

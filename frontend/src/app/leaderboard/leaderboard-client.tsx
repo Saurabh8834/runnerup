@@ -193,15 +193,11 @@ function Podium3D({
             className="flex flex-1 min-w-0 flex-col items-center max-w-[115px] sm:max-w-[190px] -mt-5 sm:-mt-6"
           >
             {/* Floating Crown / Trophy on Top */}
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-              className="mb-1 flex items-center justify-center"
-            >
+            <div className="mb-1 flex items-center justify-center animate-pulse motion-reduce:animate-none">
               <span className="text-xl sm:text-3xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
                 🏆
               </span>
-            </motion.div>
+            </div>
 
             {/* Avatar */}
             <div className="relative mb-1.5 sm:mb-2">
@@ -613,37 +609,37 @@ export function LeaderboardClient() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 
           {/* Dual Tab Switcher & GPS Badge */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-[#90aead]/15 pb-5">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#90aead]/15 pb-5">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 type="button"
                 onClick={() => setActiveTab("verified")}
-                className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex shrink-0 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "verified"
                     ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
                     : "border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0]/80 hover:border-[#90aead]/40"
                 }`}
               >
-                <Trophy className="h-4 w-4 shrink-0" />
+                <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>Verified Leaderboard</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("participants")}
-                className={`flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                className={`flex shrink-0 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeTab === "participants"
                     ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
                     : "border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0]/80 hover:border-[#90aead]/40"
                 }`}
               >
-                <Users className="h-4 w-4 shrink-0" />
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 <span>Event Roster</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300 bg-white/[0.06] px-3.5 py-1.5 rounded-full border border-white/10 shadow-xs w-fit">
-              <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-slate-300 bg-white/[0.06] px-3 sm:px-3.5 py-1.5 rounded-full border border-white/10 shadow-xs w-fit shrink-0">
+              <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 shrink-0" />
               <span>GPS Timestamp Verified</span>
             </div>
           </div>
@@ -750,17 +746,14 @@ export function LeaderboardClient() {
 
                     {/* 📱 MOBILE CARD VIEW (Under 640px) */}
                     <div className="block sm:hidden divide-y divide-white/5 p-3 space-y-2.5">
-                      {filteredEntries.map((row, idx) => {
+                      {filteredEntries.map((row) => {
                         const isYou =
                           Boolean(currentClerkId && row.clerkId === currentClerkId) ||
                           Boolean(user?.fullName && row.runnerName.toLowerCase() === user.fullName.toLowerCase());
 
                         return (
-                          <motion.div
+                          <div
                             key={`mob-${row.rank}-${row.bibNumber || row.runnerName}`}
-                            initial={false}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.25) }}
                             className={`rounded-2xl border p-3.5 transition-all ${
                               isYou
                                 ? "bg-[#e64833]/15 border-[#e64833]/50 shadow-md shadow-[#e64833]/10"
@@ -810,7 +803,7 @@ export function LeaderboardClient() {
                                 </p>
                               </div>
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })}
                     </div>
@@ -831,17 +824,14 @@ export function LeaderboardClient() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                          {filteredEntries.map((row, idx) => {
+                          {filteredEntries.map((row) => {
                             const isYou =
                               Boolean(currentClerkId && row.clerkId === currentClerkId) ||
                               Boolean(user?.fullName && row.runnerName.toLowerCase() === user.fullName.toLowerCase());
 
                             return (
-                              <motion.tr
+                              <tr
                                 key={`${row.rank}-${row.bibNumber || row.runnerName}`}
-                                initial={false}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.2, delay: Math.min(idx * 0.02, 0.3) }}
                                 className={`transition-colors hover:bg-white/[0.04] ${
                                   isYou ? "bg-[#e64833]/15 font-semibold" : ""
                                 }`}
@@ -919,7 +909,7 @@ export function LeaderboardClient() {
                                     <CheckCircle2 className="h-3 w-3 text-emerald-400" /> Verified
                                   </span>
                                 </td>
-                              </motion.tr>
+                              </tr>
                             );
                           })}
                         </tbody>

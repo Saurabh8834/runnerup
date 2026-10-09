@@ -83,14 +83,16 @@ function NewsletterForm() {
     </div>
   );
   return (
-    <form onSubmit={onSubmit} noValidate className="flex gap-2">
-      <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-        placeholder="your@email.com" aria-label="Newsletter email"
-        className="h-10 min-w-0 flex-1 rounded-xl border border-[#90aead]/20 bg-[#172c34] px-3.5 text-xs text-[#fbe9d0] placeholder:text-[#90aead]/50 focus:border-[#e64833] focus:outline-none focus:ring-2 focus:ring-[#e64833]/20" />
-      <button type="submit" disabled={busy} aria-label="Subscribe"
-        className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0] transition-all shadow-md active:scale-95 disabled:opacity-60 hover:brightness-110">
-        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-      </button>
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-1.5">
+      <div className="flex gap-2">
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="your@email.com" aria-label="Newsletter email"
+          className="h-10 min-w-0 flex-1 rounded-xl border border-[#90aead]/20 bg-[#172c34] px-3.5 text-xs text-[#fbe9d0] placeholder:text-[#90aead]/50 focus:border-[#e64833] focus:outline-none focus:ring-2 focus:ring-[#e64833]/20" />
+        <button type="submit" disabled={busy} aria-label="Subscribe"
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0] transition-all shadow-md active:scale-95 disabled:opacity-60 hover:brightness-110">
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        </button>
+      </div>
       {error ? <p className="text-xs text-rose-400 font-semibold">{error}</p> : null}
     </form>
   );
@@ -257,11 +259,11 @@ export function AppFooter() {
       <div className="bg-[#112026] border-t border-[#90aead]/15">
         <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
 
-          {/* Grid — 2 cols mobile, 4 cols tablet, 5 cols desktop */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-5">
+          {/* Grid — 2 cols mobile (2x2 link grid), 6 cols desktop */}
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
 
             {/* Brand */}
-            <div className="col-span-2 sm:col-span-3 md:col-span-2">
+            <div className="col-span-2 md:col-span-2">
               <Link href="/" aria-label="RUNNERUP home" className="group inline-flex items-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/runnerup-logo.png" alt="RUNNERUP" width={200} height={44}
@@ -291,18 +293,25 @@ export function AppFooter() {
               ["National Leaderboard", "/leaderboard"],
             ]} />
 
-            <FooterCol title="Help & Support" links={[
-              ["Official Gallery", "/gallery"],
-              ["Leaderboard Rankings", "/leaderboard"],
-              ["GPS Verification FAQ", "/#faq"],
-              ["Contact Support", "mailto:runnerupofficial@gmail.com"],
-            ]} />
-
             <FooterCol title="Athlete Portal" links={[
               ["Athlete Sign In", "/sign-in"],
               ["Register Account", "/sign-up"],
               ["My Dashboard", "/dashboard"],
               ["Submit Run Proof", "/dashboard"],
+            ]} />
+
+            <FooterCol title="Rewards & Info" links={[
+              ["Prizes & Medals", "/prize"],
+              ["Refer a Runner", "/refer"],
+              ["About RunnerUp", "/about"],
+              ["GPS Verification FAQ", "/#faq"],
+            ]} />
+
+            <FooterCol title="Help & Support" links={[
+              ["Support Desk", "mailto:runnerupofficial@gmail.com"],
+              ["WhatsApp Helpline", "https://wa.me/917518418960"],
+              ["Official Gallery", "/gallery"],
+              ["Unsubscribe Alerts", "/unsubscribe"],
             ]} />
 
           </div>

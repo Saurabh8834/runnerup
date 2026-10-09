@@ -40,16 +40,14 @@ const stats = [
 
 export function HomeStatsTicker() {
   return (
-    <section className="relative z-20 pt-10 sm:pt-16 mb-8 sm:mb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-2xl p-4 sm:p-7 shadow-[0_20px_50px_rgba(20,36,42,0.85)] grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-[#90aead]/15">
-        {stats.map((stat, i) => {
+    <section className="relative z-20 pt-8 sm:pt-16 mb-8 sm:mb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-xl p-3 sm:p-7 shadow-[0_20px_50px_rgba(20,36,42,0.85)] grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 sm:divide-x divide-[#90aead]/15">
+        {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <div
               key={stat.label}
-              className={`flex flex-col items-center text-center p-2.5 sm:p-4 ${
-                i > 1 ? "pt-3.5 sm:pt-4" : ""
-              }`}
+              className="flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-white/[0.02] sm:bg-transparent border border-white/5 sm:border-0"
             >
               <div
                 className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl border border-[#90aead]/20 bg-[#244855]/50 mb-2 sm:mb-3 shadow-inner"

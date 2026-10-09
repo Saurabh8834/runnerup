@@ -38,31 +38,29 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug]);
 
-  // Live countdown state
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
+  // Live countdown state updated once per minute to prevent unnecessary 1s CPU thrashing
+  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
     hours: 14 + ((index * 6) % 24),
     minutes: 32,
-    seconds: 45,
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 12, minutes: 30, seconds: 0 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59 };
+        return { hours: 12, minutes: 30 };
       });
-    }, 1000);
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] text-[#fbe9d0]">
+    <article className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] text-[#fbe9d0]">
       {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
+          hasBannerImage ? "h-56 sm:h-72 bg-[#14242a]" : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
         {imgSrc && !imgFailed ? (
@@ -102,15 +100,15 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         />
 
         {/* Top Urgency Badges */}
-        <div className="relative z-10 p-4 flex items-start justify-between gap-2">
+        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
           {/* Scarcity Badge */}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e64833] backdrop-blur-md px-3 py-1 text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg">
-            <Flame className="h-3.5 w-3.5 animate-bounce fill-white" />
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
+            <Flame className="h-3 w-3 fill-white" />
             <span>{scarcity.percent}% Booked</span>
           </span>
 
           {/* Active Race Badge */}
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />

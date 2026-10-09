@@ -164,7 +164,7 @@ export default function CertificateVerifyPage() {
       <section className="section py-8">
         <div className="container-page max-w-5xl">
           {/* Header controls (hidden on print) */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6 print:hidden">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4 print:hidden">
             <div>
               <p className="eyebrow text-[#e64833]">Official E-Certificate</p>
               <h1 className="heading text-2xl sm:text-3xl mt-1">Certificate of Achievement</h1>
@@ -183,6 +183,12 @@ export default function CertificateVerifyPage() {
               </div>
             )}
           </div>
+
+          {data && (
+            <p className="text-[0.7rem] text-(--muted) mb-3 sm:hidden text-center print:hidden">
+              👉 Swipe horizontally to inspect your full verified certificate
+            </p>
+          )}
 
           {/* Loading state */}
           {loading && (
@@ -204,65 +210,66 @@ export default function CertificateVerifyPage() {
 
           {/* ══════ MAIN CERTIFICATE CANVAS (MATCHING USER'S IMAGE) ══════ */}
           {data && (
-            <article
-              id="certificate-print"
-              className="relative overflow-hidden rounded-2xl shadow-2xl transition-all"
-              style={{
-                background: "linear-gradient(135deg, #fbf6ee 0%, #fcfaf5 45%, #f4ede1 100%)",
-                border: "2.5px solid #244855",
-                color: "#244855",
-              }}
-            >
-              {/* Subtle Topo contour lines watermark */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-[0.035]"
+            <div className="w-full overflow-x-auto pb-4 no-scrollbar">
+              <article
+                id="certificate-print"
+                className="relative min-w-[580px] sm:min-w-0 overflow-hidden rounded-2xl shadow-2xl transition-all"
                 style={{
-                  backgroundImage: `radial-gradient(#244855 1px, transparent 1px), radial-gradient(#e64833 1px, #fbf6ee 1px)`,
-                  backgroundSize: "28px 28px",
-                  backgroundPosition: "0 0, 14px 14px",
+                  background: "linear-gradient(135deg, #fbf6ee 0%, #fcfaf5 45%, #f4ede1 100%)",
+                  border: "2.5px solid #244855",
+                  color: "#244855",
                 }}
-              />
+              >
+                {/* Subtle Topo contour lines watermark */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-[0.035]"
+                  style={{
+                    backgroundImage: `radial-gradient(#244855 1px, transparent 1px), radial-gradient(#e64833 1px, #fbf6ee 1px)`,
+                    backgroundSize: "28px 28px",
+                    backgroundPosition: "0 0, 14px 14px",
+                  }}
+                />
 
-              {/* Top Indian Tricolor Strip */}
-              <div className="flex h-2 w-full">
-                <div className="flex-1 bg-[#FF9933]" />
-                <div className="flex-1 bg-white" />
-                <div className="flex-1 bg-[#138808]" />
-              </div>
-
-              {/* Left Trail Runner & Mountain Silhouette Graphic */}
-              <RunnerTrailGraphic />
-
-              <div className="relative px-6 py-8 sm:px-12 sm:py-10">
-
-                {/* ── TOP BAR: Left Badge | Center Logo | Right Event Banner ── */}
-                <div className="flex items-start justify-between gap-4">
-                  {/* Left Badge */}
-                  <div className="w-1/4">
-                    <VirtualRunBadge />
-                  </div>
-
-                  {/* Center RunnerUp Crest Logo */}
-                  <div className="w-2/4 flex justify-center">
-                    <RunnerUpCrestLogo />
-                  </div>
-
-                  {/* Right Event Header + Ribbon */}
-                  <div className="w-1/4 flex flex-col items-end text-right">
-                    <p className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-[#e64833] leading-none">
-                      — EVENT —
-                    </p>
-                    <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-[#244855] leading-tight mt-0.5">
-                      {data.event}
-                    </p>
-                    <div className="mt-1">
-                      <TricolorRibbon />
-                    </div>
-                  </div>
+                {/* Top Indian Tricolor Strip */}
+                <div className="flex h-2 w-full">
+                  <div className="flex-1 bg-[#FF9933]" />
+                  <div className="flex-1 bg-white" />
+                  <div className="flex-1 bg-[#138808]" />
                 </div>
 
-                {/* ── CERTIFICATE OF ACHIEVEMENT TITLE ── */}
-                <div className="mt-6 text-center">
+                {/* Left Trail Runner & Mountain Silhouette Graphic */}
+                <RunnerTrailGraphic />
+
+                <div className="relative px-6 py-8 sm:px-12 sm:py-10">
+
+                  {/* ── TOP BAR: Left Badge | Center Logo | Right Event Banner ── */}
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left Badge */}
+                    <div className="w-1/4 shrink-0">
+                      <VirtualRunBadge />
+                    </div>
+
+                    {/* Center RunnerUp Crest Logo */}
+                    <div className="w-2/4 flex justify-center shrink-0">
+                      <RunnerUpCrestLogo />
+                    </div>
+
+                    {/* Right Event Header + Ribbon */}
+                    <div className="w-1/4 flex flex-col items-end text-right shrink-0">
+                      <p className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-[#e64833] leading-none">
+                        — EVENT —
+                      </p>
+                      <p className="text-xs sm:text-sm font-black uppercase tracking-wide text-[#244855] leading-tight mt-0.5">
+                        {data.event}
+                      </p>
+                      <div className="mt-1">
+                        <TricolorRibbon />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── CERTIFICATE OF ACHIEVEMENT TITLE ── */}
+                  <div className="mt-6 text-center">
                   <h2
                     className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-[#244855] leading-none"
                     style={{ fontFamily: "Georgia, 'Times New Roman', serif", letterSpacing: "-0.01em" }}
@@ -432,7 +439,8 @@ export default function CertificateVerifyPage() {
                 <div className="flex-1 bg-[#138808]" />
               </div>
             </article>
-          )}
+          </div>
+        )}
 
           {/* Action buttons (hidden on print) */}
           {data && (

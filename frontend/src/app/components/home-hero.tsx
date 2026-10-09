@@ -17,17 +17,17 @@ import {
 
 export function HomeHero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[100dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-24 pb-12 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
+    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[92dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-20 pb-10 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
       {/* ─── Ambient Atmospheric Background Glows ─── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        <div className="absolute top-1/4 left-1/2 -z-10 h-[260px] w-[300px] sm:h-[400px] sm:w-[600px] -translate-x-1/2 rounded-full bg-[#244855]/40 blur-[90px] sm:blur-[130px]" />
-        <div className="absolute top-1/3 right-4 -z-10 h-[200px] w-[200px] sm:h-[300px] sm:w-[300px] rounded-full bg-[#e64833]/20 blur-[80px] sm:blur-[110px]" />
-        <div className="absolute bottom-6 left-10 -z-10 h-[150px] w-[150px] sm:h-[240px] sm:w-[240px] rounded-full bg-[#244855]/30 blur-[70px]" />
+        <div className="absolute top-1/4 left-1/2 -z-10 h-[220px] w-[260px] sm:h-[400px] sm:w-[600px] -translate-x-1/2 rounded-full bg-[#244855]/40 blur-[70px] sm:blur-[130px]" />
+        <div className="absolute top-1/3 right-4 -z-10 h-[180px] w-[180px] sm:h-[300px] sm:w-[300px] rounded-full bg-[#e64833]/20 blur-[60px] sm:blur-[110px]" />
+        <div className="absolute bottom-6 left-10 -z-10 h-[140px] w-[140px] sm:h-[240px] sm:w-[240px] rounded-full bg-[#244855]/30 blur-[50px] sm:blur-[70px]" />
       </div>
 
       <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full lg:my-auto">
         {/* ─── Responsive Grid: Stacked on Mobile, 2-Column on Desktop ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 xl:gap-12 items-center">
           
           {/* ─── Text Content Column (lg: 7 cols) ─── */}
           <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
@@ -37,18 +37,18 @@ export function HomeHero() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-[#e64833]/50 bg-[#172c34]/90 px-3.5 sm:px-4 py-1 sm:py-1.5 text-[0.65rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] backdrop-blur-xl shadow-lg shadow-black/40 mb-2.5 sm:mb-3.5"
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-[#e64833]/50 bg-[#172c34]/90 px-3.5 sm:px-4 py-1 sm:py-1.5 text-[0.65rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg shadow-black/40 mb-2 sm:mb-3"
             >
               <Zap className="h-3.5 w-3.5 fill-[#e64833] text-[#e64833] shrink-0" />
               <span>INDIA&apos;S #1 VIRTUAL RUNNING PLATFORM</span>
             </motion.div>
 
-            {/* Main Slogan Headline — Scaled for Laptops */}
+            {/* Main Slogan Headline — Scaled for Laptops & Mobile */}
             <motion.h1
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display font-black text-2xl sm:text-4xl md:text-[2.75rem] lg:text-[2.5rem] xl:text-[3.25rem] 2xl:text-[3.8rem] tracking-tight uppercase leading-[1.04] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+              className="font-display font-black text-[1.75rem] xs:text-2xl sm:text-4xl md:text-[2.75rem] lg:text-[2.5rem] xl:text-[3.25rem] 2xl:text-[3.8rem] tracking-tight uppercase leading-[1.06] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
             >
               <span className="block text-[#fbe9d0]">Push Your Limits,</span>
               <span className="block text-[#e64833] italic font-black drop-shadow-[0_0_24px_rgba(230,72,51,0.55)]">
@@ -79,20 +79,20 @@ export function HomeHero() {
               >
                 {/* 16:10 Aspect Ratio Container for Full Image Visibility */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden">
-                  <motion.img
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src="/runner-mobile.webp"
                     alt="Runners sprinting in marathon"
-                    initial={{ scale: 1 }}
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
+                    loading="eager"
+                    decoding="async"
+                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] will-change-transform"
                   />
                   {/* Subtle edge vignette */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14242a]/85 via-transparent to-[#14242a]/30 pointer-events-none" />
 
                   {/* Top-Left Live Badge */}
                   <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
-                    <Flame className="h-3 w-3 text-[#e64833] fill-[#e64833] animate-pulse" />
+                    <Flame className="h-3 w-3 text-[#e64833] fill-[#e64833]" />
                     <span className="text-[0.62rem] font-black uppercase tracking-wider text-white">12,400+ Active</span>
                   </div>
 
@@ -116,16 +116,16 @@ export function HomeHero() {
               </motion.div>
             </div>
 
-            {/* ─── High-Impact CTAs — Positioned Above Fold on Laptops ─── */}
+            {/* ─── High-Impact CTAs — Positioned Above Fold on Laptops & Full-Width on Mobile ─── */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 w-full sm:w-auto"
+              className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-2.5 sm:gap-3 w-full sm:w-auto"
             >
               <Link
                 href="/events"
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-6 py-3 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-black uppercase tracking-wider text-[#fbe9d0] shadow-[0_0_25px_rgba(230,72,51,0.5),0_8px_16px_rgba(0,0,0,0.4)] border border-[#fbe9d0]/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_35px_rgba(230,72,51,0.8)] active:scale-95"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-6 py-3.5 sm:px-7 text-xs sm:text-sm font-black uppercase tracking-wider text-[#fbe9d0] shadow-[0_0_25px_rgba(230,72,51,0.5),0_8px_16px_rgba(0,0,0,0.4)] border border-[#fbe9d0]/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_35px_rgba(230,72,51,0.8)] active:scale-95"
               >
                 <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
                 <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Explore Challenges</span>
@@ -134,7 +134,7 @@ export function HomeHero() {
 
               <Link
                 href="/register"
-                className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-[#90aead]/30 bg-[#1b323b]/85 px-5 py-3 sm:px-6 sm:py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-xl transition-all duration-300 hover:border-[#e64833]/60 hover:bg-[#244855]/90 hover:shadow-[0_0_20px_rgba(230,72,51,0.25)] active:scale-95"
+                className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-[#90aead]/30 bg-[#1b323b]/85 px-5 py-3.5 sm:px-6 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-xl transition-all duration-300 hover:border-[#e64833]/60 hover:bg-[#244855]/90 hover:shadow-[0_0_20px_rgba(230,72,51,0.25)] active:scale-95"
               >
                 <ShieldCheck className="h-4 w-4 text-[#90aead] transition-transform duration-300 group-hover:scale-110" />
                 <span className="text-[#fbe9d0]/90 group-hover:text-white transition-colors">GPS Verified Races</span>
@@ -175,13 +175,13 @@ export function HomeHero() {
               {/* Outer decorative ambient frame */}
               <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_35px_rgba(230,72,51,0.22)] bg-[#101e23] group">
                 <div className="relative aspect-[4/4.4] xl:aspect-[4/5] max-h-[380px] xl:max-h-[460px] 2xl:max-h-[520px] w-full overflow-hidden">
-                  <motion.img
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src="/runner-hd.webp"
                     alt="Marathon runners pushing their limits"
-                    initial={{ scale: 1 }}
-                    animate={{ scale: [1, 1.06, 1] }}
-                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
+                    loading="eager"
+                    decoding="async"
+                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
                   />
                   {/* Cinematic gradient shading */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14242a] via-[#14242a]/20 to-transparent pointer-events-none" />

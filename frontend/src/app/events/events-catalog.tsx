@@ -90,30 +90,29 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug]);
 
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 14 + (index * 6) % 24,
+  // Live countdown state updated once per minute to avoid CPU lag
+  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
+    hours: 14 + ((index * 6) % 24),
     minutes: 32,
-    seconds: 45,
   });
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 12, minutes: 30, seconds: 0 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59 };
+        return { hours: 12, minutes: 30 };
       });
-    }, 1000);
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)]">
-      {/* Banner / Poster — 65% Height */}
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)]">
+      {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-64 sm:h-72 bg-[#14242a]" : "h-64 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
+          hasBannerImage ? "h-56 sm:h-72 bg-[#14242a]" : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
         {imgSrc && !imgFailed ? (
@@ -156,13 +155,13 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         )}
 
         {/* Top Badges */}
-        <div className="relative z-10 p-4 flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e64833] px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg">
-            <Flame className="h-3 w-3 animate-bounce fill-white" />
+        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
+            <Flame className="h-3 w-3 fill-white" />
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
@@ -172,7 +171,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         </div>
 
         {/* Reward / Medal Highlight Strip */}
-        <div className="absolute bottom-3.5 left-4 right-4 z-10">
+        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
             <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
@@ -279,9 +278,9 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
   }, [event.bannerImageUrl, event.slug]);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-[#e64833] hover:shadow-2xl">
-      {/* Banner / Poster — 65% Height */}
-      <div className="h-64 sm:h-72 relative overflow-hidden bg-[#14242a]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-2xl">
+      {/* Banner / Poster */}
+      <div className="h-56 sm:h-72 relative overflow-hidden bg-[#14242a]">
         {imgSrc && !imgFailed ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -320,20 +319,20 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
         />
 
         {/* Top Badges */}
-        <div className="relative z-10 p-4 flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 backdrop-blur-md px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-slate-300">
+        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-slate-300">
             <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
             Closed
           </span>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 backdrop-blur-md px-3 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
             <BadgeCheck className="h-3 w-3" />
             Verified
           </span>
         </div>
 
         {/* Reward / Medal Highlight Strip */}
-        <div className="absolute bottom-3.5 left-4 right-4 z-10">
+        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
             <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
@@ -364,18 +363,18 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
 
         {/* Stats Strip */}
         {(event.finishers || event.cities) && (
-          <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] p-3 text-center">
+          <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2 rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] p-2.5 sm:p-3 text-center">
             {[
               { label: "Finishers", value: event.finishers, icon: Users },
               { label: "Verified", value: event.verifiedResults, icon: BadgeCheck },
               { label: "Cities", value: event.cities, icon: MapPin },
             ].map(({ label, value, icon: Icon }) => (
-              <div key={label}>
+              <div key={label} className="min-w-0">
                 <Icon className="mx-auto h-3.5 w-3.5 text-[#e64833]" />
-                <p className="mt-1 text-sm font-black tracking-tight text-[#14242a] font-mono">
+                <p className="mt-1 text-xs sm:text-sm font-black tracking-tight text-[#14242a] font-mono truncate">
                   {typeof value === "number" ? value.toLocaleString("en-IN") : "—"}
                 </p>
-                <p className="text-[0.55rem] uppercase font-bold tracking-wider text-[#90aead]">{label}</p>
+                <p className="text-[0.5rem] sm:text-[0.55rem] uppercase font-bold tracking-wider text-[#90aead] truncate">{label}</p>
               </div>
             ))}
           </div>
