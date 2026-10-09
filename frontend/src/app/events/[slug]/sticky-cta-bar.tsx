@@ -51,10 +51,10 @@ export function EventStickyCta({
 
           {/* Premium Glowing CTA Button */}
           <Link
-            className="group relative flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#e64833] to-[#c73824] px-5 py-2.5 text-xs sm:text-sm font-black tracking-wide text-[#fbe9d0] shadow-lg shadow-[#e64833]/30 transition-all duration-200 hover:brightness-110 active:scale-95 shrink-0 select-none border border-[#fbe9d0]/20"
+            className="group relative flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#e64833] to-[#c73824] px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-black tracking-wide text-[#fbe9d0] shadow-lg shadow-[#e64833]/30 transition-all duration-200 hover:brightness-110 active:scale-95 shrink-0 select-none border border-[#fbe9d0]/20"
             href={`/register?event=${encodeURIComponent(slug)}`}
           >
-            <span>Register now</span>
+            <span>⚡ Register & Pay</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>

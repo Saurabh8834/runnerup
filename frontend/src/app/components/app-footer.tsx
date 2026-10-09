@@ -341,7 +341,7 @@ export function AppFooter() {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-8 flex flex-col items-center gap-3 border-t border-[#90aead]/15 pt-6 sm:flex-row sm:justify-between">
+          <div className="mt-8 flex flex-col items-center gap-3 border-t border-[#90aead]/15 pt-6 pb-16 sm:pb-0 sm:flex-row sm:justify-between">
             <p className="text-xs text-[#90aead] font-medium">&copy; {new Date().getFullYear()} RUNNERUP India. All rights reserved.</p>
             <p className="hidden text-xs text-[#90aead]/60 font-medium sm:block">Engineered with ❤️ for runners across India</p>
             <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} type="button"

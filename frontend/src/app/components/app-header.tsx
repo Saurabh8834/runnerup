@@ -429,10 +429,11 @@ export function AppHeader() {
                   </Link>
                   <Link
                     className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.4),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(230,72,51,0.7),0_6px_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
-                    href="/events"
+                    href="/register"
                   >
                     <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                    <span className="relative z-10 text-[#fbe9d0]">Browse events</span>
+                    <Zap className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] fill-[#fbe9d0]" />
+                    <span className="relative z-10 text-[#fbe9d0]">Register & Pay</span>
                     <ArrowRight className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </>
@@ -441,9 +442,10 @@ export function AppHeader() {
                 <div className="flex items-center gap-2.5">
                   <Link
                     className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-sm hover:shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
-                    href="/events"
+                    href="/register"
                   >
-                    <span>Browse events</span>
+                    <Zap className="h-3 w-3 text-[#fbe9d0] fill-[#fbe9d0]" />
+                    <span>Register & Pay</span>
                     <ArrowRight className="h-3 w-3 text-[#fbe9d0]" />
                   </Link>
                   <DashboardProfileDropdown />
@@ -558,17 +560,17 @@ export function AppHeader() {
 
                 {/* Featured Primary CTA: Browse Events */}
                 <Link
-                  href="/events"
+                  href="/register"
                   onClick={() => setOpen(false)}
                   className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#e64833]/25 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
-                      <Calendar className="h-4.5 w-4.5 text-white" />
+                      <Zap className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
-                      <span className="block text-xs font-black uppercase tracking-wider">Browse Events</span>
-                      <span className="block text-[0.65rem] font-medium text-[#fbe9d0] normal-case">Explore 1.5K, 5K, 10K & 21K Races</span>
+                      <span className="block text-xs font-black uppercase tracking-wider">Register & Pay</span>
+                      <span className="block text-[0.65rem] font-medium text-[#fbe9d0] normal-case">Instant UPI Checkout · 1.5K, 5K, 10K & 21K</span>
                     </div>
                   </div>
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

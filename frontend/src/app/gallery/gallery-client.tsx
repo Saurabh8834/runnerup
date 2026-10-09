@@ -653,7 +653,7 @@ export function GalleryClient() {
         transition={{ delay: 0.6, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 px-4 py-3 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-2xl backdrop-blur-md hover:border-[#e64833] cursor-pointer sm:hidden"
+        className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-2xl backdrop-blur-md hover:border-[#e64833] cursor-pointer sm:hidden"
       >
         <Upload className="h-4 w-4 text-[#e64833]" />
         <span>Submit Photo</span>
