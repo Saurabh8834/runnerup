@@ -136,22 +136,30 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
         onClick={() => setOpen((v) => !v)}
         aria-label="Open dashboard and profile menu"
         aria-expanded={open}
-        className={`inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#090d16]/85 backdrop-blur-xl transition-all duration-200 hover:border-white/30 hover:bg-[#090d16] hover:text-white shadow-xl cursor-pointer active:scale-95 ${
+        className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-white/15 bg-[#172c34]/95 backdrop-blur-xl transition-all duration-200 hover:border-white/30 hover:bg-[#112026] hover:text-white shadow-xl cursor-pointer active:scale-95 ${
           isMobile
-            ? "px-3 py-1.5 text-[0.72rem] font-bold uppercase tracking-wider text-white"
+            ? "h-8 w-8 sm:h-9 sm:w-auto p-1.5 sm:px-3.5 sm:py-2 text-[0.72rem] font-bold uppercase tracking-wider text-white"
             : "px-4 py-1.5 sm:px-4.5 sm:py-2 text-xs font-bold uppercase tracking-wider text-white"
         } ${
           isActive
-            ? "border-sky-400/50 bg-sky-500/20 text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.25)]"
+            ? "border-[#e64833]/60 bg-[#e64833]/20 text-[#fbe9d0] shadow-[0_0_15px_rgba(230,72,51,0.25)]"
             : ""
         }`}
       >
-        <User className="h-3.5 w-3.5 text-white/90" />
-        <span>Dashboard</span>
+        {user.imageUrl ? (
+          <img
+            src={user.imageUrl}
+            alt={name}
+            className="h-5 w-5 rounded-full object-cover ring-1 ring-white/30 shrink-0"
+          />
+        ) : (
+          <User className="h-3.5 w-3.5 text-white/90 shrink-0" />
+        )}
+        <span className="hidden sm:inline">Dashboard</span>
         <motion.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.2 }}
-          className="text-white/60 text-[0.65rem] leading-none"
+          className="hidden sm:inline text-white/60 text-[0.65rem] leading-none"
         >
           ▾
         </motion.span>
@@ -164,15 +172,15 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute right-0 top-[calc(100%+10px)] z-50 w-64 origin-top-right overflow-hidden rounded-2xl border border-white/20 bg-slate-950/60 backdrop-blur-3xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.35),0_20px_50px_rgba(0,0,0,0.7),0_0_20px_rgba(56,189,248,0.15)]"
+            className="absolute right-0 top-[calc(100%+10px)] z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-[#90aead]/25 bg-[#112026]/98 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(230,72,51,0.15)]"
           >
-            <div className="h-[2px] w-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500" />
+            <div className="h-[2px] w-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#874f41]" />
             
             {/* Athlete Header */}
-            <div className="border-b border-white/10 bg-white/[0.06] p-3.5 backdrop-blur-md">
+            <div className="border-b border-white/10 bg-white/[0.04] p-3.5 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{name}</p>
-                <span className="rounded-full bg-sky-500/25 border border-sky-400/40 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-sky-300">
+                <span className="rounded-full bg-[#e64833]/25 border border-[#e64833]/50 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-[#fbe9d0]">
                   {isAdmin ? "Admin 🛡️" : "Athlete ⚡"}
                 </span>
               </div>
@@ -196,9 +204,9 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
               <Link
                 href="/dashboard"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-xl border border-transparent bg-white/[0.04] px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:bg-white/10 hover:border-white/15 hover:text-sky-300"
+                className="flex items-center gap-2.5 rounded-xl border border-transparent bg-white/[0.04] px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:bg-white/10 hover:border-white/15 hover:text-[#fbe9d0]"
               >
-                <LayoutDashboard className="h-4 w-4 text-sky-400" />
+                <LayoutDashboard className="h-4 w-4 text-[#e64833]" />
                 Athlete Dashboard
               </Link>
 
@@ -359,12 +367,12 @@ export function AppHeader() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-3 sm:top-4 z-50 flex justify-center px-4 sm:px-6 pointer-events-none transition-all duration-300 ${
-          scrolled ? "top-2 sm:top-3" : "top-3 sm:top-4"
+        className={`fixed inset-x-0 top-2.5 sm:top-4 z-50 flex justify-center px-3 sm:px-6 pointer-events-none transition-all duration-300 ${
+          scrolled ? "top-2 sm:top-3" : "top-2.5 sm:top-4"
         }`}
       >
         <div
-          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-4 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
+          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-3.5 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
             scrolled ? "bg-[#112026]/98 border-[#90aead]/25 shadow-[0_20px_48px_rgba(0,0,0,0.85)]" : ""
           }`}
         >
@@ -384,7 +392,7 @@ export function AppHeader() {
                 alt="RUNNERUP"
                 width={180}
                 height={40}
-                className="h-8 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)] transition-transform duration-200 group-hover:scale-105"
+                className="h-7 xs:h-7.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)] transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>

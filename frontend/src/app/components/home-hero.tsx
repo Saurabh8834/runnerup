@@ -17,7 +17,7 @@ import {
 
 export function HomeHero() {
   return (
-    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[92dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-20 pb-10 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
+    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[92dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-24 pb-10 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
       {/* ─── Ambient Atmospheric Background Glows ─── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         <div className="absolute top-1/4 left-1/2 -z-10 h-[220px] w-[260px] sm:h-[400px] sm:w-[600px] -translate-x-1/2 rounded-full bg-[#244855]/40 blur-[70px] sm:blur-[130px]" />
