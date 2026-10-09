@@ -7,17 +7,20 @@ import { galleryMoments } from "../data/events";
 import type { HomeMoment } from "../../lib/events-api";
 import { HomeSectionHeader } from "./home-section-header";
 
+const photoMap: Record<string, string> = {
+  "sunrise finish": "/events/monsoon-mountain-miles.webp",
+  "club leaderboard push": "/runner-hd.webp",
+  "first medal day": "/runner-img.webp",
+  "weekend long run": "/events/himalayan-winter-sprint.webp",
+};
 
-
-function ensureSvgPath(src: string): string {
-  if (!src) return "/images/sunrise-finish.svg";
-  if (src.includes("sunrise-finish")) return "/images/sunrise-finish.svg";
-  if (src.includes("club-push")) return "/images/club-push.svg";
-  if (src.includes("first-medal")) return "/images/first-medal.svg";
-  if (src.includes("weekend-long-run")) return "/images/weekend-long-run.svg";
-  if (src.includes("mountain-run-hero")) return "/images/mountain-run-hero.svg";
-  if (src.endsWith(".png")) return src.replace(/\.png$/, ".svg");
-  return src;
+function resolveAlternateImage(title: string, src?: string): string {
+  const key = (title || "").toLowerCase().trim();
+  if (photoMap[key]) return photoMap[key];
+  if (src && !src.endsWith(".svg") && (src.endsWith(".webp") || src.endsWith(".jpg") || src.endsWith(".png") || src.startsWith("http"))) {
+    return src;
+  }
+  return photoMap[key] || "/events/monsoon-mountain-miles.webp";
 }
 
 const fallbackMoments: HomeMoment[] = galleryMoments.map((m, i) => ({
@@ -32,8 +35,37 @@ export function HomeGalleryPreview({
 }: {
   moments?: HomeMoment[];
 }) {
-  const moments =
-    initial && initial.length > 0 ? initial : fallbackMoments;
+  // Deduplicate items by title so duplicate rows from database never appear, strictly capped at 4 items
+  const rawList = initial && initial.length > 0 ? initial : fallbackMoments;
+  const seen = new Set<string>();
+  const moments: HomeMoment[] = [];
+
+  for (const item of rawList) {
+    const key = (item.title || "").toLowerCase().trim();
+    if (key && !seen.has(key)) {
+      seen.add(key);
+      moments.push({
+        ...item,
+        image: resolveAlternateImage(item.title, item.image),
+      });
+      if (moments.length === 4) break;
+    }
+  }
+
+  // If fewer than 4 items after deduplication, fill remainder from fallback moments
+  if (moments.length < 4) {
+    for (const fb of fallbackMoments) {
+      const key = (fb.title || "").toLowerCase().trim();
+      if (!seen.has(key)) {
+        seen.add(key);
+        moments.push({
+          ...fb,
+          image: resolveAlternateImage(fb.title, fb.image),
+        });
+        if (moments.length === 4) break;
+      }
+    }
+  }
 
   if (moments.length === 0) {
     return null;
@@ -62,8 +94,9 @@ export function HomeGalleryPreview({
           lead="Real photos and inspiring finisher moments from runners across India."
         />
 
+        {/* Strictly 4 cards in a responsive grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {moments.map((moment, index) => (
+          {moments.slice(0, 4).map((moment, index) => (
             <Link
               key={moment.id ?? `${moment.title}-${index}`}
               className="group block overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] shadow-xl transition-all duration-300 hover:border-[#e64833]/50 hover:bg-[#1b323b] hover:shadow-2xl hover:-translate-y-1.5"
@@ -73,14 +106,14 @@ export function HomeGalleryPreview({
                 <Image
                   alt={moment.title}
                   className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  src={ensureSvgPath(moment.image)}
+                  src={moment.image}
                   width={400}
                   height={300}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   loading="lazy"
                 />
                 <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#14242a]/90 via-transparent to-transparent pointer-events-none" />
-                <span className="absolute left-3.5 bottom-3.5 z-10 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#90aead] backdrop-blur-md shadow-md">
+                <span className="absolute left-3.5 bottom-3.5 z-10 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] backdrop-blur-md shadow-md">
                   {moment.meta}
                 </span>
               </div>
@@ -96,6 +129,5 @@ export function HomeGalleryPreview({
       </div>
     </section>
   );
-
 }
 

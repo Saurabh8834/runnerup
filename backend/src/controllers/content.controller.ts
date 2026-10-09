@@ -24,7 +24,7 @@ export async function getHomeContent(_request: Request, response: Response) {
     prisma.siteMedia.findMany({
       where: { published: true, showOnHomeMoments: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-      take: 12,
+      take: 4,
     }),
     prisma.siteTestimonial.findMany({
       where: { published: true, showOnHome: true },

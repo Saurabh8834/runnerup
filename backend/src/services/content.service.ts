@@ -2,8 +2,8 @@ import { prisma } from "../lib/prisma.js";
 
 const defaultMedia = [
   {
-    title: "Sunrise finish",
-    imageUrl: "/images/sunrise-finish.svg",
+    title: "Sunrise Finish",
+    imageUrl: "/events/monsoon-mountain-miles.webp",
     category: "Trail Run",
     location: "Lonavala",
     eventLabel: "Monsoon Mountain Miles",
@@ -14,8 +14,8 @@ const defaultMedia = [
     showOnHomeMoments: true,
   },
   {
-    title: "Club leaderboard push",
-    imageUrl: "/images/club-push.svg",
+    title: "Club Leaderboard Push",
+    imageUrl: "/runner-hd.webp",
     category: "Community",
     location: "Pune",
     eventLabel: "Independence Endurance Run",
@@ -26,8 +26,8 @@ const defaultMedia = [
     showOnHomeMoments: true,
   },
   {
-    title: "First medal day",
-    imageUrl: "/images/first-medal.svg",
+    title: "First Medal Day",
+    imageUrl: "/runner-img.webp",
     category: "Awards",
     location: "Mumbai",
     eventLabel: "Spring Valley Dash",
@@ -38,8 +38,8 @@ const defaultMedia = [
     showOnHomeMoments: true,
   },
   {
-    title: "Weekend long run",
-    imageUrl: "/images/weekend-long-run.svg",
+    title: "Weekend Long Run",
+    imageUrl: "/events/himalayan-winter-sprint.webp",
     category: "Training",
     location: "Bengaluru",
     eventLabel: "Club weekend",
