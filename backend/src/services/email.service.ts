@@ -33,11 +33,11 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Registration Confirmed — Mountain Run</title>
+  <title>Registration Confirmed — Runner Up</title>
 </head>
 <body style="margin:0;padding:0;background:#f0ede5;font-family:Arial,sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
-    Registration confirmed! Welcome to Mountain Run, ${payload.runnerName}. Your Bib is ready. 🏃
+    Registration confirmed! Welcome to Runner Up, ${payload.runnerName}. Your Bib is ready. 🏃
   </div>
 
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0ede5;padding:32px 16px;">
@@ -59,9 +59,9 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                 <tr>
                   <td style="padding:28px 32px 20px;text-align:center;">
                     <div style="display:inline-block;background:rgba(255,255,255,0.08);border:1px solid rgba(201,162,39,0.4);border-radius:50px;padding:6px 20px;margin-bottom:10px;">
-                      <span style="font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:${GOLD};">⛰️ MOUNTAIN RUN</span>
+                      <span style="font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:${GOLD};">🏃 RUNNER UP</span>
                     </div>
-                    <p style="margin:0;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Run Anywhere, Anytime</p>
+                    <p style="margin:0;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Run Anywhere, Anytime · runnerup.in</p>
                   </td>
                 </tr>
               </table>
@@ -83,8 +83,8 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                     <p style="margin:0 0 20px;font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:${GOLD};">── You're officially in! ──</p>
                     <p style="margin:0;font-size:15px;color:#4a4a4a;line-height:1.7;">
                       Hi <strong style="color:${DARK_GREEN};">${payload.runnerName}</strong>,<br/>
-                      Your Mountain Run registration is confirmed and payment has been received successfully.<br/>
-                      We're thrilled to have you on board! 🏔️
+                      Your Runner Up registration is confirmed and payment has been received successfully.<br/>
+                      We're thrilled to have you on board! 🏃
                     </p>
                   </td>
                 </tr>
@@ -161,7 +161,7 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                       Keep Running, Keep Inspiring!
                     </p>
                     <p style="margin:0 0 16px;font-size:11px;color:${GOLD};letter-spacing:0.2em;text-transform:uppercase;">── Every Finish Has a Story ──</p>
-                    <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#ffffff;">Mountain Run Team</p>
+                    <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#ffffff;">Runner Up Team</p>
                     <p style="margin:0 0 16px;font-size:11px;color:rgba(255,255,255,0.4);">Organizer · runnerup.in</p>
                     <table width="200" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
                       <tr>
@@ -187,8 +187,8 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
           <tr>
             <td style="padding:16px;text-align:center;">
               <p style="margin:0;font-size:10px;color:#94a3b8;line-height:1.5;">
-                You're receiving this because you registered for a Mountain Run virtual event.<br/>
-                © ${new Date().getFullYear()} Mountain Run. All rights reserved.
+                You're receiving this because you registered for a Runner Up virtual event.<br/>
+                © ${new Date().getFullYear()} Runner Up. All rights reserved.
               </p>
             </td>
           </tr>
@@ -222,7 +222,7 @@ export async function sendRegistrationConfirmationEmail(
     const result = await resend.emails.send({
       from,
       to: payload.to,
-      subject: `Mountain Run confirmed — Bib ${payload.bibNumber}`,
+      subject: `Runner Up confirmed — Bib ${payload.bibNumber}`,
       html: buildConfirmationHtml(payload),
     });
 
@@ -266,7 +266,7 @@ export async function sendCertificateEmail(input: {
     const result = await resend.emails.send({
       from,
       to: input.to,
-      subject: `Your Mountain Run certificate — ${input.data.eventTitle}`,
+      subject: `Your Runner Up Certificate — ${input.data.eventTitle}`,
       html: buildCertificateEmailHtml(input.data),
     });
 

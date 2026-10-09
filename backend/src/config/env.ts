@@ -60,7 +60,7 @@ const allowedOrigins = Array.from(
  * Broken env values (unquoted spaces, stripped <email>, extra quotes) are normalized.
  */
 function normalizeResendFrom(raw: string | undefined): string {
-  const fallback = "Mountain Run <onboarding@resend.dev>";
+  const fallback = "Runner Up <onboarding@resend.dev>";
   if (!raw) return fallback;
 
   let value = raw.trim();

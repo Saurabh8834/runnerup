@@ -13,13 +13,13 @@ export type CertificateRenderData = {
 
 export function createCertificateNumber(bibNumber: string) {
   const year = new Date().getFullYear();
-  return `MR-${year}-${bibNumber.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`;
+  return `RU-${year}-${bibNumber.replace(/[^A-Z0-9]/gi, "").toUpperCase()}`;
 }
 
 export function createCertificateQrPayload(certificateNumber: string) {
   const verifyUrl = buildCertificatePublicUrl(certificateNumber);
   return JSON.stringify({
-    issuer: "Mountain Run",
+    issuer: "Runner Up",
     certificateNumber,
     verifyUrl,
   });
@@ -256,16 +256,16 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
                 <tr>
                   <!-- Left: Organizer Signature -->
                   <td class="sign-col" width="28%" align="center" valign="bottom">
-                    <p style="margin:0;font-family:'Dancing Script', cursive;font-size:20px;color:${DARK_GREEN};font-weight:700;">Mountain Run Team</p>
+                    <p style="margin:0;font-family:'Dancing Script', cursive;font-size:20px;color:${DARK_GREEN};font-weight:700;">Runner Up Team</p>
                     <div style="height:1px;background:#c9a227;margin:4px auto;width:120px;"></div>
-                    <p style="margin:0;font-size:9px;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;color:${DARK_GREEN};">MOUNTAIN RUN TEAM</p>
-                    <p style="margin:2px 0 0;font-size:8px;color:${MUTED};text-transform:uppercase;">Organizer</p>
+                    <p style="margin:0;font-size:9px;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;color:${DARK_GREEN};">RUNNER UP TEAM</p>
+                    <p style="margin:2px 0 0;font-size:8px;color:${MUTED};text-transform:uppercase;">Organizer · runnerup.in</p>
                   </td>
 
                   <!-- Center-Left: Official Round Stamp -->
                   <td class="sign-col" width="22%" align="center" valign="middle">
                     <div style="width:68px;height:68px;border-radius:50%;background:#1a3a2e;border:2px dashed #c9a227;display:inline-block;text-align:center;padding-top:10px;">
-                      <p style="margin:0;font-size:7px;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;color:#f5f5f0;">MOUNTAIN RUN</p>
+                      <p style="margin:0;font-size:7px;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;color:#f5f5f0;">RUNNER UP</p>
                       <p style="margin:2px 0;font-size:6px;letter-spacing:0.1em;text-transform:uppercase;color:#c9a227;">RUN ANYWHERE</p>
                       <p style="margin:0;font-size:11px;color:#c9a227;">★★★</p>
                     </div>

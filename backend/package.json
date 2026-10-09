@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
-    "cloudinary:test": "tsx scripts/test-cloudinary.ts"
+    "cloudinary:test": "tsx scripts/test-cloudinary.ts",
+    "resend:test": "tsx scripts/test-resend.ts"
   },
   "dependencies": {
     "@clerk/backend": "^3.11.5",
