@@ -24,14 +24,14 @@ export type DefaultEvent = {
 
 export const defaultEvents: DefaultEvent[] = [
   {
-    title: "Indian Air Force Day 2026 🇮🇳",
-    slug: "indian-air-force-day-2026",
+    title: "Indian Air Force Day Virtual Challenge ✈️ 🎖️",
+    slug: "indian-air-force-day-virtual-challenge",
     description:
-      "Pick a distance, finish it on any one day of the five, and a real finisher medal reaches your door. Celebrate Indian Air Force Day with an authentic solid metal finisher medal, GPS verification, e-certificate, and pan-India doorstep delivery.",
+      "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
     startsAt: new Date("2026-10-08T00:00:00.000Z"),
     endsAt: new Date("2026-10-12T23:59:59.000Z"),
     proofClosesAt: new Date("2026-10-17T23:59:59.000Z"),
-    distances: ["1.6 km", "3.2 km", "5 km", "10 km", "21 km"],
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     priceInPaise: 49900, // Rs. 499
     status: "OPEN",
     city: "Virtual (All India)",
@@ -39,7 +39,7 @@ export const defaultEvents: DefaultEvent[] = [
     medalIncluded: true,
     bannerImageUrl: "/images/event-medal.jpg",
     banner: "Air Force Day Virtual Challenge",
-    reward: "Solid Metal Finisher Medal + E-Certificate",
+    reward: "100% Solid Metal Finisher Medal + E-Certificate",
     highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
     benefits: [
       "Free delivery across India",

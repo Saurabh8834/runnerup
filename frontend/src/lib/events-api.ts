@@ -81,9 +81,20 @@ export function mapApiEventToPublic(
     event.registrationOpen === false ||
     ["COMPLETED", "CLOSED", "CANCELLED"].includes(event.status);
 
-  const staticMatch = allPublicEvents.find((item) => item.slug === event.slug);
+  const isAirForce =
+    event.slug.includes("air-force") ||
+    event.title.toLowerCase().includes("air force") ||
+    event.slug === "indian-air-force-day-2026" ||
+    event.slug === "indian-air-force-day-virtual-challenge";
+
+  const staticMatch =
+    allPublicEvents.find((item) => item.slug === event.slug) ||
+    (isAirForce ? allPublicEvents.find((item) => item.slug.includes("air-force")) : undefined);
+
   const apiFinishers = event.stats?.finishers ?? event._count?.registrations;
   const apiVerified = event.stats?.verifiedResults ?? event._count?.registrations;
+
+  const iafDescription = `🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳`;
 
   return {
     name: event.title,
@@ -94,15 +105,25 @@ export function mapApiEventToPublic(
       !event.paymentRequired || event.priceInPaise <= 0
         ? "Free"
         : `Rs. ${Math.round(event.priceInPaise / 100)}`,
-    description: event.description,
+    description: isAirForce ? iafDescription : (event.description || staticMatch?.description || ""),
     highlight:
       staticMatch?.highlight ??
       (isPast
         ? "Completed · Tap to view recap and rewards."
+        : isAirForce
+        ? "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included."
         : "Open for registration · Choose distance and join."),
-    banner: staticMatch?.banner ?? (isPast ? "Past race" : "Open event"),
-    bannerImageUrl: event.bannerImageUrl ?? staticMatch?.bannerImageUrl ?? undefined,
-    reward: staticMatch?.reward ?? (isPast ? "Medal + certificate" : "Register now"),
+    banner: staticMatch?.banner ?? (isAirForce ? "Air Force Day Virtual Challenge" : (isPast ? "Past race" : "Open event")),
+    bannerImageUrl:
+      event.bannerImageUrl ??
+      staticMatch?.bannerImageUrl ??
+      (isAirForce ? "/images/event-medal.jpg" : undefined),
+    reward:
+      (isAirForce
+        ? "100% Solid Metal Finisher Medal + E-Certificate"
+        : undefined) ??
+      staticMatch?.reward ??
+      (isPast ? "Medal + certificate" : "Register now"),
     couponCode: event.couponCode ?? undefined,
     showCouponOnCard: event.showCouponOnCard ?? undefined,
     activityTypes: event.activityTypes ?? ["running"],

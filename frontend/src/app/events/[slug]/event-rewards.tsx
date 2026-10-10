@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Trophy, Truck } from "lucide-react";
+import type { PublicEvent } from "../../data/events";
 import { Medal3D } from "./medal";
 import { Reveal, SectionHeader } from "./reveal";
 
@@ -31,7 +32,23 @@ const items = [
   },
 ];
 
-export function EventRewards() {
+export function EventRewards({ event }: { event?: PublicEvent }) {
+  const isAirForce =
+    event?.slug?.includes("air-force") ||
+    event?.name?.toLowerCase().includes("air force");
+  const medalImg = isAirForce ? "/images/event-medal.jpg" : event?.bannerImageUrl;
+
+  const dynamicItems = [
+    {
+      icon: Medal,
+      title: "Finisher medal",
+      desc: isAirForce
+        ? "100% Solid Metal Finisher Medal delivered right to your doorstep."
+        : "A heavyweight metal medal with a gold-trimmed ribbon, designed to be worn.",
+    },
+    ...items.slice(1),
+  ];
+
   return (
     <section id="rewards" className="section scroll-mt-24 border-b border-(--line)">
       <div className="container-page">
@@ -49,7 +66,7 @@ export function EventRewards() {
         <div className="mt-10 grid items-start gap-6 sm:mt-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
           {/* Reward list */}
           <div className="space-y-3.5">
-            {items.map(({ icon: Icon, title, desc }, i) => (
+            {dynamicItems.map(({ icon: Icon, title, desc }, i) => (
               <Reveal key={title} delay={i * 0.06}>
                 <article className="group flex items-start gap-4 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e64833]/40 hover:shadow-premium sm:p-5">
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#90aead]/20 bg-gradient-to-br from-[#e64833]/15 to-[#874f41]/10 text-[#e64833] shadow-sm transition-transform duration-300 group-hover:scale-105">
@@ -79,9 +96,20 @@ export function EventRewards() {
               />
 
               <div className="relative flex items-center justify-center px-6 pt-10">
-                <div className="medal-float w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
-                  <Medal3D className="h-auto w-full" />
-                </div>
+                {medalImg ? (
+                  <div className="relative w-48 sm:w-60 aspect-square rounded-2xl overflow-hidden shadow-2xl border border-amber-500/30 group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={medalImg}
+                      alt={event?.name ? `${event.name} Finisher Medal` : "Finisher Medal"}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                ) : (
+                  <div className="medal-float w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
+                    <Medal3D className="h-auto w-full" />
+                  </div>
+                )}
               </div>
 
               {/* Pinned feature badges — static, zero float or tilt */}

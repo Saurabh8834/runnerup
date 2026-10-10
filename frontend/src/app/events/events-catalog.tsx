@@ -56,6 +56,8 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 }
 
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
+  "indian-air-force-day-virtual-challenge": "/images/event-medal.jpg",
+  "indian-air-force-day-2026": "/images/event-medal.jpg",
   "october-runner":
     "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
   "independence-day-virtual-run-2026":
@@ -76,8 +78,14 @@ const FALLBACK_EVENT_IMAGES: Record<string, string> = {
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
+  const isAirForce =
+    event.slug.includes("air-force") ||
+    event.name.toLowerCase().includes("air force");
+
   const defaultPoster =
-    event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+    event.bannerImageUrl ||
+    (isAirForce ? "/images/event-medal.jpg" : FALLBACK_EVENT_IMAGES[event.slug]) ||
+    `/events/${event.slug}.webp`;
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
@@ -85,10 +93,12 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
   useEffect(() => {
     const nextPoster =
-      event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+      event.bannerImageUrl ||
+      (isAirForce ? "/images/event-medal.jpg" : FALLBACK_EVENT_IMAGES[event.slug]) ||
+      `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
     setImgFailed(false);
-  }, [event.bannerImageUrl, event.slug]);
+  }, [event.bannerImageUrl, event.slug, isAirForce]);
 
   // Live countdown state updated once per minute to avoid CPU lag
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
@@ -124,6 +134,10 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
             loading={index < 3 ? "eager" : "lazy"}
             decoding="async"
             onError={() => {
+              if (isAirForce) {
+                setImgSrc("/images/event-medal.jpg");
+                return;
+              }
               if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
                 setImgSrc(`/events/${event.slug}.webp`);
               } else if (imgSrc && imgSrc.endsWith(".webp")) {
@@ -208,7 +222,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         </h3>
 
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          {event.distance.split(",").map((d) => (
+          {event.distance.split(/[\/,]/).map((d) => (
             <span
               key={d}
               className="rounded-lg bg-[#244855] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#fbe9d0]"

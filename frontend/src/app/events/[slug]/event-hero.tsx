@@ -74,7 +74,8 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
   const isAirForce =
     event.slug.includes("air-force") ||
     event.name.toLowerCase().includes("air force") ||
-    event.slug === "indian-air-force-day-2026";
+    event.slug === "indian-air-force-day-2026" ||
+    event.slug === "indian-air-force-day-virtual-challenge";
 
   // Date eyebrow text
   const eyebrowDate = isAirForce
@@ -148,18 +149,29 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               )}
             </motion.h1>
 
-            {/* Subtitle */}
-            <motion.p
+            {/* Subtitle / Event Description */}
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base lg:text-[1.05rem] text-zinc-400 font-normal leading-relaxed"
+              className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base lg:text-[1.05rem] text-zinc-300 font-medium leading-relaxed space-y-2.5"
             >
-              {isAirForce
-                ? "Pick a distance, finish it on any one day of the five, and a real finisher medal reaches your door."
-                : event.description ||
-                  "Pick a distance, finish it on your schedule anywhere in India, and an authentic heavy metal finisher medal reaches your door."}
-            </motion.p>
+              {isAirForce ? (
+                <>
+                  <p className="text-zinc-200 font-semibold leading-relaxed">
+                    Run with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.
+                  </p>
+                  <p className="text-[#f59e0b] font-black tracking-wide text-sm sm:text-base">
+                    Run for Glory. Run for India. Jai Hind! 🇮🇳
+                  </p>
+                </>
+              ) : (
+                <p className="text-zinc-400 font-normal">
+                  {event.description ||
+                    "Pick a distance, finish it on your schedule anywhere in India, and an authentic heavy metal finisher medal reaches your door."}
+                </p>
+              )}
+            </motion.div>
 
             {/* Distance Selector */}
             <motion.div

@@ -28,15 +28,26 @@ function getEventScarcity(slug: string) {
 }
 
 function EventCard({ event, index }: { event: PublicEvent; index: number }) {
-  const [imgSrc, setImgSrc] = useState(event.bannerImageUrl || `/events/${event.slug}.webp`);
+  const isAirForce =
+    event.slug.includes("air-force") ||
+    event.name.toLowerCase().includes("air force");
+
+  const initialImage =
+    event.bannerImageUrl ||
+    (isAirForce ? "/images/event-medal.jpg" : `/events/${event.slug}.webp`);
+
+  const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
 
   useEffect(() => {
-    setImgSrc(event.bannerImageUrl || `/events/${event.slug}.webp`);
+    setImgSrc(
+      event.bannerImageUrl ||
+        (isAirForce ? "/images/event-medal.jpg" : `/events/${event.slug}.webp`)
+    );
     setImgFailed(false);
-  }, [event.bannerImageUrl, event.slug]);
+  }, [event.bannerImageUrl, event.slug, isAirForce]);
 
   // Live countdown state updated once per minute to prevent unnecessary 1s CPU thrashing
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
@@ -72,6 +83,10 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
             loading={index < 3 ? "eager" : "lazy"}
             decoding="async"
             onError={() => {
+              if (isAirForce) {
+                setImgSrc("/images/event-medal.jpg");
+                return;
+              }
               if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
                 setImgSrc(`/events/${event.slug}.webp`);
               } else if (imgSrc && imgSrc.endsWith(".webp")) {
@@ -156,7 +171,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Multi-Distance Tags */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {event.distance.split(",").map((d) => (
+          {event.distance.split(/[\/,]/).map((d) => (
             <span
               key={d}
               className="rounded-lg bg-[#244855] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#fbe9d0]"
