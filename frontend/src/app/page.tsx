@@ -51,9 +51,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const revalidate = 60;
+
 export default async function Home() {
-  const serverEvents = await fetchOpenEvents({ homeFeaturedFirst: true, limit: 3 }).catch(() => undefined);
-  const serverHome = await fetchHomeContent().catch(() => undefined);
+  const [serverEvents, serverHome] = await Promise.all([
+    fetchOpenEvents({ homeFeaturedFirst: true, limit: 3 }).catch(() => undefined),
+    fetchHomeContent().catch(() => undefined),
+  ]);
 
   return (
     <div className="page-shell flex min-h-screen flex-col bg-[#14242a] text-[#fcf8f2]">

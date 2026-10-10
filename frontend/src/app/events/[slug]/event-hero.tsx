@@ -312,11 +312,16 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                 className="relative z-10 w-full flex items-center justify-center"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={medalImageSrc}
-                  alt="RunnerUp Official Indian Air Force Day 2026 Physical Finisher Medal"
-                  className="w-full h-auto object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-[1.02]"
-                />
+                <picture className="w-full flex justify-center">
+                  <source srcSet="/images/event-medal.webp" type="image/webp" />
+                  <img
+                    src={medalImageSrc}
+                    alt="RunnerUp Official Indian Air Force Day 2026 Physical Finisher Medal"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="w-full h-auto object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-[1.02]"
+                  />
+                </picture>
               </motion.div>
 
             </div>

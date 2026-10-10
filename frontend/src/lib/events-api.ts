@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getApiUrl } from "./api";
 import type { PublicEvent } from "../app/data/events";
 import { allPublicEvents, getEventBySlug } from "../app/data/events";
@@ -125,7 +126,7 @@ export function mapApiEventToPublic(
 }
 
 /** Server or client: fetch one event by slug, fallback to static catalog. */
-export async function fetchEventBySlug(slug: string): Promise<PublicEvent | null> {
+export const fetchEventBySlug = cache(async function fetchEventBySlug(slug: string): Promise<PublicEvent | null> {
   try {
     const response = await fetch(getApiUrl(`/api/events/${encodeURIComponent(slug)}`), {
       next: { revalidate: 300 },
@@ -141,10 +142,10 @@ export async function fetchEventBySlug(slug: string): Promise<PublicEvent | null
   }
 
   return getEventBySlug(slug) ?? null;
-}
+});
 
 /** Fetch open/upcoming events for home & previews. Featured first when set by admin. */
-export async function fetchOpenEvents(options?: {
+export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
   homeFeaturedFirst?: boolean;
   limit?: number;
 }): Promise<PublicEvent[]> {
@@ -172,7 +173,7 @@ export async function fetchOpenEvents(options?: {
 
   const fallback = allPublicEvents.filter((event) => event.status === "upcoming");
   return limit != null ? fallback.slice(0, limit) : fallback;
-}
+});
 
 export type HomeMoment = {
   id?: string;
@@ -190,7 +191,7 @@ export type HomeTestimonial = {
   rating: number;
 };
 
-export async function fetchHomeContent(): Promise<{
+export const fetchHomeContent = cache(async function fetchHomeContent(): Promise<{
   moments: HomeMoment[];
   testimonials: HomeTestimonial[];
 }> {
@@ -211,7 +212,7 @@ export async function fetchHomeContent(): Promise<{
     // fallback empty → components use static defaults
   }
   return { moments: [], testimonials: [] };
-}
+});
 
 export async function fetchGalleryContent(category?: string) {
   try {

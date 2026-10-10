@@ -12,6 +12,8 @@ if (publishableKey && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
 const nextConfig: NextConfig = {
+  compress: true,
+  poweredByHeader: false,
   env: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: publishableKey,
   },
