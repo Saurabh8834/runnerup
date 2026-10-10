@@ -40,8 +40,6 @@ const organizationSchema = {
   ],
   sameAs: [
     'https://instagram.com/runnerup.in',
-    'https://facebook.com/runnerupofficial',
-    'https://twitter.com/runnerup',
     'https://wa.me/918287831071',
   ],
   address: {

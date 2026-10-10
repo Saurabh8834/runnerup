@@ -22,26 +22,10 @@ function WhatsAppIcon() {
     </svg>
   );
 }
-function FacebookIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-    </svg>
-  );
-}
-function XIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
 
 const socials = [
   { label: "Instagram", href: "https://instagram.com/runnerup.in", icon: <InstagramIcon /> },
   { label: "WhatsApp", href: "https://wa.me/918287831071", icon: <WhatsAppIcon /> },
-  { label: "Facebook", href: "https://facebook.com/runnerupofficial", icon: <FacebookIcon /> },
-  { label: "X", href: "https://twitter.com/runnerupofficial", icon: <XIcon /> },
 ];
 
 /* ─── Newsletter ─── */
@@ -279,10 +263,6 @@ export function AppFooter() {
                     {icon}
                   </a>
                 ))}
-                <a href="mailto:runnerupofficials@gmail.com" aria-label="Email"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] transition-all hover:border-[#e64833] hover:bg-[#e64833]/15 hover:text-[#e64833] shadow-sm">
-                  <Mail className="h-4 w-4" />
-                </a>
               </div>
             </div>
 

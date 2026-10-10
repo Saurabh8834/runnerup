@@ -71,7 +71,6 @@ export default function AboutPage() {
       logo: `${SITE_URL}/logo-mark.svg`,
       sameAs: [
         "https://instagram.com/runnerup.in",
-        "https://facebook.com/runnerupofficial",
       ],
     },
   };
