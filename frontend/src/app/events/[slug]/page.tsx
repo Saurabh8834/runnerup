@@ -238,7 +238,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             </section>
 
             <EventCta event={event} />
-            <EventStickyCta price={event.price} compareAtPrice={event.compareAtPrice} slug={event.slug} />
+            <EventStickyCta price={event.price} compareAtPrice={event.compareAtPrice} slug={event.slug} eventName={event.name} />
           </>
         )}
       </div>

@@ -40,6 +40,30 @@ export type PublicEvent = {
 
 export const allPublicEvents: PublicEvent[] = [
   {
+    name: "Indian Air Force Day 2026 🇮🇳",
+    slug: "indian-air-force-day-2026",
+    date: "8-12 October 2026",
+    distance: "1.6 km / 3.2 km / 5 km / 10 km / 21 km",
+    price: "Rs. 499",
+    description:
+      "Pick a distance, finish it on any one day of the five, and a real finisher medal reaches your door.",
+    highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
+    banner: "Air Force Day Challenge",
+    bannerImageUrl: "/images/event-medal.jpg",
+    reward: "Solid Metal Finisher Medal + E-Certificate",
+    status: "upcoming",
+    compareAtPrice: "Rs. 549",
+    startsAt: "2026-10-08T00:00:00.000Z",
+    endsAt: "2026-10-12T23:59:59.000Z",
+    benefits: [
+      "Free delivery across India",
+      "Works with Strava, Garmin, NRC",
+      "100% Solid Metal Finisher Medal Included",
+      "Verifiable E-Certificate & Digital Bib",
+      "Live GPS-Verified Leaderboard Ranking",
+    ],
+  },
+  {
     name: "October Runner 🍁",
     slug: "october-runner",
     date: "1-31 Oct 2026",
@@ -199,6 +223,9 @@ export const pastEvents = allPublicEvents.filter((event) => event.status === "pa
 export const upcomingEvents = publicEvents;
 
 export function getEventBySlug(slug: string) {
+  if (slug === "indian-air-force-day" || slug === "iaf-2026" || slug === "indian-airforce-day") {
+    return allPublicEvents.find((event) => event.slug === "indian-air-force-day-2026");
+  }
   return allPublicEvents.find((event) => event.slug === slug);
 }
 

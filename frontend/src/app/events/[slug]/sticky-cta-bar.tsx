@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, IndianRupee, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 function formatPrice(price: string) {
   return price.replace(/^Rs\.\s*/, "₹");
@@ -11,52 +11,60 @@ export function EventStickyCta({
   price,
   compareAtPrice,
   slug,
+  eventName = "Indian Air Force Day 2026",
 }: {
   price: string;
   compareAtPrice?: string;
   slug: string;
+  eventName?: string;
 }) {
   const amount = price.toLowerCase().includes("free") ? "Free" : formatPrice(price);
-  const mrp = compareAtPrice ? formatPrice(compareAtPrice) : undefined;
+  const registerHref = `/register?event=${encodeURIComponent(slug)}`;
 
   return (
     <>
-      {/* Spacer so page bottom content isn't covered */}
-      <div className="h-24 md:hidden" aria-hidden="true" />
+      {/* Spacer so page content isn't obscured */}
+      <div className="h-20" aria-hidden="true" />
 
-      {/* 100% Solid, Opaque & High-End Sticky Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-[#14242a] border-t border-[#90aead]/25 shadow-[0_-16px_40px_rgba(20,36,42,0.9)] md:hidden">
-        {/* Shimmer Accent Line */}
-        <div className="h-0.5 w-full bg-linear-to-r from-transparent via-[#e64833] to-transparent" />
-
-        <div className="mx-auto flex max-w-md items-center justify-between gap-3 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-          {/* Price & Value Proposition */}
+      {/* Sleek, Premium Fixed Bottom Bar */}
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-[#070a0c]/95 border-t border-white/10 shadow-[0_-12px_36px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3">
+          
+          {/* Left: Event Title & Pricing Breakdown */}
           <div className="min-w-0 flex flex-col justify-center">
-            <div className="flex items-baseline gap-1.5">
-              <span className="flex items-center text-xl sm:text-2xl font-black tracking-tight text-[#fcf8f2] font-mono">
-                <IndianRupee className="h-4 w-4 mr-0.5 text-[#e64833]" />
+            <p className="truncate font-display text-xs sm:text-sm font-extrabold text-white tracking-tight">
+              {eventName}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="font-display font-black text-sm sm:text-base text-[#f59e0b]">
                 {amount}
               </span>
-              {mrp ? (
-                <span className="text-xs font-semibold text-[#90aead] line-through">
-                  {mrp}
-                </span>
-              ) : null}
+              <span className="text-[0.65rem] sm:text-xs text-zinc-400 font-medium hidden sm:inline">
+                · Medal, certificate and delivery included
+              </span>
             </div>
-            <p className="mt-0.5 inline-flex items-center gap-1 truncate text-[0.6rem] font-bold uppercase tracking-wider text-[#fbe9d0]">
-              <Sparkles className="h-2.5 w-2.5 shrink-0 text-[#e64833]" />
-              Early Bird · Kit Included
-            </p>
           </div>
 
-          {/* Premium Glowing CTA Button */}
-          <Link
-            className="group relative flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#e64833] to-[#c73824] px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-black tracking-wide text-[#fbe9d0] shadow-lg shadow-[#e64833]/30 transition-all duration-200 hover:brightness-110 active:scale-95 shrink-0 select-none border border-[#fbe9d0]/20"
-            href={`/register?event=${encodeURIComponent(slug)}`}
-          >
-            <span>⚡ Register Now</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Submit Proof shortcut */}
+            <Link
+              href="/dashboard"
+              className="hidden sm:inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 transition-all cursor-pointer"
+            >
+              Submit Proof
+            </Link>
+
+            {/* Primary Register Button */}
+            <Link
+              href={registerHref}
+              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-extrabold text-xs sm:text-sm px-5 sm:px-6 py-2 sm:py-2.5 shadow-md shadow-amber-500/20 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <span>Register for {amount}</span>
+              <ArrowRight className="h-3.5 w-3.5 stroke-[3]" />
+            </Link>
+          </div>
+
         </div>
       </div>
     </>
