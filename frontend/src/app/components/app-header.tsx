@@ -26,7 +26,7 @@ import { ThemeToggle } from "./theme-toggle";
 /* ─── Nav items with icons ─── */
 const publicNav = [
   { label: "Events", href: "/events", icon: Calendar },
-  { label: "How It Works", href: "/#how-it-works", icon: Zap },
+  { label: "What is Virtual Run?", href: "/what-is-virtual-run", icon: Zap },
   { label: "Gallery", href: "/gallery", icon: Camera },
   { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
 ] as const;

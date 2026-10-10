@@ -287,8 +287,8 @@ export function AppFooter() {
             </div>
 
             <FooterCol title="Races & Events" links={[
+              ["What is a Virtual Run?", "/what-is-virtual-run"],
               ["Upcoming Challenges", "/events"],
-              ["Past Race Archive", "/events"],
               ["Runner Photo Wall", "/gallery"],
               ["National Leaderboard", "/leaderboard"],
             ]} />
