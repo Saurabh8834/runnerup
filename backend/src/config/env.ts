@@ -79,7 +79,7 @@ function normalizeResendFrom(raw: string | undefined): string {
 
   // Bare email
   if (/^[^\s<>]+@[^\s<>]+\.[^\s<>]+$/.test(value)) {
-    return `Mountain Run <${value}>`;
+    return `RunnerUp <${value}>`;
   }
 
   // Recover email if present anywhere in the string
@@ -91,7 +91,7 @@ function normalizeResendFrom(raw: string | undefined): string {
       .replace(email, " ")
       .replace(/\s+/g, " ")
       .trim();
-    return name ? `${name} <${email}>` : `Mountain Run <${email}>`;
+    return name ? `${name} <${email}>` : `RunnerUp <${email}>`;
   }
 
   logger.warn(

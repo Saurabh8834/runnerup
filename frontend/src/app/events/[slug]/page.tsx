@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!event) return { title: "Event Not Found" };
 
   const isPast = event.status === "past";
-  const metaTitle = `${event.name} - ${event.distance} Virtual Run | Mountain Run`;
+  const metaTitle = `${event.name} - ${event.distance} Virtual Run | RunnerUp`;
   const metaDescription = isPast
     ? `View results and recap for ${event.name}. ${event.finishers ?? 0} finishers, ${event.verifiedResults ?? 0} verified GPS results from across India.`
     : `Register for ${event.name} - a ${event.distance} virtual running event. GPS verification, medals, certificates, and leaderboard. Entry: ${event.price}.`;
@@ -113,7 +113,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     },
     organizer: {
       "@type": "Organization",
-      name: "Mountain Run",
+      name: "RunnerUp",
       url: SITE_URL,
       logo: `${SITE_URL}/logo-mark.svg`,
     },
@@ -138,7 +138,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         name: `How do I participate in ${event.name}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `Register on Mountain Run, choose your distance (${event.distance}), run using any GPS tracking app (Strava, Nike, Garmin), and upload your activity screenshot to claim your medal and certificate.`,
+          text: `Register on RunnerUp, choose your distance (${event.distance}), run using any GPS tracking app (Strava, Nike, Garmin), and upload your activity screenshot to claim your medal and certificate.`,
         },
       },
       {

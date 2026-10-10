@@ -24,7 +24,7 @@ export function EventCompare() {
     <section className="section border-b border-(--line)">
       <div className="container-page">
         <SectionHeader
-          eyebrow="The Mountain Run difference"
+          eyebrow="The RunnerUp difference"
           title={
             <>
               A real race,{" "}
@@ -54,7 +54,7 @@ export function EventCompare() {
             </div>
           </Reveal>
 
-          {/* Mountain Run */}
+          {/* RunnerUp */}
           <Reveal delay={0.1}>
             <div className="relative h-full overflow-hidden rounded-3xl border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 to-(--panel) p-6 shadow-premium sm:p-8">
               <div
@@ -63,7 +63,7 @@ export function EventCompare() {
               />
               <div className="flex items-center justify-between">
                 <p className="text-[0.65rem] font-black uppercase tracking-widest text-[#e64833]">
-                  Mountain Run
+                  RunnerUp
                 </p>
                 <span className="rounded-full bg-gradient-to-r from-[#e64833] to-[#874f41] px-2.5 py-0.5 text-[0.6rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-xs">
                   Recommended

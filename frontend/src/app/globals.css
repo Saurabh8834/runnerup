@@ -1084,10 +1084,10 @@ html[data-theme="dark"] .badge-danger {
 @keyframes badge-float {
   0%,
   100% {
-    transform: translateY(0) rotate(var(--tilt, 0deg));
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px) rotate(var(--tilt, 0deg));
+    transform: translateY(-8px);
   }
 }
 
@@ -1615,7 +1615,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   box-shadow: 14px 14px 0 rgba(230,72,51,.2), 0 28px 65px rgba(0,0,0,.45) !important;
 }
 .event-classic-poster::before {
-  content: "OFFICIAL MOUNTAIN RUN • EST. 2026";
+  content: "OFFICIAL RUNNERUP • EST. 2026";
   position: absolute;
   z-index: 2;
   top: .85rem;
@@ -1683,7 +1683,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
     linear-gradient(135deg, #172c34, #14242a 68%);
 }
 .events-classic-hero::after {
-  content: "MOUNTAIN RUN • OPEN RACES • MOUNTAIN RUN • OPEN RACES • MOUNTAIN RUN";
+  content: "RUNNERUP • OPEN RACES • RUNNERUP • OPEN RACES • RUNNERUP";
   position: absolute;
   bottom: .45rem;
   left: 0;
@@ -1756,7 +1756,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
     linear-gradient(135deg, #172c34, #14242a 70%);
 }
 .gallery-classic-hero::after {
-  content: "THE MOUNTAIN RUN ALBUM • THE MOUNTAIN RUN ALBUM • THE MOUNTAIN RUN ALBUM";
+  content: "THE RUNNERUP ALBUM • THE RUNNERUP ALBUM • THE RUNNERUP ALBUM";
   position: absolute;
   bottom: .45rem;
   left: 0;
@@ -1788,7 +1788,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 
 /* Make catalogue cards feel like a selected race kit */
 .events-classic-card > div:first-child::after {
-  content: "MOUNTAIN RUN";
+  content: "RUNNERUP";
   position: absolute;
   right: .85rem;
   bottom: .7rem;
@@ -1898,7 +1898,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
     linear-gradient(135deg, #172c34, #14242a 62%, #1b323b);
 }
 .auth-classic-shell::before {
-  content: "MOUNTAIN RUN • RUN YOUR WAY • MOUNTAIN RUN • RUN YOUR WAY";
+  content: "RUNNERUP • RUN YOUR WAY • RUNNERUP • RUN YOUR WAY";
   position: absolute;
   right: -7rem;
   top: 50%;

@@ -1,4 +1,4 @@
-# Railway deploy (Mountain Run API)
+# Railway deploy (RunnerUp API)
 
 ## Service settings
 

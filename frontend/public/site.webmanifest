@@ -1,6 +1,6 @@
 {
-  "name": "Mountain Run - Virtual Running Events",
-  "short_name": "Mountain Run",
+  "name": "RunnerUp - Virtual Running Events",
+  "short_name": "RunnerUp",
   "description": "Join India's premier virtual running events. Register with UPI, track with GPS, earn medals & certificates.",
   "start_url": "/",
   "display": "standalone",

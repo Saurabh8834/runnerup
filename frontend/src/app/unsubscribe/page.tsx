@@ -68,7 +68,7 @@ function UnsubscribeForm() {
       </div>
       <h2 className="mt-4 text-center text-lg font-semibold">Unsubscribe</h2>
       <p className="mt-1 text-center text-sm text-(--muted)">
-        Enter your email to unsubscribe from Mountain Run updates.
+        Enter your email to unsubscribe from RunnerUp updates.
       </p>
       <form onSubmit={onSubmit} noValidate className="mt-6">
         <input

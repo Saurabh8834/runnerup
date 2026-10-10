@@ -450,7 +450,7 @@ function SidebarNav({
 }) {
   return (
     <>
-      <Link href="/" className="admin-sidebar-brand" aria-label="Go to Mountain Run homepage">
+      <Link href="/" className="admin-sidebar-brand" aria-label="Go to RunnerUp homepage">
         <div className="admin-sidebar-brand-icon">
           <BrandMark size={20} />
         </div>

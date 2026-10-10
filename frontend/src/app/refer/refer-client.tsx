@@ -46,7 +46,7 @@ function ReferSignedIn() {
 
   const getWhatsAppUrl = () => {
     if (!data) return "#";
-    const text = encodeURIComponent(`Join me on Mountain Run — virtual running events across India! Sign up using my referral link: ${data.link}`);
+    const text = encodeURIComponent(`Join me on RunnerUp — virtual running events across India! Sign up using my referral link: ${data.link}`);
     return `https://wa.me/?text=${text}`;
   };
 
@@ -171,7 +171,7 @@ export function ReferClient() {
             </h2>
             <div className="mt-10 grid gap-6 sm:grid-cols-3">
               {[
-                { step: "01", icon: UserPlus, title: "Create account", desc: "Sign up for free on Mountain Run. Get your unique referral code instantly." },
+                { step: "01", icon: UserPlus, title: "Create account", desc: "Sign up for free on RunnerUp. Get your unique referral code instantly." },
                 { step: "02", icon: Share2, title: "Share your link", desc: "Send your referral link to friends, family, and running groups on WhatsApp or social media." },
                 { step: "03", icon: Gift, title: "Earn rewards", desc: "When they register for an event, you both earn rewards. The more you refer, the more you earn." },
               ].map(({ step, icon: Icon, title, desc }) => (
@@ -202,7 +202,7 @@ export function ReferClient() {
                 { icon: IndianRupee, title: "Referral discount", desc: "Get ₹100 off your next event registration for each friend who signs up using your code." },
                 { icon: Users, title: "Friend also benefits", desc: "Your friend gets ₹100 off their first registration too. It's a win-win!" },
                 { icon: Sparkles, title: "No limit", desc: "Refer as many friends as you want. There's no cap on how much you can earn." },
-                { icon: Gift, title: "Extra perks", desc: "Top referrers each season get exclusive Mountain Run merch and free entries." },
+                { icon: Gift, title: "Extra perks", desc: "Top referrers each season get exclusive RunnerUp merch and free entries." },
               ].map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="flex gap-4 rounded-xl border border-(--line) bg-(--panel) p-5">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-(--sage-soft) text-(--sage)">

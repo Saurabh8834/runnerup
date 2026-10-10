@@ -13,7 +13,7 @@ export function PersistentRegisterCta() {
     return null;
   }
 
-  // Check if user is on a specific event page (e.g. /events/mountain-run)
+  // Check if user is on a specific event page (e.g. /events/october-runner)
   const isEventDetail =
     pathname?.startsWith("/events/") &&
     pathname !== "/events" &&

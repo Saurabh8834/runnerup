@@ -192,7 +192,7 @@
       <rect x="-80" y="38" width="160" height="24" rx="12" fill="#0f172a" stroke="url(#goldRim)" stroke-width="2" />
       <text x="0" y="54" fill="#fef08a" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="900" text-anchor="middle" letter-spacing="2">FINISHER 2026</text>
 
-      <text x="0" y="-85" fill="#fef08a" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" text-anchor="middle" letter-spacing="3">MOUNTAIN RUN</text>
+      <text x="0" y="-85" fill="#fef08a" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" text-anchor="middle" letter-spacing="3">RUNNERUP</text>
 
       <!-- 5 Stars Below -->
       <g transform="translate(-36, 75)" fill="#fef08a">

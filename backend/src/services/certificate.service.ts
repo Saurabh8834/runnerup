@@ -85,7 +85,7 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Mountain Run Certificate of Achievement</title>
+  <title>Your RunnerUp Certificate of Achievement</title>
   <style type="text/css">
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Outfit:wght@400;600;700;800;900&display=swap');
     
@@ -148,11 +148,11 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
                     </table>
                   </td>
 
-                  <!-- Center: Mountain Run Logo -->
+                  <!-- Center: RunnerUp Logo -->
                   <td width="40%" align="center" valign="top">
                     <div style="display:inline-block;text-align:center;">
-                      <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏔️</div>
-                      <p style="margin:0;font-size:16px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:${DARK_GREEN};line-height:1.1;">MOUNTAIN <span style="color:#d97706;">RUN</span></p>
+                      <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏃</div>
+                      <p style="margin:0;font-size:16px;font-weight:900;letter-spacing:0.18em;text-transform:uppercase;color:${DARK_GREEN};line-height:1.1;">RUNNER <span style="color:#d97706;">UP</span></p>
                       <p style="margin:3px 0 0;font-size:8px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:${MUTED};">— RUN ANYWHERE, ANYTIME —</p>
                     </div>
                   </td>
@@ -312,7 +312,7 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
                 THIS IS AN E-CERTIFICATE AND DOES NOT REQUIRE A PHYSICAL SIGNATURE.
               </p>
               <p style="margin:0;font-size:9px;color:rgba(255,255,255,0.4);line-height:1.5;">
-                © ${new Date().getFullYear()} Mountain Run India. All rights reserved.<br/>
+                © ${new Date().getFullYear()} RunnerUp India. All rights reserved.<br/>
                 Verify authenticity anytime at <a href="${escapeHtml(data.verifyUrl)}" style="color:#c9a227;text-decoration:none;">${escapeHtml(data.verifyUrl)}</a>
               </p>
             </td>

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { PrismaClient } from "@prisma/client";
 
-const localUrl = "postgresql://postgres:12345@127.0.0.1:5432/relentlessrun?schema=public";
+const localUrl = "postgresql://postgres:12345@127.0.0.1:5432/runnerup?schema=public";
 const localPrisma = new PrismaClient({ datasources: { db: { url: localUrl } } });
 
 const neonUrl = process.env.DATABASE_URL!;

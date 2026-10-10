@@ -75,7 +75,7 @@ export async function getGalleryContent(request: Request, response: Response) {
     data: items.map((m) => ({
       id: m.id,
       title: m.title,
-      event: m.eventLabel ?? "Mountain Run",
+      event: m.eventLabel ?? "RunnerUp",
       location: m.location ?? "India",
       date: m.dateLabel ?? "",
       category: m.category,

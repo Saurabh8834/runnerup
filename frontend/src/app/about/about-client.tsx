@@ -140,7 +140,7 @@ export function AboutClient() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="eyebrow">About Mountain Run</p>
+              <p className="eyebrow">About RunnerUp</p>
               <h1 className="mt-3 text-4xl font-bold leading-[1.1] tracking-tight text-(--foreground) sm:text-5xl">
                 Real races.
                 <span className="block mt-1 bg-gradient-to-r from-emerald-500 via-(--sage) to-indigo-400 bg-clip-text text-transparent">
@@ -149,7 +149,7 @@ export function AboutClient() {
               </h1>
               <div className="mt-5 space-y-4 text-sm leading-7 text-(--muted) sm:text-base sm:leading-8 max-w-lg">
                 <p>
-                  Mountain Run was built for people who love running but don't always have a race nearby.
+                  RunnerUp was built for people who love running but don't always have a race nearby.
                 </p>
                 <p>
                   Choose an event, run wherever you are, upload your GPS activity, and earn a finish that actually means something. No complicated rules, no crowded start lines — just real effort, verified honestly.
@@ -174,7 +174,7 @@ export function AboutClient() {
             >
               <div className="relative aspect-[4/3] w-full sm:aspect-[16/10] lg:aspect-[4/3]">
                 <Image
-                  alt="Runner finishing a Mountain Run virtual event"
+                  alt="Runner finishing a RunnerUp virtual event"
                   src="/images/about-hero-art.svg"
                   fill
                   className="object-cover"
@@ -295,7 +295,7 @@ export function AboutClient() {
               <div className="relative overflow-hidden rounded-3xl border border-(--line) group">
                 <div className="relative aspect-[16/10] w-full">
                   <Image
-                    alt="Mountain Run finisher medal and verified e-certificate"
+                    alt="RunnerUp finisher medal and verified e-certificate"
                     src="/images/rewards-showcase.svg"
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"

@@ -4,7 +4,7 @@ import { prisma } from "./lib/prisma.js";
 import { logger } from "./utils/logger.js";
 
 const server = app.listen(env.port, "0.0.0.0", () => {
-  logger.info(`Mountain Run API listening on port ${env.port}`, {
+  logger.info(`RunnerUp API listening on port ${env.port}`, {
     port: env.port,
     env: env.nodeEnv,
   });

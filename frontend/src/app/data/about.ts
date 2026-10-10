@@ -40,8 +40,8 @@ export const aboutPillars = [
 
 export const aboutFaqs = [
   {
-    q: "Do I need a mountain trail to join?",
-    a: "No. Mountain Run is the brand spirit — you can finish on road, track, or trail. Distances range from short intro efforts to longer challenges.",
+    q: "Where can I complete my run?",
+    a: "Anywhere! You can finish on road, park, track, or trail in your own city. Distances range from short intro efforts to longer challenges.",
   },
   {
     q: "How does proof work?",

@@ -372,11 +372,11 @@ export default function CertificateVerifyPage() {
                       className="text-2xl sm:text-3xl text-[#244855] font-bold"
                       style={{ fontFamily: "'Dancing Script', cursive" }}
                     >
-                      Mountain Run Team
+                      RunnerUp Team
                     </p>
                     <div className="h-0.5 w-32 bg-[#e64833] my-1" />
                     <p className="text-[0.6rem] font-black uppercase tracking-[0.15em] text-[#244855]">
-                      MOUNTAIN RUN TEAM
+                      RUNNERUP TEAM
                     </p>
                     <p className="text-[0.55rem] text-[#874f41]">Organizer</p>
                   </div>
@@ -384,7 +384,7 @@ export default function CertificateVerifyPage() {
                   {/* Center-Left: Official Wax / Stamp Seal */}
                   <div className="flex flex-col items-center">
                     <div className="w-18 h-18 rounded-full bg-[#244855] border-2 border-dashed border-[#e64833] flex flex-col items-center justify-center p-2 shadow-md">
-                      <p className="text-[0.5rem] font-black uppercase tracking-wider text-[#fbe9d0] leading-none">MOUNTAIN RUN</p>
+                      <p className="text-[0.5rem] font-black uppercase tracking-wider text-[#fbe9d0] leading-none">RUNNERUP</p>
                       <p className="text-[0.45rem] font-bold tracking-wider text-[#fbe9d0] uppercase mt-0.5">RUN ANYWHERE</p>
                       <p className="text-[0.4rem] tracking-widest text-[#90aead] uppercase">ANYTIME</p>
                       <p className="text-[0.65rem] text-[#e64833] leading-none mt-0.5">★★★</p>

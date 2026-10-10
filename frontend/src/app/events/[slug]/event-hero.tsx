@@ -4,14 +4,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   CalendarDays,
-  FileBadge,
-  Medal,
   Route,
-  Shirt,
   Sparkles,
   Star,
-  Trophy,
-  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { PublicEvent } from "../../data/events";
@@ -19,14 +14,6 @@ import { Breadcrumb } from "../../components/breadcrumb";
 import { RegisterCta } from "../../components/register-cta";
 import { EventCountdown } from "./countdown";
 import { Medal3D } from "./medal";
-
-const rewardBadges = [
-  { icon: Medal, label: "Finisher Medal" },
-  { icon: Shirt, label: "Premium T-shirt" },
-  { icon: FileBadge, label: "Official Certificate" },
-  { icon: Truck, label: "Free Delivery" },
-  { icon: Trophy, label: "Hall of Fame" },
-];
 
 export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boolean }) {
   const [heroImg, setHeroImg] = useState(event.bannerImageUrl ?? "/images/mountain-run-hero.svg");
@@ -114,23 +101,6 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               </span>
             </div>
           ) : null}
-
-          {/* Floating reward badges */}
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-            {rewardBadges.map(({ icon: Icon, label }, i) => (
-              <motion.span
-                key={label}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 + i * 0.08, duration: 0.5 }}
-                className="badge-float glass-pill inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.7rem] font-semibold text-(--foreground) shadow-sm"
-                style={{ animationDelay: `${i * 0.55}s`, ["--tilt" as string]: `${i % 2 === 0 ? -3 : 3}deg` }}
-              >
-                <Icon className="h-3.5 w-3.5 text-(--gold-deep)" />
-                {label}
-              </motion.span>
-            ))}
-          </div>
         </motion.div>
 
         {/* ─── Cinematic poster frame ─── */}

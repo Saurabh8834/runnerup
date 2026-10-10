@@ -36,7 +36,7 @@ export async function createRazorpayOrder(input: {
       receipt: input.receipt,
       notes: {
         registrationId: input.registrationId,
-        product: "Mountain Run registration",
+        product: "RunnerUp registration",
       },
     }),
   });

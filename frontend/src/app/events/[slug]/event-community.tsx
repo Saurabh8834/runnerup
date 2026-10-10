@@ -31,7 +31,7 @@ export function EventCommunity() {
               <span className="text-gold">Real moments.</span>
             </>
           }
-          lead="Join 25,000+ runners who made Mountain Run part of their journey."
+          lead="Join 25,000+ runners who made RunnerUp part of their journey."
         />
 
         <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:grid-cols-4 sm:gap-4">
