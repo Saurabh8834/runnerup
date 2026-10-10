@@ -49,7 +49,7 @@ export const allPublicEvents: PublicEvent[] = [
       "Pick a distance, finish it on any one day of the five, and a real finisher medal reaches your door.",
     highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
     banner: "Air Force Day Challenge",
-    bannerImageUrl: "/images/event-medal.jpg",
+    bannerImageUrl: "/images/event-medal.jpg?v=2",
     reward: "Solid Metal Finisher Medal + E-Certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
