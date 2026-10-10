@@ -35,14 +35,14 @@ export const adminEventSchema = z.object({
   featured: z.boolean().optional(),
   maxCapacity: z.number().int().positive().nullable().optional(),
   city: z.string().optional().nullable(),
-  bannerImageUrl: z.string().url().optional().nullable().or(z.literal("")),
+  bannerImageUrl: z.string().max(2000).optional().nullable().or(z.literal("")),
   couponCode: z.string().max(40).optional().nullable(),
   showCouponOnCard: z.boolean().optional(),
   activityTypes: z.array(z.enum(["running", "cycling", "walking"])).min(1).optional(),
   benefits: z.array(z.string().min(1)).optional(),
-  finishers: z.number().int().positive().nullable().optional(),
-  verifiedResults: z.number().int().positive().nullable().optional(),
-  cities: z.number().int().positive().nullable().optional(),
+  finishers: z.number().int().nonnegative().nullable().optional(),
+  verifiedResults: z.number().int().nonnegative().nullable().optional(),
+  cities: z.number().int().nonnegative().nullable().optional(),
   resultNote: z.string().max(2000).nullable().optional(),
   status: eventStatusEnum.optional(),
 });
@@ -77,12 +77,12 @@ export const adminMedalUpdateSchema = z.object({
   status: medalStatusEnum,
   courier: z.string().optional().nullable(),
   trackingNumber: z.string().optional().nullable(),
-  trackingUrl: z.string().url().optional().nullable().or(z.literal("")),
+  trackingUrl: z.string().max(2000).optional().nullable().or(z.literal("")),
 });
 
 export const adminCertificateUpdateSchema = z.object({
   status: certificateStatusEnum,
-  pdfUrl: z.string().url().optional().nullable().or(z.literal("")),
+  pdfUrl: z.string().max(2000).optional().nullable().or(z.literal("")),
 });
 
 export const adminUserRoleSchema = z.object({

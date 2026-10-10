@@ -230,11 +230,11 @@ export default function AdminEventsPage() {
         showCouponOnCard: form.showCouponOnCard,
         activityTypes: form.activityTypes,
         benefits: form.benefits.split("\n").map((s: string) => s.trim()).filter(Boolean),
-        finishers: form.finishers ? Number(form.finishers) : null,
-        verifiedResults: form.verifiedResults ? Number(form.verifiedResults) : null,
-        cities: form.cities ? Number(form.cities) : null,
+        finishers: form.finishers !== "" && form.finishers !== null && form.finishers !== undefined ? Number(form.finishers) : null,
+        verifiedResults: form.verifiedResults !== "" && form.verifiedResults !== null && form.verifiedResults !== undefined ? Number(form.verifiedResults) : null,
+        cities: form.cities !== "" && form.cities !== null && form.cities !== undefined ? Number(form.cities) : null,
         resultNote: form.resultNote || null,
-        bannerImageUrl: form.bannerImageUrl || null,
+        bannerImageUrl: form.bannerImageUrl ? form.bannerImageUrl.trim() : null,
         medalIncluded: form.medalIncluded, featured: form.featured,
         maxCapacity: form.maxCapacity ? Number(form.maxCapacity) : null,
         city: form.city || "Virtual", status: form.status,
@@ -389,10 +389,10 @@ export default function AdminEventsPage() {
                 )}
               </div>
               <p className="text-[0.65rem] text-[var(--muted)]">PNG, JPEG, WebP or AVIF · max 10 MB · or paste a URL below.</p>
-              <input className="input" placeholder="https://… or leave blank for default"
+              <input className="input" placeholder="https://… or /images/… or leave blank for default"
                 onChange={(e) => setForm((f) => ({ ...f, bannerImageUrl: e.target.value }))}
                 value={form.bannerImageUrl} />
-              {form.bannerImageUrl && !form.bannerImageUrl.startsWith("/images/") && (
+              {form.bannerImageUrl && (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img alt="Banner preview" src={form.bannerImageUrl} className="mt-1 h-12 w-auto max-w-full rounded-lg object-cover" />
               )}
