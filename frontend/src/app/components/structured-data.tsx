@@ -39,10 +39,10 @@ const organizationSchema = {
     'Virtual Runs for Beginners, Kids, and Families',
   ],
   sameAs: [
-    'https://instagram.com/runnerupofficial',
+    'https://instagram.com/runnerup.in',
     'https://facebook.com/runnerupofficial',
     'https://twitter.com/runnerup',
-    'https://wa.me/917518418960',
+    'https://wa.me/918287831071',
   ],
   address: {
     '@type': 'PostalAddress',
@@ -51,8 +51,8 @@ const organizationSchema = {
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',
-    email: 'runnerupofficial@gmail.com',
-    telephone: '+91-7518418960',
+    email: 'runnerupofficials@gmail.com',
+    telephone: '+91-8287831071',
     areaServed: 'IN',
     availableLanguage: ['English', 'Hindi'],
   },

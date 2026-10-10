@@ -59,13 +59,13 @@ export function EventCommunity() {
 
         <Reveal className="mt-8 text-center">
           <Link
-            href="https://instagram.com"
+            href="https://instagram.com/runnerup.in"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-(--line) bg-(--panel) px-5 py-2.5 text-sm font-bold text-(--foreground) shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-(--gold-line) hover:shadow-premium"
           >
             <InstagramGlyph className="h-4 w-4 text-(--gold-deep)" />
-            Follow @runnerup
+            Follow @runnerup.in
           </Link>
         </Reveal>
       </div>

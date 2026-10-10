@@ -6,7 +6,7 @@ import { Medal3D } from "./medal";
 import { EventCountdown } from "./countdown";
 import { Reveal } from "./reveal";
 
-const WHATSAPP_URL = "https://wa.me/917518418960";
+const WHATSAPP_URL = "https://wa.me/918287831071";
 
 function formatPrice(price: string) {
   return price.replace(/^Rs\.\s*/, "₹");

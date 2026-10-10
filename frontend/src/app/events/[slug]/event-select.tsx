@@ -8,7 +8,7 @@ import { RegisterCta } from "../../components/register-cta";
 import { EventCountdown } from "./countdown";
 import { SectionHeader } from "./reveal";
 
-const WHATSAPP_URL = "https://wa.me/917518418960";
+const WHATSAPP_URL = "https://wa.me/918287831071";
 
 type Activity = { key: string; label: string; icon: typeof Footprints; active: string };
 
