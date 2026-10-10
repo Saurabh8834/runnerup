@@ -40,14 +40,14 @@ export type PublicEvent = {
 
 export const allPublicEvents: PublicEvent[] = [
   {
-    name: "Indian Air Force Day Virtual Challenge ✈️ 🎖️",
+    name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
     date: "8-12 October 2026",
     distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
     price: "Rs. 499",
     description:
       "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
-    highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
+    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
     banner: "Air Force Day Virtual Challenge",
     bannerImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
@@ -64,14 +64,14 @@ export const allPublicEvents: PublicEvent[] = [
     ],
   },
   {
-    name: "Indian Air Force Day 2026 🇮🇳",
+    name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-2026",
     date: "8-12 October 2026",
     distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
     price: "Rs. 499",
     description:
       "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
-    highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
+    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
     banner: "Air Force Day Virtual Challenge",
     bannerImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",

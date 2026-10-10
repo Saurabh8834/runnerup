@@ -6,12 +6,12 @@ async function main() {
   const desc = `🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳`;
 
   const data = {
-    title: "Indian Air Force Day Virtual Challenge ✈️ 🎖️",
+    title: "Indian Air Force Day Virtual Challenge 2026",
     description: desc,
     bannerImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     banner: "Air Force Day Virtual Challenge",
-    highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
+    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     priceInPaise: 49900,
     paymentRequired: true,

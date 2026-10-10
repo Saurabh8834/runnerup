@@ -24,7 +24,7 @@ export type DefaultEvent = {
 
 export const defaultEvents: DefaultEvent[] = [
   {
-    title: "Indian Air Force Day Virtual Challenge ✈️ 🎖️",
+    title: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
     description:
       "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
@@ -40,7 +40,7 @@ export const defaultEvents: DefaultEvent[] = [
     bannerImageUrl: "/images/event-medal.webp",
     banner: "Air Force Day Virtual Challenge",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
-    highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",
+    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
     benefits: [
       "Free delivery across India",
       "Works with Strava, Garmin, NRC",

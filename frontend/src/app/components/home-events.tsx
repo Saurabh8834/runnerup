@@ -67,12 +67,18 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   }, []);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] text-[#fbe9d0]">
+    <article
+      className={`group flex flex-col overflow-hidden rounded-3xl border transition-all duration-300 hover:-translate-y-1.5 shadow-2xl ${
+        isAirForce
+          ? "border-slate-200/90 bg-white text-slate-900 hover:shadow-[0_20px_50px_rgba(2,132,199,0.25)] hover:border-[#0284c7]/50"
+          : "border-[#90aead]/20 bg-[#172c34]/95 text-[#fbe9d0] hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)]"
+      }`}
+    >
       {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
           isAirForce
-            ? "h-80 sm:h-96 bg-gradient-to-b from-[#14242a] via-[#172c34] to-[#14242a]"
+            ? "h-80 sm:h-96 bg-black flex items-center justify-center p-4 sm:p-6"
             : hasBannerImage
             ? "h-56 sm:h-72 bg-[#14242a]"
             : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
@@ -86,10 +92,10 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         {imgSrc && !imgFailed ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            alt=""
+            alt={event.name}
             className={
               isAirForce
-                ? "relative z-[2] h-full w-full object-contain p-2.5 pb-11 transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.9)]"
+                ? "relative z-[2] h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.9)]"
                 : "absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
             }
             src={imgSrc}
@@ -129,46 +135,59 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           />
         )}
 
-        {/* Top Urgency Badges */}
-        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
-          {/* Scarcity Badge */}
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
-            <Flame className="h-3 w-3 fill-white" />
-            <span>{scarcity.percent}% Booked</span>
-          </span>
-
-          {/* Active Race Badge */}
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+        {/* Top Badges */}
+        {isAirForce ? (
+          <div className="absolute top-3.5 right-3.5 z-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 text-[0.7rem] font-bold text-emerald-400 backdrop-blur-md shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Open
             </span>
-            <span>Registration Open</span>
-          </span>
-        </div>
-
-        {/* Reward / Medal Highlight Strip */}
-        <div className="absolute bottom-3 left-4 right-4 z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-md">
-            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
-            <span className="truncate">{event.reward}</span>
           </div>
-        </div>
+        ) : (
+          <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
+              <Flame className="h-3 w-3 fill-white" />
+              <span>{scarcity.percent}% Booked</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span>Registration Open</span>
+            </span>
+          </div>
+        )}
+
+        {/* Reward / Medal Highlight Strip for non-Air Force events */}
+        {!isAirForce && (
+          <div className="absolute bottom-3 left-4 right-4 z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-md">
+              <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
+              <span className="truncate">{event.reward}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Body Content */}
-      <div className="flex flex-1 flex-col p-6">
+      <div className={`flex flex-1 flex-col p-6 ${isAirForce ? "bg-white" : ""}`}>
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-[#e64833] flex items-center gap-1">
               <Zap className="h-3.5 w-3.5 fill-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
             </span>
-            <span className="text-[#90aead] font-mono text-[0.72rem]">
+            <span className={`${isAirForce ? "text-slate-500" : "text-[#90aead]"} font-mono text-[0.72rem]`}>
               {scarcity.percent}% Filled
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-black/30 p-0.5 border border-[#90aead]/20">
+          <div
+            className={`h-2 w-full overflow-hidden rounded-full p-0.5 border ${
+              isAirForce ? "bg-slate-100 border-slate-200" : "bg-black/30 border-[#90aead]/20"
+            }`}
+          >
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${scarcity.percent}%` }}
@@ -180,39 +199,60 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         </div>
 
         {/* Title */}
-        <h3 className="font-display font-black text-xl sm:text-2xl uppercase tracking-tight text-[#fbe9d0] transition-colors group-hover:text-[#e64833]">
+        <h3
+          className={`font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors ${
+            isAirForce
+              ? "text-[#0284c7] hover:text-[#0369a1]"
+              : "uppercase tracking-tight text-[#fbe9d0] group-hover:text-[#e64833]"
+          }`}
+        >
           {event.name}
         </h3>
 
+        {/* Subtitle / Highlight */}
+        <p
+          className={`mt-2 text-xs sm:text-sm font-medium leading-relaxed ${
+            isAirForce ? "text-slate-600" : "text-[#90aead] line-clamp-2"
+          }`}
+        >
+          {event.highlight}
+        </p>
+
         {/* Multi-Distance Tags */}
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
           {event.distance.split(/[\/,]/).map((d) => (
             <span
               key={d}
-              className="rounded-lg bg-[#244855] border border-[#90aead]/30 px-2.5 py-0.5 font-mono text-[0.68rem] font-bold text-[#fbe9d0]"
+              className={`rounded-lg px-2.5 py-0.5 font-mono text-[0.68rem] font-bold ${
+                isAirForce
+                  ? "bg-slate-100 border border-slate-200/90 text-slate-700"
+                  : "bg-[#244855] border border-[#90aead]/30 text-[#fbe9d0]"
+              }`}
             >
               {d.trim()}
             </span>
           ))}
         </div>
 
-        <p className="mt-3 flex-1 text-xs sm:text-sm leading-relaxed text-[#90aead] font-medium line-clamp-2">
-          {event.highlight}
-        </p>
-
         {/* Countdown & Price Footer */}
-        <div className="mt-5 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-[#90aead] font-medium">
-            <Timer className="h-4 w-4 text-[#e64833] shrink-0" />
+        <div
+          className={`mt-5 pt-4 border-t flex items-center justify-between gap-2 ${
+            isAirForce ? "border-slate-100 text-slate-600" : "border-[#90aead]/15 text-[#90aead]"
+          }`}
+        >
+          <div className="flex items-center gap-1.5 text-xs font-medium">
+            <Timer className={`h-4 w-4 shrink-0 ${isAirForce ? "text-[#0284c7]" : "text-[#e64833]"}`} />
             <span>Closes in:</span>
-            <span className="font-mono font-bold text-[#fbe9d0]">
+            <span className={`font-mono font-bold ${isAirForce ? "text-slate-800" : "text-[#fbe9d0]"}`}>
               {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
             </span>
           </div>
 
           <div className="flex items-baseline gap-2 text-right">
-            <span className="text-xs text-[#90aead]/60 line-through font-mono">₹549</span>
-            <span className="font-mono text-xl font-black text-[#fbe9d0]">
+            <span className={`text-xs line-through font-mono ${isAirForce ? "text-slate-400" : "text-[#90aead]/60"}`}>
+              ₹549
+            </span>
+            <span className={`font-mono text-xl font-black ${isAirForce ? "text-slate-900" : "text-[#fbe9d0]"}`}>
               {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "₹")}
             </span>
           </div>
@@ -220,10 +260,14 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Primary CTA */}
         <Link
-          className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)] transition-all"
+          className={`mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all ${
+            isAirForce
+              ? "bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-md hover:shadow-lg hover:scale-[1.01]"
+              : "bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
+          }`}
           href={`/events/${event.slug}`}
         >
-          <Sparkles className="h-4 w-4 text-[#fbe9d0]" />
+          <Sparkles className="h-4 w-4" />
           <span>Claim Your Bib & Medal</span>
           <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
