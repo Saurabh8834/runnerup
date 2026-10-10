@@ -56,8 +56,8 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 }
 
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
-  "indian-air-force-day-virtual-challenge": "/images/event-medal.jpg",
-  "indian-air-force-day-2026": "/images/event-medal.jpg",
+  "indian-air-force-day-virtual-challenge": "/images/event-medal.webp",
+  "indian-air-force-day-2026": "/images/event-medal.webp",
   "october-runner":
     "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
   "independence-day-virtual-run-2026":
@@ -84,7 +84,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
   const defaultPoster =
     event.bannerImageUrl ||
-    (isAirForce ? "/images/event-medal.jpg" : FALLBACK_EVENT_IMAGES[event.slug]) ||
+    (isAirForce ? "/images/event-medal.webp" : FALLBACK_EVENT_IMAGES[event.slug]) ||
     `/events/${event.slug}.webp`;
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
@@ -94,7 +94,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   useEffect(() => {
     const nextPoster =
       event.bannerImageUrl ||
-      (isAirForce ? "/images/event-medal.jpg" : FALLBACK_EVENT_IMAGES[event.slug]) ||
+      (isAirForce ? "/images/event-medal.webp" : FALLBACK_EVENT_IMAGES[event.slug]) ||
       `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
     setImgFailed(false);
@@ -122,20 +122,33 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
       {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-56 sm:h-72 bg-[#14242a]" : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
+          isAirForce
+            ? "h-80 sm:h-96 bg-gradient-to-b from-[#14242a] via-[#172c34] to-[#14242a]"
+            : hasBannerImage
+            ? "h-56 sm:h-72 bg-[#14242a]"
+            : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
+        {isAirForce && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+            <div className="h-56 w-56 rounded-full bg-[#f59e0b]/15 blur-3xl" />
+          </div>
+        )}
         {imgSrc && !imgFailed ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            className={
+              isAirForce
+                ? "relative z-[2] h-full w-full object-contain p-2.5 pb-11 transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.9)]"
+                : "absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            }
             src={imgSrc}
             loading={index < 3 ? "eager" : "lazy"}
             decoding="async"
             onError={() => {
               if (isAirForce) {
-                setImgSrc("/images/event-medal.jpg");
+                setImgSrc("/images/event-medal.png");
                 return;
               }
               if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
@@ -161,7 +174,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           </div>
         )}
         
-        {hasBannerImage && (
+        {hasBannerImage && !isAirForce && (
           <div
             aria-hidden
             className="absolute inset-0 bg-gradient-to-t from-[#172c34]/95 via-[#172c34]/40 to-transparent"

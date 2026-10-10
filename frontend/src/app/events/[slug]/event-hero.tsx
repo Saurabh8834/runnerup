@@ -84,8 +84,8 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     ? event.date.toUpperCase()
     : "8-12 OCTOBER 2026";
 
-  // Medal image source - always use the high quality new RunnerUp medal
-  const medalImageSrc = "/images/event-medal.jpg?v=2";
+  // Medal image source - transparent high-quality RunnerUp medal
+  const medalImageSrc = "/images/event-medal.webp";
 
   return (
     <section className="relative w-full overflow-hidden bg-black text-white isolate min-h-[92dvh] flex flex-col justify-center pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-24 lg:pb-14 border-b border-white/10">

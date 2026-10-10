@@ -8,7 +8,7 @@ async function main() {
   const data = {
     title: "Indian Air Force Day Virtual Challenge ✈️ 🎖️",
     description: desc,
-    bannerImageUrl: "/images/event-medal.jpg",
+    bannerImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     banner: "Air Force Day Virtual Challenge",
     highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",

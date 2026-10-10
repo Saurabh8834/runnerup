@@ -34,7 +34,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
   const initialImage =
     event.bannerImageUrl ||
-    (isAirForce ? "/images/event-medal.jpg" : `/events/${event.slug}.webp`);
+    (isAirForce ? "/images/event-medal.webp" : `/events/${event.slug}.webp`);
 
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
@@ -44,7 +44,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   useEffect(() => {
     setImgSrc(
       event.bannerImageUrl ||
-        (isAirForce ? "/images/event-medal.jpg" : `/events/${event.slug}.webp`)
+        (isAirForce ? "/images/event-medal.webp" : `/events/${event.slug}.webp`)
     );
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug, isAirForce]);
@@ -71,20 +71,33 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
-          hasBannerImage ? "h-56 sm:h-72 bg-[#14242a]" : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
+          isAirForce
+            ? "h-80 sm:h-96 bg-gradient-to-b from-[#14242a] via-[#172c34] to-[#14242a]"
+            : hasBannerImage
+            ? "h-56 sm:h-72 bg-[#14242a]"
+            : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
         }`}
       >
+        {isAirForce && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+            <div className="h-56 w-56 rounded-full bg-[#f59e0b]/15 blur-3xl" />
+          </div>
+        )}
         {imgSrc && !imgFailed ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            className={
+              isAirForce
+                ? "relative z-[2] h-full w-full object-contain p-2.5 pb-11 transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.9)]"
+                : "absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+            }
             src={imgSrc}
             loading={index < 3 ? "eager" : "lazy"}
             decoding="async"
             onError={() => {
               if (isAirForce) {
-                setImgSrc("/images/event-medal.jpg");
+                setImgSrc("/images/event-medal.png");
                 return;
               }
               if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
@@ -109,10 +122,12 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
             </span>
           </div>
         )}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-[#172c34] via-[#172c34]/40 to-[#14242a]/30"
-        />
+        {!isAirForce && (
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-[#172c34] via-[#172c34]/40 to-[#14242a]/30"
+          />
+        )}
 
         {/* Top Urgency Badges */}
         <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">

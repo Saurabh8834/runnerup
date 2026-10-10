@@ -37,7 +37,7 @@ export const defaultEvents: DefaultEvent[] = [
     city: "Virtual (All India)",
     featured: true,
     medalIncluded: true,
-    bannerImageUrl: "/images/event-medal.jpg",
+    bannerImageUrl: "/images/event-medal.webp",
     banner: "Air Force Day Virtual Challenge",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     highlight: "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included.",

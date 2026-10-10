@@ -36,7 +36,7 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
   const isAirForce =
     event?.slug?.includes("air-force") ||
     event?.name?.toLowerCase().includes("air force");
-  const medalImg = isAirForce ? "/images/event-medal.jpg" : event?.bannerImageUrl;
+  const medalImg = isAirForce ? "/images/event-medal.webp" : event?.bannerImageUrl;
 
   const dynamicItems = [
     {
@@ -97,12 +97,12 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
 
               <div className="relative flex items-center justify-center px-6 pt-10">
                 {medalImg ? (
-                  <div className="relative w-48 sm:w-60 aspect-square rounded-2xl overflow-hidden shadow-2xl border border-amber-500/30 group">
+                  <div className="relative w-52 sm:w-64 max-w-full aspect-[2/3] flex items-center justify-center group">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={medalImg}
                       alt={event?.name ? `${event.name} Finisher Medal` : "Finisher Medal"}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                 ) : (
