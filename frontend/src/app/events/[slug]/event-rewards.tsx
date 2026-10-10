@@ -84,6 +84,20 @@ export function EventRewards() {
                 </div>
               </div>
 
+              {/* Pinned feature badges — static, zero float or tilt */}
+              <div className="glass-pill absolute left-4 top-8 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:left-7 sm:top-10">
+                <Shirt className="h-3.5 w-3.5 text-(--gold-deep)" />
+                Premium T-shirt
+              </div>
+              <div className="glass-pill absolute bottom-24 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:bottom-28 sm:right-6">
+                <FileBadge className="h-3.5 w-3.5 text-(--gold-deep)" />
+                Official certificate
+              </div>
+              <div className="glass-pill absolute bottom-12 left-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:bottom-16 sm:left-6">
+                <Truck className="h-3.5 w-3.5 text-(--gold-deep)" />
+                Free delivery
+              </div>
+
               {/* Footer tag */}
               <div className="relative border-t border-(--gold-line) px-6 py-5 text-center">
                 <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--gold-deep)">

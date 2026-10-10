@@ -1081,19 +1081,6 @@ html[data-theme="dark"] .badge-danger {
   transform-origin: 50% 100%;
 }
 
-@keyframes badge-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-.badge-float {
-  animation: badge-float 5.5s ease-in-out infinite;
-}
 
 @keyframes shimmer-sweep {
   0% {

@@ -4,9 +4,14 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   CalendarDays,
+  FileBadge,
+  Medal,
   Route,
+  Shirt,
   Sparkles,
   Star,
+  Trophy,
+  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { PublicEvent } from "../../data/events";
@@ -14,6 +19,14 @@ import { Breadcrumb } from "../../components/breadcrumb";
 import { RegisterCta } from "../../components/register-cta";
 import { EventCountdown } from "./countdown";
 import { Medal3D } from "./medal";
+
+const rewardBadges = [
+  { icon: Medal, label: "Finisher Medal" },
+  { icon: Shirt, label: "Premium T-shirt" },
+  { icon: FileBadge, label: "Official Certificate" },
+  { icon: Truck, label: "Free Delivery" },
+  { icon: Trophy, label: "Hall of Fame" },
+];
 
 export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boolean }) {
   const [heroImg, setHeroImg] = useState(event.bannerImageUrl ?? "/images/mountain-run-hero.svg");
@@ -101,6 +114,19 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               </span>
             </div>
           ) : null}
+
+          {/* Reward Badges — Static, flat, zero floating or tilting effect */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            {rewardBadges.map(({ icon: Icon, label }) => (
+              <span
+                key={label}
+                className="glass-pill inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.7rem] sm:text-xs font-semibold text-(--foreground) shadow-xs"
+              >
+                <Icon className="h-3.5 w-3.5 text-(--gold-deep)" />
+                {label}
+              </span>
+            ))}
+          </div>
         </motion.div>
 
         {/* ─── Cinematic poster frame ─── */}
