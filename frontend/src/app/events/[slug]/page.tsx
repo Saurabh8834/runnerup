@@ -32,21 +32,41 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ? `View results and recap for ${event.name}. ${event.finishers ?? 0} finishers, ${event.verifiedResults ?? 0} verified GPS results from across India.`
     : `Register for ${event.name} - a ${event.distance} virtual running event. GPS verification, medals, certificates, and leaderboard. Entry: ${event.price}.`;
 
+  const ogImageUrl = event.bannerImageUrl
+    ? event.bannerImageUrl.startsWith("http")
+      ? event.bannerImageUrl
+      : `${SITE_URL}${event.bannerImageUrl.startsWith("/") ? "" : "/"}${event.bannerImageUrl}`
+    : `${SITE_URL}/og-image.png`;
+
   return {
     title: metaTitle,
     description: metaDescription,
-    keywords: [event.name, event.distance, "virtual run", "GPS verified", "running event", "marathon", "5K run", "10K run", "half marathon", "virtual race India"],
+    keywords: [
+      event.name,
+      event.distance,
+      "virtual run",
+      "GPS verified",
+      "running event",
+      "marathon",
+      "5K run",
+      "10K run",
+      "half marathon",
+      "virtual race India",
+      "finisher medal india",
+      "strava running challenge",
+      "running medal delivery india",
+    ],
     openGraph: {
       title: metaTitle,
       description: metaDescription,
-      url: `/events/${slug}`,
+      url: `${SITE_URL}/events/${slug}`,
       type: "website",
       images: [
         {
-          url: event.bannerImageUrl || "/og-image.png",
+          url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: event.name,
+          alt: `${event.name} Finisher Medal & Virtual Run`,
         },
       ],
     },
@@ -54,7 +74,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       card: "summary_large_image",
       title: metaTitle,
       description: metaDescription,
-      images: [event.bannerImageUrl || "/og-image.png"],
+      images: [ogImageUrl],
     },
     alternates: { canonical: `${SITE_URL}/events/${slug}` },
   };
@@ -105,7 +125,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     name: event.name,
     description: event.description || event.highlight,
     url: `${SITE_URL}/events/${slug}`,
-    image: event.bannerImageUrl || `${SITE_URL}/og-image.png`,
+    image: event.bannerImageUrl
+      ? event.bannerImageUrl.startsWith("http")
+        ? event.bannerImageUrl
+        : `${SITE_URL}${event.bannerImageUrl.startsWith("/") ? "" : "/"}${event.bannerImageUrl}`
+      : `${SITE_URL}/og-image.png`,
     startDate: event.date,
     location: {
       "@type": "VirtualLocation",

@@ -57,6 +57,7 @@ export function HomeHero() {
               <span className="block text-white">
                 Own Your Journey
               </span>
+              <span className="sr-only"> — India&apos;s Premier Virtual Running Events &amp; Marathons</span>
             </motion.h1>
 
             {/* Subtitle */}
@@ -66,7 +67,7 @@ export function HomeHero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mt-2.5 sm:mt-3.5 max-w-lg text-xs sm:text-sm lg:text-base text-[#fbe9d0]/85 font-medium leading-relaxed"
             >
-              Track your run with Strava, Garmin, or Apple Watch and earn your finisher medal.
+              India&apos;s premier GPS-verified virtual running races. Track your run anywhere with Strava, Garmin, or Apple Watch and earn authentic metal finisher medals delivered across India.
             </motion.p>
 
             {/* ─── Mobile Hero Image Card (visible ONLY on < lg screens) ─── */}

@@ -1,12 +1,8 @@
 import { MetadataRoute } from 'next';
 import { allPublicEvents } from './data/events';
+import { getApiUrl } from '../lib/api';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://runnerup.in';
-const API_URL =
-  process.env.INTERNAL_API_URL ||
-  (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("api.runnerup.in")
-    ? process.env.NEXT_PUBLIC_API_URL
-    : "http://127.0.0.1:4000");
 
 interface EventData {
   id?: string;
@@ -16,7 +12,8 @@ interface EventData {
 
 async function getEvents(): Promise<EventData[]> {
   try {
-    const response = await fetch(`${API_URL}/api/events`, {
+    const url = getApiUrl('/api/events');
+    const response = await fetch(url, {
       next: { revalidate: 3600 },
     });
     if (!response.ok) return [];
@@ -48,6 +45,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${SITE_URL}/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/gallery`,
       lastModified: new Date(),
       changeFrequency: 'daily',
@@ -58,6 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/refer`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.75,
     },
     {
       url: `${SITE_URL}/register`,

@@ -22,8 +22,22 @@ export const metadata: Metadata = {
     title: "Official Virtual Run Leaderboard & Finish Times | RunnerUp India",
     description:
       "View live GPS-verified running results and rankings from RunnerUp events.",
-    url: "/leaderboard",
+    url: `${SITE_URL}/leaderboard`,
     type: "website",
+    images: [
+      {
+        url: `${SITE_URL}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "RunnerUp Official Virtual Marathon Leaderboard",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Official Virtual Run Leaderboard | RunnerUp",
+    description: "View live GPS-verified virtual running rankings and times across India.",
+    images: [`${SITE_URL}/og-image.png`],
   },
   alternates: {
     canonical: `${SITE_URL}/leaderboard`,
