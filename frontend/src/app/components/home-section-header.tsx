@@ -29,7 +29,7 @@ export function HomeSectionHeader({
     return (
       <div className="flex flex-col gap-4 sm:gap-5 md:flex-row md:items-end md:justify-between mb-8">
         <div className="min-w-0">
-          <span className="inline-block rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
+          <span className="inline-block rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#00dfc4]">
             {eyebrow}
           </span>
           <h2 className={titleClass}>
@@ -48,7 +48,7 @@ export function HomeSectionHeader({
 
   return (
     <div className="mb-8">
-      <span className="inline-block rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
+      <span className="inline-block rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#00dfc4]">
         {eyebrow}
       </span>
       <h2 className={titleClass}>

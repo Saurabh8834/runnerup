@@ -261,20 +261,17 @@ function NavLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`relative inline-flex items-center rounded-full px-3.5 sm:px-4 py-1.5 text-xs sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
+      className={`relative inline-flex flex-col items-center justify-center px-3.5 py-1.5 text-xs sm:text-sm transition-all duration-200 whitespace-nowrap shrink-0 ${
         active
-          ? "text-[#fbe9d0] font-semibold"
-          : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
+          ? "text-[#00dfc4] font-bold"
+          : "text-slate-300 hover:text-white font-medium"
       }`}
     >
-      {active && (
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#e64833] shadow-[0_0_8px_#e64833] mr-1.5 shrink-0" />
-      )}
       <span className="whitespace-nowrap shrink-0">{label}</span>
       {active && (
         <motion.span
-          layoutId="nav-capsule-active"
-          className="absolute inset-0 -z-10 rounded-full bg-[#e64833]/15 border border-[#e64833]/40 shadow-[0_0_14px_rgba(230,72,51,0.25)]"
+          layoutId="nav-header-active"
+          className="absolute -bottom-1 h-[2px] w-6 rounded-full bg-[#00dfc4] shadow-[0_0_8px_#00dfc4]"
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
         />
       )}
@@ -368,18 +365,13 @@ export function AppHeader() {
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-2.5 sm:top-4 z-50 flex justify-center px-3 sm:px-6 pointer-events-none transition-all duration-300 ${
-          scrolled ? "top-2 sm:top-3" : "top-2.5 sm:top-4"
+        className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
+          scrolled
+            ? "bg-[#030d12]/95 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.85)] py-2.5 sm:py-3"
+            : "bg-[#030d12]/80 backdrop-blur-md border-b border-white/[0.08] py-3 sm:py-3.5"
         }`}
       >
-        <div
-          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-3.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
-            scrolled ? "bg-[#112026]/98 border-[#90aead]/25 shadow-[0_20px_48px_rgba(0,0,0,0.85)]" : ""
-          }`}
-        >
-          {/* Subtle top edge luminous highlight line */}
-          <div className="pointer-events-none absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#fbe9d0]/25 to-transparent" />
-
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Left — Brand Logo */}
           <div className="flex items-center shrink-0">
             <Link
@@ -393,14 +385,14 @@ export function AppHeader() {
                 alt="RUNNERUP"
                 width={180}
                 height={40}
-                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.4)] transition-transform duration-200 group-hover:scale-105"
+                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(0,223,196,0.35)] transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>
 
-          {/* Center — Distinct Nav Capsule Pill */}
-          <div className="hidden lg:flex items-center shrink-0 rounded-full bg-[#1f3741]/95 border border-[#90aead]/20 px-2.5 lg:px-3.5 py-1 lg:py-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_4px_16px_rgba(0,0,0,0.35)]">
-            <nav className="flex items-center gap-0.5 sm:gap-1" aria-label="Main navigation">
+          {/* Center — Clean Desktop Nav (Matches Image 2) */}
+          <div className="hidden lg:flex items-center shrink-0">
+            <nav className="flex items-center gap-1 xl:gap-2" aria-label="Main navigation">
               {publicNav.map(({ label, href }) => {
                 const active = isActive(href);
                 return (
@@ -417,20 +409,20 @@ export function AppHeader() {
           </div>
 
           {/* Right — Actions & High-contrast CTA */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* Desktop Actions (lg and up) */}
             <div className="hidden lg:flex items-center gap-2.5 xl:gap-3 shrink-0">
               {isLoaded && !isSignedIn && (
                 <>
                   <Link
-                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white/90 transition-colors hover:text-white hover:bg-white/[0.08] whitespace-nowrap border border-white/15 bg-white/[0.04]"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs sm:text-[13px] font-bold text-white transition-all hover:text-white hover:bg-white/[0.1] whitespace-nowrap border border-white/20 bg-white/[0.05]"
                     href="/sign-in"
                   >
                     <User className="h-3.5 w-3.5" />
                     <span>Login</span>
                   </Link>
                   <Link
-                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.5)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(0,223,196,0.8)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
+                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.55)] transition-all duration-300 hover:shadow-[0_0_35px_rgba(0,223,196,0.85)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
                     href="/events"
                   >
                     <span>Join Now</span>
@@ -441,19 +433,19 @@ export function AppHeader() {
               {isLoaded && isSignedIn && (
                 <div className="flex items-center gap-2.5">
                   <Link
-                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-sm hover:shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-4.5 text-xs font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
                     href="/register"
                   >
-                    <Zap className="h-3 w-3 text-[#fbe9d0] fill-[#fbe9d0]" />
+                    <Zap className="h-3.5 w-3.5 text-black fill-black" />
                     <span>Register Now</span>
-                    <ArrowRight className="h-3 w-3 text-[#fbe9d0]" />
+                    <ArrowRight className="h-3.5 w-3.5 text-black stroke-[2.5]" />
                   </Link>
                   <DashboardProfileDropdown />
                 </div>
               )}
             </div>
 
-            {/* Mobile Controls (below lg) - Browse Events is hidden from the top bar and housed in the hamburger menu */}
+            {/* Mobile Controls (below lg) - Circular hamburger button matching Image 1 */}
             <div className="flex lg:hidden items-center gap-2">
               {isLoaded && isSignedIn && (
                 <DashboardProfileDropdown isMobile />
@@ -481,7 +473,7 @@ export function AppHeader() {
               />
 
               {/* Glowing Accent Orb behind drawer */}
-              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-[#e64833]/15 blur-[120px]" />
+              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-[#00dfc4]/15 blur-[120px]" />
 
               {/* Slide-Over Drawer Sheet */}
               <motion.nav
@@ -489,13 +481,13 @@ export function AppHeader() {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[85%] max-w-[340px] flex-col overflow-hidden rounded-l-[32px] border-l border-white/20 bg-[#112026]/98 backdrop-blur-3xl shadow-[-25px_0_60px_rgba(0,0,0,0.85)] text-white"
+                className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[85%] max-w-[340px] flex-col overflow-hidden rounded-l-[32px] border-l border-white/20 bg-[#071922]/98 backdrop-blur-3xl shadow-[-25px_0_60px_rgba(0,0,0,0.85)] text-white"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Mobile Navigation"
               >
                 {/* Top Neon Accent Line */}
-                <div className="h-1 w-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#874f41] shrink-0" />
+                <div className="h-1 w-full bg-gradient-to-r from-[#00dfc4] via-[#00c9b0] to-[#059669] shrink-0" />
 
                 {/* Drawer Header: Brand Logo + Close Pill */}
                 <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/10 shrink-0">
@@ -508,7 +500,7 @@ export function AppHeader() {
                       src="/runnerup-logo.png"
                       alt="RUNNERUP"
                       style={{ height: "32px", width: "auto" }}
-                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(230,72,51,0.4)]"
+                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(0,223,196,0.4)]"
                     />
                   </Link>
 
@@ -530,15 +522,15 @@ export function AppHeader() {
               >
                 {/* Athlete Profile (only shown when signed in) */}
                 {isLoaded && isSignedIn && user ? (
-                  <div className="flex items-center gap-3 rounded-2xl border border-[#e64833]/30 bg-[#e64833]/[0.08] p-3.5 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                  <div className="flex items-center gap-3 rounded-2xl border border-[#00dfc4]/30 bg-[#00dfc4]/[0.08] p-3.5 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
                     {user?.imageUrl ? (
                       <img
                         src={user.imageUrl}
                         alt={user?.fullName ?? "Athlete"}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#e64833]/60 shadow-lg shrink-0"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#00dfc4]/60 shadow-lg shrink-0"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] to-[#874f41] text-xs font-black text-white ring-2 ring-[#e64833]/60 shadow-lg shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-[#00dfc4] to-[#059669] text-xs font-black text-black ring-2 ring-[#00dfc4]/60 shadow-lg shrink-0">
                         {(user?.fullName ?? user?.firstName ?? "A").charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -547,7 +539,7 @@ export function AppHeader() {
                         <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                           {user?.fullName ?? user?.firstName ?? "Athlete"}
                         </p>
-                        <span className="rounded-full bg-[#e64833]/25 border border-[#e64833]/50 px-1.5 py-0.2 text-[0.52rem] font-black uppercase tracking-wider text-[#fbe9d0]">
+                        <span className="rounded-full bg-[#00dfc4]/25 border border-[#00dfc4]/50 px-1.5 py-0.2 text-[0.52rem] font-black uppercase tracking-wider text-[#00dfc4]">
                           PRO ⚡
                         </span>
                       </div>
@@ -558,27 +550,27 @@ export function AppHeader() {
                   </div>
                 ) : null}
 
-                {/* Featured Primary CTA: Browse Events */}
+                {/* Featured Primary CTA: Register Now */}
                 <Link
                   href="/register"
                   onClick={() => setOpen(false)}
-                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#e64833]/25 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
+                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-[#00dfc4] hover:bg-[#00c9b0] p-3.5 text-xs font-black uppercase tracking-wider text-black shadow-lg shadow-[#00dfc4]/25 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
-                      <Zap className="h-4.5 w-4.5 text-white" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/10 backdrop-blur-md">
+                      <Zap className="h-4.5 w-4.5 text-black fill-black" />
                     </div>
                     <div>
-                      <span className="block text-xs font-black uppercase tracking-wider">Register Now</span>
-                      <span className="block text-[0.65rem] font-medium text-[#fbe9d0] normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-black">Register Now</span>
+                      <span className="block text-[0.65rem] font-medium text-black/80 normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
                     </div>
                   </div>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 text-black stroke-[2.5] transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 {/* Section Header */}
                 <div className="px-1 pt-1">
-                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#90aead]">
+                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#00dfc4]">
                     Menu Navigation
                   </span>
                 </div>
@@ -594,15 +586,15 @@ export function AppHeader() {
                         onClick={(e) => handleMobileNavClick(href, e)}
                         className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
                           active
-                            ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
+                            ? "bg-gradient-to-r from-[#00dfc4]/25 via-[#00dfc4]/15 to-transparent border border-[#00dfc4]/50 text-white shadow-[0_0_16px_rgba(0,223,196,0.2)] backdrop-blur-xl"
                             : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
                         }`}
                       >
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
                             active
-                              ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
-                              : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
+                              ? "bg-[#00dfc4] text-black shadow-[0_0_10px_rgba(0,223,196,0.5)]"
+                              : "bg-white/[0.08] text-[#00dfc4] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
                           }`}
                         >
                           <Icon className="h-4 w-4" strokeWidth={2.2} />
@@ -610,14 +602,14 @@ export function AppHeader() {
                         <div className="flex-1 flex items-center justify-between">
                           <span>{label}</span>
                           {href === "/events" && (
-                            <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-emerald-300">
+                            <span className="rounded-full bg-[#00dfc4]/20 border border-[#00dfc4]/40 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-[#00dfc4]">
                               Active Races
                             </span>
                           )}
                         </div>
                         <svg
                           className={`h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 ${
-                            active ? "text-[#e64833]" : "text-slate-500 group-hover:text-white"
+                            active ? "text-[#00dfc4]" : "text-slate-500 group-hover:text-white"
                           }`}
                           viewBox="0 0 16 16"
                           fill="none"
@@ -639,15 +631,15 @@ export function AppHeader() {
                       onClick={() => setOpen(false)}
                       className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
                         isActive("/dashboard")
-                          ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
+                          ? "bg-gradient-to-r from-[#00dfc4]/25 via-[#00dfc4]/15 to-transparent border border-[#00dfc4]/50 text-white shadow-[0_0_16px_rgba(0,223,196,0.2)] backdrop-blur-xl"
                           : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
                       }`}
                     >
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
                           isActive("/dashboard")
-                            ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
-                            : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
+                            ? "bg-[#00dfc4] text-black shadow-[0_0_10px_rgba(0,223,196,0.5)]"
+                            : "bg-white/[0.08] text-[#00dfc4] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" strokeWidth={2.2} />
@@ -687,7 +679,7 @@ export function AppHeader() {
               </div>
 
               {/* Drawer Footer Actions - Sleek & Production Grade */}
-              <div className="p-5 border-t border-[#90aead]/20 bg-[#112026]/95 backdrop-blur-xl shrink-0 space-y-2.5">
+              <div className="p-5 border-t border-white/10 bg-[#040e13]/95 backdrop-blur-xl shrink-0 space-y-2.5">
                 {isLoaded && isSignedIn ? (
                   <button
                     type="button"
@@ -705,18 +697,17 @@ export function AppHeader() {
                     <Link
                       href="/sign-in"
                       onClick={() => setOpen(false)}
-                      className="flex items-center justify-center rounded-xl border border-[#90aead]/25 bg-[#172c34] px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-md transition-all hover:bg-[#1f3741] hover:border-[#90aead]/45 hover:text-white active:scale-95 shadow-sm"
+                      className="flex items-center justify-center rounded-xl border border-white/20 bg-white/[0.05] px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/30 active:scale-95 shadow-sm"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setOpen(false)}
-                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shadow-[#e64833]/30 border border-[#fbe9d0]/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#e64833]/45 hover:brightness-105"
+                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-[#00dfc4] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-md shadow-[#00dfc4]/30 border border-white/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#00dfc4]/45 hover:bg-[#00c9b0]"
                     >
-                      <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                       <span className="relative z-10">Register</span>
-                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-[#fbe9d0]" />
+                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-black stroke-[2.5]" />
                     </Link>
                   </div>
                 )}
