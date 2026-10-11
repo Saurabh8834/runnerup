@@ -55,35 +55,11 @@ html[data-theme="dark"] {
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-display);
-  --font-inter: var(--font-inter);
 }
 
-/* ── Typography & Display matching beyondrun.in ── */
-h1, h2, h3, h4, h5, h6,
-.font-display,
-.display,
-.heading,
-.subheading {
-  font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-.display {
-  letter-spacing: -0.035em;
-  overflow-wrap: anywhere;
-  font-weight: 800;
-}
-
-.heading {
-  letter-spacing: -0.03em;
-  overflow-wrap: anywhere;
-  font-weight: 750;
-}
-
-.subheading {
-  letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
-  font-weight: 650;
+/* ── Deep Spruce & Vermilion Flame Palette ── */
+.font-display {
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .font-tech {
@@ -1456,7 +1432,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 
 .classic-home .font-serif,
 .classic-home .classic-title {
-  font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 .classic-home .section {
@@ -1544,11 +1520,11 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
 .classic-stamp span { font-size: .55rem; font-weight: 900; letter-spacing: .18em; }
-.classic-stamp strong { margin: .18rem 0; font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, sans-serif; font-size: 2.1rem; }
+.classic-stamp strong { margin: .18rem 0; font-family: Georgia, serif; font-size: 2.1rem; }
 
 .classic-section { background: #101a20; }
 .classic-home .heading,
-.classic-home h2 { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; letter-spacing: -.03em; }
+.classic-home h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.045em; }
 .classic-home .lede { color: #aebbb7; }
 .classic-home .eyebrow { color: #e0b75e; }
 
@@ -1595,7 +1571,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 .event-classic .section { border-color: rgba(238, 223, 190, .14); }
 .event-classic h2,
 .event-classic h3,
-.event-classic-title { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+.event-classic-title { font-family: Georgia, "Times New Roman", serif; }
 .event-classic .eyebrow { color: #e0b75e; }
 .event-classic .lede { color: #adbbb6; }
 .event-classic .btn-primary {
@@ -1708,7 +1684,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   pointer-events: none;
 }
 .events-classic-title,
-.events-classic-heading { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; letter-spacing: -.03em; }
+.events-classic-heading { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.05em; }
 .events-classic-title { color: #fcf8f2; }
 .events-classic .eyebrow { color: #e64833; }
 .events-classic .lede { color: #90aead; }
@@ -1730,7 +1706,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   transform: translate(-2px, -2px);
 }
 .events-classic-card > div:first-child { min-height: 11rem; }
-.events-classic-card h3 { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; font-size: 1.3rem; }
+.events-classic-card h3 { font-family: Georgia, "Times New Roman", serif; font-size: 1.3rem; }
 .events-classic-card .btn { border-radius: .4rem; }
 .events-classic-card .btn-primary { background: #e64833; color: #fbe9d0; }
 .events-classic-card .btn-secondary { border-color: rgba(144,174,173,.35); }
@@ -1779,7 +1755,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   white-space: nowrap;
   pointer-events: none;
 }
-.gallery-classic-title { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; letter-spacing: -.035em; }
+.gallery-classic-title { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
 .gallery-classic-stat {
   border-radius: 0 !important;
   border-color: rgba(144,174,173,.24) !important;
@@ -1852,7 +1828,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   white-space: nowrap;
   pointer-events: none;
 }
-.leaderboard-classic-title { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; letter-spacing: -.035em; }
+.leaderboard-classic-title { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.06em; }
 .leaderboard-classic .lede { color: #90aead; }
 .leaderboard-classic-content { background: #14242a; }
 .leaderboard-classic-content > section { border-color: rgba(144,174,173,.16); }
@@ -1869,7 +1845,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 .leaderboard-podium-card:hover { box-shadow: 10px 10px 0 rgba(230,72,51,.22), 0 20px 35px -26px rgba(0,0,0,.8) !important; }
 .leaderboard-podium-card[class*="ring-amber"] { background: linear-gradient(180deg, rgba(230,72,51,.18), #172c34 42%) !important; }
 .leaderboard-podium-card .rounded-xl { border-radius: .4rem; }
-.leaderboard-podium-card h3 { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+.leaderboard-podium-card h3 { font-family: Georgia, "Times New Roman", serif; }
 
 .leaderboard-table-shell {
   border-radius: 0 !important;
@@ -1921,7 +1897,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   white-space: nowrap;
 }
 .auth-classic-kicker { color: #e64833; font-size: .68rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
-.auth-classic-title { color: #fcf8f2; font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; font-size: clamp(3.25rem, 5vw, 5.25rem); font-weight: 700; letter-spacing: -.035em; line-height: .94; }
+.auth-classic-title { color: #fcf8f2; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.25rem, 5vw, 5.25rem); font-weight: 700; letter-spacing: -.065em; line-height: .94; }
 .auth-classic-form {
   position: relative;
   border: 1px solid rgba(144,174,173,.35);
@@ -1929,7 +1905,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
   box-shadow: 12px 12px 0 rgba(230,72,51,.16), 0 25px 60px rgba(0,0,0,.4);
   padding: 2rem;
 }
-.auth-classic-form-title { color: #fcf8f2; font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; font-size: clamp(1.85rem, 3vw, 2.45rem); font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+.auth-classic-form-title { color: #fcf8f2; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.85rem, 3vw, 2.45rem); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
 .auth-classic .cl-card { border-color: rgba(144,174,173,.2) !important; background: #1b323b !important; border-radius: .65rem !important; }
 .auth-classic .cl-formButtonPrimary { background: #e64833 !important; color: #fbe9d0 !important; }
 .auth-classic .cl-formButtonPrimary:hover { background: #d83d28 !important; }
@@ -1981,7 +1957,7 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 }
 .dashboard-classic-hero h1,
 .dashboard-classic h2,
-.dashboard-classic h3 { font-family: var(--font-display), var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; letter-spacing: -.03em; }
+.dashboard-classic h3 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.035em; }
 .dashboard-classic-hero > div:last-child { border-color: rgba(144,174,173,.14); }
 .dashboard-classic-hero [class*="rounded-2xl"] { border-radius: .4rem; }
 
