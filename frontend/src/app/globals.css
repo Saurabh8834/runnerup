@@ -1,9 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
 @import "tailwindcss";
-
-.font-brush {
-  font-family: 'Permanent Marker', cursive, sans-serif;
-}
 
 /* ── Palette Tokens: #244855, #E64833, #874F41, #90AEAD, #FBE9D0 ──── */
 :root,

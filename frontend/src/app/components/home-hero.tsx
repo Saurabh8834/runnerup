@@ -62,17 +62,14 @@ export function HomeHero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-display font-black text-[2.75rem] xs:text-[3.25rem] sm:text-6xl md:text-7xl lg:text-[4.75rem] xl:text-[5.5rem] tracking-tight leading-[0.92] uppercase drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
+            className="font-display font-black text-[2.75rem] xs:text-[3.25rem] sm:text-6xl md:text-7xl lg:text-[4.75rem] xl:text-[5.5rem] tracking-tight leading-[0.94] uppercase drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
           >
             <span className="block text-white">VIRTUAL</span>
-            {/* Exact dry-brush RUNNING artwork matching attached reference */}
-            <span className="block my-1 sm:my-2 w-fit">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/running-brush-word.webp"
-                alt="RUNNING"
-                className="h-12 xs:h-14 sm:h-18 md:h-22 lg:h-24 xl:h-28 w-auto object-contain select-none filter drop-shadow-[0_0_25px_rgba(230,72,51,0.75)]"
-              />
+            {/* Pure CSS athletic typography: zero image cache bugs, perfectly scaled & radiant */}
+            <span className="block my-0.5 sm:my-1 filter drop-shadow-[0_0_24px_rgba(230,72,51,0.65)]">
+              <span className="block italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ff5e3a] via-[#e64833] to-[#ff7d47]">
+                RUNNING
+              </span>
             </span>
             <span className="block text-white">RACES</span>
           </motion.h1>
