@@ -221,6 +221,25 @@ function PaymentRegistrationFormInner() {
   // Confetti modal state
   const [confirmedBib, setConfirmedBib] = useState<string | null>(null);
 
+  // Auto-reset stuck 'paying' or 'creating' state when user returns to tab after UPI app or external redirect
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible" && !paidRef.current) {
+        setTimeout(() => {
+          if (!paidRef.current) {
+            setStatus((curr) => (curr === "paying" || curr === "creating" ? "idle" : curr));
+          }
+        }, 1000);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleVisibility);
+    };
+  }, []);
+
   // Load events
   useEffect(() => {
     let cancelled = false;
@@ -384,13 +403,9 @@ function PaymentRegistrationFormInner() {
   const registeredKeys = useMemo(() => {
     const set = new Set<string>();
     for (const reg of existingRegs) {
-      // Only confirmed or completed registrations with successful payment count as already registered.
-      // Unpaid or pending attempts (PENDING_PAYMENT, payment CREATED/FAILED) must NEVER block the user from retrying or completing their payment.
-      const isConfirmed =
-        (reg.status === "CONFIRMED" || reg.status === "COMPLETED") &&
-        reg.payment?.status !== "FAILED";
-
-      if (isConfirmed || reg.payment?.status === "PAID") {
+      // ONLY successful paid registrations count as already registered.
+      // Unpaid, pending, or failed attempts must NEVER block the user from retrying or completing payment.
+      if (reg.payment?.status === "PAID") {
         set.add(`${reg.event?.slug}::${reg.distance}`);
       }
     }
@@ -934,7 +949,13 @@ function PaymentRegistrationFormInner() {
           )}
 
           <button
-            className="btn btn-primary w-full h-12 text-sm font-black tracking-wide shadow-lg shadow-(--sage)/20 cursor-pointer disabled:opacity-50"
+            className={cn(
+              "w-full h-13 rounded-full text-base font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-2",
+              distanceAlreadyTaken
+                ? "bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 cursor-not-allowed opacity-75"
+                : "bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white shadow-[0_0_28px_rgba(230,72,51,0.65)] hover:shadow-[0_0_45px_rgba(230,72,51,0.9)] hover:brightness-110 active:scale-[0.99] border border-amber-300/40 cursor-pointer",
+              (status === "creating" || status === "paying") && "opacity-85 pointer-events-none cursor-wait",
+            )}
             disabled={status === "creating" || status === "paying" || distanceAlreadyTaken}
             type="submit"
           >

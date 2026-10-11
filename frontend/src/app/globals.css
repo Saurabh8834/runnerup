@@ -70,23 +70,24 @@ h1, h2, h3, h4, h5, h6,
   font-family: 'Space Grotesk', var(--font-geist-mono), monospace;
 }
 
-/* Hollow Athletic Sports Outline (Racing Jersey Cutout Stencil) */
+/* Filled Athletic Sports Wordmark with Radiant Neon Glow */
 .athletic-outline-text {
-  color: transparent;
-  -webkit-text-stroke: 2.2px #ff5e3a;
-  text-shadow: 0 0 18px rgba(230, 72, 51, 0.55), 0 0 32px rgba(230, 72, 51, 0.35);
-  letter-spacing: 0.03em;
+  color: #ff5e3a;
+  -webkit-text-fill-color: #ff5e3a;
+  -webkit-text-stroke: 1.2px #ff7a54;
+  text-shadow: 0 0 18px rgba(230, 72, 51, 0.65), 0 0 35px rgba(230, 72, 51, 0.35);
+  letter-spacing: 0.02em;
 }
 
 @media (min-width: 640px) {
   .athletic-outline-text {
-    -webkit-text-stroke: 3px #ff5e3a;
+    -webkit-text-stroke: 1.8px #ff7a54;
   }
 }
 
 @media (min-width: 1024px) {
   .athletic-outline-text {
-    -webkit-text-stroke: 3.5px #ff5e3a;
+    -webkit-text-stroke: 2.2px #ff7a54;
   }
 }
 
