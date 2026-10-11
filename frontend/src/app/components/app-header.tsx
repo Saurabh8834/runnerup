@@ -39,7 +39,7 @@ function Hamburger({ open, onClick }: { open: boolean; onClick: () => void }) {
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       onClick={onClick}
-      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-white/20 bg-slate-900/80 text-white backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-sky-400/50 hover:bg-slate-800/90 hover:shadow-[0_0_15px_rgba(56,189,248,0.25)] active:scale-90"
+      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-[#90aead]/25 bg-[#172c34] text-[#fbe9d0] backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#e64833]/60 hover:bg-[#1f3741] hover:text-white hover:shadow-[0_0_15px_rgba(230,72,51,0.3)] active:scale-90"
     >
       <span className="flex w-5 flex-col gap-[5px]">
         <motion.span
@@ -687,7 +687,7 @@ export function AppHeader() {
               </div>
 
               {/* Drawer Footer Actions - Sleek & Production Grade */}
-              <div className="p-5 border-t border-white/10 bg-slate-950/80 backdrop-blur-xl shrink-0 space-y-2.5">
+              <div className="p-5 border-t border-[#90aead]/20 bg-[#112026]/95 backdrop-blur-xl shrink-0 space-y-2.5">
                 {isLoaded && isSignedIn ? (
                   <button
                     type="button"
@@ -705,22 +705,23 @@ export function AppHeader() {
                     <Link
                       href="/sign-in"
                       onClick={() => setOpen(false)}
-                      className="flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-200 backdrop-blur-md transition-all hover:bg-white/12 hover:border-white/25 hover:text-white active:scale-95"
+                      className="flex items-center justify-center rounded-xl border border-[#90aead]/25 bg-[#172c34] px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-md transition-all hover:bg-[#1f3741] hover:border-[#90aead]/45 hover:text-white active:scale-95 shadow-sm"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setOpen(false)}
-                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3.5 py-2.5 text-xs font-extrabold uppercase tracking-wider text-white shadow-md shadow-sky-500/25 active:scale-95 transition-all hover:from-sky-400 hover:to-blue-500"
+                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shadow-[#e64833]/30 border border-[#fbe9d0]/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#e64833]/45 hover:brightness-105"
                     >
-                      <span>Register</span>
-                      <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                      <span className="relative z-10">Register</span>
+                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-[#fbe9d0]" />
                     </Link>
                   </div>
                 )}
                 
-                <p className="text-center text-[0.62rem] text-slate-500 font-medium pt-0.5">
+                <p className="text-center text-[0.62rem] text-[#90aead]/70 font-semibold tracking-wide pt-0.5">
                   RUNNERUP © 2026 • Virtual Marathon Platform
                 </p>
               </div>
