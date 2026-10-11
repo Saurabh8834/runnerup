@@ -111,8 +111,9 @@ export async function createRegistration(request: AuthenticatedRequest, response
   if (existingRegistration) {
     // Resume unpaid checkout for the exact same event + distance only.
     if (
-      existingRegistration.status === "PENDING_PAYMENT" ||
-      existingRegistration.payment?.status === "CREATED"
+      existingRegistration.status !== "CONFIRMED" &&
+      existingRegistration.status !== "COMPLETED" &&
+      existingRegistration.payment?.status !== "PAID"
     ) {
       response.status(200).json({
         data: existingRegistration,
@@ -169,7 +170,12 @@ export async function createRegistration(request: AuthenticatedRequest, response
       },
       include: { event: true, user: true, payment: true },
     });
-    if (raced && (raced.status === "PENDING_PAYMENT" || raced.payment?.status === "CREATED")) {
+    if (
+      raced &&
+      raced.status !== "CONFIRMED" &&
+      raced.status !== "COMPLETED" &&
+      raced.payment?.status !== "PAID"
+    ) {
       response.status(200).json({
         data: raced,
         meta: { freeEntry: false, resumed: true },

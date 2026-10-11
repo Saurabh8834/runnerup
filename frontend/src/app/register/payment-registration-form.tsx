@@ -384,7 +384,13 @@ function PaymentRegistrationFormInner() {
   const registeredKeys = useMemo(() => {
     const set = new Set<string>();
     for (const reg of existingRegs) {
-      if (reg.status !== "CANCELLED") {
+      // Only confirmed or completed registrations with successful payment count as already registered.
+      // Unpaid or pending attempts (PENDING_PAYMENT, payment CREATED/FAILED) must NEVER block the user from retrying or completing their payment.
+      const isConfirmed =
+        (reg.status === "CONFIRMED" || reg.status === "COMPLETED") &&
+        reg.payment?.status !== "FAILED";
+
+      if (isConfirmed || reg.payment?.status === "PAID") {
         set.add(`${reg.event?.slug}::${reg.distance}`);
       }
     }
@@ -400,7 +406,10 @@ function PaymentRegistrationFormInner() {
       (r) =>
         r.event?.slug === selectedEvent &&
         r.distance === selectedDistance &&
-        r.payment?.status === "CREATED",
+        (r.status === "PENDING_PAYMENT" || r.payment?.status === "CREATED" || r.payment?.status === "FAILED") &&
+        r.status !== "CONFIRMED" &&
+        r.status !== "COMPLETED" &&
+        r.payment?.status !== "PAID",
     ),
   );
 
@@ -495,9 +504,30 @@ function PaymentRegistrationFormInner() {
       if (!regRes.ok) throw new Error(await readApiError(regRes, "Registration could not be created"));
       const regJson = await regRes.json();
       const registrationId = regJson.data?.registration?.id ?? regJson.data?.id;
-      const assignedBib = regJson.data?.registration?.bibNumber || previewBibNumber;
+      const assignedBib =
+        regJson.data?.registration?.bibNumber ||
+        regJson.data?.bibNumber ||
+        previewBibNumber;
 
       if (!registrationId) throw new Error("Invalid registration response from server");
+
+      // Track registration in local state so user can resume seamlessly
+      setExistingRegs((prev) => {
+        const idx = prev.findIndex((r) => r.id === registrationId);
+        const item: ExistingReg = {
+          id: registrationId,
+          distance: selectedDistance,
+          status: "PENDING_PAYMENT",
+          event: { slug: selectedEvent, title: activeEvent.label },
+          payment: { status: "CREATED" },
+        };
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = { ...next[idx], ...item };
+          return next;
+        }
+        return [...prev, item];
+      });
 
       let payRes = await fetch(getApiUrl("/api/payments/create-order"), {
         method: "POST",
@@ -537,12 +567,20 @@ function PaymentRegistrationFormInner() {
           email: payload.email,
           contact: payload.phone,
         },
-        theme: { color: "#10b981" },
+        theme: { color: "#e64833" },
         handler: async (response: CheckoutResponse) => {
           const freshToken = await getToken();
           if (!freshToken) {
+            paidRef.current = true;
             setStatus("paid");
             setConfirmedBib(assignedBib);
+            setExistingRegs((prev) =>
+              prev.map((r) =>
+                r.id === registrationId
+                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
+                  : r,
+              ),
+            );
             return;
           }
 
@@ -560,17 +598,33 @@ function PaymentRegistrationFormInner() {
             paidRef.current = true;
             setStatus("paid");
             setConfirmedBib(assignedBib);
+            setExistingRegs((prev) =>
+              prev.map((r) =>
+                r.id === registrationId
+                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
+                  : r,
+              ),
+            );
           } catch {
             paidRef.current = true;
             setStatus("paid");
             setConfirmedBib(assignedBib);
+            setExistingRegs((prev) =>
+              prev.map((r) =>
+                r.id === registrationId
+                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
+                  : r,
+              ),
+            );
           }
         },
         modal: {
           ondismiss: () => {
-            if (paidRef.current || failedRef.current) return;
+            if (paidRef.current) return;
             setStatus("idle");
-            setMessage("Checkout paused. You can resume whenever you're ready.");
+            if (!failedRef.current) {
+              setMessage("Payment paused. You can click below to complete your checkout anytime.");
+            }
           },
         },
       });
@@ -579,7 +633,7 @@ function PaymentRegistrationFormInner() {
         const err = response as { error?: { description?: string } };
         failedRef.current = true;
         setStatus("error");
-        setMessage(err?.error?.description ?? "Payment failed. Please try UPI or Netbanking.");
+        setMessage(err?.error?.description ?? "Payment failed or was cancelled. Please try again or use another payment method (UPI/Card).");
       });
 
       checkout.open();
@@ -727,7 +781,7 @@ function PaymentRegistrationFormInner() {
                   const taken = registeredKeys.has(`${selectedEvent}::${distance}`);
                   return (
                     <option disabled={taken} key={distance} value={distance}>
-                      {distance} {taken ? "(Already Registered)" : ""}
+                      {distance} {taken ? "(Already Registered & Paid)" : ""}
                     </option>
                   );
                 })}
@@ -854,8 +908,28 @@ function PaymentRegistrationFormInner() {
           </div>
 
           {status === "error" && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-700">
+            <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-300 font-medium">
               {message}
+            </div>
+          )}
+
+          {status === "idle" && message && message !== "Complete the form and continue to secure checkout." && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300 font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
+              <span>{message}</span>
+            </div>
+          )}
+
+          {pendingSame && !distanceAlreadyTaken && status !== "error" && status !== "creating" && status !== "paying" && (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300 font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
+              <span>Previous payment was incomplete. Click below to complete your checkout and secure your race bib!</span>
+            </div>
+          )}
+
+          {distanceAlreadyTaken && (
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-300 font-bold flex items-center gap-2">
+              <span>✅ You are already registered & confirmed for {selectedDistance}. Check your bib in Athlete Dashboard.</span>
             </div>
           )}
 
@@ -868,7 +942,11 @@ function PaymentRegistrationFormInner() {
               ? "Generating Order..."
               : status === "paying"
                 ? "Opening Razorpay..."
-                : `Pay ${selectedAmount} & Claim Official Bib`}
+                : distanceAlreadyTaken
+                  ? "Already Registered"
+                  : pendingSame
+                    ? `Complete Payment (${selectedAmount}) & Claim Bib`
+                    : `Pay ${selectedAmount} & Claim Official Bib`}
           </button>
         </form>
       </div>
