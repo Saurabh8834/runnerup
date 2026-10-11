@@ -162,14 +162,11 @@ export function HomeHero() {
                       </div>
 
                       {/* Bottom Banner Strip */}
-                      <div className="absolute bottom-2 inset-x-2.5 z-20 flex items-center justify-between rounded-xl bg-[#14242a]/95 border border-[#90aead]/30 px-3 py-1 backdrop-blur-md shadow-lg">
-                        <div className="flex items-center gap-1.5 text-[0.62rem] font-bold text-[#fbe9d0] truncate">
+                      <div className="absolute bottom-2 inset-x-4 z-20 flex items-center justify-center rounded-xl bg-[#14242a]/95 border border-[#90aead]/30 px-3.5 py-1 backdrop-blur-md shadow-lg">
+                        <div className="flex items-center gap-1.5 text-[0.62rem] font-bold text-[#fbe9d0]">
                           <Trophy className="h-3 w-3 text-[#e64833] shrink-0" />
-                          <span className="truncate">Finisher Kit with Ribbon &amp; Cert</span>
+                          <span>Finisher Kit with Ribbon &amp; Cert</span>
                         </div>
-                        <span className="text-[0.55rem] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 shrink-0">
-                          Dispatched in 48h
-                        </span>
                       </div>
                     </motion.div>
                   ) : (
@@ -180,39 +177,57 @@ export function HomeHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="relative min-h-[340px] sm:min-h-[380px] h-[340px] sm:h-[380px] w-full overflow-hidden"
+                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden flex flex-col justify-between bg-[#0e191e]"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/runner-mobile.webp"
-                        alt="Runners sprinting in marathon"
-                        loading="eager"
-                        decoding="async"
-                        className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#14242a]/85 via-transparent to-[#14242a]/30 pointer-events-none" />
+                      {/* Top Section: Runners Photo */}
+                      <div className="relative w-full h-[175px] sm:h-[195px] overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/runner-mobile.webp"
+                          alt="Runners sprinting in marathon"
+                          loading="eager"
+                          decoding="async"
+                          className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0e191e] via-transparent to-[#0e191e]/40 pointer-events-none" />
 
-                      {/* Top-Left Live Badge */}
-                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
-                        <Flame className="h-3 w-3 text-[#e64833] fill-[#e64833]" />
-                        <span className="text-[0.62rem] font-black uppercase tracking-wider text-white">12,400+ Active</span>
+                        {/* Top-Left Live Badge */}
+                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
+                          <Flame className="h-3 w-3 text-[#e64833] fill-[#e64833]" />
+                          <span className="text-[0.62rem] font-black uppercase tracking-wider text-white">12,400+ Active</span>
+                        </div>
+
+                        {/* Top-Right Badge */}
+                        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
+                          <MapPin className="h-3 w-3 text-sky-400" />
+                          <span className="text-[0.62rem] font-black uppercase tracking-wider text-sky-200">Pan India</span>
+                        </div>
                       </div>
 
-                      {/* Top-Right Badge */}
-                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
-                        <MapPin className="h-3 w-3 text-sky-400" />
-                        <span className="text-[0.62rem] font-black uppercase tracking-wider text-sky-200">Pan India</span>
+                      {/* Middle Section: Bold Brand Promise (Exact Image 3 Typography) */}
+                      <div className="px-4 py-3 flex flex-col items-center text-center justify-center my-auto">
+                        <h3 className="font-display font-black text-2xl sm:text-3xl text-white tracking-wider uppercase leading-tight">
+                          YOUR MILES.
+                        </h3>
+                        <h3 className="font-display font-black text-2xl sm:text-3xl text-[#00e5ff] tracking-wider uppercase leading-tight mt-0.5">
+                          YOUR GLORY.
+                        </h3>
+                        <p className="mt-2 text-xs sm:text-sm font-medium text-slate-300">
+                          Run anywhere. Earn your medal.
+                        </p>
                       </div>
 
                       {/* Bottom Strip Badge */}
-                      <div className="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between rounded-xl bg-[#14242a]/90 border border-[#90aead]/30 px-3 py-1.5 backdrop-blur-md shadow-lg">
-                        <div className="flex items-center gap-1.5 text-[0.65rem] font-bold text-[#fbe9d0]">
-                          <Activity className="h-3.5 w-3.5 text-[#e64833]" />
-                          <span>Strava · Garmin · NRC</span>
+                      <div className="p-3 pt-0">
+                        <div className="flex items-center justify-between rounded-xl bg-[#14242a]/90 border border-[#90aead]/30 px-3 py-1.5 backdrop-blur-md shadow-lg">
+                          <div className="flex items-center gap-1.5 text-[0.65rem] font-bold text-[#fbe9d0]">
+                            <Activity className="h-3.5 w-3.5 text-[#e64833]" />
+                            <span>Strava · Garmin · NRC</span>
+                          </div>
+                          <span className="text-[0.6rem] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                            GPS Verified
+                          </span>
                         </div>
-                        <span className="text-[0.6rem] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                          GPS Verified
-                        </span>
                       </div>
                     </motion.div>
                   )}
@@ -378,45 +393,17 @@ export function HomeHero() {
                   </div>
                 </div>
 
-                {/* 2. Middle Section: Bold Brand Promise (Exact Image 1 Typography & Underline) */}
-                <div className="px-5 pt-4 pb-3 sm:px-6 sm:pt-5 sm:pb-3 flex flex-col justify-center">
-                  <div className="space-y-0.5">
-                    <h3 className="font-display font-black text-3xl sm:text-4xl text-white tracking-tight leading-tight">
-                      Your Run.
-                    </h3>
-                    <div className="relative inline-block">
-                      <h3 className="font-display font-black text-3xl sm:text-4xl text-[#2feaa8] tracking-tight leading-tight">
-                        Your Medal.
-                      </h3>
-                      {/* Aqua Curved Swoosh Underline */}
-                      <svg
-                        className="w-full h-3 text-[#2feaa8] -mt-0.5 drop-shadow-[0_2px_8px_rgba(47,234,168,0.4)]"
-                        viewBox="0 0 160 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        preserveAspectRatio="none"
-                      >
-                        <path
-                          d="M3 8.5C38 3 118 2 157 8.5"
-                          stroke="currentColor"
-                          strokeWidth="3.2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Location & Tagline */}
-                  <div className="mt-3.5 flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full border border-[#2feaa8]/40 bg-[#2feaa8]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(47,234,168,0.2)]">
-                      <MapPin className="h-4 w-4 text-[#2feaa8]" />
-                    </div>
-                    <div className="border-l border-[#90aead]/30 pl-3">
-                      <p className="text-xs sm:text-[0.82rem] font-medium text-[#fbe9d0] leading-snug">
-                        GPS-verified virtual races,<br />anywhere in India.
-                      </p>
-                    </div>
-                  </div>
+                {/* 2. Middle Section: Bold Brand Promise (Exact Image 3 Typography) */}
+                <div className="px-5 py-6 sm:px-6 sm:py-7 flex flex-col items-center text-center justify-center">
+                  <h3 className="font-display font-black text-3xl sm:text-4xl text-white tracking-wider uppercase leading-tight">
+                    YOUR MILES.
+                  </h3>
+                  <h3 className="font-display font-black text-3xl sm:text-4xl text-[#00e5ff] tracking-wider uppercase leading-tight mt-1">
+                    YOUR GLORY.
+                  </h3>
+                  <p className="mt-3 text-sm sm:text-base font-medium text-slate-300">
+                    Run anywhere. Earn your medal.
+                  </p>
                 </div>
 
                 {/* 3. Bottom Section: Finisher Medal & Kit Showcase (Free Courier instead of misleading 100% Free) */}
