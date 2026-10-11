@@ -43,20 +43,20 @@ export const allPublicEvents: PublicEvent[] = [
   {
     name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
-    date: "8-12 October 2026",
+    date: "25-30 October 2026",
     distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
     price: "Rs. 499",
     description:
       "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
-    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
+    highlight: "Salute the Air Warriors · Run, Walk or Ride on 25–30 Oct",
     banner: "Air Force Day Virtual Challenge",
     bannerImageUrl: "/images/event-medal.webp",
     medalImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
-    startsAt: "2026-10-08T00:00:00.000Z",
-    endsAt: "2026-10-12T23:59:59.000Z",
+    startsAt: "2026-10-25T00:00:00.000Z",
+    endsAt: "2026-10-30T23:59:59.000Z",
     benefits: [
       "100% Solid Metal Finisher Medal Included",
       "Free doorstep delivery across India",
@@ -126,7 +126,7 @@ export const allPublicEvents: PublicEvent[] = [
   {
     name: "Himalayan Winter Sprint",
     slug: "himalayan-winter-sprint",
-    date: "5-9 Dec 2026",
+    date: "5-9 Dec 2025",
     distance: "2 km / 5 km / 10 km",
     price: "Rs. 399",
     description:
@@ -139,8 +139,8 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "Digital kit + medal",
     status: "past",
     compareAtPrice: "Rs. 700",
-    startsAt: "2026-12-05T00:00:00.000Z",
-    endsAt: "2026-12-09T23:59:59.000Z",
+    startsAt: "2025-12-05T00:00:00.000Z",
+    endsAt: "2025-12-09T23:59:59.000Z",
   },
   {
     name: "Spring Valley Dash",

@@ -79,10 +79,10 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
 
   // Date eyebrow text
   const eyebrowDate = isAirForce
-    ? "8-12 OCTOBER 2026"
+    ? "25-30 OCTOBER 2026"
     : event.date
     ? event.date.toUpperCase()
-    : "8-12 OCTOBER 2026";
+    : "25-30 OCTOBER 2026";
 
   // Medal image source - dynamically matches each event's authentic physical finisher medal
   const medalImageSrc = event.medalImageUrl || getEventMedalImage(event.slug);

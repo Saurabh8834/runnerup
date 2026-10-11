@@ -70,6 +70,26 @@ h1, h2, h3, h4, h5, h6,
   font-family: 'Space Grotesk', var(--font-geist-mono), monospace;
 }
 
+/* Hollow Athletic Sports Outline (Racing Jersey Cutout Stencil) */
+.athletic-outline-text {
+  color: transparent;
+  -webkit-text-stroke: 2.2px #ff5e3a;
+  text-shadow: 0 0 18px rgba(230, 72, 51, 0.55), 0 0 32px rgba(230, 72, 51, 0.35);
+  letter-spacing: 0.03em;
+}
+
+@media (min-width: 640px) {
+  .athletic-outline-text {
+    -webkit-text-stroke: 3px #ff5e3a;
+  }
+}
+
+@media (min-width: 1024px) {
+  .athletic-outline-text {
+    -webkit-text-stroke: 3.5px #ff5e3a;
+  }
+}
+
 .glass-card-dark {
   background: rgba(27, 50, 59, 0.85);
   backdrop-filter: blur(24px);

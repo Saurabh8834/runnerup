@@ -65,9 +65,9 @@ export function HomeHero() {
             className="font-display font-black text-[2.75rem] xs:text-[3.25rem] sm:text-6xl md:text-7xl lg:text-[4.75rem] xl:text-[5.5rem] tracking-tight leading-[0.94] uppercase drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
           >
             <span className="block text-white">VIRTUAL</span>
-            {/* Pure CSS athletic typography: zero image cache bugs, perfectly scaled & radiant */}
-            <span className="block my-0.5 sm:my-1 filter drop-shadow-[0_0_24px_rgba(230,72,51,0.65)]">
-              <span className="block italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#ff5e3a] via-[#e64833] to-[#ff7d47]">
+            {/* Hollow Athletic Sports Outline: Racing jersey cutout stencil with glowing orange neon borders */}
+            <span className="block my-0.5 sm:my-1 filter drop-shadow-[0_0_20px_rgba(230,72,51,0.7)]">
+              <span className="block italic font-black athletic-outline-text select-none">
                 RUNNING
               </span>
             </span>

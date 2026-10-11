@@ -188,8 +188,8 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           </div>
         </div>
 
-        {/* Title */}
-        <h3 className="font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors uppercase tracking-tight text-[#fbe9d0] group-hover:text-[#e64833]">
+        {/* Title (Vibrant Brand Orange matching Image 2 reference) */}
+        <h3 className="font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors uppercase tracking-tight text-[#e64833] hover:brightness-110">
           {event.name}
         </h3>
 
