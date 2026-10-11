@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Trophy, Truck } from "lucide-react";
-import type { PublicEvent } from "../../data/events";
+import { getEventMedalImage, type PublicEvent } from "../../data/events";
 import { Medal3D } from "./medal";
 import { Reveal, SectionHeader } from "./reveal";
 
@@ -36,7 +36,7 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
   const isAirForce =
     event?.slug?.includes("air-force") ||
     event?.name?.toLowerCase().includes("air force");
-  const medalImg = isAirForce ? "/images/event-medal.webp" : event?.bannerImageUrl;
+  const medalImg = event?.medalImageUrl || (event?.slug ? getEventMedalImage(event.slug) : "/images/event-medal.webp");
 
   const dynamicItems = [
     {

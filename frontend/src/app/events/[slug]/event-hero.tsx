@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { PublicEvent } from "../../data/events";
+import { getEventMedalImage, type PublicEvent } from "../../data/events";
 
 export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boolean }) {
   // Extract available distances
@@ -84,8 +84,8 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     ? event.date.toUpperCase()
     : "8-12 OCTOBER 2026";
 
-  // Medal image source - transparent high-quality RunnerUp medal
-  const medalImageSrc = "/images/event-medal.webp";
+  // Medal image source - dynamically matches each event's authentic physical finisher medal
+  const medalImageSrc = event.medalImageUrl || getEventMedalImage(event.slug);
 
   return (
     <section className="relative w-full overflow-hidden bg-black text-white isolate min-h-[92dvh] flex flex-col justify-center pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-24 lg:pb-14 border-b border-white/10">
@@ -324,16 +324,13 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                 className="relative z-10 w-full flex items-center justify-center"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <picture className="w-full flex justify-center">
-                  <source srcSet="/images/event-medal.webp" type="image/webp" />
-                  <img
-                    src={medalImageSrc}
-                    alt="RunnerUp Official Indian Air Force Day 2026 Physical Finisher Medal"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="w-full h-auto object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-[1.02]"
-                  />
-                </picture>
+                <img
+                  src={medalImageSrc}
+                  alt={`RunnerUp Official ${event.name} Physical Finisher Medal`}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="w-full h-auto max-h-[500px] object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-[1.02]"
+                />
               </motion.div>
 
             </div>

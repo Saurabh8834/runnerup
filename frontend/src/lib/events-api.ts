@@ -118,6 +118,10 @@ export function mapApiEventToPublic(
       event.bannerImageUrl ??
       staticMatch?.bannerImageUrl ??
       (isAirForce ? "/images/event-medal.webp" : undefined),
+    medalImageUrl:
+      (event as { medalImageUrl?: string }).medalImageUrl ??
+      staticMatch?.medalImageUrl ??
+      (isAirForce ? "/images/event-medal.webp" : undefined),
     reward:
       (isAirForce
         ? "100% Solid Metal Finisher Medal + E-Certificate"

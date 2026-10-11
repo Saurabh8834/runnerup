@@ -13,6 +13,7 @@ export type DefaultEvent = {
   benefits?: string[];
   featured?: boolean;
   bannerImageUrl?: string;
+  medalImageUrl?: string;
   banner?: string;
   reward?: string;
   highlight?: string;
@@ -38,6 +39,7 @@ export const defaultEvents: DefaultEvent[] = [
     featured: true,
     medalIncluded: true,
     bannerImageUrl: "/images/event-medal.webp",
+    medalImageUrl: "/images/event-medal.webp",
     banner: "Air Force Day Virtual Challenge",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
@@ -65,6 +67,7 @@ export const defaultEvents: DefaultEvent[] = [
     featured: false,
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
+    medalImageUrl: "/images/medals/independence-day-virtual-run-2026.jpg",
     banner: "Flagship run",
     reward: "Premium medal + T-shirt + certificate",
     highlight: "Flagship virtual run with official finisher medals and e-certificates.",
@@ -91,6 +94,7 @@ export const defaultEvents: DefaultEvent[] = [
     featured: true,
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
+    medalImageUrl: "/images/medals/monsoon-mountain-miles.jpg",
     banner: "Rain-ready challenge",
     reward: "Medal + certificate",
     highlight: "Ideal for first virtual races and running clubs.",
@@ -116,6 +120,7 @@ export const defaultEvents: DefaultEvent[] = [
     featured: true,
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
+    medalImageUrl: "/images/medals/himalayan-winter-sprint.jpg",
     banner: "Fast festive sprint",
     reward: "Digital kit + medal",
     highlight: "Quick, beginner-friendly participation.",
@@ -140,6 +145,7 @@ export const defaultEvents: DefaultEvent[] = [
     featured: false,
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
+    medalImageUrl: "/images/medals/independence-endurance-run.jpg",
     banner: "Flagship endurance week",
     reward: "Premium medal + T-shirt",
     highlight: "Built for runners chasing a longer verified effort.",
@@ -164,6 +170,7 @@ export const defaultEvents: DefaultEvent[] = [
     city: "Virtual",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
+    medalImageUrl: "/images/medals/spring-valley-dash.jpg",
     banner: "Season opener",
     reward: "Medal + certificate",
     highlight: "Completed · Strong beginner turnout across 40+ cities.",
@@ -186,6 +193,7 @@ export const defaultEvents: DefaultEvent[] = [
     city: "Virtual",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
+    medalImageUrl: "/images/medals/holi-color-virtual-run.jpg",
     banner: "Festival run",
     reward: "Digital kit + medal",
     highlight: "Completed · Festival favorite for clubs and first-timers.",
@@ -208,5 +216,6 @@ export const defaultEvents: DefaultEvent[] = [
     city: "Virtual",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
+    medalImageUrl: "/images/medals/new-year-night-miles.jpg",
   },
 ];

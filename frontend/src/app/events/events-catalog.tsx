@@ -409,25 +409,10 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
           </div>
         )}
 
-        {/* Footer */}
-        <div className="mt-4 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[0.72rem] text-[#90aead]">
-            <CalendarDays className="h-3.5 w-3.5 text-[#90aead] shrink-0" />
-            <span>{event.date}</span>
-          </div>
-
-          <div className="text-right">
-            <span className="text-lg sm:text-xl font-black font-mono text-[#14242a] flex items-center justify-end gap-0.5">
-              <IndianRupee className="h-4 w-4 text-[#e64833]" />
-              {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "")}
-            </span>
-          </div>
-        </div>
-
         {/* CTA Buttons */}
-        <div className="mt-4 flex items-center gap-2.5">
+        <div className="mt-auto pt-4 border-t border-[#90aead]/15 flex items-center gap-2.5">
           <Link
-            className="flex-1 h-10 rounded-full border border-[#90aead]/20 bg-[#fbf6ee] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#14242a] hover:bg-[#f5ecdd] transition-all"
+            className="flex-1 h-10 rounded-full border border-[#90aead]/20 bg-[#fbf6ee] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#14242a] hover:bg-[#f5ecdd] transition-all shadow-xs"
             href={`/events/${event.slug}`}
           >
             <span>View Recap</span>

@@ -18,6 +18,7 @@ export type PublicEvent = {
   highlight: string;
   banner: string;
   bannerImageUrl?: string;
+  medalImageUrl?: string;
   reward: string;
   status: "upcoming" | "past";
   couponCode?: string;
@@ -50,6 +51,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
     banner: "Air Force Day Virtual Challenge",
     bannerImageUrl: "/images/event-medal.webp",
+    medalImageUrl: "/images/event-medal.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
@@ -76,6 +78,7 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Flagship run",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
+    medalImageUrl: "/images/medals/independence-day-virtual-run-2026.jpg",
     reward: "Premium medal + T-shirt + certificate",
     status: "past",
     compareAtPrice: "Rs. 699",
@@ -92,8 +95,9 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Rain-ready challenge",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
+    medalImageUrl: "/images/medals/monsoon-mountain-miles.jpg",
     reward: "Medal + certificate",
-    status: "upcoming",
+    status: "past",
     compareAtPrice: "Rs. 850",
   },
   {
@@ -108,8 +112,9 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Flagship endurance week",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
+    medalImageUrl: "/images/medals/independence-endurance-run.jpg",
     reward: "Premium medal + T-shirt",
-    status: "upcoming",
+    status: "past",
     compareAtPrice: "Rs. 1100",
   },
   {
@@ -124,8 +129,9 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Fast festive sprint",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
+    medalImageUrl: "/images/medals/himalayan-winter-sprint.jpg",
     reward: "Digital kit + medal",
-    status: "upcoming",
+    status: "past",
     compareAtPrice: "Rs. 700",
   },
   {
@@ -140,6 +146,7 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Season opener",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
+    medalImageUrl: "/images/medals/spring-valley-dash.jpg",
     reward: "Medal + certificate",
     status: "past",
     finishers: 1842,
@@ -160,6 +167,7 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Festival run",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
+    medalImageUrl: "/images/medals/holi-color-virtual-run.jpg",
     reward: "Digital kit + medal",
     status: "past",
     finishers: 2560,
@@ -180,6 +188,7 @@ export const allPublicEvents: PublicEvent[] = [
     banner: "Year-end challenge",
     bannerImageUrl:
       "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
+    medalImageUrl: "/images/medals/new-year-night-miles.jpg",
     reward: "Premium medal + certificate",
     status: "past",
     finishers: 1295,
@@ -197,6 +206,28 @@ export const publicEvents = allPublicEvents.filter((event) => event.status === "
 export const pastEvents = allPublicEvents.filter((event) => event.status === "past");
 
 export const upcomingEvents = publicEvents;
+
+export function getEventMedalImage(slug: string): string {
+  if (
+    slug.includes("air-force") ||
+    slug.includes("airforce") ||
+    slug === "iaf-2026" ||
+    slug === "indian-air-force-day-2026" ||
+    slug === "indian-air-force-day-virtual-challenge"
+  ) {
+    return "/images/event-medal.webp";
+  }
+  const medalMap: Record<string, string> = {
+    "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.jpg",
+    "independence-endurance-run": "/images/medals/independence-endurance-run.jpg",
+    "himalayan-winter-sprint": "/images/medals/himalayan-winter-sprint.jpg",
+    "independence-day-virtual-run-2026": "/images/medals/independence-day-virtual-run-2026.jpg",
+    "spring-valley-dash": "/images/medals/spring-valley-dash.jpg",
+    "holi-color-virtual-run": "/images/medals/holi-color-virtual-run.jpg",
+    "new-year-night-miles": "/images/medals/new-year-night-miles.jpg",
+  };
+  return medalMap[slug] || "/images/event-medal.webp";
+}
 
 export function getEventBySlug(slug: string) {
   if (
