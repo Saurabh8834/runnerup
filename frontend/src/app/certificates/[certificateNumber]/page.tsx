@@ -272,7 +272,7 @@ export default function CertificateVerifyPage() {
                   <div className="mt-6 text-center">
                   <h2
                     className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-[#244855] leading-none"
-                    style={{ fontFamily: "Georgia, 'Times New Roman', serif", letterSpacing: "-0.01em" }}
+                    style={{ letterSpacing: "-0.01em" }}
                   >
                     CERTIFICATE
                   </h2>
