@@ -2,7 +2,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const BACKEND_INTERNAL_URL =
   process.env.INTERNAL_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  (isDev ? "http://127.0.0.1:4000" : "https://api.runnerup.in");
+  (isDev ? "http://127.0.0.1:4000" : "https://mountainrun-production-c2c6.up.railway.app");
 
 const CONFIGURED_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
 
