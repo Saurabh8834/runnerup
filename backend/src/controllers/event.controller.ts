@@ -32,12 +32,27 @@ export async function listEvents(request: Request, response: Response) {
   });
 
   const enriched = events.map((event) => withEventMeta(event));
+  const seenKeys = new Set<string>();
+  const seenNames = new Set<string>();
+  const dedupedEnriched = enriched.filter((event) => {
+    const isAirForce =
+      event.slug.includes("air-force") ||
+      event.slug.includes("airforce") ||
+      event.slug === "iaf-2026" ||
+      (event.title && event.title.toLowerCase().includes("air force"));
+    const key = isAirForce ? "canonical-iaf-event" : event.slug;
+    const nameKey = event.title ? event.title.toLowerCase().trim().replace(/\s+/g, " ") : key;
+    if (seenKeys.has(key) || seenNames.has(nameKey)) return false;
+    seenKeys.add(key);
+    seenNames.add(nameKey);
+    return true;
+  });
 
   if (group) {
-    const upcoming = enriched
+    const upcoming = dedupedEnriched
       .filter((event) => event.phase === "upcoming" || event.phase === "live")
       .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
-    const past = enriched
+    const past = dedupedEnriched
       .filter((event) => event.phase === "past")
       .sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime());
 
@@ -46,7 +61,7 @@ export async function listEvents(request: Request, response: Response) {
       meta: {
         upcomingCount: upcoming.length,
         pastCount: past.length,
-        total: enriched.length,
+        total: dedupedEnriched.length,
       },
     });
     return;
@@ -54,16 +69,16 @@ export async function listEvents(request: Request, response: Response) {
 
   // For open/upcoming lists, show soonest first
   if (scope === "upcoming" || scope === "open" || scope === "live") {
-    enriched.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    dedupedEnriched.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
   }
 
   response.json({
-    data: enriched,
+    data: dedupedEnriched,
     meta: {
       scope,
-      total: enriched.length,
-      upcomingCount: enriched.filter((e) => e.phase === "upcoming" || e.phase === "live").length,
-      pastCount: enriched.filter((e) => e.phase === "past").length,
+      total: dedupedEnriched.length,
+      upcomingCount: dedupedEnriched.filter((e) => e.phase === "upcoming" || e.phase === "live").length,
+      pastCount: dedupedEnriched.filter((e) => e.phase === "past").length,
     },
   });
 }

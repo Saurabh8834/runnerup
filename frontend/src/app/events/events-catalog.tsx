@@ -118,18 +118,12 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   }, []);
 
   return (
-    <article
-      className={`group flex h-full flex-col overflow-hidden rounded-3xl border transition-all duration-300 hover:-translate-y-1.5 shadow-2xl ${
-        isAirForce
-          ? "border-slate-200/90 bg-white text-slate-900 hover:shadow-[0_20px_50px_rgba(2,132,199,0.25)] hover:border-[#0284c7]/50"
-          : "border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)]"
-      }`}
-    >
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)] shadow-2xl">
       {/* Banner / Poster */}
       <div
         className={`relative overflow-hidden ${
           isAirForce
-            ? "h-80 sm:h-96 bg-black flex items-center justify-center p-4 sm:p-6"
+            ? "h-72 sm:h-80 bg-black flex items-center justify-center p-4 sm:p-5"
             : hasBannerImage
             ? "h-56 sm:h-72 bg-[#14242a]"
             : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
@@ -188,58 +182,43 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         )}
 
         {/* Top Badges */}
-        {isAirForce ? (
-          <div className="absolute top-3.5 right-3.5 z-10">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 text-[0.7rem] font-bold text-emerald-400 backdrop-blur-md shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              Open
-            </span>
-          </div>
-        ) : (
-          <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
-              <Flame className="h-3 w-3 fill-white" />
-              <span>{scarcity.percent}% Booked</span>
-            </span>
+        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 w-full">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
+            <Flame className="h-3 w-3 fill-white" />
+            <span>{scarcity.percent}% Booked</span>
+          </span>
 
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-              </span>
-              <span>Active Race</span>
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-          </div>
-        )}
+            <span>Active Race</span>
+          </span>
+        </div>
 
         {/* Reward / Medal Highlight Strip */}
-        {!isAirForce && (
-          <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
-              <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
-              <span className="truncate">{event.reward}</span>
-            </div>
+        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
+            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
+            <span className="truncate">{event.reward}</span>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Body Content */}
-      <div className={`flex flex-1 flex-col p-5 sm:p-6 ${isAirForce ? "bg-white" : "bg-[#172c34]"}`}>
+      <div className="flex flex-1 flex-col p-5 sm:p-6 bg-[#172c34]">
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-[0.68rem]">
             <span className="font-semibold text-[#e64833] flex items-center gap-1">
               <Zap className="h-3 w-3 text-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
             </span>
-            <span className={`${isAirForce ? "text-slate-500" : "text-[#90aead]"} font-mono font-medium`}>
+            <span className="text-[#90aead] font-mono font-medium">
               {scarcity.percent}% filled
             </span>
           </div>
-          <div
-            className={`h-2 w-full overflow-hidden rounded-full p-0.5 border ${
-              isAirForce ? "bg-slate-100 border-slate-200" : "bg-black/30 border-[#90aead]/20"
-            }`}
-          >
+          <div className="h-2 w-full overflow-hidden rounded-full p-0.5 border bg-black/30 border-[#90aead]/20">
             <motion.div
               initial={{ width: 0 }}
               whileInView={{ width: `${scarcity.percent}%` }}
@@ -251,22 +230,12 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         </div>
 
         {/* Title */}
-        <h3
-          className={`font-display font-extrabold text-xl leading-tight transition-colors ${
-            isAirForce
-              ? "text-[#0284c7] hover:text-[#0369a1]"
-              : "uppercase tracking-tight text-[#fbe9d0] group-hover:text-[#e64833]"
-          }`}
-        >
+        <h3 className="font-display font-extrabold text-xl leading-tight transition-colors uppercase tracking-tight text-[#fbe9d0] group-hover:text-[#e64833]">
           {event.name}
         </h3>
 
         {/* Subtitle / Highlight */}
-        <p
-          className={`mt-2 text-xs font-medium leading-relaxed ${
-            isAirForce ? "text-slate-600" : "text-[#90aead] line-clamp-2"
-          }`}
-        >
+        <p className="mt-2 text-xs font-medium leading-relaxed text-[#90aead] line-clamp-2">
           {event.highlight}
         </p>
 
@@ -275,11 +244,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           {event.distance.split(/[\/,]/).map((d) => (
             <span
               key={d}
-              className={`rounded-lg px-2.5 py-0.5 font-mono text-[0.68rem] font-bold ${
-                isAirForce
-                  ? "bg-slate-100 border border-slate-200/90 text-slate-700"
-                  : "bg-[#244855] border border-[#90aead]/30 text-[#fbe9d0]"
-              }`}
+              className="rounded-lg px-2.5 py-0.5 font-mono text-[0.68rem] font-bold bg-[#244855] border border-[#90aead]/30 text-[#fbe9d0]"
             >
               {d.trim()}
             </span>
@@ -287,26 +252,18 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         </div>
 
         {/* Countdown & Price Footer */}
-        <div
-          className={`mt-4 pt-4 border-t flex items-center justify-between gap-2 ${
-            isAirForce ? "border-slate-100 text-slate-600" : "border-[#90aead]/15 text-[#90aead]"
-          }`}
-        >
+        <div className="mt-4 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2 text-[#90aead]">
           <div className="flex items-center gap-1.5 text-[0.72rem]">
-            <Timer className={`h-3.5 w-3.5 shrink-0 ${isAirForce ? "text-[#0284c7]" : "text-[#e64833]"}`} />
+            <Timer className="h-3.5 w-3.5 shrink-0 text-[#e64833]" />
             <span>Closes in:</span>
-            <span className={`font-mono font-bold ${isAirForce ? "text-slate-800" : "text-[#fbe9d0]"}`}>
+            <span className="font-mono font-bold text-[#fbe9d0]">
               {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
             </span>
           </div>
 
           <div className="text-right">
-            <span
-              className={`text-lg sm:text-xl font-black font-mono flex items-center justify-end gap-0.5 ${
-                isAirForce ? "text-slate-900" : "text-[#fbe9d0]"
-              }`}
-            >
-              <IndianRupee className={`h-4 w-4 ${isAirForce ? "text-[#0284c7]" : "text-[#e64833]"}`} />
+            <span className="text-lg sm:text-xl font-black font-mono flex items-center justify-end gap-0.5 text-[#fbe9d0]">
+              <IndianRupee className="h-4 w-4 text-[#e64833]" />
               {event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "")}
             </span>
           </div>
@@ -315,23 +272,15 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         {/* CTA Buttons */}
         <div className="mt-4 flex items-center gap-2.5">
           <Link
-            className={`flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-              isAirForce
-                ? "border border-slate-200 bg-slate-100 text-slate-800 hover:bg-slate-200"
-                : "border border-[#90aead]/30 bg-[#244855]/60 text-[#fbe9d0] hover:bg-[#244855]"
-            }`}
+            className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-all border border-[#90aead]/30 bg-[#244855]/60 text-[#fbe9d0] hover:bg-[#244855]"
             href={`/events/${event.slug}`}
           >
             <span>Details</span>
-            <ArrowUpRight className={`h-3.5 w-3.5 ${isAirForce ? "text-slate-600" : "text-[#90aead]"}`} />
+            <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
           <Link
-            className={`flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 ${
-              isAirForce
-                ? "bg-[#0284c7] hover:bg-[#0369a1] text-white"
-                : "bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
-            }`}
+            className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
             href={`/register?event=${encodeURIComponent(event.slug)}`}
           >
             <span>Register</span>
@@ -498,9 +447,30 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
   );
 }
 
+function deduplicateEvents(list: PublicEvent[]): PublicEvent[] {
+  const seenKeys = new Set<string>();
+  const seenNames = new Set<string>();
+  const result: PublicEvent[] = [];
+  for (const ev of list) {
+    const isAirForce =
+      ev.slug.includes("air-force") ||
+      ev.slug.includes("airforce") ||
+      ev.slug === "iaf-2026" ||
+      (ev.name && ev.name.toLowerCase().includes("air force"));
+
+    const key = isAirForce ? "canonical-iaf-event" : ev.slug;
+    const nameKey = ev.name ? ev.name.toLowerCase().trim().replace(/\s+/g, " ") : key;
+    if (seenKeys.has(key) || seenNames.has(nameKey)) continue;
+    seenKeys.add(key);
+    seenNames.add(nameKey);
+    result.push(ev);
+  }
+  return result;
+}
+
 export function EventsCatalog() {
-  const [upcoming, setUpcoming] = useState<PublicEvent[]>(staticUpcomingEvents);
-  const [past, setPast] = useState<PublicEvent[]>(staticPastEvents);
+  const [upcoming, setUpcoming] = useState<PublicEvent[]>(() => deduplicateEvents(staticUpcomingEvents));
+  const [past, setPast] = useState<PublicEvent[]>(() => deduplicateEvents(staticPastEvents));
   const [source, setSource] = useState<"api" | "static">("static");
 
   useEffect(() => {
@@ -513,8 +483,8 @@ export function EventsCatalog() {
         const upcomingApi = (json.data?.upcoming ?? []) as ApiEvent[];
         const pastApi = (json.data?.past ?? []) as ApiEvent[];
         if (cancelled || (upcomingApi.length === 0 && pastApi.length === 0)) return;
-        setUpcoming(upcomingApi.map((event) => mapApiEventToPublic(event, "upcoming")));
-        setPast(pastApi.map((event) => mapApiEventToPublic(event, "past")));
+        setUpcoming(deduplicateEvents(upcomingApi.map((event) => mapApiEventToPublic(event, "upcoming"))));
+        setPast(deduplicateEvents(pastApi.map((event) => mapApiEventToPublic(event, "past"))));
         setSource("api");
       } catch {
         // keep static catalog

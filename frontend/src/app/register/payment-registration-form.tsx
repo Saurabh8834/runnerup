@@ -526,7 +526,7 @@ function PaymentRegistrationFormInner() {
 
       const checkout = new window.Razorpay!({
         key: order?.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TjmOBLaIqe8Kz0",
-        amount: order.amount,
+        amount: order?.amountInPaise ?? order?.amount,
         currency: order.currency ?? "INR",
         name: "RUNNERUP",
         description: `${activeEvent.label} · ${selectedDistance}`,

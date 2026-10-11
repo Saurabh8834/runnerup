@@ -35,19 +35,13 @@ async function main() {
   });
   console.log("Updated indian-air-force-day-virtual-challenge:", updated1.count);
 
-  // 2. Also upsert indian-air-force-day-2026
-  const updated2 = await prisma.event.upsert({
+  // 2. Delete any duplicate legacy slug in DB if present
+  const deletedLegacy = await prisma.event.deleteMany({
     where: { slug: "indian-air-force-day-2026" },
-    update: data,
-    create: {
-      ...data,
-      slug: "indian-air-force-day-2026",
-      startsAt: new Date("2026-10-08T00:00:00.000Z"),
-      endsAt: new Date("2026-10-31T23:59:00.000Z"),
-      proofClosesAt: new Date("2026-11-05T23:59:00.000Z"),
-    },
   });
-  console.log("Upserted indian-air-force-day-2026:", updated2.id);
+  if (deletedLegacy.count > 0) {
+    console.log("Cleaned up duplicate legacy slug count:", deletedLegacy.count);
+  }
 }
 
 main()

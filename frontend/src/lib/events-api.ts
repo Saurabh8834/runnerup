@@ -165,6 +165,26 @@ export const fetchEventBySlug = cache(async function fetchEventBySlug(slug: stri
   return getEventBySlug(slug) ?? null;
 });
 
+function deduplicateOpenEvents(list: PublicEvent[]): PublicEvent[] {
+  const seenKeys = new Set<string>();
+  const seenNames = new Set<string>();
+  const result: PublicEvent[] = [];
+  for (const ev of list) {
+    const isAirForce =
+      ev.slug.includes("air-force") ||
+      ev.slug.includes("airforce") ||
+      ev.slug === "iaf-2026" ||
+      (ev.name && ev.name.toLowerCase().includes("air force"));
+    const key = isAirForce ? "canonical-iaf-event" : ev.slug;
+    const nameKey = ev.name ? ev.name.toLowerCase().trim().replace(/\s+/g, " ") : key;
+    if (seenKeys.has(key) || seenNames.has(nameKey)) continue;
+    seenKeys.add(key);
+    seenNames.add(nameKey);
+    result.push(ev);
+  }
+  return result;
+}
+
 /** Fetch open/upcoming events for home & previews. Featured first when set by admin. */
 export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
   homeFeaturedFirst?: boolean;
@@ -182,17 +202,16 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
         if (options?.homeFeaturedFirst) {
           rows.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
         }
-        if (limit != null) {
-          rows = rows.slice(0, limit);
-        }
-        return rows.map((event) => mapApiEventToPublic(event, "upcoming"));
+        const mapped = rows.map((event) => mapApiEventToPublic(event, "upcoming"));
+        const deduped = deduplicateOpenEvents(mapped);
+        return limit != null ? deduped.slice(0, limit) : deduped;
       }
     }
   } catch {
     // fallback
   }
 
-  const fallback = allPublicEvents.filter((event) => event.status === "upcoming");
+  const fallback = deduplicateOpenEvents(allPublicEvents.filter((event) => event.status === "upcoming"));
   return limit != null ? fallback.slice(0, limit) : fallback;
 });
 

@@ -91,6 +91,29 @@ export async function verifyPayment(request: Request, response: Response) {
     throw new ApiError(400, "Invalid Razorpay payment signature");
   }
 
+  const existingPayment = await prisma.payment.findUnique({
+    where: { razorpayOrderId: payload.razorpay_order_id },
+    include: { registration: { include: { user: true, event: true } } },
+  });
+
+  if (!existingPayment) {
+    throw new ApiError(404, "Payment record not found for this order");
+  }
+
+  if (existingPayment.status === "PAID") {
+    logger.info("[Payment] Payment already confirmed previously", {
+      orderId: payload.razorpay_order_id,
+      paymentId: payload.razorpay_payment_id,
+      registrationId: existingPayment.registrationId,
+    });
+    return response.json({
+      data: {
+        ...existingPayment,
+        emailSent: true,
+      },
+    });
+  }
+
   const payment = await prisma.payment.update({
     where: { razorpayOrderId: payload.razorpay_order_id },
     data: {
@@ -112,9 +135,11 @@ export async function verifyPayment(request: Request, response: Response) {
   let emailError: string | undefined;
 
   try {
+    const currentStatus = existingPayment.registration?.status;
+    const nextStatus = currentStatus === "COMPLETED" ? "COMPLETED" : "CONFIRMED";
     const registration = await prisma.registration.update({
       where: { id: payment.registrationId },
-      data: { status: "CONFIRMED" },
+      data: { status: nextStatus },
       include: { user: true, event: true },
     });
 
@@ -160,6 +185,11 @@ export async function verifyPayment(request: Request, response: Response) {
 }
 
 export async function handleRazorpayWebhook(request: Request, response: Response) {
+  if (!env.razorpayWebhookSecret) {
+    logger.warn("[Webhook] RAZORPAY_WEBHOOK_SECRET is not configured. Webhook acknowledged.");
+    return response.json({ received: true, note: "Webhook secret not configured on server" });
+  }
+
   const rawBody = Buffer.isBuffer(request.body) ? request.body : Buffer.from(JSON.stringify(request.body));
   const isValid = verifyWebhookSignature(rawBody, request.header("x-razorpay-signature"));
 

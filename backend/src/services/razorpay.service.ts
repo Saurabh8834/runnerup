@@ -61,10 +61,14 @@ export function verifyCheckoutSignature(input: {
     .update(`${input.razorpayOrderId}|${input.razorpayPaymentId}`)
     .digest("hex");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(expected),
-    Buffer.from(input.razorpaySignature),
-  );
+  const expectedBuf = Buffer.from(expected);
+  const signatureBuf = Buffer.from(input.razorpaySignature || "");
+
+  if (expectedBuf.length !== signatureBuf.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }
 
 export async function fetchPaymentsForOrder(orderId: string) {
@@ -100,5 +104,12 @@ export function verifyWebhookSignature(rawBody: Buffer, signature: string | unde
     .update(rawBody)
     .digest("hex");
 
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  const expectedBuf = Buffer.from(expected);
+  const signatureBuf = Buffer.from(signature);
+
+  if (expectedBuf.length !== signatureBuf.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }

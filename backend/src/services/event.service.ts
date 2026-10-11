@@ -45,21 +45,22 @@ export function withEventMeta<T extends Pick<Event, "status" | "startsAt" | "end
   };
 }
 
-/** Seed starter catalog only when the database has no events yet. */
+/** Ensure starter catalog events exist in the database. */
 export async function ensureDefaultEvents() {
-  const existingEvents = await prisma.event.count();
-  if (existingEvents > 0) {
-    return;
-  }
-
   for (const event of defaultEvents) {
-    await prisma.event.create({
-      data: {
-        ...event,
-        medalIncluded: event.medalIncluded ?? true,
-        benefits: event.benefits ?? [],
-      },
+    const existing = await prisma.event.findUnique({
+      where: { slug: event.slug },
+      select: { id: true },
     });
+    if (!existing) {
+      await prisma.event.create({
+        data: {
+          ...event,
+          medalIncluded: event.medalIncluded ?? true,
+          benefits: event.benefits ?? [],
+        },
+      });
+    }
   }
 }
 

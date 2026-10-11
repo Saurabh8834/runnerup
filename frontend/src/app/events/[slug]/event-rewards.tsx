@@ -106,24 +106,26 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
                     />
                   </div>
                 ) : (
-                  <div className="medal-float w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
+                  <div className="w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
                     <Medal3D className="h-auto w-full" />
                   </div>
                 )}
               </div>
 
-              {/* Pinned feature badges — static, zero float or tilt */}
-              <div className="glass-pill absolute left-4 top-8 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:left-7 sm:top-10">
-                <Shirt className="h-3.5 w-3.5 text-(--gold-deep)" />
-                Premium T-shirt
-              </div>
-              <div className="glass-pill absolute bottom-24 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:bottom-28 sm:right-6">
-                <FileBadge className="h-3.5 w-3.5 text-(--gold-deep)" />
-                Official certificate
-              </div>
-              <div className="glass-pill absolute bottom-12 left-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.65rem] font-bold text-(--foreground) shadow-xs sm:bottom-16 sm:left-6">
-                <Truck className="h-3.5 w-3.5 text-(--gold-deep)" />
-                Free delivery
+              {/* Stable feature badges — neatly docked beneath the medal, zero overlapping */}
+              <div className="relative px-4 sm:px-6 pb-6 pt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
+                  <Shirt className="h-3.5 w-3.5 text-[#e64833]" />
+                  <span>Premium T-shirt</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
+                  <FileBadge className="h-3.5 w-3.5 text-[#e64833]" />
+                  <span>Official certificate</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
+                  <Truck className="h-3.5 w-3.5 text-[#e64833]" />
+                  <span>Free delivery</span>
+                </div>
               </div>
 
               {/* Footer tag */}

@@ -64,30 +64,6 @@ export const allPublicEvents: PublicEvent[] = [
     ],
   },
   {
-    name: "Indian Air Force Day Virtual Challenge 2026",
-    slug: "indian-air-force-day-2026",
-    date: "8-12 October 2026",
-    distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
-    price: "Rs. 499",
-    description:
-      "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
-    highlight: "Salute the Air Warriors · Run, Walk or Ride on 8–12 Oct",
-    banner: "Air Force Day Virtual Challenge",
-    bannerImageUrl: "/images/event-medal.webp",
-    reward: "100% Solid Metal Finisher Medal + E-Certificate",
-    status: "upcoming",
-    compareAtPrice: "Rs. 549",
-    startsAt: "2026-10-08T00:00:00.000Z",
-    endsAt: "2026-10-12T23:59:59.000Z",
-    benefits: [
-      "100% Solid Metal Finisher Medal Included",
-      "Free doorstep delivery across India",
-      "Works with Strava, Garmin, NRC",
-      "Official Verifiable E-Certificate & Digital Bib",
-      "Live GPS-Verified Leaderboard Ranking",
-    ],
-  },
-  {
     name: "October Runner 🍁",
     slug: "october-runner",
     date: "1-31 Oct 2026",
@@ -247,8 +223,13 @@ export const pastEvents = allPublicEvents.filter((event) => event.status === "pa
 export const upcomingEvents = publicEvents;
 
 export function getEventBySlug(slug: string) {
-  if (slug === "indian-air-force-day" || slug === "iaf-2026" || slug === "indian-airforce-day") {
-    return allPublicEvents.find((event) => event.slug === "indian-air-force-day-2026");
+  if (
+    slug === "indian-air-force-day" ||
+    slug === "iaf-2026" ||
+    slug === "indian-airforce-day" ||
+    slug === "indian-air-force-day-2026"
+  ) {
+    return allPublicEvents.find((event) => event.slug === "indian-air-force-day-virtual-challenge");
   }
   return allPublicEvents.find((event) => event.slug === slug);
 }

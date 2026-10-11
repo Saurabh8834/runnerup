@@ -39,7 +39,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
             />
 
             <div className="relative mx-auto flex max-w-2xl flex-col items-center">
-              <div className="medal-float w-28 drop-shadow-[0_25px_30px_rgba(230,72,51,0.25)] sm:w-36">
+              <div className="w-28 drop-shadow-[0_25px_30px_rgba(230,72,51,0.25)] sm:w-36">
                 <Medal3D className="h-auto w-full" />
               </div>
 
