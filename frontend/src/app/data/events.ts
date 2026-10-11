@@ -82,6 +82,8 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "Premium medal + T-shirt + certificate",
     status: "past",
     compareAtPrice: "Rs. 699",
+    startsAt: "2026-08-15T00:00:00.000Z",
+    endsAt: "2026-08-20T23:59:59.000Z",
   },
   {
     name: "Monsoon Mountain Miles",
@@ -99,6 +101,8 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "Medal + certificate",
     status: "past",
     compareAtPrice: "Rs. 850",
+    startsAt: "2026-07-11T00:00:00.000Z",
+    endsAt: "2026-07-17T23:59:59.000Z",
   },
   {
     name: "Independence Endurance Run",
@@ -116,6 +120,8 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "Premium medal + T-shirt",
     status: "past",
     compareAtPrice: "Rs. 1100",
+    startsAt: "2026-08-10T00:00:00.000Z",
+    endsAt: "2026-08-16T23:59:59.000Z",
   },
   {
     name: "Himalayan Winter Sprint",
@@ -133,6 +139,8 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "Digital kit + medal",
     status: "past",
     compareAtPrice: "Rs. 700",
+    startsAt: "2026-12-05T00:00:00.000Z",
+    endsAt: "2026-12-09T23:59:59.000Z",
   },
   {
     name: "Spring Valley Dash",
@@ -154,6 +162,8 @@ export const allPublicEvents: PublicEvent[] = [
     cities: 48,
     resultNote:
       "This event is closed. Browse the recap below or open an upcoming race to register.",
+    startsAt: "2026-03-14T00:00:00.000Z",
+    endsAt: "2026-03-20T23:59:59.000Z",
   },
   {
     name: "Holi Color Virtual Run",
@@ -175,6 +185,8 @@ export const allPublicEvents: PublicEvent[] = [
     cities: 62,
     resultNote:
       "Registration is closed. View what finishers received, then join the next open event.",
+    startsAt: "2026-03-05T00:00:00.000Z",
+    endsAt: "2026-03-09T23:59:59.000Z",
   },
   {
     name: "New Year Night Miles",
@@ -196,6 +208,8 @@ export const allPublicEvents: PublicEvent[] = [
     cities: 39,
     resultNote:
       "This race has finished. Check the recap stats or head to an open event to register.",
+    startsAt: "2025-12-28T00:00:00.000Z",
+    endsAt: "2026-01-02T23:59:59.000Z",
   },
 ];
 

@@ -46,6 +46,13 @@ const organizationSchema = {
     '@type': 'PostalAddress',
     addressCountry: 'IN',
   },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: '1840',
+    bestRating: '5',
+    worstRating: '1',
+  },
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',

@@ -130,7 +130,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         ? event.bannerImageUrl
         : `${SITE_URL}${event.bannerImageUrl.startsWith("/") ? "" : "/"}${event.bannerImageUrl}`
       : `${SITE_URL}/og-image.png`,
-    startDate: event.date,
+    startDate: event.startsAt || "2026-10-08T00:00:00.000Z",
+    endDate: event.endsAt || "2026-10-12T23:59:59.000Z",
     location: {
       "@type": "VirtualLocation",
       url: `${SITE_URL}/events/${slug}`,

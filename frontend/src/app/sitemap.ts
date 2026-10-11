@@ -96,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${SITE_URL}/events/${event.slug}`,
         lastModified: event.updatedAt ? new Date(event.updatedAt) : new Date(),
         changeFrequency: 'daily',
-        priority: 0.9,
+        priority: 0.95,
       });
     }
   }
@@ -105,11 +105,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const event of allPublicEvents) {
     if (event.slug && !eventSlugSet.has(event.slug)) {
       eventSlugSet.add(event.slug);
+      const isPast = event.status === 'past';
       eventPages.push({
         url: `${SITE_URL}/events/${event.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: 0.9,
+        lastModified: event.startsAt ? new Date(event.startsAt) : new Date(),
+        changeFrequency: isPast ? 'weekly' : 'daily',
+        priority: isPast ? 0.85 : 0.95,
       });
     }
   }
