@@ -72,9 +72,9 @@ const TSHIRT_SIZES = [
 
 const fallbackEvents: RegisterEventOption[] = [
   {
-    label: "October Runner 🍁",
-    value: "october-runner",
-    amount: "₹1",
+    label: "Indian Air Force Day Virtual Challenge 2026",
+    value: "indian-air-force-day-virtual-challenge",
+    amount: "₹499",
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     activityTypes: ["running", "cycling", "walking"],
   },

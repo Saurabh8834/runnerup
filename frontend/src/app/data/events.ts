@@ -63,31 +63,7 @@ export const allPublicEvents: PublicEvent[] = [
       "Live GPS-Verified Leaderboard Ranking",
     ],
   },
-  {
-    name: "October Runner 🍁",
-    slug: "october-runner",
-    date: "1-31 Oct 2026",
-    distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
-    price: "Rs. 1",
-    description:
-      "Join the October Runner 1 Rupee virtual challenge! Celebrate the running season with verified GPS tracking, an instant verifiable E-Certificate, and an official digital bib. Complete your chosen distance anywhere, anytime.",
-    highlight: "Special ₹1 October Challenge · Instant verified certificate for all finishers.",
-    banner: "Special ₹1 Challenge",
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
-    reward: "Instant QR E-Certificate + Digital Bib",
-    status: "upcoming",
-    compareAtPrice: "Rs. 99",
-    startsAt: "2026-10-01T00:00:00.000Z",
-    endsAt: "2026-10-31T23:59:59.000Z",
-    benefits: [
-      "Instant Verifiable QR E-Certificate",
-      "Official Digital Race Bib with Number",
-      "Live GPS-Verified Leaderboard Ranking",
-      "Strava, Garmin, Nike & Apple Watch Sync",
-      "Finisher Badge on Profile",
-    ],
-  },
+
   {
     name: "Independence Day Virtual Run 2026 🇮🇳",
     slug: "independence-day-virtual-run-2026",

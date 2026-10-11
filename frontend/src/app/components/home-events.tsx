@@ -71,46 +71,46 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] shadow-2xl"
     >
       {/* Banner / Poster */}
-      <div
-        className={`relative overflow-hidden ${
-          isAirForce
-            ? "h-72 sm:h-80 bg-black flex items-center justify-center p-4 sm:p-5"
-            : hasBannerImage
-            ? "h-56 sm:h-72 bg-[#14242a]"
-            : "h-56 sm:h-72 bg-gradient-to-br from-[#244855] via-[#1b323b] to-[#14242a]"
-        }`}
-      >
+      <div className="relative h-60 sm:h-72 overflow-hidden bg-[#14242a]">
         {isAirForce && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-            <div className="h-56 w-56 rounded-full bg-[#f59e0b]/15 blur-3xl" />
+            <div className="h-52 w-52 rounded-full bg-[#f59e0b]/15 blur-3xl" />
           </div>
         )}
         {imgSrc && !imgFailed ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            alt={event.name}
-            className={
-              isAirForce
-                ? "relative z-[2] h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.9)]"
-                : "absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
-            }
-            src={imgSrc}
-            loading={index < 3 ? "eager" : "lazy"}
-            decoding="async"
-            onError={() => {
-              if (isAirForce) {
-                setImgSrc("/images/event-medal.png");
-                return;
-              }
-              if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
-                setImgSrc(`/events/${event.slug}.webp`);
-              } else if (imgSrc && imgSrc.endsWith(".webp")) {
-                setImgSrc(`/events/${event.slug}.jpg`);
-              } else {
-                setImgFailed(true);
-              }
-            }}
-          />
+          isAirForce ? (
+            <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                alt={event.name}
+                className="h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.85)]"
+                src={imgSrc}
+                loading={index < 3 ? "eager" : "lazy"}
+                decoding="async"
+                onError={() => {
+                  setImgSrc("/images/event-medal.png");
+                }}
+              />
+            </div>
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              alt={event.name}
+              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+              src={imgSrc}
+              loading={index < 3 ? "eager" : "lazy"}
+              decoding="async"
+              onError={() => {
+                if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
+                  setImgSrc(`/events/${event.slug}.webp`);
+                } else if (imgSrc && imgSrc.endsWith(".webp")) {
+                  setImgSrc(`/events/${event.slug}.jpg`);
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+            />
+          )
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
             <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
@@ -132,7 +132,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         )}
 
         {/* Top Badges */}
-        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 w-full">
+        <div className="absolute top-0 inset-x-0 z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 pointer-events-none">
           <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
             <Flame className="h-3 w-3 fill-white" />
             <span>{scarcity.percent}% Booked</span>
