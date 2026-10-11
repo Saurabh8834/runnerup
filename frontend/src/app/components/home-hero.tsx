@@ -85,7 +85,7 @@ export function HomeHero() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mt-2.5 sm:mt-3.5 max-w-lg text-xs sm:text-sm lg:text-base text-[#fbe9d0]/85 font-medium leading-relaxed"
             >
-              India&apos;s premier GPS-verified virtual running races. Track your run anywhere with Strava, Garmin, or Apple Watch and earn authentic metal finisher medals delivered across India.
+              India’s premier GPS-verified virtual races. Run anywhere, track with Strava, Garmin, or Apple Watch, and earn authentic metal finisher medals delivered across India.
             </motion.p>
 
             {/* ─── UNIQUE MOBILE INTERACTIVE SHOWCASE CARD (visible ONLY on < lg screens) ─── */}
@@ -180,7 +180,7 @@ export function HomeHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden"
+                      className="relative min-h-[340px] sm:min-h-[380px] h-[340px] sm:h-[380px] w-full overflow-hidden"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -188,7 +188,7 @@ export function HomeHero() {
                         alt="Runners sprinting in marathon"
                         loading="eager"
                         decoding="async"
-                        className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
+                        className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#14242a]/85 via-transparent to-[#14242a]/30 pointer-events-none" />
 
@@ -351,7 +351,7 @@ export function HomeHero() {
                     alt="Marathon runners pushing their limits"
                     loading="eager"
                     decoding="async"
-                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
+                    className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
                   />
                   {/* Cinematic gradient shading */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#14242a] via-[#14242a]/20 to-transparent pointer-events-none" />

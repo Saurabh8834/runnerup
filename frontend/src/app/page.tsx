@@ -19,7 +19,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 export const metadata: Metadata = {
   title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
   description:
-    "Join India's premier virtual running events. Run 1.5K, 5K, 10K, 21K marathons from anywhere. Track with Strava, Garmin, Nike, earn authentic metal finisher medals, t-shirts, and instant E-certificates.",
+    "India’s premier GPS-verified virtual races. Run anywhere, track with Strava, Garmin, or Apple Watch, and earn authentic metal finisher medals delivered across India.",
   keywords: [
     "virtual running",
     "virtual running events india",
