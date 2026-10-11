@@ -83,7 +83,7 @@ export function FloatingContact() {
       ref={containerRef}
       data-floating-contact="true"
       aria-label="Customer Support Chat"
-      className="fixed z-50 right-4 sm:right-6 bottom-20 md:bottom-[5.25rem]"
+      className="fixed z-50 right-3.5 sm:right-6 bottom-[4.85rem] md:bottom-[5.25rem]"
     >
       {/* ─── Expandable Support / WhatsApp Popup (BeyondRun Reference) ─── */}
       <AnimatePresence>
@@ -163,7 +163,7 @@ export function FloatingContact() {
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={isOpen ? "Close support menu" : "Open support chat on WhatsApp"}
         aria-expanded={isOpen}
-        className="group relative flex h-14 w-14 sm:h-15 sm:w-15 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] via-[#ea5a47] to-[#ff5722] text-white shadow-[0_10px_32px_rgba(230,72,51,0.5)] border border-[#fbe9d0]/25 transition-all duration-300 hover:scale-108 hover:shadow-[0_14px_40px_rgba(230,72,51,0.7)] active:scale-95 focus:outline-none"
+        className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] via-[#ea5a47] to-[#ff5722] text-white shadow-[0_10px_32px_rgba(230,72,51,0.5)] border border-[#fbe9d0]/25 transition-all duration-300 hover:scale-108 hover:shadow-[0_14px_40px_rgba(230,72,51,0.7)] active:scale-95 focus:outline-none"
       >
         {/* Pulsing Green Online Status Badge (Top Right Corner) */}
         <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 pointer-events-none">
