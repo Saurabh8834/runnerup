@@ -71,7 +71,7 @@ export function HomeHero() {
               <img
                 src="/images/running-brush-word.webp"
                 alt="RUNNING"
-                className="h-12 xs:h-14 sm:h-18 md:h-22 lg:h-24 xl:h-28 w-auto object-contain select-none filter drop-shadow-[0_0_25px_rgba(0,223,196,0.8)]"
+                className="h-12 xs:h-14 sm:h-18 md:h-22 lg:h-24 xl:h-28 w-auto object-contain select-none filter drop-shadow-[0_0_25px_rgba(230,72,51,0.75)]"
               />
             </span>
             <span className="block text-white">RACES</span>
@@ -196,7 +196,7 @@ export function HomeHero() {
       </div>
 
       {/* ─── 3. BOTTOM SECTION: HOW IT WORKS (Desktop) / RUN • EARN • BE PROUD (Mobile) ─── */}
-      <div id="how-it-works" className="relative z-10 w-full mt-3 lg:mt-6">
+      <div className="relative z-10 w-full mt-3 lg:mt-6">
         {/* Desktop "HOW IT WORKS" 4-Step Bar */}
         <div className="hidden lg:block w-full border-t border-white/10 bg-[#172c34]/95 backdrop-blur-md rounded-t-3xl py-4">
           <div className="container-page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

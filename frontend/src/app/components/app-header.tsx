@@ -385,7 +385,7 @@ export function AppHeader() {
                 alt="RUNNERUP"
                 width={180}
                 height={40}
-                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(0,223,196,0.35)] transition-transform duration-200 group-hover:scale-105"
+                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)] transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>
@@ -473,7 +473,7 @@ export function AppHeader() {
               />
 
               {/* Glowing Accent Orb behind drawer */}
-              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-[#00dfc4]/15 blur-[120px]" />
+              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-[#e64833]/15 blur-[120px]" />
 
               {/* Slide-Over Drawer Sheet */}
               <motion.nav
@@ -487,7 +487,7 @@ export function AppHeader() {
                 aria-label="Mobile Navigation"
               >
                 {/* Top Neon Accent Line */}
-                <div className="h-1 w-full bg-gradient-to-r from-[#00dfc4] via-[#00c9b0] to-[#059669] shrink-0" />
+                <div className="h-1 w-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#fbe9d0] shrink-0" />
 
                 {/* Drawer Header: Brand Logo + Close Pill */}
                 <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/10 shrink-0">
@@ -500,7 +500,7 @@ export function AppHeader() {
                       src="/runnerup-logo.png"
                       alt="RUNNERUP"
                       style={{ height: "32px", width: "auto" }}
-                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(0,223,196,0.4)]"
+                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(230,72,51,0.4)]"
                     />
                   </Link>
 
