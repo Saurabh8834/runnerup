@@ -120,19 +120,19 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)] shadow-2xl">
       {/* Banner / Poster */}
-      <div className="relative h-60 sm:h-72 overflow-hidden bg-[#14242a]">
+      <div className={`relative overflow-hidden ${isAirForce ? "h-80 sm:h-96 bg-black" : "h-60 sm:h-72 bg-[#14242a]"}`}>
         {isAirForce && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-            <div className="h-52 w-52 rounded-full bg-[#f59e0b]/15 blur-3xl" />
+            <div className="h-56 w-56 rounded-full bg-[#f59e0b]/15 blur-3xl" />
           </div>
         )}
         {imgSrc && !imgFailed ? (
           isAirForce ? (
-            <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+            <div className="absolute inset-0 flex items-center justify-center p-3.5 sm:p-5 z-[2]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={event.name}
-                className="h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.85)]"
+                className="h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none"
                 src={imgSrc}
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
@@ -183,31 +183,40 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
         {/* Top Badges */}
         <div className="absolute top-0 inset-x-0 z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 pointer-events-none">
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#e64833] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
             <Flame className="h-3 w-3 fill-white" />
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-[#90aead]/30 bg-[#14242a]/90 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-black uppercase tracking-wider text-[#fbe9d0] shadow-md shrink-0">
+          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-            <span>Active Race</span>
+            <span>Open</span>
           </span>
         </div>
 
-        {/* Reward / Medal Highlight Strip */}
-        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
-            <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
-            <span className="truncate">{event.reward}</span>
+        {/* Reward / Medal Highlight Strip (Only for non-medal cards so medals are never obscured) */}
+        {!isAirForce && (
+          <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#14242a]/85 backdrop-blur-md px-3 py-1 text-xs font-bold text-[#fbe9d0] shadow-lg max-w-full">
+              <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
+              <span className="truncate">{event.reward}</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Body Content */}
       <div className="flex flex-1 flex-col p-5 sm:p-6 bg-[#172c34]">
+        {/* Reward Highlight Badge for Medal Cards (Positioned in body so medal is 100% visible) */}
+        {isAirForce && (
+          <div className="mb-3.5 inline-flex items-center gap-2 rounded-xl border border-[#90aead]/25 bg-[#244855]/35 px-3 py-1.5 text-xs font-bold text-[#fbe9d0] shadow-sm">
+            <Medal className="h-4 w-4 text-[#e64833] shrink-0" />
+            <span className="truncate">{event.reward}</span>
+          </div>
+        )}
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-[0.68rem]">

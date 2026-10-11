@@ -372,7 +372,7 @@ export function AppHeader() {
         }`}
       >
         <div
-          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-3.5 sm:px-6 py-1.5 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
+          className={`pointer-events-auto relative w-full max-w-6xl rounded-2xl sm:rounded-full bg-[#16272e]/94 backdrop-blur-2xl border border-[#90aead]/20 shadow-[0_16px_40px_rgba(0,0,0,0.65)] px-3.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between transition-all duration-300 ${
             scrolled ? "bg-[#112026]/98 border-[#90aead]/25 shadow-[0_20px_48px_rgba(0,0,0,0.85)]" : ""
           }`}
         >
@@ -392,7 +392,7 @@ export function AppHeader() {
                 alt="RUNNERUP"
                 width={180}
                 height={40}
-                className="h-7 xs:h-7.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)] transition-transform duration-200 group-hover:scale-105"
+                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.4)] transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>
@@ -507,8 +507,8 @@ export function AppHeader() {
                     <img
                       src="/runnerup-logo.png"
                       alt="RUNNERUP"
-                      style={{ height: "28px", width: "auto" }}
-                      className="h-7 max-h-[30px] w-auto object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(230,72,51,0.35)]"
+                      style={{ height: "32px", width: "auto" }}
+                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(230,72,51,0.4)]"
                     />
                   </Link>
 

@@ -134,19 +134,19 @@ export function HomeHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="relative aspect-[16/10] w-full overflow-hidden flex items-center justify-center bg-gradient-to-b from-[#172c34] via-[#112026] to-[#0c161a]"
+                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden flex items-center justify-center bg-black p-3"
                     >
                       {/* Ambient Radial Spotlight Glow */}
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(230,72,51,0.3)_0%,rgba(251,233,208,0.12)_35%,transparent_70%)] pointer-events-none" />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(230,72,51,0.25)_0%,rgba(251,233,208,0.12)_35%,transparent_70%)] pointer-events-none" />
 
-                      {/* Medal Image with Drop Shadow & Sheen */}
+                      {/* Medal Image with Drop Shadow & Sheen — 100% Uncropped */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="/images/event-medal.webp"
                         alt="Authentic 3D Solid Metal Finisher Medal"
                         loading="eager"
                         decoding="async"
-                        className="relative z-10 h-[88%] w-auto max-w-[85%] object-contain drop-shadow-[0_12px_28px_rgba(0,0,0,0.9)] transition-transform duration-500 hover:scale-105 will-change-transform"
+                        className="relative z-10 h-auto w-auto max-h-[295px] sm:max-h-[340px] max-w-[88%] object-contain select-none drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-105 will-change-transform"
                       />
 
                       {/* Top-Left Chip: 100% Solid Metal */}
@@ -162,12 +162,12 @@ export function HomeHero() {
                       </div>
 
                       {/* Bottom Banner Strip */}
-                      <div className="absolute bottom-2 inset-x-2 z-20 flex items-center justify-between rounded-xl bg-[#14242a]/95 border border-[#90aead]/30 px-3 py-1.5 backdrop-blur-md shadow-lg">
-                        <div className="flex items-center gap-1.5 text-[0.65rem] font-bold text-[#fbe9d0] truncate">
-                          <Trophy className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
+                      <div className="absolute bottom-2 inset-x-2.5 z-20 flex items-center justify-between rounded-xl bg-[#14242a]/95 border border-[#90aead]/30 px-3 py-1 backdrop-blur-md shadow-lg">
+                        <div className="flex items-center gap-1.5 text-[0.62rem] font-bold text-[#fbe9d0] truncate">
+                          <Trophy className="h-3 w-3 text-[#e64833] shrink-0" />
                           <span className="truncate">Finisher Kit with Ribbon &amp; Cert</span>
                         </div>
-                        <span className="text-[0.58rem] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 shrink-0">
+                        <span className="text-[0.55rem] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30 shrink-0">
                           Dispatched in 48h
                         </span>
                       </div>
@@ -180,7 +180,7 @@ export function HomeHero() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
                       transition={{ duration: 0.25 }}
-                      className="relative aspect-[16/10] w-full overflow-hidden"
+                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
