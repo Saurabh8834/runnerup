@@ -84,7 +84,7 @@ export function PersistentRegisterCta() {
           ───────────────────────────────────────────────────────────── */}
       <aside
         aria-label="Quick registration"
-        className="fixed bottom-6 right-24 sm:right-26 z-40 hidden md:flex items-center"
+        className="fixed bottom-6 right-6 z-40 hidden md:flex items-center"
       >
         <Link
           href={targetHref}

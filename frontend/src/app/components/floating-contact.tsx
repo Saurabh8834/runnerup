@@ -83,7 +83,7 @@ export function FloatingContact() {
       ref={containerRef}
       data-floating-contact="true"
       aria-label="Customer Support Chat"
-      className="fixed z-50 right-4 sm:right-6 bottom-20 sm:bottom-6"
+      className="fixed z-50 right-4 sm:right-6 bottom-20 md:bottom-[5.25rem]"
     >
       {/* ─── Expandable Support / WhatsApp Popup (BeyondRun Reference) ─── */}
       <AnimatePresence>
