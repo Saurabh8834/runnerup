@@ -343,52 +343,101 @@ export function HomeHero() {
               className="relative w-full"
             >
               {/* Outer decorative ambient frame */}
-              <div className="relative rounded-3xl overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_35px_rgba(230,72,51,0.22)] bg-[#101e23] group">
-                <div className="relative aspect-[4/4.4] xl:aspect-[4/5] max-h-[380px] xl:max-h-[460px] 2xl:max-h-[520px] w-full overflow-hidden">
+              <div className="relative rounded-3xl overflow-hidden border border-[#90aead]/25 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_35px_rgba(47,234,168,0.15)] bg-[#0d1a20] group flex flex-col">
+                {/* 1. Top Section: Landscape Marathon Runner Hero Image */}
+                <div className="relative w-full h-[200px] xl:h-[220px] overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/runner-hd.webp"
                     alt="Marathon runners pushing their limits"
                     loading="eager"
                     decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
+                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
                   />
                   {/* Cinematic gradient shading */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#14242a] via-[#14242a]/20 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d1a20] via-transparent to-[#0d1a20]/35 pointer-events-none" />
 
                   {/* Floating Telemetry Widget 1: Top Active Runners */}
-                  <div className="absolute top-3.5 left-3.5 flex items-center gap-2 rounded-2xl bg-[#14242a]/90 border border-white/20 px-3 py-1.5 backdrop-blur-xl shadow-xl">
-                    <div className="h-7 w-7 rounded-xl bg-[#e64833]/20 flex items-center justify-center border border-[#e64833]/40">
+                  <div className="absolute top-3 left-3 flex items-center gap-2 rounded-2xl bg-[#14242a]/92 border border-white/20 px-3 py-1.5 backdrop-blur-xl shadow-xl">
+                    <div className="h-6 w-6 rounded-lg bg-[#e64833]/20 flex items-center justify-center border border-[#e64833]/40">
                       <Flame className="h-3.5 w-3.5 text-[#e64833] fill-[#e64833]" />
                     </div>
                     <div>
-                      <p className="text-[0.58rem] font-bold text-slate-300 uppercase tracking-wider">Active Community</p>
-                      <p className="text-[0.72rem] font-black text-white">12,400+ Runners</p>
+                      <p className="text-[0.55rem] font-bold text-slate-300 uppercase tracking-wider leading-none">Active Community</p>
+                      <p className="text-[0.68rem] font-black text-white leading-tight mt-0.5">12,400+ Runners</p>
                     </div>
                   </div>
 
                   {/* Floating Telemetry Widget 2: GPS Verified */}
-                  <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 rounded-2xl bg-[#14242a]/90 border border-white/20 px-2.5 py-1.5 backdrop-blur-xl shadow-xl">
-                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-[#14242a]/92 border border-white/20 px-2.5 py-1 backdrop-blur-xl shadow-xl">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                    </span>
                     <span className="text-[0.62rem] font-black uppercase tracking-wider text-emerald-300">Live GPS</span>
                   </div>
+                </div>
 
-                  {/* Floating Bottom Card: Finisher Kit Showcase */}
-                  <div className="absolute bottom-3.5 inset-x-3.5 rounded-2xl bg-[#172c34]/95 border border-[#90aead]/30 p-3 backdrop-blur-2xl shadow-2xl">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#e64833] to-[#ea5a47] flex items-center justify-center text-white shadow-lg shadow-[#e64833]/40">
-                          <Trophy className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-[0.7rem] font-black text-white uppercase tracking-wider">Finisher Medal &amp; Kit</p>
-                          <p className="text-[0.62rem] text-[#fbe9d0]/80 font-medium">Delivered to door anywhere in India</p>
-                        </div>
-                      </div>
-                      <span className="rounded-full bg-emerald-500/25 border border-emerald-400/40 px-2 py-0.5 text-[0.58rem] font-black uppercase tracking-wider text-emerald-300">
-                        100% Free
-                      </span>
+                {/* 2. Middle Section: Bold Brand Promise (Exact Image 1 Typography & Underline) */}
+                <div className="px-5 pt-4 pb-3 sm:px-6 sm:pt-5 sm:pb-3 flex flex-col justify-center">
+                  <div className="space-y-0.5">
+                    <h3 className="font-display font-black text-3xl sm:text-4xl text-white tracking-tight leading-tight">
+                      Your Run.
+                    </h3>
+                    <div className="relative inline-block">
+                      <h3 className="font-display font-black text-3xl sm:text-4xl text-[#2feaa8] tracking-tight leading-tight">
+                        Your Medal.
+                      </h3>
+                      {/* Aqua Curved Swoosh Underline */}
+                      <svg
+                        className="w-full h-3 text-[#2feaa8] -mt-0.5 drop-shadow-[0_2px_8px_rgba(47,234,168,0.4)]"
+                        viewBox="0 0 160 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        preserveAspectRatio="none"
+                      >
+                        <path
+                          d="M3 8.5C38 3 118 2 157 8.5"
+                          stroke="currentColor"
+                          strokeWidth="3.2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
                     </div>
+                  </div>
+
+                  {/* Location & Tagline */}
+                  <div className="mt-3.5 flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full border border-[#2feaa8]/40 bg-[#2feaa8]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(47,234,168,0.2)]">
+                      <MapPin className="h-4 w-4 text-[#2feaa8]" />
+                    </div>
+                    <div className="border-l border-[#90aead]/30 pl-3">
+                      <p className="text-xs sm:text-[0.82rem] font-medium text-[#fbe9d0] leading-snug">
+                        GPS-verified virtual races,<br />anywhere in India.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Bottom Section: Finisher Medal & Kit Showcase (Free Courier instead of misleading 100% Free) */}
+                <div className="p-3.5 sm:p-4 pt-1">
+                  <div className="rounded-2xl bg-[#172c34]/95 border border-[#90aead]/30 p-3 backdrop-blur-2xl shadow-xl flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#e64833] to-[#ea5a47] flex items-center justify-center text-white shadow-lg shadow-[#e64833]/40 shrink-0">
+                        <Trophy className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[0.7rem] font-black text-white uppercase tracking-wider truncate">
+                          Finisher Medal &amp; Kit
+                        </p>
+                        <p className="text-[0.62rem] text-[#fbe9d0]/80 font-medium truncate">
+                          Delivered to door anywhere in India
+                        </p>
+                      </div>
+                    </div>
+                    <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wider text-emerald-300 shadow-sm shrink-0">
+                      Free Courier
+                    </span>
                   </div>
                 </div>
               </div>
