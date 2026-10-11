@@ -40,7 +40,7 @@ function Hamburger({ open, onClick }: { open: boolean; onClick: () => void }) {
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       onClick={onClick}
-      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#112229]/95 text-white backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#00dfc4]/60 hover:text-[#00dfc4] active:scale-90"
+      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#172c34] text-[#fbe9d0] backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#e64833]/60 hover:text-white hover:shadow-[0_0_15px_rgba(230,72,51,0.3)] active:scale-90"
     >
       <span className="flex w-5 flex-col gap-[5px]">
         <motion.span
@@ -263,7 +263,7 @@ function NavLink({
       onClick={onClick}
       className={`relative inline-flex flex-col items-center justify-center px-3.5 py-1.5 text-xs sm:text-sm transition-all duration-200 whitespace-nowrap shrink-0 ${
         active
-          ? "text-[#00dfc4] font-bold"
+          ? "text-[#e64833] font-bold"
           : "text-slate-300 hover:text-white font-medium"
       }`}
     >
@@ -271,7 +271,7 @@ function NavLink({
       {active && (
         <motion.span
           layoutId="nav-header-active"
-          className="absolute -bottom-1 h-[2px] w-6 rounded-full bg-[#00dfc4] shadow-[0_0_8px_#00dfc4]"
+          className="absolute -bottom-1 h-[2px] w-6 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#874f41] shadow-[0_0_8px_rgba(230,72,51,0.6)]"
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
         />
       )}
@@ -422,23 +422,23 @@ export function AppHeader() {
                     <span>Login</span>
                   </Link>
                   <Link
-                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.55)] transition-all duration-300 hover:shadow-[0_0_35px_rgba(0,223,196,0.85)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
+                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.4),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(230,72,51,0.7),0_6px_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
                     href="/events"
                   >
                     <span>Join Now</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-black stroke-[2.5] transition-transform duration-300 group-hover:translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5] transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </>
               )}
               {isLoaded && isSignedIn && (
                 <div className="flex items-center gap-2.5">
                   <Link
-                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-4.5 text-xs font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
                     href="/register"
                   >
-                    <Zap className="h-3.5 w-3.5 text-black fill-black" />
+                    <Zap className="h-3.5 w-3.5 text-white fill-white" />
                     <span>Register Now</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-black stroke-[2.5]" />
+                    <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5]" />
                   </Link>
                   <DashboardProfileDropdown />
                 </div>
@@ -522,15 +522,15 @@ export function AppHeader() {
               >
                 {/* Athlete Profile (only shown when signed in) */}
                 {isLoaded && isSignedIn && user ? (
-                  <div className="flex items-center gap-3 rounded-2xl border border-[#00dfc4]/30 bg-[#00dfc4]/[0.08] p-3.5 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+                  <div className="flex items-center gap-3 rounded-2xl border border-[#e64833]/30 bg-[#e64833]/[0.08] p-3.5 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
                     {user?.imageUrl ? (
                       <img
                         src={user.imageUrl}
                         alt={user?.fullName ?? "Athlete"}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#00dfc4]/60 shadow-lg shrink-0"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#e64833]/60 shadow-lg shrink-0"
                       />
                     ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-[#00dfc4] to-[#059669] text-xs font-black text-black ring-2 ring-[#00dfc4]/60 shadow-lg shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-xs font-black text-white ring-2 ring-[#e64833]/60 shadow-lg shrink-0">
                         {(user?.fullName ?? user?.firstName ?? "A").charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -539,7 +539,7 @@ export function AppHeader() {
                         <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                           {user?.fullName ?? user?.firstName ?? "Athlete"}
                         </p>
-                        <span className="rounded-full bg-[#00dfc4]/25 border border-[#00dfc4]/50 px-1.5 py-0.2 text-[0.52rem] font-black uppercase tracking-wider text-[#00dfc4]">
+                        <span className="rounded-full bg-[#e64833]/25 border border-[#e64833]/50 px-1.5 py-0.2 text-[0.52rem] font-black uppercase tracking-wider text-[#fbe9d0]">
                           PRO ⚡
                         </span>
                       </div>
@@ -554,23 +554,23 @@ export function AppHeader() {
                 <Link
                   href="/register"
                   onClick={() => setOpen(false)}
-                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-[#00dfc4] hover:bg-[#00c9b0] p-3.5 text-xs font-black uppercase tracking-wider text-black shadow-lg shadow-[#00dfc4]/25 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
+                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#e64833]/30 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/10 backdrop-blur-md">
-                      <Zap className="h-4.5 w-4.5 text-black fill-black" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/20 backdrop-blur-md">
+                      <Zap className="h-4.5 w-4.5 text-white fill-white" />
                     </div>
                     <div>
-                      <span className="block text-xs font-black uppercase tracking-wider text-black">Register Now</span>
-                      <span className="block text-[0.65rem] font-medium text-black/80 normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-white">Register Now</span>
+                      <span className="block text-[0.65rem] font-medium text-white/90 normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
                     </div>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-black stroke-[2.5] transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 text-white stroke-[2.5] transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 {/* Section Header */}
                 <div className="px-1 pt-1">
-                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#00dfc4]">
+                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#90aead]">
                     Menu Navigation
                   </span>
                 </div>
@@ -586,15 +586,15 @@ export function AppHeader() {
                         onClick={(e) => handleMobileNavClick(href, e)}
                         className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
                           active
-                            ? "bg-gradient-to-r from-[#00dfc4]/25 via-[#00dfc4]/15 to-transparent border border-[#00dfc4]/50 text-white shadow-[0_0_16px_rgba(0,223,196,0.2)] backdrop-blur-xl"
+                            ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
                             : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
                         }`}
                       >
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
                             active
-                              ? "bg-[#00dfc4] text-black shadow-[0_0_10px_rgba(0,223,196,0.5)]"
-                              : "bg-white/[0.08] text-[#00dfc4] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
+                              ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
+                              : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
                           }`}
                         >
                           <Icon className="h-4 w-4" strokeWidth={2.2} />
@@ -602,14 +602,14 @@ export function AppHeader() {
                         <div className="flex-1 flex items-center justify-between">
                           <span>{label}</span>
                           {href === "/events" && (
-                            <span className="rounded-full bg-[#00dfc4]/20 border border-[#00dfc4]/40 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-[#00dfc4]">
+                            <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-emerald-300">
                               Active Races
                             </span>
                           )}
                         </div>
                         <svg
                           className={`h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 ${
-                            active ? "text-[#00dfc4]" : "text-slate-500 group-hover:text-white"
+                            active ? "text-[#e64833]" : "text-slate-500 group-hover:text-white"
                           }`}
                           viewBox="0 0 16 16"
                           fill="none"
@@ -631,15 +631,15 @@ export function AppHeader() {
                       onClick={() => setOpen(false)}
                       className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
                         isActive("/dashboard")
-                          ? "bg-gradient-to-r from-[#00dfc4]/25 via-[#00dfc4]/15 to-transparent border border-[#00dfc4]/50 text-white shadow-[0_0_16px_rgba(0,223,196,0.2)] backdrop-blur-xl"
+                          ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
                           : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
                       }`}
                     >
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
                           isActive("/dashboard")
-                            ? "bg-[#00dfc4] text-black shadow-[0_0_10px_rgba(0,223,196,0.5)]"
-                            : "bg-white/[0.08] text-[#00dfc4] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
+                            ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
+                            : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
                         }`}
                       >
                         <LayoutDashboard className="h-4 w-4" strokeWidth={2.2} />
@@ -704,10 +704,10 @@ export function AppHeader() {
                     <Link
                       href="/register"
                       onClick={() => setOpen(false)}
-                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-[#00dfc4] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-md shadow-[#00dfc4]/30 border border-white/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#00dfc4]/45 hover:bg-[#00c9b0]"
+                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#e64833]/30 border border-white/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#e64833]/45"
                     >
                       <span className="relative z-10">Register</span>
-                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-black stroke-[2.5]" />
+                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-white stroke-[2.5]" />
                     </Link>
                   </div>
                 )}
