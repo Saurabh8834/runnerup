@@ -25,10 +25,11 @@ import { ThemeToggle } from "./theme-toggle";
 
 /* ─── Nav items with icons ─── */
 const publicNav = [
+  { label: "Home", href: "/", icon: Calendar },
   { label: "Events", href: "/events", icon: Calendar },
-  { label: "What is Virtual Run?", href: "/what-is-virtual-run", icon: Zap },
-  { label: "Gallery", href: "/gallery", icon: Camera },
-  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+  { label: "How It Works", href: "/#how-it-works", icon: Zap },
+  { label: "Medals", href: "/gallery", icon: Award },
+  { label: "About", href: "/about", icon: Trophy },
 ] as const;
 
 /* ─── Animated hamburger button ─── */
@@ -39,7 +40,7 @@ function Hamburger({ open, onClick }: { open: boolean; onClick: () => void }) {
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       onClick={onClick}
-      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border border-[#90aead]/25 bg-[#172c34] text-[#fbe9d0] backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#e64833]/60 hover:bg-[#1f3741] hover:text-white hover:shadow-[0_0_15px_rgba(230,72,51,0.3)] active:scale-90"
+      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#112229]/95 text-white backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#00dfc4]/60 hover:text-[#00dfc4] active:scale-90"
     >
       <span className="flex w-5 flex-col gap-[5px]">
         <motion.span
@@ -422,19 +423,18 @@ export function AppHeader() {
               {isLoaded && !isSignedIn && (
                 <>
                   <Link
-                    className="inline-flex h-9 items-center rounded-full px-3.5 text-xs font-semibold text-[#fbe9d0] transition-colors hover:text-white hover:bg-white/[0.06] whitespace-nowrap"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white/90 transition-colors hover:text-white hover:bg-white/[0.08] whitespace-nowrap border border-white/15 bg-white/[0.04]"
                     href="/sign-in"
                   >
-                    Sign in
+                    <User className="h-3.5 w-3.5" />
+                    <span>Login</span>
                   </Link>
                   <Link
-                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.4),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(230,72,51,0.7),0_6px_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
-                    href="/register"
+                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-black shadow-[0_0_20px_rgba(0,223,196,0.5)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(0,223,196,0.8)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
+                    href="/events"
                   >
-                    <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                    <Zap className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] fill-[#fbe9d0]" />
-                    <span className="relative z-10 text-[#fbe9d0]">Register Now</span>
-                    <ArrowRight className="relative z-10 h-3.5 w-3.5 text-[#fbe9d0] transition-transform duration-300 group-hover:translate-x-1" />
+                    <span>Join Now</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-black stroke-[2.5] transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </>
               )}

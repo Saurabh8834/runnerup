@@ -1,436 +1,374 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
-  ShieldCheck,
-  Award,
-  Zap,
   MapPin,
-  Flame,
-  Sparkles,
-  CheckCircle2,
   Activity,
-  Trophy,
+  Award,
   Truck,
-  Watch,
   Smartphone,
-  ChevronRight,
+  Cloud,
+  Trophy,
+  Star,
 } from "lucide-react";
 
-const mobileDistances = [
-  { distance: "5K", label: "Fun Run", badge: "Beginner Pick", slug: "indian-air-force-day-virtual-challenge" },
-  { distance: "10K", label: "Challenge", badge: "Most Popular", slug: "indian-air-force-day-virtual-challenge" },
-  { distance: "21K", label: "Half Marathon", badge: "Pro Finisher", slug: "indian-air-force-day-virtual-challenge" },
-  { distance: "25K", label: "Virtual Ride", badge: "Cycling", slug: "indian-air-force-day-virtual-challenge" },
-  { distance: "3K", label: "Starter Walk", badge: "Family & Kids", slug: "indian-air-force-day-virtual-challenge" },
-];
-
 export function HomeHero() {
-  const [mobileTab, setMobileTab] = useState<"medal" | "race">("medal");
-
   return (
-    <section className="relative w-full overflow-hidden bg-[#14242a] text-[#fbe9d0] isolate min-h-[92dvh] lg:h-[100dvh] flex flex-col justify-start lg:justify-center pt-20 pb-12 sm:pt-28 sm:pb-14 lg:pt-14 lg:pb-6">
-      {/* ─── Ambient Atmospheric Background Glows ─── */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
-        <div className="absolute top-1/4 left-1/2 -z-10 h-[220px] w-[260px] sm:h-[400px] sm:w-[600px] -translate-x-1/2 rounded-full bg-[#244855]/40 blur-[70px] sm:blur-[130px]" />
-        <div className="absolute top-1/3 right-4 -z-10 h-[180px] w-[180px] sm:h-[300px] sm:w-[300px] rounded-full bg-[#e64833]/20 blur-[60px] sm:blur-[110px]" />
-        <div className="absolute bottom-6 left-10 -z-10 h-[140px] w-[140px] sm:h-[240px] sm:w-[240px] rounded-full bg-[#244855]/30 blur-[50px] sm:blur-[70px]" />
+    <section className="relative w-full overflow-hidden bg-[#071419] text-[#fbe9d0] isolate min-h-[92dvh] lg:min-h-[100dvh] flex flex-col justify-between pt-24 pb-6 sm:pt-28 sm:pb-8 lg:pt-28 lg:pb-0">
+      {/* ─── 1. Cinematic Background with Runner & Mountain Sunrise (Matches Mockup) ─── */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/hero-runner-sunrise.jpg"
+          alt="Runner chasing mountain sunrise"
+          className="absolute inset-0 h-full w-full object-cover object-[72%_center] sm:object-[78%_center] lg:object-[82%_center] opacity-80 brightness-[0.92] contrast-[1.08]"
+        />
+        {/* Left-side dark gradient overlay for crystal clear text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071419] via-[#071419]/90 to-transparent w-full lg:w-[62%]" />
+        {/* Top header blend */}
+        <div className="absolute inset-x-0 top-0 h-28 sm:h-36 bg-gradient-to-b from-[#071419] to-transparent" />
+        {/* Bottom footer/section blend */}
+        <div className="absolute inset-x-0 bottom-0 h-36 sm:h-44 bg-gradient-to-t from-[#071419] via-[#071419]/80 to-transparent" />
       </div>
 
-      <div className="container-page relative z-10 mx-auto max-w-7xl px-3.5 sm:px-6 lg:px-8 w-full lg:my-auto">
-        {/* ─── Responsive Grid: Stacked on Mobile, 2-Column on Desktop ─── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 xl:gap-12 items-center">
-          
-          {/* ─── Text Content Column (lg: 7 cols) ─── */}
-          <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
-            
-            {/* Eyebrow Badge with Live Pulsing Beacon */}
+      {/* ─── 2. Main Hero Content Area ─── */}
+      <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 items-center">
+
+          {/* ══════════════════════════════════════════════════════
+              LEFT COLUMN: HEADLINE, CTA & BADGES (lg: 7 cols)
+             ══════════════════════════════════════════════════════ */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            {/* Eyebrow: INDIA'S PREMIER ───── */}
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 rounded-full border border-[#e64833]/50 bg-[#172c34]/95 px-3.5 sm:px-4 py-1 sm:py-1.5 text-[0.65rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg shadow-black/40 mb-2 sm:mb-3"
+              className="flex items-center gap-2.5 mb-2.5 sm:mb-4"
             >
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#e64833] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e64833]" />
+              <span className="font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.22em] text-white">
+                INDIA&apos;S PREMIER
               </span>
-              <span>INDIA&apos;S #1 VIRTUAL RUNNING PLATFORM</span>
+              <span className="h-[2px] w-10 sm:w-16 bg-[#00dfc4] rounded-full shadow-[0_0_10px_#00dfc4]" />
             </motion.div>
 
-            {/* Main Slogan Headline */}
+            {/* Giant Title: VIRTUAL RUNNING RACES (Matches UI Mockup) */}
             <motion.h1
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display font-black text-[1.85rem] xs:text-[2.1rem] sm:text-4xl md:text-[2.75rem] lg:text-[2.5rem] xl:text-[3.25rem] 2xl:text-[3.8rem] tracking-tight uppercase leading-[1.04] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
+              className="font-display font-black text-[2.75rem] xs:text-[3.25rem] sm:text-6xl md:text-7xl lg:text-[4.75rem] xl:text-[5.5rem] tracking-tight leading-[0.92] uppercase"
             >
-              <span className="block text-[#fbe9d0]">Push Your Limits,</span>
-              <span className="block text-[#e64833] italic font-black drop-shadow-[0_0_24px_rgba(230,72,51,0.55)]">
-                Chase Your Goals,
+              <span className="block text-white">VIRTUAL</span>
+              <span className="block text-[#00dfc4] italic tracking-normal drop-shadow-[0_0_30px_rgba(0,223,196,0.55)] my-1 sm:my-1.5">
+                RUNNING
               </span>
-              <span className="block text-white">
-                Own Your Journey
-              </span>
-              <span className="sr-only"> — India&apos;s Premier Virtual Running Events &amp; Marathons</span>
+              <span className="block text-white">RACES</span>
             </motion.h1>
 
-            {/* Subtitle */}
-            <motion.p
+            {/* Subtitle with Location Pin */}
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-2.5 sm:mt-3.5 max-w-lg text-xs sm:text-sm lg:text-base text-[#fbe9d0]/85 font-medium leading-relaxed"
+              className="mt-3.5 sm:mt-5 flex items-center gap-2.5 text-white/95 text-sm sm:text-base lg:text-lg font-semibold"
             >
-              India’s premier GPS-verified virtual races. Run anywhere, track with Strava, Garmin, or Apple Watch, and earn authentic metal finisher medals delivered across India.
-            </motion.p>
-
-            {/* ─── UNIQUE MOBILE INTERACTIVE SHOWCASE CARD (visible ONLY on < lg screens) ─── */}
-            <div className="w-full mt-3.5 mb-2 block lg:hidden">
-              {/* Interactive Switcher Tabs on Mobile */}
-              <div className="flex items-center justify-center p-1 rounded-full bg-[#112026]/90 border border-white/15 mb-2.5 mx-auto max-w-[290px] shadow-lg backdrop-blur-md">
-                <button
-                  type="button"
-                  onClick={() => setMobileTab("medal")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-[0.66rem] font-black uppercase tracking-wider transition-all duration-300 ${
-                    mobileTab === "medal"
-                      ? "bg-gradient-to-r from-[#e64833] to-[#ea5a47] text-[#fbe9d0] shadow-md shadow-[#e64833]/40"
-                      : "text-[#90aead] hover:text-[#fbe9d0]"
-                  }`}
-                >
-                  <Award className="h-3.5 w-3.5 shrink-0" />
-                  <span>Finisher Medal</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMobileTab("race")}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full text-[0.66rem] font-black uppercase tracking-wider transition-all duration-300 ${
-                    mobileTab === "race"
-                      ? "bg-gradient-to-r from-[#e64833] to-[#ea5a47] text-[#fbe9d0] shadow-md shadow-[#e64833]/40"
-                      : "text-[#90aead] hover:text-[#fbe9d0]"
-                  }`}
-                >
-                  <Activity className="h-3.5 w-3.5 shrink-0" />
-                  <span>Live Race</span>
-                </button>
+              <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-[#00dfc4]/20 border border-[#00dfc4]/60 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(0,223,196,0.3)]">
+                <MapPin className="h-3.5 w-3.5 text-[#00dfc4]" />
               </div>
+              <span>Run Anywhere. Earn Real Medals.</span>
+            </motion.div>
 
-              {/* Main Showcase Screen on Mobile */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="relative w-full rounded-2xl overflow-hidden border border-white/20 shadow-[0_20px_45px_rgba(0,0,0,0.85),0_0_30px_rgba(230,72,51,0.22)] bg-[#0e191e]"
-              >
-                <AnimatePresence mode="wait">
-                  {mobileTab === "medal" ? (
-                    /* ─── Mode 1: 3D Finisher Medal Showcase ─── */
-                    <motion.div
-                      key="medal"
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.25 }}
-                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden flex items-center justify-center bg-black p-3"
-                    >
-                      {/* Ambient Radial Spotlight Glow */}
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(230,72,51,0.25)_0%,rgba(251,233,208,0.12)_35%,transparent_70%)] pointer-events-none" />
-
-                      {/* Medal Image with Drop Shadow & Sheen — 100% Uncropped */}
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/images/event-medal.webp"
-                        alt="Authentic 3D Solid Metal Finisher Medal"
-                        loading="eager"
-                        decoding="async"
-                        className="relative z-10 h-auto w-auto max-h-[295px] sm:max-h-[340px] max-w-[88%] object-contain select-none drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-105 will-change-transform"
-                      />
-
-                      {/* Top-Left Chip: 100% Solid Metal */}
-                      <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 rounded-full bg-[#14242a]/95 border border-[#e64833]/40 px-2.5 py-1 backdrop-blur-md shadow-lg">
-                        <Award className="h-3 w-3 text-[#e64833] shrink-0" />
-                        <span className="text-[0.62rem] font-black uppercase tracking-wider text-[#fbe9d0]">100% Solid Metal</span>
-                      </div>
-
-                      {/* Top-Right Chip: Free Courier */}
-                      <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 rounded-full bg-[#14242a]/95 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-lg">
-                        <Truck className="h-3 w-3 text-emerald-400 shrink-0" />
-                        <span className="text-[0.62rem] font-black uppercase tracking-wider text-emerald-200">Free Courier</span>
-                      </div>
-
-                      {/* Bottom Banner Strip */}
-                      <div className="absolute bottom-2 inset-x-4 z-20 flex items-center justify-center rounded-xl bg-[#14242a]/95 border border-[#90aead]/30 px-3.5 py-1 backdrop-blur-md shadow-lg">
-                        <div className="flex items-center gap-1.5 text-[0.62rem] font-bold text-[#fbe9d0]">
-                          <Trophy className="h-3 w-3 text-[#e64833] shrink-0" />
-                          <span>Finisher Kit with Ribbon &amp; Cert</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    /* ─── Mode 2: Live Race Action ─── */
-                    <motion.div
-                      key="race"
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.25 }}
-                      className="relative min-h-[340px] sm:min-h-[380px] w-full overflow-hidden flex flex-col justify-between bg-[#0e191e]"
-                    >
-                      {/* Top Section: Runners Photo */}
-                      <div className="relative w-full h-[175px] sm:h-[195px] overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="/runner-mobile.webp"
-                          alt="Runners sprinting in marathon"
-                          loading="eager"
-                          decoding="async"
-                          className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05]"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#0e191e] via-transparent to-[#0e191e]/40 pointer-events-none" />
-
-                        {/* Top-Left Live Badge */}
-                        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
-                          <Flame className="h-3 w-3 text-[#e64833] fill-[#e64833]" />
-                          <span className="text-[0.62rem] font-black uppercase tracking-wider text-white">12,400+ Active</span>
-                        </div>
-
-                        {/* Top-Right Badge */}
-                        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 rounded-full bg-[#14242a]/90 border border-white/20 px-2.5 py-1 backdrop-blur-md shadow-md">
-                          <MapPin className="h-3 w-3 text-sky-400" />
-                          <span className="text-[0.62rem] font-black uppercase tracking-wider text-sky-200">Pan India</span>
-                        </div>
-                      </div>
-
-                      {/* Middle Section: Bold Brand Promise (Exact Image 3 Typography) */}
-                      <div className="px-4 py-3 flex flex-col items-center text-center justify-center my-auto">
-                        <h3 className="font-display font-black text-2xl sm:text-3xl text-white tracking-wider uppercase leading-tight">
-                          YOUR MILES.
-                        </h3>
-                        <h3 className="font-display font-black text-2xl sm:text-3xl text-[#00e5ff] tracking-wider uppercase leading-tight mt-0.5">
-                          YOUR GLORY.
-                        </h3>
-                        <p className="mt-2 text-xs sm:text-sm font-medium text-slate-300">
-                          Run anywhere. Earn your medal.
-                        </p>
-                      </div>
-
-                      {/* Bottom Strip Badge */}
-                      <div className="p-3 pt-0">
-                        <div className="flex items-center justify-between rounded-xl bg-[#14242a]/90 border border-[#90aead]/30 px-3 py-1.5 backdrop-blur-md shadow-lg">
-                          <div className="flex items-center gap-1.5 text-[0.65rem] font-bold text-[#fbe9d0]">
-                            <Activity className="h-3.5 w-3.5 text-[#e64833]" />
-                            <span>Strava · Garmin · NRC</span>
-                          </div>
-                          <span className="text-[0.6rem] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                            GPS Verified
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
-
-            {/* ─── Mobile Interactive Quick Distance Strip ─── */}
-            <div className="w-full mt-1 mb-2.5 block lg:hidden">
-              <div className="flex items-center justify-between px-1 mb-1.5">
-                <span className="text-[0.62rem] font-black uppercase tracking-wider text-[#90aead] flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-[#e64833] fill-[#e64833]" />
-                  <span>Choose Your Target Distance</span>
-                </span>
-                <Link href="/events" className="text-[0.62rem] font-bold text-[#e64833] hover:underline flex items-center gap-0.5">
-                  <span>View All</span>
-                  <ChevronRight className="h-3 w-3" />
-                </Link>
-              </div>
-
-              {/* Horizontal Scrollable Distance Chips */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 -mx-2">
-                {mobileDistances.map((item) => (
-                  <Link
-                    key={item.distance}
-                    href={`/events/${item.slug}`}
-                    className="shrink-0 flex items-center gap-2 rounded-xl bg-[#172c34]/95 hover:bg-[#244855] border border-[#90aead]/25 hover:border-[#e64833]/60 px-3 py-2 text-left transition-all active:scale-95 shadow-md"
-                  >
-                    <span className="font-display font-black text-sm text-[#fbe9d0] leading-none">{item.distance}</span>
-                    <div className="flex flex-col">
-                      <span className="text-[0.6rem] font-bold text-white leading-none">{item.label}</span>
-                      <span className="text-[0.52rem] font-black uppercase text-[#e64833] tracking-wider mt-0.5 leading-none">{item.badge}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* ─── High-Impact CTAs ─── */}
+            {/* Primary Glowing Pill CTA Button */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-2.5 sm:mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-2.5 sm:gap-3 w-full sm:w-auto"
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="mt-5 sm:mt-7"
             >
               <Link
                 href="/events"
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-6 py-3.5 sm:px-7 text-xs sm:text-sm font-black uppercase tracking-wider text-[#fbe9d0] shadow-[0_0_25px_rgba(230,72,51,0.5),0_8px_16px_rgba(0,0,0,0.4)] border border-[#fbe9d0]/30 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_35px_rgba(230,72,51,0.8)] active:scale-95"
+                className="inline-flex items-center gap-2.5 rounded-full bg-[#00dfc4] hover:bg-[#00c9b0] text-black font-extrabold text-sm sm:text-base px-8 sm:px-10 py-3.5 sm:py-4 shadow-[0_0_30px_rgba(0,223,196,0.6)] hover:shadow-[0_0_45px_rgba(0,223,196,0.9)] hover:scale-105 active:scale-95 transition-all duration-300"
               >
-                <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-                <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Explore Challenges</span>
-                <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-
-              <Link
-                href="/register"
-                className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-[#90aead]/30 bg-[#1b323b]/85 px-5 py-3.5 sm:px-6 text-xs sm:text-sm font-bold uppercase tracking-wider text-[#fbe9d0] backdrop-blur-xl transition-all duration-300 hover:border-[#e64833]/60 hover:bg-[#244855]/90 hover:shadow-[0_0_20px_rgba(230,72,51,0.25)] active:scale-95"
-              >
-                <ShieldCheck className="h-4 w-4 text-[#90aead] transition-transform duration-300 group-hover:scale-110" />
-                <span className="text-[#fbe9d0]/90 group-hover:text-white transition-colors">GPS Verified Races</span>
+                <span>JOIN NOW</span>
+                <ArrowRight className="h-5 w-5 stroke-[2.5]" />
               </Link>
             </motion.div>
 
-            {/* ─── Mobile 2x2 Value Advantage Cards (Instant Trust & Unique Mobile Feel) ─── */}
-            <div className="grid grid-cols-2 gap-2 mt-3.5 sm:hidden w-full max-w-md">
-              <div className="rounded-xl border border-[#90aead]/20 bg-[#172c34]/85 p-2.5 backdrop-blur-md flex flex-col items-start text-left gap-1 shadow-sm">
-                <div className="h-7 w-7 rounded-lg bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center text-[#e64833]">
-                  <Award className="h-4 w-4" />
+            {/* Feature Badges Bar (Desktop & Tablet) */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="mt-8 sm:mt-10 pt-6 border-t border-white/10 w-full hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6"
+            >
+              {/* Badge 1: GPS Verified */}
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(0,223,196,0.2)]">
+                  <MapPin className="h-4 w-4 text-[#00dfc4]" />
                 </div>
-                <span className="text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0]">Solid Metal Medal</span>
-                <span className="text-[0.58rem] text-[#90aead] leading-tight">Heavy 3D finisher medal to your doorstep</span>
+                <div>
+                  <p className="font-display font-black text-xs text-white uppercase tracking-wider">GPS VERIFIED</p>
+                  <p className="text-[0.68rem] text-[#90aead] font-medium leading-tight">Real runs. Real miles.</p>
+                </div>
               </div>
 
-              <div className="rounded-xl border border-[#90aead]/20 bg-[#172c34]/85 p-2.5 backdrop-blur-md flex flex-col items-start text-left gap-1 shadow-sm">
-                <div className="h-7 w-7 rounded-lg bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
-                  <Smartphone className="h-4 w-4" />
+              {/* Badge 2: Track Anywhere */}
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(0,223,196,0.2)]">
+                  <Activity className="h-4 w-4 text-[#00dfc4]" />
                 </div>
-                <span className="text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0]">Any Fitness App</span>
-                <span className="text-[0.58rem] text-[#90aead] leading-tight">Strava, Garmin, Apple Watch, Nike &amp; Treadmill</span>
+                <div>
+                  <p className="font-display font-black text-xs text-white uppercase tracking-wider">TRACK ANYWHERE</p>
+                  <p className="text-[0.68rem] text-[#90aead] font-medium leading-tight">Strava / Garmin / Apple Watch</p>
+                </div>
               </div>
 
-              <div className="rounded-xl border border-[#90aead]/20 bg-[#172c34]/85 p-2.5 backdrop-blur-md flex flex-col items-start text-left gap-1 shadow-sm">
-                <div className="h-7 w-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <CheckCircle2 className="h-4 w-4" />
+              {/* Badge 3: Earn Medals */}
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(0,223,196,0.2)]">
+                  <Award className="h-4 w-4 text-[#00dfc4]" />
                 </div>
-                <span className="text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0]">QR E-Certificate</span>
-                <span className="text-[0.58rem] text-[#90aead] leading-tight">Official verifiable digital finisher certificate</span>
+                <div>
+                  <p className="font-display font-black text-xs text-white uppercase tracking-wider">EARN MEDALS</p>
+                  <p className="text-[0.68rem] text-[#90aead] font-medium leading-tight">Delivered across India</p>
+                </div>
               </div>
 
-              <div className="rounded-xl border border-[#90aead]/20 bg-[#172c34]/85 p-2.5 backdrop-blur-md flex flex-col items-start text-left gap-1 shadow-sm">
-                <div className="h-7 w-7 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                  <MapPin className="h-4 w-4" />
+              {/* Badge 4: Pan India Delivery */}
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(0,223,196,0.2)]">
+                  <Truck className="h-4 w-4 text-[#00dfc4]" />
                 </div>
-                <span className="text-[0.68rem] font-black uppercase tracking-wider text-[#fbe9d0]">Free Pan-India Delivery</span>
-                <span className="text-[0.58rem] text-[#90aead] leading-tight">100% free courier to 19,000+ pincodes</span>
+                <div>
+                  <p className="font-display font-black text-xs text-white uppercase tracking-wider">PAN INDIA DELIVERY</p>
+                  <p className="text-[0.68rem] text-[#90aead] font-medium leading-tight">Your medal. Our promise.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Mobile-only 3-badge Row (Matches Image 1) */}
+            <div className="mt-6 pt-5 border-t border-white/10 w-full grid grid-cols-3 gap-2 sm:hidden">
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <div className="h-8 w-8 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,223,196,0.2)]">
+                  <MapPin className="h-3.5 w-3.5 text-[#00dfc4]" />
+                </div>
+                <div>
+                  <p className="font-display font-black text-[0.65rem] text-white uppercase tracking-wider">GPS VERIFIED</p>
+                  <p className="text-[0.58rem] text-[#90aead] leading-tight">Real runs.</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <div className="h-8 w-8 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,223,196,0.2)]">
+                  <Activity className="h-3.5 w-3.5 text-[#00dfc4]" />
+                </div>
+                <div>
+                  <p className="font-display font-black text-[0.65rem] text-white uppercase tracking-wider">TRACK</p>
+                  <p className="text-[0.58rem] text-[#90aead] leading-tight">Anywhere</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <div className="h-8 w-8 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,223,196,0.2)]">
+                  <Award className="h-3.5 w-3.5 text-[#00dfc4]" />
+                </div>
+                <div>
+                  <p className="font-display font-black text-[0.65rem] text-white uppercase tracking-wider">EARN MEDALS</p>
+                  <p className="text-[0.58rem] text-[#90aead] leading-tight">Doorstep</p>
+                </div>
               </div>
             </div>
 
-            {/* ─── Compact Responsive Trust Chips (Visible on Tablet & Desktop) ─── */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-3.5 sm:mt-4.5 hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-2 text-xs max-w-xl"
-            >
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#172c34]/85 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-xs font-bold text-[#fbe9d0]/90 shadow-sm">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                <span>Strava, Garmin &amp; Apple Watch</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#172c34]/85 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-xs font-bold text-[#fbe9d0]/90 shadow-sm">
-                <MapPin className="h-3.5 w-3.5 text-sky-400 shrink-0" />
-                <span>Run Anywhere in India</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#172c34]/85 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-xs font-bold text-[#fbe9d0]/90 shadow-sm">
-                <Award className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
-                <span>Free Doorstep Medal Delivery</span>
-              </span>
-            </motion.div>
-
           </div>
 
-          {/* ─── Desktop Visual Showcase Column (lg: 5 cols, hidden on mobile) ─── */}
-          <div className="lg:col-span-5 hidden lg:block">
+          {/* ══════════════════════════════════════════════════════
+              RIGHT COLUMN ON DESKTOP: THE AUTHENTIC MEDAL (5 cols)
+              (Exact match with Image 2)
+             ══════════════════════════════════════════════════════ */}
+          <div className="lg:col-span-5 hidden lg:flex items-center justify-center relative">
+            {/* Warm Golden / Cyan Spotlight Aura */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="h-[440px] w-[440px] xl:h-[500px] xl:w-[500px] rounded-full bg-gradient-to-tr from-[#f59e0b]/25 via-[#00dfc4]/15 to-transparent blur-[100px]" />
+            </div>
+
+            {/* Authentic Indian Air Force Day 2026 Solid Metal Finisher Medal (100% uncropped as in Image 3) */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.94, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.94, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full"
+              className="relative z-10 w-full flex items-center justify-center"
             >
-              {/* Outer decorative ambient frame */}
-              <div className="relative rounded-3xl overflow-hidden border border-[#90aead]/25 shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_35px_rgba(47,234,168,0.15)] bg-[#0d1a20] group flex flex-col">
-                {/* 1. Top Section: Landscape Marathon Runner Hero Image */}
-                <div className="relative w-full h-[200px] xl:h-[220px] overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/runner-hd.webp"
-                    alt="Marathon runners pushing their limits"
-                    loading="eager"
-                    decoding="async"
-                    className="h-full w-full object-cover object-center brightness-[0.98] contrast-[1.05] transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
-                  />
-                  {/* Cinematic gradient shading */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d1a20] via-transparent to-[#0d1a20]/35 pointer-events-none" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/event-medal.webp"
+                alt="Authentic Indian Air Force Day 2026 Solid Metal Finisher Medal"
+                className="w-auto h-auto max-h-[500px] xl:max-h-[560px] object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] transition-transform duration-500 hover:scale-105 will-change-transform"
+              />
+            </motion.div>
+          </div>
 
-                  {/* Floating Telemetry Widget 1: Top Active Runners */}
-                  <div className="absolute top-3 left-3 flex items-center gap-2 rounded-2xl bg-[#14242a]/92 border border-white/20 px-3 py-1.5 backdrop-blur-xl shadow-xl">
-                    <div className="h-6 w-6 rounded-lg bg-[#e64833]/20 flex items-center justify-center border border-[#e64833]/40">
-                      <Flame className="h-3.5 w-3.5 text-[#e64833] fill-[#e64833]" />
-                    </div>
-                    <div>
-                      <p className="text-[0.55rem] font-bold text-slate-300 uppercase tracking-wider leading-none">Active Community</p>
-                      <p className="text-[0.68rem] font-black text-white leading-tight mt-0.5">12,400+ Runners</p>
-                    </div>
-                  </div>
+        </div>
 
-                  {/* Floating Telemetry Widget 2: GPS Verified */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-[#14242a]/92 border border-white/20 px-2.5 py-1 backdrop-blur-xl shadow-xl">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                    </span>
-                    <span className="text-[0.62rem] font-black uppercase tracking-wider text-emerald-300">Live GPS</span>
+        {/* ══════════════════════════════════════════════════════
+            MOBILE FEATURED RACE CARD (Matches Image 1)
+            (Visible on screens < lg)
+           ══════════════════════════════════════════════════════ */}
+        <div className="mt-7 w-full block lg:hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="relative rounded-3xl border border-[#00dfc4]/30 bg-[#0a181f]/95 backdrop-blur-xl p-4 xs:p-5 shadow-[0_20px_50px_rgba(0,0,0,0.85)] overflow-hidden"
+          >
+            {/* Subtle Tricolor Ambient Glow inside the card */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-[#f59e0b]/20 via-[#00dfc4]/10 to-transparent blur-3xl pointer-events-none" />
+
+            <div className="grid grid-cols-12 gap-3 xs:gap-4 items-center relative z-10">
+              {/* Card Left: Event Info */}
+              <div className="col-span-7 flex flex-col items-start text-left">
+                {/* Badge: ⭐ FEATURED RACE */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/15 px-2.5 py-0.5 text-[0.62rem] font-black uppercase tracking-wider text-amber-300 shadow-sm">
+                  <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
+                  <span>FEATURED RACE</span>
+                </div>
+
+                {/* Title */}
+                <h3 className="mt-2 font-display font-black text-base xs:text-lg text-white uppercase tracking-tight leading-tight">
+                  INDIAN AIRFORCE DAY
+                </h3>
+                <p className="text-[0.62rem] font-mono font-bold tracking-[0.2em] text-[#90aead] uppercase mt-0.5">
+                  VIRTUAL RUN
+                </p>
+
+                {/* Cyan Accent Line */}
+                <div className="h-[1.5px] w-8 bg-[#00dfc4] rounded-full my-2" />
+
+                {/* Tagline */}
+                <p className="text-[0.7rem] text-[#fbe9d0]/85 font-medium leading-snug">
+                  Salute the Guardians of our Skies.
+                </p>
+
+                {/* Distance Chip */}
+                <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-[#00dfc4]/40 bg-[#00dfc4]/10 px-2.5 py-0.5 text-[0.68rem] font-bold text-[#00dfc4]">
+                  <Activity className="h-3 w-3" />
+                  <span>5K – 21K</span>
+                </div>
+
+                {/* Button: RUN NOW → */}
+                <Link
+                  href="/events/indian-air-force-day-virtual-challenge"
+                  className="mt-3.5 inline-flex items-center gap-1.5 rounded-full border-2 border-[#00dfc4] bg-transparent hover:bg-[#00dfc4] text-[#00dfc4] hover:text-black font-black text-[0.68rem] uppercase tracking-wider px-4 py-1.5 transition-all duration-300 shadow-[0_0_15px_rgba(0,223,196,0.3)]"
+                >
+                  <span>RUN NOW</span>
+                  <ArrowRight className="h-3 w-3 stroke-[2.5]" />
+                </Link>
+              </div>
+
+              {/* Card Right: Authentic Medal Display */}
+              <div className="col-span-5 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/event-medal.webp"
+                  alt="Indian Air Force Day Virtual Challenge Medal"
+                  className="h-auto max-h-[190px] xs:max-h-[220px] w-full object-contain select-none drop-shadow-[0_15px_35px_rgba(0,0,0,0.95)] transition-transform duration-300 hover:scale-105"
+                />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* ─── 3. BOTTOM SECTION: HOW IT WORKS (Desktop) / RUN • EARN • BE PROUD (Mobile) ─── */}
+      <div id="how-it-works" className="relative z-10 w-full mt-6 lg:mt-8">
+        {/* Desktop "HOW IT WORKS" 4-Step Bar (Image 2) */}
+        <div className="hidden lg:block w-full border-t border-white/10 bg-[#061217]/95 backdrop-blur-md py-4">
+          <div className="container-page mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between gap-8">
+              {/* Left Title */}
+              <div className="shrink-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#00dfc4]">
+                    HOW IT WORKS
+                  </span>
+                  <span className="h-[1.5px] w-8 bg-[#00dfc4] rounded-full" />
+                </div>
+                <h4 className="font-display font-black text-sm text-white tracking-tight uppercase">
+                  SIMPLE STEPS. REAL REWARDS.
+                </h4>
+              </div>
+
+              {/* 4 Steps */}
+              <div className="flex items-center justify-between flex-1 max-w-3xl">
+                {/* Step 1 */}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#00dfc4]/50 bg-[#00dfc4]/10 font-mono text-[0.68rem] font-bold text-[#00dfc4]">
+                    1
+                  </span>
+                  <Smartphone className="h-4 w-4 text-[#00dfc4] shrink-0" />
+                  <div>
+                    <p className="font-display font-black text-xs text-white uppercase tracking-wider">REGISTER</p>
+                    <p className="text-[0.65rem] text-[#90aead] leading-tight">Join your chosen event</p>
                   </div>
                 </div>
 
-                {/* 2. Middle Section: Bold Brand Promise (Exact Image 3 Typography) */}
-                <div className="px-5 py-6 sm:px-6 sm:py-7 flex flex-col items-center text-center justify-center">
-                  <h3 className="font-display font-black text-3xl sm:text-4xl text-white tracking-wider uppercase leading-tight">
-                    YOUR MILES.
-                  </h3>
-                  <h3 className="font-display font-black text-3xl sm:text-4xl text-[#00e5ff] tracking-wider uppercase leading-tight mt-1">
-                    YOUR GLORY.
-                  </h3>
-                  <p className="mt-3 text-sm sm:text-base font-medium text-slate-300">
-                    Run anywhere. Earn your medal.
-                  </p>
+                <div className="h-[1px] w-6 bg-white/20 shrink-0" />
+
+                {/* Step 2 */}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#00dfc4]/50 bg-[#00dfc4]/10 font-mono text-[0.68rem] font-bold text-[#00dfc4]">
+                    2
+                  </span>
+                  <Activity className="h-4 w-4 text-[#00dfc4] shrink-0" />
+                  <div>
+                    <p className="font-display font-black text-xs text-white uppercase tracking-wider">RUN</p>
+                    <p className="text-[0.65rem] text-[#90aead] leading-tight">Anywhere, anytime</p>
+                  </div>
                 </div>
 
-                {/* 3. Bottom Section: Finisher Medal & Kit Showcase (Free Courier instead of misleading 100% Free) */}
-                <div className="p-3.5 sm:p-4 pt-1">
-                  <div className="rounded-2xl bg-[#172c34]/95 border border-[#90aead]/30 p-3 backdrop-blur-2xl shadow-xl flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#e64833] to-[#ea5a47] flex items-center justify-center text-white shadow-lg shadow-[#e64833]/40 shrink-0">
-                        <Trophy className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[0.7rem] font-black text-white uppercase tracking-wider truncate">
-                          Finisher Medal &amp; Kit
-                        </p>
-                        <p className="text-[0.62rem] text-[#fbe9d0]/80 font-medium truncate">
-                          Delivered to door anywhere in India
-                        </p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2.5 py-1 text-[0.6rem] font-black uppercase tracking-wider text-emerald-300 shadow-sm shrink-0">
-                      Free Courier
-                    </span>
+                <div className="h-[1px] w-6 bg-white/20 shrink-0" />
+
+                {/* Step 3 */}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#00dfc4]/50 bg-[#00dfc4]/10 font-mono text-[0.68rem] font-bold text-[#00dfc4]">
+                    3
+                  </span>
+                  <Cloud className="h-4 w-4 text-[#00dfc4] shrink-0" />
+                  <div>
+                    <p className="font-display font-black text-xs text-white uppercase tracking-wider">SYNC</p>
+                    <p className="text-[0.65rem] text-[#90aead] leading-tight">With Strava / Garmin / Apple Watch</p>
+                  </div>
+                </div>
+
+                <div className="h-[1px] w-6 bg-white/20 shrink-0" />
+
+                {/* Step 4 */}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#00dfc4]/50 bg-[#00dfc4]/10 font-mono text-[0.68rem] font-bold text-[#00dfc4]">
+                    4
+                  </span>
+                  <Trophy className="h-4 w-4 text-[#00dfc4] shrink-0" />
+                  <div>
+                    <p className="font-display font-black text-xs text-white uppercase tracking-wider">EARN &amp; RECEIVE</p>
+                    <p className="text-[0.65rem] text-[#90aead] leading-tight">Your finisher medal at home</p>
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
+        </div>
 
+        {/* Mobile Ticker: RUN • EARN • BE PROUD (Image 1) */}
+        <div className="block lg:hidden w-full py-2">
+          <div className="flex items-center justify-center gap-3 text-center">
+            <span className="h-[1px] w-12 bg-gradient-to-r from-transparent to-[#00dfc4]/50" />
+            <span className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.25em] text-[#00dfc4]">
+              RUN &nbsp;•&nbsp; EARN &nbsp;•&nbsp; BE PROUD
+            </span>
+            <span className="h-[1px] w-12 bg-gradient-to-l from-transparent to-[#00dfc4]/50" />
+          </div>
         </div>
       </div>
     </section>
