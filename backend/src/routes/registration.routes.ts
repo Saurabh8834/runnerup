@@ -5,12 +5,12 @@ import {
   reviewProof,
   submitProof,
 } from "../controllers/registration.controller.js";
-import { requireAdmin, requireClerkAuth } from "../middleware/clerk-auth.js";
+import { requireAdmin, requireClerkAuth, optionalClerkAuth } from "../middleware/clerk-auth.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const registrationRouter = Router();
 
-registrationRouter.post("/", requireClerkAuth, asyncHandler(createRegistration));
+registrationRouter.post("/", optionalClerkAuth, asyncHandler(createRegistration));
 registrationRouter.post("/:id/proof", requireClerkAuth, asyncHandler(submitProof));
 registrationRouter.post(
   "/:id/review",

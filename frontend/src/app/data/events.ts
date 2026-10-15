@@ -50,8 +50,8 @@ export const allPublicEvents: PublicEvent[] = [
       "🇮🇳 Indian Air Force Day Virtual Run 2026 ✈️\n\nRun with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.\n\nRun for Glory. Run for India. Jai Hind! 🇮🇳",
     highlight: "Salute the Air Warriors · Run, Walk or Ride on 25–30 Oct",
     banner: "Air Force Day Virtual Challenge",
-    bannerImageUrl: "/images/event-medal.webp",
-    medalImageUrl: "/images/event-medal.webp",
+    bannerImageUrl: "/images/iaf-medal-front.webp",
+    medalImageUrl: "/images/iaf-medal-front.webp",
     reward: "100% Solid Metal Finisher Medal + E-Certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
@@ -221,6 +221,23 @@ export const pastEvents = allPublicEvents.filter((event) => event.status === "pa
 
 export const upcomingEvents = publicEvents;
 
+export function getEventMedalImages(slug: string): { front: string; back: string } {
+  if (
+    slug.includes("air-force") ||
+    slug.includes("airforce") ||
+    slug === "iaf-2026" ||
+    slug === "indian-air-force-day-2026" ||
+    slug === "indian-air-force-day-virtual-challenge"
+  ) {
+    return {
+      front: "/images/iaf-medal-front.webp",
+      back: "/images/iaf-medal-back.webp",
+    };
+  }
+  const img = getEventMedalImage(slug);
+  return { front: img, back: img };
+}
+
 export function getEventMedalImage(slug: string): string {
   if (
     slug.includes("air-force") ||
@@ -229,7 +246,7 @@ export function getEventMedalImage(slug: string): string {
     slug === "indian-air-force-day-2026" ||
     slug === "indian-air-force-day-virtual-challenge"
   ) {
-    return "/images/event-medal.webp";
+    return "/images/iaf-medal-front.webp";
   }
   const medalMap: Record<string, string> = {
     "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.jpg",
@@ -240,7 +257,7 @@ export function getEventMedalImage(slug: string): string {
     "holi-color-virtual-run": "/images/medals/holi-color-virtual-run.jpg",
     "new-year-night-miles": "/images/medals/new-year-night-miles.jpg",
   };
-  return medalMap[slug] || "/images/event-medal.webp";
+  return medalMap[slug] || "/images/iaf-medal-front.jpg";
 }
 
 export function getEventBySlug(slug: string) {

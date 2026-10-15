@@ -55,23 +55,23 @@ export function EventWhy() {
           lead="No crowds. No pressure. Just you, your distance, and a finish that is 100% yours."
         />
 
-        <div className="mt-10 grid grid-cols-1 gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 xs:grid-cols-2 gap-3 sm:gap-4 sm:mt-14 lg:grid-cols-3">
           {cards.map(({ icon: Icon, title, desc, tile }, i) => (
             <Reveal key={title} delay={(i % 3) * 0.08}>
-              <article className="group relative h-full overflow-hidden rounded-3xl border border-(--line) bg-(--panel) p-6 transition-all duration-300 hover:-translate-y-1.5 hover:border-(--sage)/25 hover:shadow-premium sm:p-7">
+              <article className="group relative h-full overflow-hidden rounded-2xl sm:rounded-3xl border border-(--line) bg-(--panel) p-4 sm:p-7 transition-all duration-300 hover:-translate-y-1 hover:border-(--sage)/25 hover:shadow-premium">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-(--sage) opacity-[0.04] blur-2xl transition-all duration-500 group-hover:opacity-[0.09]"
                 />
                 <span
-                  className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${tile} shadow-sm`}
+                  className={`inline-flex h-11 w-11 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${tile} shadow-sm`}
                 >
-                  <Icon className="h-6 w-6" strokeWidth={1.75} />
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.75} />
                 </span>
-                <h3 className="mt-5 text-lg font-bold tracking-tight text-(--foreground) transition-colors duration-300 group-hover:text-(--sage)">
+                <h3 className="mt-3.5 sm:mt-5 text-base sm:text-lg font-bold tracking-tight text-(--foreground) transition-colors duration-300 group-hover:text-(--sage)">
                   {title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-(--muted)">{desc}</p>
+                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm leading-relaxed text-(--muted)">{desc}</p>
               </article>
             </Reveal>
           ))}

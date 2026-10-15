@@ -76,20 +76,49 @@ export async function createRegistration(request: AuthenticatedRequest, response
   } else if (payload.userId) {
     user = await prisma.user.findUnique({ where: { id: payload.userId } });
   } else if (email) {
-    user = await prisma.user.upsert({
+    const existing = await prisma.user.findFirst({
       where: { email },
-      create: {
-        name: payload.name ?? payload.shippingName,
-        email,
-        phone: payload.phone ?? payload.shippingPhone,
-        username: payload.username,
-      },
-      update: {
-        name: payload.name ?? payload.shippingName,
-        phone: payload.phone ?? payload.shippingPhone,
-        username: payload.username,
-      },
     });
+
+    if (existing) {
+      user = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          name: payload.name ?? payload.shippingName ?? existing.name,
+          phone: payload.phone ?? payload.shippingPhone ?? existing.phone,
+        },
+      });
+    } else {
+      let desiredUsername = payload.username;
+      if (!desiredUsername) {
+        const base = email
+          .split("@")[0]
+          .toLowerCase()
+          .replace(/[^a-z0-9_]/g, "_")
+          .replace(/_+/g, "_")
+          .replace(/^_|_$/g, "")
+          .slice(0, 18);
+        desiredUsername = base.length >= 3 ? base : "runner";
+      }
+
+      let uniqueUsername = desiredUsername;
+      const clash = await prisma.user.findFirst({
+        where: { username: uniqueUsername },
+        select: { id: true },
+      });
+      if (clash) {
+        uniqueUsername = `${desiredUsername.slice(0, 12)}_${Math.random().toString(36).substring(2, 6)}`;
+      }
+
+      user = await prisma.user.create({
+        data: {
+          name: payload.name ?? payload.shippingName ?? "Runner",
+          email,
+          phone: payload.phone ?? payload.shippingPhone,
+          username: uniqueUsername,
+        },
+      });
+    }
   }
 
   if (!user) {

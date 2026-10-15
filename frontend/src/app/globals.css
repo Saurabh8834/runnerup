@@ -70,6 +70,11 @@ h1, h2, h3, h4, h5, h6,
   font-family: 'Space Grotesk', var(--font-geist-mono), monospace;
 }
 
+/* Hide Next.js development indicator overlay so it never overlaps UI elements */
+nextjs-portal, [data-nextjs-toast], [data-nextjs-dev-indicator] {
+  display: none !important;
+}
+
 /* Filled Athletic Sports Wordmark with Radiant Neon Glow */
 .athletic-outline-text {
   color: #ff5e3a;

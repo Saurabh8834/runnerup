@@ -236,7 +236,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           href={`/events/${event.slug}`}
         >
           <Sparkles className="h-4 w-4" />
-          <span>Claim Your Bib & Medal</span>
+          <span>Claim Your Kit</span>
           <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </Link>
       </div>

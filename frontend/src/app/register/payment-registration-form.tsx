@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Shirt,
   Sparkles,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -127,11 +128,23 @@ function FieldError({ message }: { message?: string }) {
 function deriveUsername(input: {
   clerkUsername?: string | null;
   dbUsername?: string | null;
+  name?: string | null;
   email?: string | null;
   clerkId?: string | null;
 }) {
   if (input.clerkUsername?.trim()) return input.clerkUsername.trim();
   if (input.dbUsername?.trim()) return input.dbUsername.trim();
+
+  const name = input.name?.trim().toLowerCase() ?? "";
+  if (name) {
+    const base = name
+      .replace(/[^a-z0-9_]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 18);
+    if (base.length >= 2) return base;
+  }
+
   const email = input.email?.trim().toLowerCase() ?? "";
   if (email.includes("@")) {
     const base = email
@@ -185,6 +198,8 @@ function ConfettiOverlay() {
   );
 }
 
+
+
 function PaymentRegistrationFormInner() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
@@ -206,6 +221,8 @@ function PaymentRegistrationFormInner() {
   const [selectedActivity, setSelectedActivity] = useState("running");
   const [selectedTshirt, setSelectedTshirt] = useState("L");
   const [runnerName, setRunnerName] = useState("");
+  const [runnerEmail, setRunnerEmail] = useState("");
+  const [customUsername, setCustomUsername] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [existingRegs, setExistingRegs] = useState<ExistingReg[]>([]);
   const [dbUsername, setDbUsername] = useState<string | null>(null);
@@ -218,8 +235,9 @@ function PaymentRegistrationFormInner() {
   const [pincodeLoading, setPincodeLoading] = useState(false);
   const [pincodeSuccess, setPincodeSuccess] = useState(false);
 
-  // Confetti modal state
+  // Confetti and modal state
   const [confirmedBib, setConfirmedBib] = useState<string | null>(null);
+  const [streetAddress, setStreetAddress] = useState("");
 
   // Auto-reset stuck 'paying' or 'creating' state when user returns to tab after UPI app or external redirect
   useEffect(() => {
@@ -393,12 +411,16 @@ function PaymentRegistrationFormInner() {
   const defaultName = profileName || user?.fullName || user?.firstName || "";
   const defaultEmail = user?.primaryEmailAddress?.emailAddress ?? "";
   const defaultPhone = user?.primaryPhoneNumber?.phoneNumber ?? "";
-  const username = deriveUsername({
+  const autoUsername = deriveUsername({
     clerkUsername: user?.username,
     dbUsername,
-    email: defaultEmail,
+    name: runnerName || defaultName,
+    email: runnerEmail || defaultEmail,
     clerkId: user?.id,
   });
+  const username = customUsername || autoUsername;
+
+
 
   const registeredKeys = useMemo(() => {
     const set = new Set<string>();
@@ -436,10 +458,6 @@ function PaymentRegistrationFormInner() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!isSignedIn) {
-      router.push(`/sign-in?redirect_url=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-      return;
-    }
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -495,8 +513,7 @@ function PaymentRegistrationFormInner() {
       const scriptOk = await loadRazorpayScript();
       if (!scriptOk) throw new Error("Could not load payment gateway. Please check internet connection.");
 
-      let token = await getToken();
-      if (!token) throw new Error("Session expired. Please sign in again.");
+      let token = isSignedIn ? await getToken() : null;
 
       let regRes = await fetch(getApiUrl("/api/registrations"), {
         method: "POST",
@@ -504,7 +521,7 @@ function PaymentRegistrationFormInner() {
         body: JSON.stringify(payload),
       });
 
-      if (regRes.status === 401) {
+      if (regRes.status === 401 && isSignedIn) {
         const freshToken = await getToken({ skipCache: true });
         if (freshToken) {
           token = freshToken;
@@ -550,7 +567,7 @@ function PaymentRegistrationFormInner() {
         body: JSON.stringify({ registrationId }),
       });
 
-      if (payRes.status === 401) {
+      if (payRes.status === 401 && isSignedIn) {
         const freshToken = await getToken({ skipCache: true });
         if (freshToken) {
           token = freshToken;
@@ -584,21 +601,7 @@ function PaymentRegistrationFormInner() {
         },
         theme: { color: "#e64833" },
         handler: async (response: CheckoutResponse) => {
-          const freshToken = await getToken();
-          if (!freshToken) {
-            paidRef.current = true;
-            setStatus("paid");
-            setConfirmedBib(assignedBib);
-            setExistingRegs((prev) =>
-              prev.map((r) =>
-                r.id === registrationId
-                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
-                  : r,
-              ),
-            );
-            return;
-          }
-
+          const freshToken = isSignedIn ? await getToken() : null;
           try {
             const verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
               method: "POST",
@@ -696,9 +699,23 @@ function PaymentRegistrationFormInner() {
               </div>
 
               <div className="mt-6 flex flex-col gap-2">
-                <Link className="btn btn-primary w-full h-11 font-bold text-sm" href="/dashboard">
-                  Open Runner Dashboard →
-                </Link>
+                {isSignedIn ? (
+                  <Link className="btn btn-primary w-full h-11 font-bold text-sm" href="/dashboard">
+                    Open Runner Dashboard →
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      className="btn btn-primary w-full h-11 font-bold text-sm flex items-center justify-center gap-2"
+                      href="/sign-in?redirect_url=/dashboard"
+                    >
+                      Sign In to Access Dashboard →
+                    </Link>
+                    <p className="text-[0.7rem] text-(--muted) text-center mt-1">
+                      Confirmation & race details have been sent to <strong>{runnerEmail || "your email"}</strong>. You can sign in anytime with this email to view your bibs & medals!
+                    </p>
+                  </>
+                )}
                 <Link className="btn btn-secondary w-full h-10 text-xs font-semibold" href="/leaderboard">
                   View Race Leaderboard
                 </Link>
@@ -750,6 +767,7 @@ function PaymentRegistrationFormInner() {
                 autoComplete="email"
                 className={inputClass}
                 defaultValue={defaultEmail}
+                onChange={(e) => setRunnerEmail(e.target.value)}
                 name="email"
                 placeholder="runner@example.com"
                 required
@@ -760,10 +778,24 @@ function PaymentRegistrationFormInner() {
 
             <div>
               <span className="field-label">Username</span>
-              <div className={`${inputClass} flex items-center gap-2 bg-(--panel-soft) text-(--muted)`}>
-                <Lock className="h-3.5 w-3.5 shrink-0 opacity-70" strokeWidth={1.75} />
-                <span className="truncate font-medium text-foreground">@{username}</span>
+              <div className={`${inputClass} flex items-center gap-2 bg-(--panel-soft)`}>
+                <span className="text-sm font-bold text-(--sage) select-none">@</span>
+                <input
+                  aria-label="Username"
+                  autoComplete="username"
+                  className="w-full bg-transparent font-medium text-foreground focus:outline-none placeholder:text-(--muted)"
+                  name="username"
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase().slice(0, 20);
+                    setCustomUsername(clean);
+                  }}
+                  placeholder={autoUsername}
+                  value={customUsername !== "" ? customUsername : autoUsername}
+                />
               </div>
+              <p className="mt-1 text-[0.65rem] text-(--muted)">
+                Auto-assigned from your name · Editable for your race profile
+              </p>
             </div>
 
             <Field label="Race Event" required>
@@ -805,14 +837,19 @@ function PaymentRegistrationFormInner() {
             </Field>
           </div>
 
-          {/* T-Shirt Size Selector */}
+          {/* T-Shirt Size Selector - Top 3 Finishers Only */}
           <div className="border-t border-(--line) pt-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-(--muted) flex items-center gap-1.5">
-                <Shirt className="h-3.5 w-3.5 text-(--sage)" /> Runner T-Shirt Size
+                <Shirt className="h-3.5 w-3.5 text-amber-500" /> Runner T-Shirt Size
               </span>
-              <span className="text-[0.65rem] text-(--muted)">Included in entry kit</span>
+              <span className="inline-flex items-center gap-1 text-[0.68rem] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                🏆 Top 3 Finishers Award
+              </span>
             </div>
+            <p className="text-[0.72rem] text-(--muted) mb-2.5">
+              Select your size in case you finish in the <strong>Top 3 on the official leaderboard</strong> to receive your exclusive podium Dri-Fit T-Shirt!
+            </p>
             <div className="grid grid-cols-5 gap-2">
               {TSHIRT_SIZES.map((t) => (
                 <button
@@ -822,7 +859,7 @@ function PaymentRegistrationFormInner() {
                   className={cn(
                     "flex flex-col items-center justify-center rounded-xl p-2 border transition-all cursor-pointer",
                     selectedTshirt === t.size
-                      ? "border-(--sage) bg-(--sage-soft) text-(--sage) font-black shadow-xs ring-2 ring-(--sage)/20"
+                      ? "border-amber-500 bg-amber-500/15 text-amber-400 font-black shadow-xs ring-2 ring-amber-500/30"
                       : "border-(--line) bg-(--panel-soft) text-(--muted) hover:text-foreground",
                   )}
                 >
@@ -948,6 +985,8 @@ function PaymentRegistrationFormInner() {
             </div>
           )}
 
+
+
           <button
             className={cn(
               "w-full h-13 rounded-full text-base font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-2",
@@ -966,8 +1005,8 @@ function PaymentRegistrationFormInner() {
                 : distanceAlreadyTaken
                   ? "Already Registered"
                   : pendingSame
-                    ? `Complete Payment (${selectedAmount}) & Claim Bib`
-                    : `Pay ${selectedAmount} & Claim Official Bib`}
+                    ? `Complete Payment (${selectedAmount}) · Claim Your Kit`
+                    : `Pay ${selectedAmount} · Claim Your Kit`}
           </button>
         </form>
       </div>
@@ -1027,7 +1066,7 @@ function PaymentRegistrationFormInner() {
               </div>
               <div>
                 <p className="text-[0.55rem] font-bold uppercase tracking-wider text-white/50">
-                  T-SHIRT
+                  TOP 3 T-SHIRT
                 </p>
                 <p className="font-mono text-xs font-black text-amber-400">{selectedTshirt} FIT</p>
               </div>
@@ -1051,15 +1090,15 @@ function PaymentRegistrationFormInner() {
             </p>
             <p className="flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-              <span>Custom Dri-Fit Performance Running T-Shirt</span>
-            </p>
-            <p className="flex items-center gap-2">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
               <span>E-Certificate with QR verification code and official timing</span>
             </p>
             <p className="flex items-center gap-2">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
               <span>Ranked position on the RUNNERUP Official Leaderboard</span>
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-sm shrink-0">🏆</span>
+              <span className="text-amber-400 font-semibold">Podium Award: Custom Dri-Fit Performance T-Shirt for Top 3 Finishers</span>
             </p>
           </div>
         </div>

@@ -97,6 +97,60 @@ export async function requireClerkAuth(
   }
 }
 
+export async function optionalClerkAuth(
+  request: AuthenticatedRequest,
+  _response: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!env.clerkEnabled) {
+      next();
+      return;
+    }
+
+    const header = request.header("authorization");
+    if (!header?.startsWith("Bearer ")) {
+      next();
+      return;
+    }
+
+    const token = header.slice("Bearer ".length).trim();
+    if (!token) {
+      next();
+      return;
+    }
+
+    let payload;
+    try {
+      payload = await verifyToken(token, {
+        secretKey: env.clerkSecretKey,
+        authorizedParties: env.allowedOrigins,
+      });
+    } catch {
+      try {
+        payload = await verifyToken(token, {
+          secretKey: env.clerkSecretKey,
+        });
+      } catch {
+        next();
+        return;
+      }
+    }
+
+    if (payload?.sub) {
+      request.auth = {
+        userId: payload.sub,
+        sessionId: typeof payload.sid === "string" ? payload.sid : undefined,
+      };
+      updateLogContext({ userId: payload.sub });
+    }
+
+    next();
+  } catch {
+    next();
+  }
+}
+
 async function elevateToAdmin(clerkId: string, email: string | null, superAdmin: boolean) {
   const role = superAdmin ? "SUPER_ADMIN" : "ADMIN";
 

@@ -24,7 +24,7 @@ const homeFaqs: FaqItem[] = [
   {
     question: "Do I get a real metal finisher medal, t-shirt, and certificate with my registration?",
     answer:
-      "Yes! Every finisher who completes their distance and uploads valid activity proof receives an authentic, heavy die-cast 3D embossed metal finisher medal, premium DRI-FIT event t-shirt (if selected), and official verifiable E-Certificate with QR code. Physical kits are dispatched via express tracked courier with zero delivery charges across all 19,000+ Indian pincodes.",
+      "Yes! Every finisher who completes their distance and uploads valid activity proof receives an authentic, heavy die-cast 3D embossed metal finisher medal and official verifiable E-Certificate with QR verification. In addition, the Top 3 runners on the official leaderboard are awarded an exclusive DRI-FIT Performance T-Shirt! Physical kits and awards are dispatched via express tracked courier with zero delivery charges across all 19,000+ Indian pincodes.",
   },
   {
     question: "Can beginners, joggers, women, and families participate in RUNNERUP events?",

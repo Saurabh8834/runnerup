@@ -115,6 +115,15 @@ export function EventReviews() {
               </article>
             ))}
           </div>
+
+          {/* Mobile swipe indicator */}
+          <div className="mt-3 flex items-center justify-center gap-1.5 sm:hidden">
+            <span className="text-[0.68rem] text-amber-400/90 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span>←</span>
+              <span>Swipe to see more reviews</span>
+              <span>→</span>
+            </span>
+          </div>
         </Reveal>
       </div>
     </section>

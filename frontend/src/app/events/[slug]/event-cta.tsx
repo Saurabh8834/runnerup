@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
-import { Medal3D } from "./medal";
+import { Medal3D, Medal3DViewer } from "./medal";
 import { EventCountdown } from "./countdown";
 import { Reveal } from "./reveal";
 
@@ -39,8 +39,13 @@ export function EventCta({ event }: { event: PublicEvent }) {
             />
 
             <div className="relative mx-auto flex max-w-2xl flex-col items-center">
-              <div className="w-28 drop-shadow-[0_25px_30px_rgba(230,72,51,0.25)] sm:w-36">
-                <Medal3D className="h-auto w-full" />
+              <div className="w-36 sm:w-48 mb-2">
+                <Medal3DViewer
+                  slug={event.slug}
+                  eventName={event.name}
+                  size="compact"
+                  showBadges={false}
+                />
               </div>
 
               <h2 className="heading mt-6 text-(--foreground)">This one&rsquo;s yours to win.</h2>

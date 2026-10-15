@@ -48,23 +48,23 @@ const stats: Stat[] = [
 
 export function EventStats() {
   return (
-    <section className="event-classic-stats border-b border-(--line)">
-      <div className="container-page -mt-7 sm:-mt-8">
+    <section className="event-classic-stats border-b border-white/10">
+      <div className="container-page -mt-6 sm:-mt-8">
         <Reveal>
-          <div className="grid grid-cols-2 gap-px overflow-hidden border border-(--line) bg-(--line) shadow-premium sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-px overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 shadow-2xl backdrop-blur-xl p-2 sm:p-0 sm:grid-cols-4">
             {stats.map(({ icon: Icon, value, suffix, label }) => (
               <div
                 key={label}
-                className="flex flex-col items-center gap-1.5 bg-(--panel) px-4 py-6 text-center transition-colors duration-300 hover:bg-(--panel-soft) sm:py-8"
+                className="flex flex-col items-center justify-center gap-1.5 rounded-2xl sm:rounded-none bg-[#0c1219]/90 sm:bg-(--panel) px-3 py-4 sm:px-4 sm:py-7 text-center transition-all duration-300 hover:bg-[#131d27] border border-white/5 sm:border-0"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-(--gold-line) bg-(--gold-soft) text-(--gold-deep)">
-                  <Icon className="h-4.5 w-4.5" strokeWidth={1.75} />
+                <span className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-transparent text-amber-400 shadow-sm">
+                  <Icon className="h-5 w-5" strokeWidth={2} />
                 </span>
-                <span className="mt-1 text-2xl font-black tabular-nums tracking-tight text-(--foreground) sm:text-3xl">
+                <span className="mt-1 text-2xl sm:text-3xl font-black tabular-nums tracking-tight text-white">
                   <CountUp value={value} />
-                  <span className="text-(--gold-deep)">{suffix}</span>
+                  <span className="text-amber-400 font-extrabold">{suffix}</span>
                 </span>
-                <span className="text-[0.6rem] font-semibold uppercase tracking-widest text-(--muted-soft) sm:text-[0.65rem]">
+                <span className="text-[0.62rem] sm:text-[0.68rem] font-bold uppercase tracking-wider text-zinc-400">
                   {label}
                 </span>
               </div>

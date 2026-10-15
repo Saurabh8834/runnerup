@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Trophy, Truck } from "lucide-react";
 import { getEventMedalImage, type PublicEvent } from "../../data/events";
-import { Medal3D } from "./medal";
+import { Medal3D, Medal3DViewer } from "./medal";
 import { Reveal, SectionHeader } from "./reveal";
 
 const items = [
@@ -12,8 +12,8 @@ const items = [
   },
   {
     icon: Shirt,
-    title: "Premium event T-shirt",
-    desc: "Exclusive athletic-fit tee included with every kit, in a special-edition print.",
+    title: "Top 3 Podium T-Shirt",
+    desc: "Exclusive athletic-fit Dri-Fit performance t-shirt awarded to the top 3 leaderboard finishers.",
   },
   {
     icon: FileBadge,
@@ -64,12 +64,12 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
         />
 
         <div className="mt-10 grid items-start gap-6 sm:mt-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
-          {/* Reward list */}
-          <div className="space-y-3.5">
+          {/* Reward list - appears second on mobile, left on desktop */}
+          <div className="space-y-3.5 order-2 lg:order-1">
             {dynamicItems.map(({ icon: Icon, title, desc }, i) => (
               <Reveal key={title} delay={i * 0.06}>
-                <article className="group flex items-start gap-4 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e64833]/40 hover:shadow-premium sm:p-5">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#90aead]/20 bg-gradient-to-br from-[#e64833]/15 to-[#874f41]/10 text-[#e64833] shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <article className="group flex items-start gap-3.5 sm:gap-4 rounded-2xl border border-(--line) bg-(--panel) p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e64833]/40 hover:shadow-premium sm:p-5">
+                  <span className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/15 via-[#e64833]/15 to-[#874f41]/10 text-amber-400 shadow-sm transition-transform duration-300 group-hover:scale-105">
                     <Icon className="h-5 w-5" strokeWidth={1.75} />
                   </span>
                   <div className="min-w-0">
@@ -83,8 +83,8 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
             ))}
           </div>
 
-          {/* Product showcase */}
-          <Reveal delay={0.1} className="lg:sticky lg:top-28">
+          {/* Product showcase - appears FIRST on mobile for maximum visual punch */}
+          <Reveal delay={0.1} className="order-1 lg:order-2 lg:sticky lg:top-28">
             <div className="relative overflow-hidden rounded-[2rem] border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 via-(--panel) to-(--panel)">
               <div
                 aria-hidden
@@ -95,28 +95,20 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
                 }}
               />
 
-              <div className="relative flex items-center justify-center px-6 pt-10">
-                {medalImg ? (
-                  <div className="relative w-52 sm:w-64 max-w-full aspect-[2/3] flex items-center justify-center group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={medalImg}
-                      alt={event?.name ? `${event.name} Finisher Medal` : "Finisher Medal"}
-                      className="w-full h-full object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.85)] transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-44 drop-shadow-[0_35px_40px_rgba(230,72,51,0.25)] sm:w-56">
-                    <Medal3D className="h-auto w-full" />
-                  </div>
-                )}
+              <div className="relative flex items-center justify-center px-4 pt-8 pb-1">
+                <Medal3DViewer
+                  slug={event?.slug || ""}
+                  eventName={event?.name}
+                  size="rewards"
+                  showBadges={false}
+                />
               </div>
 
               {/* Stable feature badges — neatly docked beneath the medal, zero overlapping */}
               <div className="relative px-4 sm:px-6 pb-6 pt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
-                  <Shirt className="h-3.5 w-3.5 text-[#e64833]" />
-                  <span>Premium T-shirt</span>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-amber-300 shadow-sm backdrop-blur-md">
+                  <Shirt className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Top 3 Podium T-shirt</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
                   <FileBadge className="h-3.5 w-3.5 text-[#e64833]" />

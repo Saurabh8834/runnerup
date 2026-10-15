@@ -65,8 +65,8 @@ export function EventSelect({ event }: { event: PublicEvent }) {
         />
 
         <div className="mt-10 grid items-start gap-6 sm:mt-14 lg:grid-cols-[1.1fr_360px] lg:gap-8">
-          {/* Purchase / Payment card - appears FIRST on mobile */}
-          <div className="order-1 lg:order-2 lg:sticky lg:top-28">
+          {/* Purchase / Payment card - appears after distance selection on mobile, sticky on desktop */}
+          <div className="order-2 lg:order-2 lg:sticky lg:top-28">
             <div className="overflow-hidden rounded-3xl border border-(--gold-line) bg-(--panel) shadow-premium">
               <div className="h-1.5 w-full bg-gradient-to-r from-(--gold) via-(--sage) to-(--gold)" />
 
@@ -118,7 +118,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                   <ul className="mt-3 space-y-1.5 text-[0.72rem] font-medium text-(--muted)">
                     <li className="flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 shrink-0 text-(--gold-deep)" />
-                      Finisher medal · Premium T-shirt · Printed certificate
+                      Finisher medal · Printed certificate · Top 3 T-shirt award
                     </li>
                     <li className="flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 shrink-0 text-(--gold-deep)" />
@@ -157,12 +157,17 @@ export function EventSelect({ event }: { event: PublicEvent }) {
             </div>
           </div>
 
-          {/* Distance picker - appears AFTER payment card on mobile */}
-          <div className="order-2 lg:order-1">
+          {/* Distance picker - appears FIRST on mobile */}
+          <div className="order-1 lg:order-1">
             <div className="rounded-3xl border border-(--line) bg-(--panel) p-5 shadow-premium sm:p-7">
-              <p className="text-[0.65rem] font-black uppercase tracking-widest text-(--muted-soft)">
-                Select Distance / Category
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-[0.65rem] font-black uppercase tracking-widest text-(--muted-soft)">
+                  Select Distance / Category
+                </p>
+                <span className="text-[0.62rem] text-amber-400 font-bold uppercase">
+                  Tap to Choose
+                </span>
+              </div>
 
               {/* Activity segmented */}
               <div className="mt-3 grid grid-cols-3 gap-2 rounded-2xl bg-(--panel-soft) p-1.5">
@@ -174,7 +179,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                       type="button"
                       onClick={() => setActivity(key)}
                       aria-pressed={isOn}
-                      className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-bold capitalize transition-all duration-200 cursor-pointer ${
+                      className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs sm:text-sm font-black capitalize transition-all duration-200 cursor-pointer ${
                         isOn
                           ? active
                           : "border-transparent bg-transparent text-(--muted) hover:text-(--foreground)"
@@ -192,17 +197,28 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                 {distances.map((distance) => {
                   const km = distanceNum(distance);
                   const t = tier(km ?? 5, activity);
+                  const isPopular = distance.includes("5");
                   return (
                     <Link
                       key={distance}
                       href={`/register?event=${encodeURIComponent(event.slug)}&distance=${encodeURIComponent(distance)}`}
-                      className={`group flex flex-col rounded-2xl border bg-(--panel) px-4 py-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-premium ${t.chip}`}
+                      className={`group relative flex flex-col justify-between rounded-2xl border bg-(--panel) p-3.5 sm:p-4 transition-all duration-200 hover:-translate-y-1 hover:border-amber-400/50 hover:shadow-lg active:scale-95 ${t.chip}`}
                     >
-                      <span className="text-lg font-black tracking-tight text-(--foreground)">
-                        {distance}
-                      </span>
-                      <span className="mt-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-(--muted)">
-                        {t.label}
+                      {isPopular && (
+                        <span className="absolute -top-2 right-2 rounded-full bg-amber-500 text-black text-[0.55rem] font-black uppercase px-2 py-0.2 shadow-sm">
+                          🔥 Popular
+                        </span>
+                      )}
+                      <div>
+                        <span className="text-xl sm:text-2xl font-black tracking-tight text-(--foreground) block">
+                          {distance}
+                        </span>
+                        <span className="mt-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-amber-400/90 block">
+                          {t.label}
+                        </span>
+                      </div>
+                      <span className="mt-3 inline-flex items-center gap-1 text-[0.68rem] font-bold text-amber-300 group-hover:translate-x-0.5 transition-transform">
+                        Select →
                       </span>
                     </Link>
                   );
