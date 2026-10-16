@@ -21,7 +21,7 @@ import {
   toCertificateRenderData,
 } from "../services/certificate.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
-import { fetchPaymentsForOrder } from "../services/razorpay.service.js";
+import { fetchPaymentsForOrder, fetchRecentCapturedPayments } from "../services/razorpay.service.js";
 import { ensureDefaultEvents } from "../services/event.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
@@ -843,6 +843,88 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
 // ── Sync ────────────────────────────────────────────────────────
 
 export async function adminSyncPayments(request: AuthenticatedRequest, response: Response) {
+  let synced = 0;
+  const errors: Array<{ id: string; orderId: string; error: string }> = [];
+
+  // 1. Fetch recent captured payments directly from Razorpay (handles alternate orders & dropped webhooks)
+  try {
+    const recentCaptured = await fetchRecentCapturedPayments(100);
+    if (recentCaptured && recentCaptured.length > 0) {
+      for (const rzp of recentCaptured) {
+        try {
+          // Check if this payment is already marked PAID
+          const alreadyPaid = await prisma.payment.findFirst({
+            where: {
+              OR: [
+                { razorpayPaymentId: rzp.id, status: "PAID" },
+                ...(rzp.order_id ? [{ razorpayOrderId: rzp.order_id, status: "PAID" as const }] : []),
+              ],
+            },
+          });
+          if (alreadyPaid) continue;
+
+          // Find registration by notes or order
+          const regId = rzp.notes?.registrationId;
+          let paymentToUpdate = await prisma.payment.findFirst({
+            where: {
+              OR: [
+                ...(rzp.order_id ? [{ razorpayOrderId: rzp.order_id }] : []),
+                ...(regId ? [{ registrationId: regId }] : []),
+              ],
+            },
+            include: { registration: { include: { user: true, event: true } } },
+          });
+
+          if (paymentToUpdate) {
+            await prisma.payment.update({
+              where: { id: paymentToUpdate.id },
+              data: {
+                status: "PAID",
+                razorpayPaymentId: rzp.id,
+                razorpayOrderId: rzp.order_id || paymentToUpdate.razorpayOrderId,
+                paidAt: new Date(rzp.created_at * 1000),
+              },
+            });
+
+            await prisma.registration.update({
+              where: { id: paymentToUpdate.registrationId },
+              data: { status: "CONFIRMED" },
+            });
+
+            // Ensure MedalDelivery exists if medalIncluded
+            if (paymentToUpdate.registration?.event?.medalIncluded) {
+              await prisma.medalDelivery.upsert({
+                where: { registrationId: paymentToUpdate.registrationId },
+                create: { registrationId: paymentToUpdate.registrationId, status: "PENDING" },
+                update: {},
+              }).catch(() => null);
+            }
+
+            await sendRegistrationConfirmationEmail({
+              to: paymentToUpdate.registration.user.email,
+              runnerName: paymentToUpdate.registration.user.name,
+              eventTitle: paymentToUpdate.registration.event.title,
+              distance: paymentToUpdate.registration.distance,
+              bibNumber: paymentToUpdate.registration.bibNumber,
+              amountInPaise: paymentToUpdate.amountInPaise,
+            }).catch(() => null);
+
+            synced++;
+          }
+        } catch (innerErr) {
+          errors.push({
+            id: rzp.id,
+            orderId: rzp.order_id || "",
+            error: innerErr instanceof Error ? innerErr.message : "Error syncing captured payment",
+          });
+        }
+      }
+    }
+  } catch (apiErr) {
+    logger.warn(`[adminSyncPayments] Could not fetch captured payments list from Razorpay: ${apiErr}`);
+  }
+
+  // 2. Also check any remaining CREATED payments with order_ IDs
   const createdPayments = await prisma.payment.findMany({
     where: {
       status: "CREATED",
@@ -853,21 +935,10 @@ export async function adminSyncPayments(request: AuthenticatedRequest, response:
     },
   });
 
-  if (createdPayments.length === 0) {
-    response.json({ data: { synced: 0, total: 0, message: "No pending payments to sync" } });
-    return;
-  }
-
-  let synced = 0;
-  const errors: Array<{ id: string; orderId: string; error: string }> = [];
-
   for (const payment of createdPayments) {
     try {
       const razorpayPayments = await fetchPaymentsForOrder(payment.razorpayOrderId);
-      if (!razorpayPayments) {
-        errors.push({ id: payment.id, orderId: payment.razorpayOrderId, error: "Failed to fetch from Razorpay" });
-        continue;
-      }
+      if (!razorpayPayments) continue;
 
       const captured = razorpayPayments.find(
         (p: { id: string; status: string }) => p.status === "captured",
@@ -887,6 +958,14 @@ export async function adminSyncPayments(request: AuthenticatedRequest, response:
         where: { id: payment.registrationId },
         data: { status: "CONFIRMED" },
       });
+
+      if (payment.registration?.event?.medalIncluded) {
+        await prisma.medalDelivery.upsert({
+          where: { registrationId: payment.registrationId },
+          create: { registrationId: payment.registrationId, status: "PENDING" },
+          update: {},
+        }).catch(() => null);
+      }
 
       await sendRegistrationConfirmationEmail({
         to: payment.registration.user.email,
@@ -911,15 +990,24 @@ export async function adminSyncPayments(request: AuthenticatedRequest, response:
     action: "payment.sync",
     entityType: "Payment",
     entityId: "bulk",
-    summary: `Synced ${synced}/${createdPayments.length} CREATED payments, ${errors.length} errors`,
+    summary: `Synced ${synced} payments against Razorpay, ${errors.length} errors`,
+  });
+
+  const paidSummary = await prisma.payment.aggregate({
+    where: { status: "PAID" },
+    _sum: { amountInPaise: true },
+    _count: true,
   });
 
   response.json({
     data: {
       synced,
-      total: createdPayments.length,
+      totalPaid: paidSummary._count,
+      totalRevenue: (paidSummary._sum.amountInPaise ?? 0) / 100,
       errors: errors.length > 0 ? errors : undefined,
-      message: `${synced} payment${synced === 1 ? "" : "s"} marked as PAID out of ${createdPayments.length}`,
+      message: synced > 0
+        ? `Successfully synced ${synced} payment${synced === 1 ? "" : "s"}! Total paid revenue: ₹${(paidSummary._sum.amountInPaise ?? 0) / 100}`
+        : `All payments are already in sync! Total paid revenue: ₹${(paidSummary._sum.amountInPaise ?? 0) / 100}`,
     },
   });
 }
