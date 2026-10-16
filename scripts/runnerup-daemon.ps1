@@ -107,6 +107,11 @@ function Start-BackendProcess {
 }
 
 function Start-TunnelProcess {
+    Write-DaemonLog "Verifying and provisioning DNS route for api.runnerup.in..."
+    try {
+        & $CloudflaredExe tunnel route dns -f "8bfe691c-7440-49a8-9c5c-620a1bd3dafe" "api.runnerup.in" 2>&1 | Out-Null
+    } catch {}
+
     Write-DaemonLog "Starting Cloudflare Tunnel..."
     $proc = Start-Process -FilePath $CloudflaredExe `
         -ArgumentList @("tunnel", "--config", $ConfigYaml, "run") `

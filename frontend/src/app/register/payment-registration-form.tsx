@@ -117,7 +117,11 @@ function getFriendlyErrorMessage(error: unknown) {
   if (error instanceof TypeError && error.message === "Failed to fetch") {
     return `Could not connect to the API at ${getApiUrl()}. Start backend with npm run dev.`;
   }
-  return error instanceof Error ? error.message : "Something went wrong";
+  const msg = error instanceof Error ? error.message : "Something went wrong";
+  if (msg.toLowerCase().includes("authentication required")) {
+    return "Session refreshed. Please click Pay again to proceed with checkout.";
+  }
+  return msg;
 }
 
 function FieldError({ message }: { message?: string }) {
@@ -521,13 +525,24 @@ function PaymentRegistrationFormInner() {
         body: JSON.stringify(payload),
       });
 
-      if (regRes.status === 401 && isSignedIn) {
-        const freshToken = await getToken({ skipCache: true });
-        if (freshToken) {
-          token = freshToken;
+      if (regRes.status === 401) {
+        if (isSignedIn) {
+          const freshToken = await getToken({ skipCache: true });
+          if (freshToken) {
+            token = freshToken;
+            regRes = await fetch(getApiUrl("/api/registrations"), {
+              method: "POST",
+              headers: authHeaders(token),
+              body: JSON.stringify(payload),
+            });
+          }
+        }
+        // If auth still rejected (or not signed in), retry as guest without authorization header
+        if (regRes.status === 401) {
+          token = null;
           regRes = await fetch(getApiUrl("/api/registrations"), {
             method: "POST",
-            headers: authHeaders(token),
+            headers: authHeaders(null),
             body: JSON.stringify(payload),
           });
         }
@@ -567,13 +582,24 @@ function PaymentRegistrationFormInner() {
         body: JSON.stringify({ registrationId }),
       });
 
-      if (payRes.status === 401 && isSignedIn) {
-        const freshToken = await getToken({ skipCache: true });
-        if (freshToken) {
-          token = freshToken;
+      if (payRes.status === 401) {
+        if (isSignedIn) {
+          const freshToken = await getToken({ skipCache: true });
+          if (freshToken) {
+            token = freshToken;
+            payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+              method: "POST",
+              headers: authHeaders(token),
+              body: JSON.stringify({ registrationId }),
+            });
+          }
+        }
+        // If auth still rejected (or not signed in), retry as guest without authorization header
+        if (payRes.status === 401) {
+          token = null;
           payRes = await fetch(getApiUrl("/api/payments/create-order"), {
             method: "POST",
-            headers: authHeaders(token),
+            headers: authHeaders(null),
             body: JSON.stringify({ registrationId }),
           });
         }
@@ -601,13 +627,21 @@ function PaymentRegistrationFormInner() {
         },
         theme: { color: "#e64833" },
         handler: async (response: CheckoutResponse) => {
-          const freshToken = isSignedIn ? await getToken() : null;
+          let freshToken = isSignedIn ? await getToken() : null;
           try {
-            const verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+            let verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
               method: "POST",
               headers: authHeaders(freshToken),
               body: JSON.stringify(response),
             });
+
+            if (verifyResponse.status === 401) {
+              verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+                method: "POST",
+                headers: authHeaders(null),
+                body: JSON.stringify(response),
+              });
+            }
 
             if (!verifyResponse.ok) {
               throw new Error(await readApiError(verifyResponse, "Payment verification error"));

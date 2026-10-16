@@ -4,7 +4,13 @@ import { isIndianState } from "../data/indian-states.js";
 const phoneSchema = z
   .string()
   .trim()
-  .transform((value) => value.replace(/\s+/g, ""))
+  .transform((value) => {
+    const cleaned = value.replace(/[\s\-()]/g, "");
+    if (/^[6-9]\d{9}$/.test(cleaned)) {
+      return `+91${cleaned}`;
+    }
+    return cleaned;
+  })
   .refine((value) => /^\+\d{8,15}$/.test(value), {
     message: "Enter a valid mobile number with country code",
   });
