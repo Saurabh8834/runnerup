@@ -2,7 +2,8 @@
 
 import { ClerkLoaded, ClerkLoading, SignIn } from "@clerk/nextjs";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { BadgeCheck, ChevronRight, Trophy } from "lucide-react";
 import { PageShell } from "../../components/app-shell";
 import { useTheme } from "../../components/theme-provider";
@@ -70,6 +71,16 @@ function ThemedSignIn() {
 }
 
 export default function SignInPage() {
+  const router = useRouter();
+  const [bibInput, setBibInput] = useState("");
+
+  function handleRunnerLookup(e: React.FormEvent) {
+    e.preventDefault();
+    const clean = bibInput.trim().toUpperCase();
+    if (!clean) return;
+    router.push(`/prize/${encodeURIComponent(clean)}`);
+  }
+
   return (
     <PageShell>
       <div className="auth-classic">
@@ -107,12 +118,45 @@ export default function SignInPage() {
             </ClerkLoaded>
           </div>
 
-          <p className="mt-6 text-center text-sm text-(--muted)">
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center">
+            <p className="text-xs font-semibold text-[#fbe9d0]">
+              Already registered for a race?
+            </p>
+            <p className="mt-1 text-[0.75rem] text-[#90aead]">
+              Quickly view your official race bib, medal tracking, and certificate:
+            </p>
+            <form onSubmit={handleRunnerLookup} className="mt-3 flex gap-2">
+              <input
+                type="text"
+                placeholder="Enter Bib Number (e.g. RU-1024)"
+                value={bibInput}
+                onChange={(e) => setBibInput(e.target.value)}
+                className="flex-1 rounded-xl border border-white/10 bg-[#14242a] px-3 py-2 text-xs text-white placeholder-slate-400 outline-none focus:border-[#e64833]"
+              />
+              <button
+                type="submit"
+                className="rounded-xl bg-[#e64833] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#d83d28]"
+              >
+                View Bib
+              </button>
+            </form>
+          </div>
+
+          <p className="mt-5 text-center text-sm text-(--muted)">
             New here?{" "}
             <Link className="inline-flex items-center gap-1 font-semibold text-[#e64833] hover:text-[#d83d28]" href="/sign-up">
               Create an account <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           </p>
+
+          <div className="mt-4 text-center">
+            <Link
+              href="/admin/login"
+              className="text-[0.72rem] text-[#90aead]/60 hover:text-[#90aead]"
+            >
+              Admin Console Access →
+            </Link>
+          </div>
           </div>
         </div>
       </section>
