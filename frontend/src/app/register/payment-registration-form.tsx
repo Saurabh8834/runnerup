@@ -548,6 +548,15 @@ function PaymentRegistrationFormInner() {
         }
       }
 
+      if (!regRes.ok && (regRes.status >= 500 || regRes.status === 404)) {
+        await new Promise((r) => setTimeout(r, 1200));
+        regRes = await fetch(getApiUrl("/api/registrations"), {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify(payload),
+        });
+      }
+
       if (!regRes.ok) throw new Error(await readApiError(regRes, "Registration could not be created"));
       const regJson = await regRes.json();
       const registrationId = regJson.data?.registration?.id ?? regJson.data?.id;
@@ -603,6 +612,15 @@ function PaymentRegistrationFormInner() {
             body: JSON.stringify({ registrationId }),
           });
         }
+      }
+
+      if (!payRes.ok && (payRes.status >= 500 || payRes.status === 404)) {
+        await new Promise((r) => setTimeout(r, 1200));
+        payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify({ registrationId }),
+        });
       }
 
       if (!payRes.ok) throw new Error(await readApiError(payRes, "Payment order failed"));
@@ -732,27 +750,30 @@ function PaymentRegistrationFormInner() {
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col gap-2">
-                {isSignedIn ? (
-                  <Link className="btn btn-primary w-full h-11 font-bold text-sm" href="/dashboard">
-                    Open Runner Dashboard →
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      className="btn btn-primary w-full h-11 font-bold text-sm flex items-center justify-center gap-2"
-                      href="/sign-in?redirect_url=/dashboard"
-                    >
-                      Sign In to Access Dashboard →
-                    </Link>
-                    <p className="text-[0.7rem] text-(--muted) text-center mt-1">
-                      Confirmation & race details have been sent to <strong>{runnerEmail || "your email"}</strong>. You can sign in anytime with this email to view your bibs & medals!
-                    </p>
-                  </>
-                )}
-                <Link className="btn btn-secondary w-full h-10 text-xs font-semibold" href="/leaderboard">
-                  View Race Leaderboard
+              <div className="mt-6 flex flex-col gap-2.5">
+                <Link
+                  className="btn btn-primary w-full h-11 font-bold text-sm flex items-center justify-center gap-2"
+                  href={`/prize/${confirmedBib || previewBibNumber}`}
+                >
+                  View Official Bib & Race Pass →
                 </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link className="btn btn-secondary w-full h-10 text-xs font-semibold flex items-center justify-center" href="/leaderboard">
+                    Live Leaderboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="btn btn-secondary w-full h-10 text-xs font-semibold flex items-center justify-center cursor-pointer"
+                  >
+                    Save Entry Pass
+                  </button>
+                </div>
+                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-center mt-1">
+                  <p className="text-[0.72rem] text-emerald-300 font-medium">
+                    ✅ Registration & payment complete! No account or sign-in needed. Confirmation sent to <strong>{runnerEmail || "your email"}</strong>.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </div>

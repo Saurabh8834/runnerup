@@ -93,8 +93,11 @@ const defaultTestimonials = [
   },
 ];
 
+let siteContentEnsured = false;
+
 /** Seed default CMS rows once so homepage/gallery work before admin edits. */
 export async function ensureDefaultSiteContent() {
+  if (siteContentEnsured) return;
   const [mediaCount, testimonialCount] = await Promise.all([
     prisma.siteMedia.count(),
     prisma.siteTestimonial.count(),
@@ -129,4 +132,5 @@ export async function ensureDefaultSiteContent() {
       })),
     });
   }
+  siteContentEnsured = true;
 }

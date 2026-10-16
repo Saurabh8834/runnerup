@@ -144,8 +144,23 @@ export async function createRegistration(request: AuthenticatedRequest, response
       existingRegistration.status !== "COMPLETED" &&
       existingRegistration.payment?.status !== "PAID"
     ) {
+      const updated = await prisma.registration.update({
+        where: { id: existingRegistration.id },
+        data: {
+          shippingName: payload.shippingName,
+          shippingPhone: payload.shippingPhone,
+          shippingLine1: payload.shippingLine1,
+          shippingLine2: payload.shippingLine2,
+          shippingCity: payload.shippingCity,
+          shippingState: payload.shippingState,
+          shippingPincode: payload.shippingPincode,
+          activityType: selectedType,
+        },
+        include: { event: true, user: true, payment: true },
+      });
+
       response.status(200).json({
-        data: existingRegistration,
+        data: updated,
         meta: {
           freeEntry: false,
           resumed: true,

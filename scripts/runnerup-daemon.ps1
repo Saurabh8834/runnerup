@@ -33,7 +33,19 @@ function Write-DaemonLog {
     Add-Content -Path $DaemonLog -Value $line -Encoding UTF8
 }
 
-# 1. Engage sleep prevention so Windows doesn't sleep while acting as a server
+# 1. Engage sleep prevention and configure laptop lid to NEVER sleep when closed
+try {
+    # Set Lid Close action to "Do Nothing" (0) and keep Wi-Fi active in standby
+    powercfg /setacvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
+    powercfg /setdcvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
+    powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
+    powercfg /setdcvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
+    powercfg /SetActive SCHEME_CURRENT 2>&1 | Out-Null
+    Write-DaemonLog "Configured Windows Power Scheme: Lid close action set to 'Do Nothing' (0) and standby network enabled."
+} catch {
+    Write-DaemonLog "Notice: Could not set lid close power settings: $_"
+}
+
 try {
     Add-Type -TypeDefinition @"
     using System;

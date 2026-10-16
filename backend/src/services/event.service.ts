@@ -45,8 +45,11 @@ export function withEventMeta<T extends Pick<Event, "status" | "startsAt" | "end
   };
 }
 
+let eventsEnsured = false;
+
 /** Ensure starter catalog events exist in the database. */
 export async function ensureDefaultEvents() {
+  if (eventsEnsured) return;
   for (const event of defaultEvents) {
     const existing = await prisma.event.findUnique({
       where: { slug: event.slug },
@@ -62,6 +65,7 @@ export async function ensureDefaultEvents() {
       });
     }
   }
+  eventsEnsured = true;
 }
 
 export function scopeWhere(scope?: string) {

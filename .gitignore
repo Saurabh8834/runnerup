@@ -48,6 +48,7 @@ yarn-error.log*
 # cloudflare local config
 cloudflared-config.yml
 *.log
+scratch/
 /logs/
 *.pid
 backend_log.txt

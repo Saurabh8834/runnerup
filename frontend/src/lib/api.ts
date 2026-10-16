@@ -37,6 +37,9 @@ export function authHeaders(token: string | null | undefined, init: HeadersInit 
 }
 
 export async function readApiError(response: Response, fallback: string) {
+  if (response.status === 521 || response.status === 522 || response.status === 530 || response.status === 502 || response.status === 504) {
+    return "Server is momentarily reconnecting. Please wait 5 seconds and click Pay again.";
+  }
   const error = await response.json().catch(() => null);
   return (error?.error?.message as string | undefined) ?? fallback;
 }
