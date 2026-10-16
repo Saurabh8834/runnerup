@@ -147,6 +147,8 @@ export const env = {
   clerkPublishableKey: readEnv("CLERK_PUBLISHABLE_KEY"),
   /** Comma-separated emails that always get admin (e.g. you@gmail.com) */
   adminEmails: parseEmailList(readEnv("ADMIN_EMAILS")),
+  /** Emergency admin passcode bypassing Clerk when locked or quota exceeded */
+  adminEmergencyKey: readEnv("ADMIN_EMERGENCY_KEY", "RunnerUp@Admin2026!#"),
   /**
    * When true (default in development), the first signed-in user who hits
    * an admin route becomes SUPER_ADMIN if no admin exists yet.

@@ -30,12 +30,42 @@ function primaryEmailFromClerkUser(user: {
   return primary?.emailAddress?.toLowerCase() ?? null;
 }
 
+export function isEmergencyAdminToken(token: string): boolean {
+  if (!token || !env.adminEmergencyKey) return false;
+  if (token === env.adminEmergencyKey) return true;
+  if (!token.startsWith("ru_admin_")) return false;
+  try {
+    const raw = Buffer.from(token.slice("ru_admin_".length), "base64").toString("utf8");
+    const [pass] = raw.split("_");
+    return pass === env.adminEmergencyKey;
+  } catch {
+    return false;
+  }
+}
+
 export async function requireClerkAuth(
   request: AuthenticatedRequest,
   _response: Response,
   next: NextFunction,
 ) {
   try {
+    const header = request.header("authorization");
+    const emergencyHeader = request.header("x-admin-emergency-token");
+    const token =
+      (header?.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : null) ||
+      (emergencyHeader ? emergencyHeader.trim() : null);
+
+    // Emergency admin passcode check (instant bypass when Clerk is locked or down)
+    if (token && isEmergencyAdminToken(token)) {
+      request.auth = {
+        userId: "admin_emergency_sourav",
+        sessionId: "emergency-session",
+      };
+      updateLogContext({ userId: "admin_emergency_sourav" });
+      next();
+      return;
+    }
+
     if (!env.clerkEnabled) {
       if (env.nodeEnv === "production") {
         throw new ApiError(500, "Clerk is not configured on the server");
@@ -46,12 +76,6 @@ export async function requireClerkAuth(
       return;
     }
 
-    const header = request.header("authorization");
-    if (!header?.startsWith("Bearer ")) {
-      throw new ApiError(401, "Authentication required. Sign in and try again.");
-    }
-
-    const token = header.slice("Bearer ".length).trim();
     if (!token) {
       throw new ApiError(401, "Authentication required. Sign in and try again.");
     }
@@ -181,6 +205,12 @@ export async function requireAdmin(
   next: NextFunction,
 ) {
   try {
+    // Instant bypass for emergency admin passcode
+    if (request.auth?.userId === "admin_emergency_sourav") {
+      next();
+      return;
+    }
+
     if (allowDevBypass()) {
       next();
       return;

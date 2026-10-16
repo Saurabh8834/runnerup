@@ -68,6 +68,19 @@ export async function adminMe(request: AuthenticatedRequest, response: Response)
     return;
   }
 
+  if (clerkId === "admin_emergency_sourav") {
+    response.json({
+      data: {
+        role: "SUPER_ADMIN",
+        name: "Sourav (Admin)",
+        email: env.adminEmails[0] ?? "sourav06556@gmail.com",
+        clerkId: "admin_emergency_sourav",
+        mode: "emergency-passcode",
+      },
+    });
+    return;
+  }
+
   const user = await prisma.user.findFirst({ where: { clerkId } });
   response.json({
     data: {

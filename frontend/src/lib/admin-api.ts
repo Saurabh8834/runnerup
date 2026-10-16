@@ -9,16 +9,34 @@ export class AdminApiError extends Error {
   }
 }
 
+export function getEmergencyAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("runnerup_admin_token");
+}
+
+export function setEmergencyAdminSession(token: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("runnerup_admin_token", token);
+  document.cookie = `runnerup_admin_session=${encodeURIComponent(token)}; path=/; max-age=604800; SameSite=Lax`;
+}
+
+export function clearEmergencyAdminSession() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("runnerup_admin_token");
+  document.cookie = "runnerup_admin_session=; path=/; max-age=0; SameSite=Lax";
+}
+
 export async function adminFetch<T = unknown>(
   path: string,
   token: string | null | undefined,
   init: RequestInit = {},
 ): Promise<T> {
+  const effectiveToken = token || getEmergencyAdminToken();
   let response: Response;
   try {
     response = await fetch(getApiUrl(path), {
       ...init,
-      headers: authHeaders(token, init.headers),
+      headers: authHeaders(effectiveToken, init.headers),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to connect to backend server";

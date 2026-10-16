@@ -41,10 +41,34 @@ import {
   adminUpdateRegistration,
   adminUpdateUserRole,
 } from "../controllers/admin.controller.js";
+import { env } from "../config/env.js";
 import { requireAdmin, requireClerkAuth } from "../middleware/clerk-auth.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
 export const adminRouter = Router();
+
+// Public emergency passcode login (allows admin access even if Clerk is down or quota capped)
+adminRouter.post("/emergency-login", (req, res) => {
+  const { passcode } = req.body || {};
+  if (!passcode || typeof passcode !== "string" || passcode.trim() !== env.adminEmergencyKey) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid admin passcode. Please enter the correct master key.",
+    });
+  }
+  const token = `ru_admin_${Buffer.from(`${passcode.trim()}_${Date.now()}`).toString("base64")}`;
+  return res.json({
+    success: true,
+    data: {
+      token,
+      user: {
+        name: "Sourav (Admin)",
+        email: env.adminEmails[0] ?? "sourav06556@gmail.com",
+        role: "SUPER_ADMIN",
+      },
+    },
+  });
+});
 
 adminRouter.use(requireClerkAuth, requireAdmin);
 

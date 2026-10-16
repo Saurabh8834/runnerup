@@ -5,7 +5,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, AdminApiError } from "../../lib/admin-api";
+import {
+  adminFetch,
+  AdminApiError,
+  getEmergencyAdminToken,
+  setEmergencyAdminSession,
+  clearEmergencyAdminSession,
+} from "../../lib/admin-api";
+import { getApiUrl } from "../../lib/api";
 import { AdminThemeProvider, AdminThemeToggle, useAdminTheme } from "./admin-theme";
 import { BrandText } from "../components/brand-text";
 import "./admin.css";
@@ -193,7 +200,35 @@ function AdminThemed({
 }
 
 /* ── Gate: not signed in ────────────────────────────────── */
-function GateSignIn() {
+function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void }) {
+  const [passcode, setPasscode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handlePasscodeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!passcode.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(getApiUrl("/api/admin/emergency-login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: passcode.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Invalid admin passcode");
+      }
+      setEmergencyAdminSession(json.data.token);
+      onEmergencySuccess?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <AdminThemed className="admin-app admin-gate">
       <motion.div
@@ -201,6 +236,7 @@ function GateSignIn() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        style={{ maxWidth: 440, width: "100%" }}
       >
         <div className="admin-gate-logo">
           <div className="admin-gate-logo-icon">
@@ -216,11 +252,58 @@ function GateSignIn() {
         </div>
 
         <h1>Admin Console</h1>
-        <p>Restricted to authorised admins only. Sign in with your admin account to continue.</p>
+        <p>Restricted to authorised admins only. Enter master passcode to unlock.</p>
+
+        {error && (
+          <div
+            style={{
+              background: "rgba(239, 68, 68, 0.12)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              color: "#f87171",
+              padding: "0.6rem 0.8rem",
+              borderRadius: "0.6rem",
+              fontSize: "0.82rem",
+              marginBottom: "0.8rem",
+              textAlign: "left",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handlePasscodeSubmit} style={{ width: "100%", marginBottom: "1rem" }}>
+          <input
+            type="password"
+            placeholder="Admin Master Passcode"
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.75rem 1rem",
+              borderRadius: "0.75rem",
+              border: "1px solid var(--line)",
+              background: "var(--panel-soft)",
+              color: "var(--foreground)",
+              fontSize: "0.92rem",
+              outline: "none",
+              boxSizing: "border-box",
+              marginBottom: "0.75rem",
+            }}
+          />
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ width: "100%", height: "2.6rem", fontWeight: 600 }}
+          >
+            {loading ? "Unlocking Console…" : "Unlock with Passcode"}
+          </button>
+        </form>
 
         <div className="admin-gate-actions">
-          <Link className="btn btn-primary" href="/sign-in?redirect_url=/admin">
-            Sign in to Admin
+          <Link className="btn btn-ghost" href="/sign-in?redirect_url=/admin">
+            Sign in with Clerk
           </Link>
           <Link className="btn btn-ghost" href="/">
             Back to site
@@ -441,12 +524,14 @@ function SidebarNav({
   initial,
   isActive,
   onNavClick,
+  onSignOut,
 }: {
   me: AdminMe;
   displayName: string;
   initial: string;
   isActive: (href: string) => boolean;
   onNavClick?: () => void;
+  onSignOut?: () => void;
 }) {
   return (
     <>
@@ -489,7 +574,7 @@ function SidebarNav({
               <strong>{displayName}</strong>
               <span>
                 {me.role ?? "ADMIN"}
-                {me.mode === "dev-bypass" ? " · dev" : ""}
+                {me.mode === "emergency-passcode" ? " · passcode" : me.mode === "dev-bypass" ? " · dev" : ""}
               </span>
             </div>
           </div>
@@ -499,7 +584,21 @@ function SidebarNav({
           <Link href="/" className="admin-sidebar-site-btn">
             ← View site
           </Link>
-          <Link href="/dashboard">My dashboard</Link>
+          <button
+            type="button"
+            onClick={onSignOut}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              fontSize: "0.82rem",
+              padding: 0,
+              textAlign: "left",
+            }}
+          >
+            Sign out
+          </button>
         </div>
       </div>
     </>
@@ -509,13 +608,32 @@ function SidebarNav({
 /* ── Inner shell (must sit under AdminThemeProvider) ────── */
 function AdminShellInner({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { signOut } = useClerk();
   const { user } = useUser();
   const pathname = usePathname();
   const [me, setMe] = useState<AdminMe | null>(null);
+  const [emergencyToken, setEmergencyTokenState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setEmergencyTokenState(getEmergencyAdminToken());
+  }, []);
+
+  const handleSignOut = useCallback(() => {
+    clearEmergencyAdminSession();
+    setEmergencyTokenState(null);
+    setMe(null);
+    if (isSignedIn) {
+      void signOut({ redirectUrl: "/admin/login" });
+    } else {
+      window.location.href = "/admin/login";
+    }
+  }, [isSignedIn, signOut]);
+
+  const effectiveSignedIn = isSignedIn || Boolean(emergencyToken);
 
   const loadMe = useCallback(async () => {
     setLoading(true);
@@ -523,11 +641,14 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     setErrorStatus(null);
     try {
       let token: string | null = null;
-      for (let attempt = 0; attempt < 6; attempt += 1) {
-        token = await getToken().catch(() => null);
-        if (token || !isSignedIn) break;
-        await new Promise((resolve) => setTimeout(resolve, 250));
+      if (isSignedIn) {
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+          token = await getToken().catch(() => null);
+          if (token) break;
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        }
       }
+      token = token || getEmergencyAdminToken();
       const json = await adminFetch<{ data: AdminMe }>("/api/admin/me", token);
       setMe(json.data);
     } catch (err) {
@@ -545,8 +666,8 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
   }, [getToken, isSignedIn]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
+    if (!isLoaded && !emergencyToken) return;
+    if (!effectiveSignedIn) {
       setLoading(false);
       setMe(null);
       setError(null);
@@ -554,18 +675,14 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       return;
     }
     void loadMe();
-  }, [isLoaded, isSignedIn, loadMe]);
+  }, [isLoaded, effectiveSignedIn, loadMe, emergencyToken]);
 
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
   /* ── Gates ─────────────────────────────────────────────── */
-  if (!isLoaded || (isSignedIn && loading)) {
+  if ((!isLoaded && !emergencyToken) || (effectiveSignedIn && loading)) {
     return <GateLoading />;
-  }
-
-  if (!isSignedIn) {
-    return <GateSignIn />;
   }
 
   const isServerOrNetworkError =
@@ -575,6 +692,17 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     Boolean(error?.includes("530")) ||
     Boolean(error?.includes("Failed to connect")) ||
     Boolean(error?.includes("Failed to fetch"));
+
+  if (!effectiveSignedIn || (!loading && !me && !isServerOrNetworkError && !error)) {
+    return (
+      <GateSignIn
+        onEmergencySuccess={() => {
+          setEmergencyTokenState(getEmergencyAdminToken());
+          void loadMe();
+        }}
+      />
+    );
+  }
 
   if (isServerOrNetworkError) {
     return (
@@ -606,6 +734,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     displayName,
     initial,
     isActive,
+    onSignOut: handleSignOut,
   };
 
   return (

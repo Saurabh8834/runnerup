@@ -40,5 +40,7 @@ services:
         sync: false
       - key: ADMIN_EMAILS
         value: sourav06556@gmail.com
+      - key: ADMIN_EMERGENCY_KEY
+        value: "RunnerUp@Admin2026!#"
       - key: ADMIN_BOOTSTRAP
         value: "false"
