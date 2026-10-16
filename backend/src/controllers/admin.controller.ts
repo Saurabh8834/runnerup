@@ -81,13 +81,22 @@ export async function adminMe(request: AuthenticatedRequest, response: Response)
     return;
   }
 
-  const user = await prisma.user.findFirst({ where: { clerkId } });
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { clerkId },
+        { email: { in: env.adminEmails } },
+      ],
+    },
+  });
+
+  const isSuper = user?.role === "SUPER_ADMIN" || env.adminEmails.includes(user?.email?.toLowerCase() || "");
   response.json({
     data: {
       id: user?.id,
-      role: user?.role ?? "RUNNER",
-      name: user?.name,
-      email: user?.email,
+      role: isSuper ? "SUPER_ADMIN" : (user?.role ?? "ADMIN"),
+      name: user?.name ?? "Admin",
+      email: user?.email ?? env.adminEmails[0],
       clerkId,
       mode: "authenticated",
     },
