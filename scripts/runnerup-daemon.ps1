@@ -124,9 +124,9 @@ function Start-TunnelProcess {
         & $CloudflaredExe tunnel route dns -f "8bfe691c-7440-49a8-9c5c-620a1bd3dafe" "api.runnerup.in" 2>&1 | Out-Null
     } catch {}
 
-    Write-DaemonLog "Starting Cloudflare Tunnel..."
+    Write-DaemonLog "Starting Cloudflare Tunnel (HTTP/2 with 10s heartbeat)..."
     $proc = Start-Process -FilePath $CloudflaredExe `
-        -ArgumentList @("tunnel", "--config", $ConfigYaml, "run") `
+        -ArgumentList @("tunnel", "--config", $ConfigYaml, "--protocol", "http2", "--heartbeat-interval", "10s", "--heartbeat-count", "3", "run") `
         -WorkingDirectory $RepoRoot `
         -RedirectStandardOutput $TunnelLog `
         -RedirectStandardError $TunnelErrLog `
@@ -189,10 +189,11 @@ while ($true) {
         $script:backendGraceCycles = 0
     }
 
-    # Cloudflare Tunnel check
+    # Cloudflare Tunnel check: process alive?
     if ($null -eq $TunnelProc -or $TunnelProc.HasExited) {
         Write-DaemonLog "Watchdog: Cloudflare Tunnel exited. Restarting..."
         $TunnelProc = Start-TunnelProcess
+        $script:tunnelFailCount = 0
     }
 
     # Frontend check if enabled
@@ -201,15 +202,47 @@ while ($true) {
         $FrontendProc = Start-FrontendProcess
     }
 
+    # Active Edge Probe: Check public endpoint every 15 seconds (every 3 cycles)
+    if ($cycle % 3 -eq 0 -and $portActive) {
+        $edgeOk = $false
+        try {
+            $resp = Invoke-WebRequest -Uri "https://api.runnerup.in/health" -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
+            if ($resp.StatusCode -eq 200) {
+                $edgeOk = $true
+                $script:tunnelFailCount = 0
+            }
+        } catch {
+            $edgeOk = $false
+        }
+
+        if (-not $edgeOk) {
+            $script:tunnelFailCount = [int]$script:tunnelFailCount + 1
+            Write-DaemonLog "Watchdog: Public edge probe failed (consecutive failures: $script:tunnelFailCount)"
+            if ($script:tunnelFailCount -ge 2) {
+                Write-DaemonLog "Watchdog: Public API (https://api.runnerup.in) unreachable. Recycling Cloudflare Tunnel..."
+                try {
+                    if ($TunnelProc -and -not $TunnelProc.HasExited) {
+                        Stop-Process -Id $TunnelProc.Id -Force -ErrorAction SilentlyContinue
+                    }
+                } catch {}
+                Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 1
+                $TunnelProc = Start-TunnelProcess
+                $script:tunnelFailCount = 0
+            }
+        }
+    }
+
     # Every 60 seconds, check local health endpoint
     if ($cycle % 12 -eq 0) {
         try {
             $resp = Invoke-WebRequest -Uri "http://127.0.0.1:4000/health" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
             if ($resp.StatusCode -ne 200) {
-                Write-DaemonLog "Warning: Health endpoint returned $($resp.StatusCode)"
+                Write-DaemonLog "Warning: Local health endpoint returned $($resp.StatusCode)"
             }
         } catch {
-            Write-DaemonLog "Warning: Health check failed: $($_.Exception.Message)"
+            Write-DaemonLog "Warning: Local health check failed: $($_.Exception.Message)"
         }
     }
 }
+
