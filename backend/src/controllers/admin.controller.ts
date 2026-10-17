@@ -21,7 +21,7 @@ import {
   toCertificateRenderData,
 } from "../services/certificate.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
-import { fetchPaymentsForOrder, fetchRecentCapturedPayments } from "../services/razorpay.service.js";
+import { reconcilePaymentsWithRazorpay } from "../services/payment-reconciliation.service.js";
 import { ensureDefaultEvents } from "../services/event.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
@@ -666,7 +666,7 @@ export async function adminExportRegistrationsCsv(
 
   const header = [
     "bibNumber",
-    "name",
+    "runnerName",
     "email",
     "phone",
     "event",
@@ -675,14 +675,18 @@ export async function adminExportRegistrationsCsv(
     "proofStatus",
     "paymentStatus",
     "amountInr",
+    "razorpayPaymentId",
+    "razorpayOrderId",
+    "shippingAddress",
     "shippingCity",
+    "shippingState",
     "shippingPincode",
     "registeredAt",
   ];
 
   const escape = (v: string | number | null | undefined) => {
     const s = String(v ?? "");
-    if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+    if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
       return `"${s.replace(/"/g, '""')}"`;
     }
     return s;
@@ -695,15 +699,19 @@ export async function adminExportRegistrationsCsv(
         r.bibNumber,
         r.user.name,
         r.user.email,
-        r.user.phone ?? r.shippingPhone,
+        r.user.phone ?? r.shippingPhone ?? "",
         r.event.title,
         r.distance,
         r.status,
         r.proofStatus,
-        r.payment?.status ?? "",
-        r.payment ? Math.round(r.payment.amountInPaise / 100) : "",
-        r.shippingCity,
-        r.shippingPincode,
+        r.payment?.status ?? (r.status === "CONFIRMED" ? "PAID" : "UNPAID"),
+        r.payment ? Math.round(r.payment.amountInPaise / 100) : 0,
+        r.payment?.razorpayPaymentId ?? "",
+        r.payment?.razorpayOrderId ?? "",
+        r.shippingLine1 ?? "",
+        r.shippingCity ?? "",
+        r.shippingState ?? "",
+        r.shippingPincode ?? "",
         r.registeredAt.toISOString(),
       ]
         .map(escape)
@@ -716,7 +724,78 @@ export async function adminExportRegistrationsCsv(
     "Content-Disposition",
     `attachment; filename="registrations-${Date.now()}.csv"`,
   );
-  response.send(lines.join("\n"));
+  // Prepend \uFEFF UTF-8 BOM so Microsoft Excel opens it correctly with proper encoding
+  response.send("\uFEFF" + lines.join("\n"));
+}
+
+export async function adminExportPaymentsCsv(
+  request: AuthenticatedRequest,
+  response: Response,
+) {
+  const status = q(request, "status");
+  const rows = await prisma.payment.findMany({
+    where: status ? { status: status as never } : undefined,
+    orderBy: { createdAt: "desc" },
+    include: {
+      registration: {
+        include: {
+          user: true,
+          event: true,
+        },
+      },
+    },
+    take: 5000,
+  });
+
+  const header = [
+    "paymentId",
+    "orderId",
+    "runnerName",
+    "email",
+    "phone",
+    "event",
+    "bibNumber",
+    "amountInr",
+    "status",
+    "paidAt",
+    "createdAt",
+  ];
+
+  const escape = (v: string | number | null | undefined) => {
+    const s = String(v ?? "");
+    if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+
+  const lines = [
+    header.join(","),
+    ...rows.map((p) =>
+      [
+        p.razorpayPaymentId ?? p.id,
+        p.razorpayOrderId,
+        p.registration?.user?.name ?? "",
+        p.registration?.user?.email ?? "",
+        p.registration?.user?.phone ?? p.registration?.shippingPhone ?? "",
+        p.registration?.event?.title ?? "",
+        p.registration?.bibNumber ?? "",
+        Math.round(p.amountInPaise / 100),
+        p.status,
+        p.paidAt ? p.paidAt.toISOString() : "",
+        p.createdAt.toISOString(),
+      ]
+        .map(escape)
+        .join(","),
+    ),
+  ];
+
+  response.setHeader("Content-Type", "text/csv; charset=utf-8");
+  response.setHeader(
+    "Content-Disposition",
+    `attachment; filename="payments-${Date.now()}.csv"`,
+  );
+  response.send("\uFEFF" + lines.join("\n"));
 }
 
 // ── Payments ───────────────────────────────────────────────────
@@ -843,171 +922,24 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
 // ── Sync ────────────────────────────────────────────────────────
 
 export async function adminSyncPayments(request: AuthenticatedRequest, response: Response) {
-  let synced = 0;
-  const errors: Array<{ id: string; orderId: string; error: string }> = [];
-
-  // 1. Fetch recent captured payments directly from Razorpay (handles alternate orders & dropped webhooks)
-  try {
-    const recentCaptured = await fetchRecentCapturedPayments(100);
-    if (recentCaptured && recentCaptured.length > 0) {
-      for (const rzp of recentCaptured) {
-        try {
-          // Check if this payment is already marked PAID
-          const alreadyPaid = await prisma.payment.findFirst({
-            where: {
-              OR: [
-                { razorpayPaymentId: rzp.id, status: "PAID" },
-                ...(rzp.order_id ? [{ razorpayOrderId: rzp.order_id, status: "PAID" as const }] : []),
-              ],
-            },
-          });
-          if (alreadyPaid) continue;
-
-          // Find registration by notes or order
-          const regId = rzp.notes?.registrationId;
-          let paymentToUpdate = await prisma.payment.findFirst({
-            where: {
-              OR: [
-                ...(rzp.order_id ? [{ razorpayOrderId: rzp.order_id }] : []),
-                ...(regId ? [{ registrationId: regId }] : []),
-              ],
-            },
-            include: { registration: { include: { user: true, event: true } } },
-          });
-
-          if (paymentToUpdate) {
-            await prisma.payment.update({
-              where: { id: paymentToUpdate.id },
-              data: {
-                status: "PAID",
-                razorpayPaymentId: rzp.id,
-                razorpayOrderId: rzp.order_id || paymentToUpdate.razorpayOrderId,
-                paidAt: new Date(rzp.created_at * 1000),
-              },
-            });
-
-            await prisma.registration.update({
-              where: { id: paymentToUpdate.registrationId },
-              data: { status: "CONFIRMED" },
-            });
-
-            // Ensure MedalDelivery exists if medalIncluded
-            if (paymentToUpdate.registration?.event?.medalIncluded) {
-              await prisma.medalDelivery.upsert({
-                where: { registrationId: paymentToUpdate.registrationId },
-                create: { registrationId: paymentToUpdate.registrationId, status: "PENDING" },
-                update: {},
-              }).catch(() => null);
-            }
-
-            await sendRegistrationConfirmationEmail({
-              to: paymentToUpdate.registration.user.email,
-              runnerName: paymentToUpdate.registration.user.name,
-              eventTitle: paymentToUpdate.registration.event.title,
-              distance: paymentToUpdate.registration.distance,
-              bibNumber: paymentToUpdate.registration.bibNumber,
-              amountInPaise: paymentToUpdate.amountInPaise,
-            }).catch(() => null);
-
-            synced++;
-          }
-        } catch (innerErr) {
-          errors.push({
-            id: rzp.id,
-            orderId: rzp.order_id || "",
-            error: innerErr instanceof Error ? innerErr.message : "Error syncing captured payment",
-          });
-        }
-      }
-    }
-  } catch (apiErr) {
-    logger.warn(`[adminSyncPayments] Could not fetch captured payments list from Razorpay: ${apiErr}`);
-  }
-
-  // 2. Also check any remaining CREATED payments with order_ IDs
-  const createdPayments = await prisma.payment.findMany({
-    where: {
-      status: "CREATED",
-      razorpayOrderId: { startsWith: "order_" },
-    },
-    include: {
-      registration: { include: { user: true, event: true } },
-    },
-  });
-
-  for (const payment of createdPayments) {
-    try {
-      const razorpayPayments = await fetchPaymentsForOrder(payment.razorpayOrderId);
-      if (!razorpayPayments) continue;
-
-      const captured = razorpayPayments.find(
-        (p: { id: string; status: string }) => p.status === "captured",
-      );
-      if (!captured) continue;
-
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: "PAID",
-          razorpayPaymentId: captured.id,
-          paidAt: new Date(),
-        },
-      });
-
-      await prisma.registration.update({
-        where: { id: payment.registrationId },
-        data: { status: "CONFIRMED" },
-      });
-
-      if (payment.registration?.event?.medalIncluded) {
-        await prisma.medalDelivery.upsert({
-          where: { registrationId: payment.registrationId },
-          create: { registrationId: payment.registrationId, status: "PENDING" },
-          update: {},
-        }).catch(() => null);
-      }
-
-      await sendRegistrationConfirmationEmail({
-        to: payment.registration.user.email,
-        runnerName: payment.registration.user.name,
-        eventTitle: payment.registration.event.title,
-        distance: payment.registration.distance,
-        bibNumber: payment.registration.bibNumber,
-        amountInPaise: payment.amountInPaise,
-      }).catch(() => null);
-
-      synced++;
-    } catch (err) {
-      errors.push({
-        id: payment.id,
-        orderId: payment.razorpayOrderId,
-        error: err instanceof Error ? err.message : "Unknown error",
-      });
-    }
-  }
+  const result = await reconcilePaymentsWithRazorpay();
 
   await writeAdminAudit(request, {
     action: "payment.sync",
     entityType: "Payment",
     entityId: "bulk",
-    summary: `Synced ${synced} payments against Razorpay, ${errors.length} errors`,
-  });
-
-  const paidSummary = await prisma.payment.aggregate({
-    where: { status: "PAID" },
-    _sum: { amountInPaise: true },
-    _count: true,
+    summary: `Synced ${result.syncedCount} payments against Razorpay, ${result.errors.length} errors`,
   });
 
   response.json({
     data: {
-      synced,
-      totalPaid: paidSummary._count,
-      totalRevenue: (paidSummary._sum.amountInPaise ?? 0) / 100,
-      errors: errors.length > 0 ? errors : undefined,
-      message: synced > 0
-        ? `Successfully synced ${synced} payment${synced === 1 ? "" : "s"}! Total paid revenue: ₹${(paidSummary._sum.amountInPaise ?? 0) / 100}`
-        : `All payments are already in sync! Total paid revenue: ₹${(paidSummary._sum.amountInPaise ?? 0) / 100}`,
+      synced: result.syncedCount,
+      totalPaid: result.totalPaidCount,
+      totalRevenue: result.totalRevenueInInr,
+      errors: result.errors.length > 0 ? result.errors : undefined,
+      message: result.syncedCount > 0
+        ? `Successfully synced ${result.syncedCount} payment${result.syncedCount === 1 ? "" : "s"}! Total paid revenue: ₹${result.totalRevenueInInr}`
+        : `All payments are already in sync! Total paid revenue: ₹${result.totalRevenueInInr}`,
     },
   });
 }
@@ -1042,14 +974,114 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       take: pageSize,
       include: {
         _count: { select: { registrations: true } },
+        registrations: {
+          select: {
+            id: true,
+            status: true,
+            payment: { select: { status: true, amountInPaise: true } },
+          },
+        },
       },
     }),
   ]);
 
+  const formatted = items.map((u) => {
+    const paidRegs = u.registrations.filter(
+      (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
+    );
+    const totalPaidInPaise = paidRegs.reduce((sum, r) => sum + (r.payment?.amountInPaise ?? 0), 0);
+    const hasPaid = paidRegs.length > 0;
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      role: u.role,
+      clerkId: u.clerkId,
+      createdAt: u.createdAt,
+      _count: u._count,
+      hasPaid,
+      paidCount: paidRegs.length,
+      totalPaidInPaise,
+      totalPaidInr: Math.round(totalPaidInPaise / 100),
+    };
+  });
+
   response.json({
-    data: items,
+    data: formatted,
     meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
   });
+}
+
+export async function adminExportUsersCsv(
+  _request: AuthenticatedRequest,
+  response: Response,
+) {
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      registrations: {
+        include: {
+          payment: true,
+        },
+      },
+      _count: { select: { registrations: true } },
+    },
+    take: 5000,
+  });
+
+  const header = [
+    "name",
+    "email",
+    "phone",
+    "role",
+    "paymentStatus",
+    "paidRegistrationsCount",
+    "totalSpentInr",
+    "totalRegistrations",
+    "joinedAt",
+  ];
+
+  const escape = (v: string | number | null | undefined) => {
+    const s = String(v ?? "");
+    if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+
+  const lines = [
+    header.join(","),
+    ...users.map((u) => {
+      const paidRegs = u.registrations.filter(
+        (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
+      );
+      const totalPaidInPaise = paidRegs.reduce((sum, r) => sum + (r.payment?.amountInPaise ?? 0), 0);
+      const hasPaid = paidRegs.length > 0;
+
+      return [
+        u.name,
+        u.email,
+        u.phone ?? "",
+        u.role,
+        hasPaid ? "PAID" : "UNPAID",
+        paidRegs.length,
+        Math.round(totalPaidInPaise / 100),
+        u._count.registrations,
+        u.createdAt.toISOString(),
+      ]
+        .map(escape)
+        .join(",");
+    }),
+  ];
+
+  response.setHeader("Content-Type", "text/csv; charset=utf-8");
+  response.setHeader(
+    "Content-Disposition",
+    `attachment; filename="users-${Date.now()}.csv"`,
+  );
+  response.send("\uFEFF" + lines.join("\n"));
 }
 
 export async function adminGetUser(request: AuthenticatedRequest, response: Response) {

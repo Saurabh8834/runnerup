@@ -1,11 +1,12 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
+import { Download, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { authHeaders, getApiUrl } from "../../../lib/api";
 import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
-import { AdminPageHeader } from "../ui";
+import { AdminPageHeader, CustomerStatusDot } from "../ui";
 
 type Row = {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminRegistrationsPage() {
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -49,33 +51,51 @@ export default function AdminRegistrationsPage() {
     void load();
   }, [load]);
 
-  async function exportCsv() {
-    const token = await getToken().catch(() => null);
-    const response = await fetch(getApiUrl("/api/admin/registrations/export.csv"), {
-      headers: authHeaders(token),
-    });
-    if (!response.ok) {
-      setError("Export failed");
-      return;
+  async function exportExcel() {
+    setExporting(true);
+    try {
+      const token = await getToken().catch(() => null);
+      const response = await fetch(getApiUrl("/api/admin/registrations/export.csv"), {
+        headers: authHeaders(token),
+      });
+      if (!response.ok) {
+        setError("Excel export failed");
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `RunnerUp-Registrations-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Excel export failed");
+    } finally {
+      setExporting(false);
     }
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `registrations-${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
+
+  const paidCount = items.filter(
+    (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
+  ).length;
 
   return (
     <div className="admin-stack">
       <AdminPageHeader
         kicker="Operations"
         title="Registrations"
-        description={`${total} total · search, filter, open a runner dossier.`}
+        description={`${total} total · ${paidCount} Paid (🟢) · ${items.length - paidCount} Unpaid (🔴)`}
         actions={
-          <button className="btn btn-secondary" onClick={() => void exportCsv()} type="button">
-            Export CSV
+          <button
+            className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"
+            disabled={exporting}
+            onClick={() => void exportExcel()}
+            type="button"
+            title="Download registrations in an Excel-compatible spreadsheet"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span>{exporting ? "Generating Sheet..." : "Download Excel Sheet"}</span>
           </button>
         }
       />
@@ -103,10 +123,10 @@ export default function AdminRegistrationsPage() {
       {error ? <p className="admin-muted" style={{ color: "var(--danger)" }}>{error}</p> : null}
 
       <div className="table-wrap table-scroll admin-fill">
-        <table className="table-clean min-w-[800px]">
+        <table className="table-clean min-w-[840px]">
           <thead>
             <tr>
-              {["Bib", "Runner", "Event", "Distance", "Status", "Proof", "Pay", "When", ""].map(
+              {["Bib", "Customer / Runner", "Event", "Distance", "Status", "Proof", "Payment", "Registered", ""].map(
                 (h) => (
                   <th key={h || "actions"}>{h}</th>
                 ),
@@ -114,37 +134,52 @@ export default function AdminRegistrationsPage() {
             </tr>
           </thead>
           <tbody>
-            {items.map((row) => (
-              <tr key={row.id}>
-                <td className="font-mono text-xs">{row.bibNumber}</td>
-                <td className="strong">
-                  <div>{row.user.name}</div>
-                  <div className="text-xs font-normal text-[var(--muted)]">{row.user.email}</div>
-                </td>
-                <td>{row.event.title}</td>
-                <td>{row.distance}</td>
-                <td>
-                  <span className="badge">{row.status}</span>
-                </td>
-                <td>
-                  <span className="badge">{row.proofStatus}</span>
-                </td>
-                <td>
-                  {row.payment
-                    ? `${row.payment.status} · ${formatInrFromPaise(row.payment.amountInPaise)}`
-                    : "—"}
-                </td>
-                <td className="text-xs">{formatDateTime(row.registeredAt)}</td>
-                <td>
-                  <Link
-                    className="text-sm font-medium underline-offset-2 hover:underline"
-                    href={`/admin/registrations/${row.id}`}
-                  >
-                    Open
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {items.map((row) => {
+              const isPaid =
+                row.payment?.status === "PAID" ||
+                row.status === "CONFIRMED" ||
+                row.status === "COMPLETED";
+
+              return (
+                <tr key={row.id}>
+                  <td className="font-mono text-xs">{row.bibNumber}</td>
+                  <td className="strong">
+                    <div className="flex items-center gap-2">
+                      <CustomerStatusDot isPaid={isPaid} />
+                      <span className="font-semibold">{row.user.name}</span>
+                    </div>
+                    <div className="text-xs font-normal text-[var(--muted)] pl-4.5">{row.user.email}</div>
+                  </td>
+                  <td>{row.event.title}</td>
+                  <td>{row.distance}</td>
+                  <td>
+                    <span className="badge">{row.status}</span>
+                  </td>
+                  <td>
+                    <span className="badge">{row.proofStatus}</span>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <CustomerStatusDot isPaid={isPaid} showLabel paidLabel="PAID" unpaidLabel="UNPAID" />
+                      {row.payment ? (
+                        <span className="text-xs font-mono font-medium text-[var(--muted)]">
+                          {formatInrFromPaise(row.payment.amountInPaise)}
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="text-xs">{formatDateTime(row.registeredAt)}</td>
+                  <td>
+                    <Link
+                      className="text-sm font-medium underline-offset-2 hover:underline text-amber-500 hover:text-amber-400"
+                      href={`/admin/registrations/${row.id}`}
+                    >
+                      Open
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

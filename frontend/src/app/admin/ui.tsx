@@ -103,3 +103,55 @@ export function AdminBackLink({ href, label }: { href: string; label: string }) 
     </Link>
   );
 }
+
+/**
+ * Green or Red status dot for customers/runners.
+ * Green = Paid / Confirmed
+ * Red = Unpaid / Pending Payment / Failed
+ */
+export function CustomerStatusDot({
+  isPaid,
+  showLabel = false,
+  paidLabel = "Paid",
+  unpaidLabel = "Unpaid",
+  className = "",
+}: {
+  isPaid: boolean;
+  showLabel?: boolean;
+  paidLabel?: string;
+  unpaidLabel?: string;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 align-middle ${className}`}
+      title={isPaid ? "Payment Verified (Paid)" : "Payment Pending (Unpaid)"}
+    >
+      <span className="relative flex h-2.5 w-2.5 shrink-0 items-center justify-center">
+        {isPaid ? (
+          <>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.85)]" />
+          </>
+        ) : (
+          <>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.85)]" />
+          </>
+        )}
+      </span>
+      {showLabel && (
+        <span
+          className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
+            isPaid
+              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+              : "bg-rose-500/15 text-rose-400 border border-rose-500/30"
+          }`}
+        >
+          {isPaid ? paidLabel : unpaidLabel}
+        </span>
+      )}
+    </span>
+  );
+}
+

@@ -1,9 +1,11 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
+import { FileSpreadsheet, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { authHeaders, getApiUrl } from "../../../lib/api";
 import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
-import { AdminPageHeader } from "../ui";
+import { AdminPageHeader, CustomerStatusDot } from "../ui";
 
 type PaymentRow = {
   id: string;
@@ -28,6 +30,7 @@ export default function AdminPaymentsPage() {
   const [q, setQ] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -72,7 +75,7 @@ export default function AdminPaymentsPage() {
     try {
       const token = await getToken().catch(() => null);
       const json = await adminFetch<{
-        data: { synced: number; total: number; message: string; errors?: Array<{ id: string; orderId: string; error: string }> };
+        data: { synced: number; totalPaid: number; totalRevenue: number; message: string; errors?: Array<{ id: string; orderId: string; error: string }> };
       }>("/api/admin/payments/sync", token, { method: "POST" });
       setSyncResult(json.data.message);
       if (json.data.errors?.length) {
@@ -86,12 +89,62 @@ export default function AdminPaymentsPage() {
     }
   }
 
+  async function exportExcel() {
+    setExporting(true);
+    try {
+      const token = await getToken().catch(() => null);
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      const response = await fetch(getApiUrl(`/api/admin/payments/export.csv?${params}`), {
+        headers: authHeaders(token),
+      });
+      if (!response.ok) {
+        setError("Excel export failed");
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `RunnerUp-Payments-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Excel export failed");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="admin-stack">
       <AdminPageHeader
         kicker="Finance"
         title="Payments"
-        description={`Paid ${meta.paidCount} · Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
+        description={`Paid ${meta.paidCount} (🟢) · Total Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
+        actions={
+          <div className="flex items-center gap-2">
+            <button
+              className="btn btn-secondary flex items-center gap-1.5 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"
+              disabled={exporting}
+              onClick={() => void exportExcel()}
+              type="button"
+              title="Download payment records in an Excel-compatible spreadsheet"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>{exporting ? "Generating Sheet..." : "Download Excel Sheet"}</span>
+            </button>
+            <button
+              className="btn btn-secondary flex items-center gap-1.5 text-amber-500 border-amber-500/30"
+              disabled={syncing}
+              onClick={() => void syncPayments()}
+              type="button"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+              <span>{syncing ? "Syncing..." : "Sync Razorpay"}</span>
+            </button>
+          </div>
+        }
       />
 
       <div className="admin-toolbar">
@@ -112,24 +165,16 @@ export default function AdminPaymentsPage() {
         <button className="btn btn-primary" onClick={() => void load()} type="button">
           Refresh
         </button>
-        <button
-          className="btn btn-secondary"
-          disabled={syncing}
-          onClick={() => void syncPayments()}
-          type="button"
-        >
-          {syncing ? "Syncing\u2026" : "Sync payments"}
-        </button>
       </div>
 
       {error ? <p className="admin-muted" style={{ color: "var(--danger)" }}>{error}</p> : null}
       {syncResult ? <p className="admin-muted" style={{ color: "var(--sage)" }}>{syncResult}</p> : null}
 
       <div className="table-wrap table-scroll admin-fill">
-        <table className="table-clean min-w-[860px]">
+        <table className="table-clean min-w-[880px]">
           <thead>
             <tr>
-              {["Amount", "Status", "Runner", "Event", "Bib", "Order", "When", "Actions"].map(
+              {["Amount", "Payment Status", "Customer / Runner", "Event", "Bib", "Razorpay Order ID", "When", "Actions"].map(
                 (h) => (
                   <th key={h}>{h}</th>
                 ),
@@ -137,48 +182,64 @@ export default function AdminPaymentsPage() {
             </tr>
           </thead>
           <tbody>
-            {items.map((row) => (
-              <tr key={row.id}>
-                <td className="strong">{formatInrFromPaise(row.amountInPaise)}</td>
-                <td>
-                  <span className="badge">{row.status}</span>
-                </td>
-                <td>
-                  <div className="text-sm">{row.registration.user.name}</div>
-                  <div className="text-xs text-[var(--muted)]">
-                    {row.registration.user.email}
-                  </div>
-                </td>
-                <td>{row.registration.event.title}</td>
-                <td className="font-mono text-xs">{row.registration.bibNumber}</td>
-                <td className="max-w-[10rem] truncate font-mono text-xs">
-                  {row.razorpayOrderId}
-                </td>
-                <td className="text-xs">{formatDateTime(row.paidAt ?? row.createdAt)}</td>
-                <td>
-                  <div className="flex flex-wrap gap-1">
-                    {row.status !== "PAID" ? (
-                      <button
-                        className="btn btn-secondary h-8 px-2 text-xs"
-                        onClick={() => void setPaymentStatus(row.id, "PAID")}
-                        type="button"
-                      >
-                        Mark paid
-                      </button>
-                    ) : null}
-                    {row.status === "PAID" ? (
-                      <button
-                        className="btn btn-ghost h-8 px-2 text-xs"
-                        onClick={() => void setPaymentStatus(row.id, "REFUNDED")}
-                        type="button"
-                      >
-                        Refund
-                      </button>
-                    ) : null}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {items.map((row) => {
+              const isPaid = row.status === "PAID";
+
+              return (
+                <tr key={row.id}>
+                  <td className="strong text-sm">
+                    <span className={isPaid ? "text-emerald-400 font-bold" : "text-(--muted)"}>
+                      {formatInrFromPaise(row.amountInPaise)}
+                    </span>
+                  </td>
+                  <td>
+                    <CustomerStatusDot
+                      isPaid={isPaid}
+                      showLabel
+                      paidLabel="PAID"
+                      unpaidLabel={row.status}
+                    />
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2">
+                      <CustomerStatusDot isPaid={isPaid} />
+                      <span className="font-semibold">{row.registration.user.name}</span>
+                    </div>
+                    <div className="text-xs text-[var(--muted)] pl-4.5">
+                      {row.registration.user.email}
+                    </div>
+                  </td>
+                  <td>{row.registration.event.title}</td>
+                  <td className="font-mono text-xs">{row.registration.bibNumber}</td>
+                  <td className="max-w-[12rem] truncate font-mono text-xs text-[var(--muted)]" title={row.razorpayOrderId}>
+                    {row.razorpayOrderId}
+                  </td>
+                  <td className="text-xs">{formatDateTime(row.paidAt ?? row.createdAt)}</td>
+                  <td>
+                    <div className="flex flex-wrap gap-1">
+                      {row.status !== "PAID" ? (
+                        <button
+                          className="btn btn-secondary h-8 px-2 text-xs"
+                          onClick={() => void setPaymentStatus(row.id, "PAID")}
+                          type="button"
+                        >
+                          Mark paid
+                        </button>
+                      ) : null}
+                      {row.status === "PAID" ? (
+                        <button
+                          className="btn btn-ghost h-8 px-2 text-xs"
+                          onClick={() => void setPaymentStatus(row.id, "REFUNDED")}
+                          type="button"
+                        >
+                          Refund
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

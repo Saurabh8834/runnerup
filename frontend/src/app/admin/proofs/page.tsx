@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, formatDateTime } from "../../../lib/admin-api";
-import { AdminEmpty, AdminPageHeader } from "../ui";
+import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
 import {
   CheckCircle,
   XCircle,
@@ -382,6 +382,7 @@ export default function AdminProofsPage() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
+                        <CustomerStatusDot isPaid={true} showLabel paidLabel="PAID" />
                         <h2 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
                           {row.user.name}
                         </h2>

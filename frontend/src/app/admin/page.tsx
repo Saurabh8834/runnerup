@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, formatDateTime, formatInrFromPaise } from "../../lib/admin-api";
-import { AdminEmpty, AdminPageHeader, AdminPanel, AdminStat } from "./ui";
+import { AdminEmpty, AdminPageHeader, AdminPanel, AdminStat, CustomerStatusDot } from "./ui";
 
 type EventBreakdown = {
   eventId: string;
@@ -107,6 +107,9 @@ export default function AdminOverviewPage() {
   const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("today");
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
 
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -126,6 +129,25 @@ export default function AdminOverviewPage() {
       setLoading(false);
     }
   }, [getToken, selectedEventId, selectedRange]);
+
+  async function handleSyncRazorpay() {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const token = await getToken().catch(() => null);
+      const json = await adminFetch<{
+        data: { synced: number; totalPaid: number; totalRevenue: number; message: string };
+      }>("/api/admin/payments/sync", token, { method: "POST" });
+      setSyncMessage(json.data.message);
+      await load();
+      setTimeout(() => setSyncMessage(null), 6000);
+    } catch (err) {
+      setSyncMessage(err instanceof Error ? err.message : "Sync failed");
+      setTimeout(() => setSyncMessage(null), 6000);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   useEffect(() => {
     void load();
@@ -170,6 +192,16 @@ export default function AdminOverviewPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <button
+            onClick={() => void handleSyncRazorpay()}
+            disabled={syncing}
+            className="btn btn-secondary h-9 px-3 text-xs flex items-center gap-1.5 cursor-pointer text-amber-500 hover:text-amber-400 border-amber-500/30"
+            type="button"
+            title="Reconcile captured payments from Razorpay"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            <span>{syncing ? "Syncing..." : "Sync Razorpay"}</span>
+          </button>
+          <button
             onClick={() => void load()}
             disabled={loading}
             className="btn btn-secondary h-9 px-3 text-xs flex items-center gap-1.5 cursor-pointer"
@@ -186,6 +218,13 @@ export default function AdminOverviewPage() {
           </Link>
         </div>
       </div>
+
+      {syncMessage && (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-xs font-medium text-emerald-400 flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+          <span>{syncMessage}</span>
+        </div>
+      )}
 
       {/* ── FILTER TOOLBAR (Time Range & Event Filter) ───────── */}
       <div className="rounded-2xl border border-(--line) bg-(--panel) p-3 sm:p-4 shadow-xs">
@@ -504,8 +543,17 @@ export default function AdminOverviewPage() {
               {data?.recentRegistrations.map((row) => (
                 <Link className="admin-list-item" href={`/admin/registrations/${row.id}`} key={row.id}>
                   <div>
-                    <div className="title">{row.user.name}</div>
-                    <div className="sub">
+                    <div className="title flex items-center gap-2">
+                      <CustomerStatusDot
+                        isPaid={
+                          row.payment?.status === "PAID" ||
+                          row.status === "CONFIRMED" ||
+                          row.status === "COMPLETED"
+                        }
+                      />
+                      <span>{row.user.name}</span>
+                    </div>
+                    <div className="sub pl-4.5">
                       {row.event.title} · {row.distance} · {row.bibNumber}
                     </div>
                   </div>
@@ -538,8 +586,11 @@ export default function AdminOverviewPage() {
               {data?.recentPayments.map((row) => (
                 <div className="admin-list-item" key={row.id}>
                   <div>
-                    <div className="title">{row.registration.user.name}</div>
-                    <div className="sub">
+                    <div className="title flex items-center gap-2">
+                      <CustomerStatusDot isPaid={row.status === "PAID"} />
+                      <span>{row.registration.user.name}</span>
+                    </div>
+                    <div className="sub pl-4.5">
                       {row.registration.event.title} · {row.registration.bibNumber}
                     </div>
                   </div>

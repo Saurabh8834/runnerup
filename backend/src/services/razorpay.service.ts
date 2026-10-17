@@ -2,12 +2,13 @@ import crypto from "node:crypto";
 import { env } from "../config/env.js";
 import { ApiError } from "../utils/api-error.js";
 
-type RazorpayOrder = {
+export type RazorpayOrder = {
   id: string;
   amount: number;
   currency: string;
   receipt: string;
   status: string;
+  notes?: Record<string, string>;
 };
 
 function requireRazorpayCredentials() {
@@ -119,6 +120,47 @@ export async function fetchRecentCapturedPayments(count = 100): Promise<Razorpay
   return json.items ?? [];
 }
 
+export async function fetchRazorpayOrder(orderId: string): Promise<RazorpayOrder | null> {
+  requireRazorpayCredentials();
+
+  const auth = Buffer.from(`${env.razorpayKeyId}:${env.razorpayKeySecret}`).toString("base64");
+  const response = await fetch(`https://api.razorpay.com/v1/orders/${orderId}`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as RazorpayOrder & { notes?: Record<string, string> };
+}
+
+export type RazorpayPaymentDetail = {
+  id: string;
+  order_id: string;
+  amount: number;
+  status: string;
+  email: string;
+  contact: string;
+  created_at: number;
+  notes?: Record<string, string>;
+};
+
+export async function fetchRazorpayPayment(paymentId: string): Promise<RazorpayPaymentDetail | null> {
+  requireRazorpayCredentials();
+
+  const auth = Buffer.from(`${env.razorpayKeyId}:${env.razorpayKeySecret}`).toString("base64");
+  const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+    headers: { Authorization: `Basic ${auth}` },
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return (await response.json()) as RazorpayPaymentDetail;
+}
+
 export function verifyWebhookSignature(rawBody: Buffer, signature: string | undefined) {
   if (!env.razorpayWebhookSecret) {
     throw new ApiError(500, "Razorpay webhook secret is not configured");
@@ -142,3 +184,4 @@ export function verifyWebhookSignature(rawBody: Buffer, signature: string | unde
 
   return crypto.timingSafeEqual(expectedBuf, signatureBuf);
 }
+

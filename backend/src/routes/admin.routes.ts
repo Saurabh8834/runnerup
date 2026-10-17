@@ -21,6 +21,8 @@ import {
   adminListEvents,
   adminListMedals,
   adminExportMedalsCsv,
+  adminExportPaymentsCsv,
+  adminExportUsersCsv,
   adminListPayments,
   adminListProofs,
   adminListRegistrations,
@@ -89,10 +91,12 @@ adminRouter.patch("/registrations/:id", asyncHandler(adminUpdateRegistration));
 adminRouter.post("/registrations/:id/mark-paid", asyncHandler(adminMarkRegistrationPaid));
 
 adminRouter.get("/payments", asyncHandler(adminListPayments));
+adminRouter.get("/payments/export.csv", asyncHandler(adminExportPaymentsCsv));
 adminRouter.post("/payments/sync", asyncHandler(adminSyncPayments));
 adminRouter.patch("/payments/:id", asyncHandler(adminUpdatePayment));
 
 adminRouter.get("/users", asyncHandler(adminListUsers));
+adminRouter.get("/users/export.csv", asyncHandler(adminExportUsersCsv));
 adminRouter.get("/users/:id", asyncHandler(adminGetUser));
 adminRouter.patch("/users/:id/role", asyncHandler(adminUpdateUserRole));
 
