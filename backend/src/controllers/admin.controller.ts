@@ -1095,7 +1095,7 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
     }),
     prisma.user.count({
       where: {
-        ...(role ? { role: role as never } : {}),
+        ...where,
         registrations: {
           some: {
             OR: [
@@ -1303,6 +1303,18 @@ export async function adminDeleteUser(
     });
     await tx.user.delete({ where: { id } });
   });
+
+  // Also clean up from Clerk to save quota if user was registered in Clerk
+  if (user.clerkId && env.clerkEnabled) {
+    try {
+      const { createClerkClient } = await import("@clerk/backend");
+      const clerk = createClerkClient({ secretKey: env.clerkSecretKey });
+      await clerk.users.deleteUser(user.clerkId);
+      logger.info(`[Clerk] Deleted clerk user ${user.clerkId} for ${user.email}`);
+    } catch (clerkErr) {
+      logger.warn(`[Clerk] Non-fatal: Could not delete clerk user ${user.clerkId}: ${clerkErr instanceof Error ? clerkErr.message : String(clerkErr)}`);
+    }
+  }
 
   await writeAdminAudit(request, {
     action: "user.delete",

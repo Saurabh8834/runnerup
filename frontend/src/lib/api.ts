@@ -1,8 +1,12 @@
 const isDev = process.env.NODE_ENV !== "production";
 const configuredApiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.INTERNAL_API_URL || "").trim().replace(/\/+$/, "");
 
+// Production canonical API is always https://api.runnerup.in. Never use obsolete Railway containers.
 export const CANONICAL_BACKEND_URL =
-  configuredApiUrl && !configuredApiUrl.includes("127.0.0.1") && !configuredApiUrl.includes("localhost")
+  configuredApiUrl &&
+  !configuredApiUrl.includes("127.0.0.1") &&
+  !configuredApiUrl.includes("localhost") &&
+  !configuredApiUrl.includes("railway.app")
     ? configuredApiUrl
     : isDev
       ? "http://127.0.0.1:4000"

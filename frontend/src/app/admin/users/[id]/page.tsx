@@ -42,6 +42,7 @@ export default function AdminUserDetailPage() {
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [confirmEmailInput, setConfirmEmailInput] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -80,7 +81,7 @@ export default function AdminUserDetailPage() {
   async function executeDelete() {
     if (!data || isProtectedAdmin) return;
     setIsDeleting(true);
-    setError(null);
+    setDeleteError(null);
     try {
       const token = await getToken().catch(() => null);
       await adminFetch(`/api/admin/users/${data.id}`, token, {
@@ -88,7 +89,7 @@ export default function AdminUserDetailPage() {
       });
       router.push("/admin/users");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete user");
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete user");
       setIsDeleting(false);
     }
   }
@@ -243,26 +244,41 @@ export default function AdminUserDetailPage() {
                   To confirm you want to permanently delete this user and their fake registrations, please type their email address below:
                 </p>
 
-                <div className="p-2.5 rounded-lg bg-black/60 border border-rose-500/30 text-center font-mono text-xs text-amber-300 font-semibold select-all">
-                  {data.email}
+                <div
+                  onClick={() => setConfirmEmailInput(data.email)}
+                  title="Click to copy into input box"
+                  className="p-2.5 rounded-lg bg-black/60 border border-rose-500/30 text-center font-mono text-xs text-amber-300 font-semibold select-all cursor-pointer hover:border-amber-400/50 hover:bg-black/80 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>{data.email}</span>
+                  <span className="text-[10px] text-white/40 font-sans font-normal">(click to fill)</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs text-white/70">Type email to confirm:</label>
+                  <label className="text-xs text-white/70">Type email to confirm (or type DELETE):</label>
                   <input
                     type="text"
                     className="input w-full font-mono text-xs"
-                    placeholder={`Type ${data.email}`}
+                    placeholder={`Type ${data.email} or DELETE`}
                     value={confirmEmailInput}
                     onChange={(e) => setConfirmEmailInput(e.target.value)}
                     autoFocus
                   />
                 </div>
 
+                {deleteError ? (
+                  <div className="p-3 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                    <span>{deleteError}</span>
+                  </div>
+                ) : null}
+
                 <div className="flex items-center justify-between pt-2">
                   <button
                     type="button"
-                    onClick={() => setDeleteStep(1)}
+                    onClick={() => {
+                      setDeleteStep(1);
+                      setDeleteError(null);
+                    }}
                     disabled={isDeleting}
                     className="btn btn-secondary px-3 py-1.5 text-xs text-white/70"
                   >
@@ -278,8 +294,8 @@ export default function AdminUserDetailPage() {
                     }
                     className="btn px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:pointer-events-none text-white rounded-lg shadow-lg shadow-rose-950/50 transition-all flex items-center gap-2"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    <span>{isDeleting ? "Deleting..." : "Permanently Delete User"}</span>
+                    <Trash2 className={`h-3.5 w-3.5 ${isDeleting ? "animate-spin" : ""}`} />
+                    <span>{isDeleting ? "Deleting from Database & Clerk..." : "Permanently Delete User"}</span>
                   </button>
                 </div>
               </div>
