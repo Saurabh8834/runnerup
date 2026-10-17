@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { adminFetch } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport } from "../../../lib/admin-api";
 import { getApiUrl } from "../../../lib/api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
 
@@ -207,21 +207,12 @@ export default function AdminMedalDispatchPage() {
       if (proofFilter && proofFilter !== "ALL") params.set("proofStatus", proofFilter);
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
 
-      const url = getApiUrl(`/api/admin/medals/export.csv?${params.toString()}`);
-      const res = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (!res.ok) throw new Error("CSV export failed");
-      const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `runnerup-medal-dispatch-${new Date().toISOString().split("T")[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(downloadUrl);
+      const query = params.toString() ? `?${params.toString()}` : "";
+      await downloadAdminExport(
+        `/api/admin/medals/export.csv${query}`,
+        `runnerup-medal-dispatch-${new Date().toISOString().split("T")[0]}.csv`,
+        token,
+      );
     } catch (err) {
       alert(err instanceof Error ? err.message : "CSV export failed");
     } finally {

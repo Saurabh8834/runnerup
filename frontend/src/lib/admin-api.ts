@@ -26,6 +26,53 @@ export function clearEmergencyAdminSession() {
   document.cookie = "runnerup_admin_session=; path=/; max-age=0; SameSite=Lax";
 }
 
+export function getEffectiveAdminToken(token?: string | null): string | null {
+  if (token) return token;
+  return getEmergencyAdminToken();
+}
+
+export async function downloadAdminExport(
+  path: string,
+  filename: string,
+  token?: string | null,
+): Promise<void> {
+  const effectiveToken = getEffectiveAdminToken(token);
+  const separator = path.includes("?") ? "&" : "?";
+  const urlPath = effectiveToken
+    ? `${path}${separator}admin_token=${encodeURIComponent(effectiveToken)}`
+    : path;
+  const url = getApiUrl(urlPath);
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "GET",
+      headers: {
+        ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
+        ...(effectiveToken ? { "x-admin-emergency-token": effectiveToken } : {}),
+      },
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to connect to export server";
+    throw new AdminApiError(msg, 0);
+  }
+
+  if (!response.ok) {
+    const errorMsg = await readApiError(response, `Excel export failed (${response.status})`);
+    throw new AdminApiError(errorMsg, response.status);
+  }
+
+  const blob = await response.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(blobUrl);
+}
+
 export async function adminFetch<T = unknown>(
   path: string,
   token: string | null | undefined,

@@ -4,8 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Download, FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { authHeaders, getApiUrl } from "../../../lib/api";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot } from "../ui";
 
 type Row = {
@@ -53,24 +52,16 @@ export default function AdminRegistrationsPage() {
 
   async function exportExcel() {
     setExporting(true);
+    setError(null);
     try {
       const token = await getToken().catch(() => null);
-      const response = await fetch(getApiUrl("/api/admin/registrations/export.csv"), {
-        headers: authHeaders(token),
-      });
-      if (!response.ok) {
-        setError("Excel export failed");
-        return;
-      }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `RunnerUp-Registrations-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setError("Excel export failed");
+      await downloadAdminExport(
+        "/api/admin/registrations/export.csv",
+        `RunnerUp-Registrations-${new Date().toISOString().slice(0, 10)}.csv`,
+        token,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Excel export failed");
     } finally {
       setExporting(false);
     }

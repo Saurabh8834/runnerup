@@ -1,10 +1,9 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { FileSpreadsheet, RefreshCw } from "lucide-react";
+import { Check, Copy, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { authHeaders, getApiUrl } from "../../../lib/api";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot } from "../ui";
 
 type PaymentRow = {
@@ -17,7 +16,8 @@ type PaymentRow = {
   paidAt: string | null;
   registration: {
     bibNumber: string;
-    user: { name: string; email: string };
+    shippingPhone?: string | null;
+    user: { name: string; email: string; phone?: string | null };
     event: { title: string };
   };
 };
@@ -32,6 +32,29 @@ export default function AdminPaymentsPage() {
   const [syncing, setSyncing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [copiedPhoneId, setCopiedPhoneId] = useState<string | null>(null);
+
+  const copyPhone = async (id: string, phone: string) => {
+    try {
+      await navigator.clipboard.writeText(phone);
+      setCopiedPhoneId(id);
+      setTimeout(() => {
+        setCopiedPhoneId((curr) => (curr === id ? null : curr));
+      }, 2000);
+    } catch {
+      // Fallback
+      const ta = document.createElement("textarea");
+      ta.value = phone;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopiedPhoneId(id);
+      setTimeout(() => {
+        setCopiedPhoneId((curr) => (curr === id ? null : curr));
+      }, 2000);
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -91,26 +114,19 @@ export default function AdminPaymentsPage() {
 
   async function exportExcel() {
     setExporting(true);
+    setError(null);
     try {
       const token = await getToken().catch(() => null);
       const params = new URLSearchParams();
       if (status) params.set("status", status);
-      const response = await fetch(getApiUrl(`/api/admin/payments/export.csv?${params}`), {
-        headers: authHeaders(token),
-      });
-      if (!response.ok) {
-        setError("Excel export failed");
-        return;
-      }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `RunnerUp-Payments-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setError("Excel export failed");
+      const query = params.toString() ? `?${params.toString()}` : "";
+      await downloadAdminExport(
+        `/api/admin/payments/export.csv${query}`,
+        `RunnerUp-Payments-${new Date().toISOString().slice(0, 10)}.csv`,
+        token,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Excel export failed");
     } finally {
       setExporting(false);
     }
@@ -184,6 +200,7 @@ export default function AdminPaymentsPage() {
           <tbody>
             {items.map((row) => {
               const isPaid = row.status === "PAID";
+              const contactPhone = row.registration.user?.phone || row.registration.shippingPhone;
 
               return (
                 <tr key={row.id}>
@@ -208,6 +225,33 @@ export default function AdminPaymentsPage() {
                     <div className="text-xs text-[var(--muted)] pl-4.5">
                       {row.registration.user.email}
                     </div>
+                    {contactPhone ? (
+                      <div className="mt-1 flex items-center gap-1.5 pl-4.5 text-xs">
+                        <span className="font-mono text-zinc-300">{contactPhone}</span>
+                        <button
+                          type="button"
+                          onClick={() => void copyPhone(row.id, contactPhone)}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all border border-emerald-500/20 cursor-pointer"
+                          title="Click to copy contact number in 1 click"
+                        >
+                          {copiedPhoneId === row.id ? (
+                            <>
+                              <Check className="h-3 w-3 text-emerald-400" />
+                              <span className="font-semibold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3 text-emerald-400" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-0.5 text-[11px] text-[var(--muted)] pl-4.5 italic">
+                        No phone
+                      </div>
+                    )}
                   </td>
                   <td>{row.registration.event.title}</td>
                   <td className="font-mono text-xs">{row.registration.bibNumber}</td>

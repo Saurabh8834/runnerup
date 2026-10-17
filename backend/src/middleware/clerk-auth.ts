@@ -88,9 +88,16 @@ export async function requireClerkAuth(
   try {
     const header = request.header("authorization");
     const emergencyHeader = request.header("x-admin-emergency-token");
+    const queryToken =
+      typeof request.query.token === "string"
+        ? request.query.token.trim()
+        : typeof request.query.admin_token === "string"
+          ? request.query.admin_token.trim()
+          : null;
     const token =
       (header?.startsWith("Bearer ") ? header.slice("Bearer ".length).trim() : null) ||
-      (emergencyHeader ? emergencyHeader.trim() : null);
+      (emergencyHeader ? emergencyHeader.trim() : null) ||
+      queryToken;
 
     // Emergency admin passcode check (instant bypass when Clerk is locked or down)
     if (token && isEmergencyAdminToken(token)) {

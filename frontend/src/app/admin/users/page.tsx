@@ -4,8 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { FileSpreadsheet } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { authHeaders, getApiUrl } from "../../../lib/api";
-import { adminFetch, formatDateTime } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, formatDateTime } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot } from "../ui";
 
 type UserRow = {
@@ -25,7 +24,7 @@ type UserRow = {
 export default function AdminUsersPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<UserRow[]>([]);
-  const [total, setTotal] = useState(0);
+  const [meta, setMeta] = useState({ total: 0, totalPaidUsers: 0, totalUnpaidUsers: 0 });
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -37,12 +36,17 @@ export default function AdminUsersPage() {
       const params = new URLSearchParams({ pageSize: "50" });
       if (q.trim()) params.set("q", q.trim());
       if (role) params.set("role", role);
-      const json = await adminFetch<{ data: UserRow[]; meta: { total: number } }>(
-        `/api/admin/users?${params}`,
-        token,
-      );
+      const json = await adminFetch<{
+        data: UserRow[];
+        meta: { total: number; totalPaidUsers?: number; totalUnpaidUsers?: number };
+      }>(`/api/admin/users?${params}`, token);
       setItems(json.data);
-      setTotal(json.meta?.total ?? json.data.length);
+      const paidInPage = json.data.filter((u) => u.hasPaid).length;
+      setMeta({
+        total: json.meta?.total ?? json.data.length,
+        totalPaidUsers: json.meta?.totalPaidUsers ?? paidInPage,
+        totalUnpaidUsers: json.meta?.totalUnpaidUsers ?? Math.max(0, (json.meta?.total ?? json.data.length) - paidInPage),
+      });
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -55,37 +59,27 @@ export default function AdminUsersPage() {
 
   async function exportExcel() {
     setExporting(true);
+    setError(null);
     try {
       const token = await getToken().catch(() => null);
-      const response = await fetch(getApiUrl("/api/admin/users/export.csv"), {
-        headers: authHeaders(token),
-      });
-      if (!response.ok) {
-        setError("Excel export failed");
-        return;
-      }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `RunnerUp-Users-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setError("Excel export failed");
+      await downloadAdminExport(
+        "/api/admin/users/export.csv",
+        `RunnerUp-Users-${new Date().toISOString().slice(0, 10)}.csv`,
+        token,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Excel export failed");
     } finally {
       setExporting(false);
     }
   }
-
-  const paidUsersCount = items.filter((u) => u.hasPaid).length;
 
   return (
     <div className="admin-stack">
       <AdminPageHeader
         kicker="People"
         title="Users"
-        description={`${total} total · ${paidUsersCount} Paid (🟢) · ${items.length - paidUsersCount} Unpaid (🔴)`}
+        description={`${meta.total} total · ${meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴)`}
         actions={
           <button
             className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"

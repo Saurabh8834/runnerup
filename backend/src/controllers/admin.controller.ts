@@ -109,17 +109,40 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
   const timeRange = (typeof request.query.range === "string" ? request.query.range.toLowerCase().trim() : "all") as "today" | "3d" | "7d" | "30d" | "all";
   const eventFilter = q(request, "eventId");
 
+  // India Standard Time (IST = UTC + 5:30)
+  const IST_OFFSET_MS = 5.5 * 3600 * 1000;
   const now = new Date();
+  const nowIST = new Date(now.getTime() + IST_OFFSET_MS);
+
   let sinceDate: Date | undefined = undefined;
 
   if (timeRange === "today") {
-    sinceDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    // Exact start of today in IST (00:00:00 IST converted to UTC)
+    sinceDate = new Date(
+      Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate(), 0, 0, 0, 0) -
+        IST_OFFSET_MS,
+    );
   } else if (timeRange === "3d") {
-    sinceDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+    // Start of 3 days ago in IST
+    const threeDaysAgoIST = new Date(nowIST.getTime() - 2 * 24 * 3600 * 1000);
+    sinceDate = new Date(
+      Date.UTC(threeDaysAgoIST.getUTCFullYear(), threeDaysAgoIST.getUTCMonth(), threeDaysAgoIST.getUTCDate(), 0, 0, 0, 0) -
+        IST_OFFSET_MS,
+    );
   } else if (timeRange === "7d") {
-    sinceDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    // Start of 7 days ago in IST
+    const sevenDaysAgoIST = new Date(nowIST.getTime() - 6 * 24 * 3600 * 1000);
+    sinceDate = new Date(
+      Date.UTC(sevenDaysAgoIST.getUTCFullYear(), sevenDaysAgoIST.getUTCMonth(), sevenDaysAgoIST.getUTCDate(), 0, 0, 0, 0) -
+        IST_OFFSET_MS,
+    );
   } else if (timeRange === "30d") {
-    sinceDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    // Start of 30 days ago in IST
+    const thirtyDaysAgoIST = new Date(nowIST.getTime() - 29 * 24 * 3600 * 1000);
+    sinceDate = new Date(
+      Date.UTC(thirtyDaysAgoIST.getUTCFullYear(), thirtyDaysAgoIST.getUTCMonth(), thirtyDaysAgoIST.getUTCDate(), 0, 0, 0, 0) -
+        IST_OFFSET_MS,
+    );
   }
 
   // Base filters for registrations and payments
@@ -141,6 +164,12 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     ...(eventFilter ? { registration: { eventId: eventFilter } } : {}),
   };
 
+  // For the 7-day revenue trend chart: independent 7-day window in IST
+  const sevenDaysTrendStartIST = new Date(
+    Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate() - 6, 0, 0, 0, 0) -
+      IST_OFFSET_MS,
+  );
+
   const [
     allEventsList,
     totalEventsCount,
@@ -153,6 +182,8 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     filteredPayments,
     recentRegs,
     recentPayments,
+    trendPayments,
+    trendRegs,
   ] = await Promise.all([
     // All events with registrations & payments to calculate per-event breakdown
     prisma.event.findMany({
@@ -203,6 +234,23 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
         },
       },
     }),
+    // 7-day trend payments (always shows full 7 days)
+    prisma.payment.findMany({
+      where: {
+        status: "PAID",
+        OR: [{ paidAt: { gte: sevenDaysTrendStartIST } }, { createdAt: { gte: sevenDaysTrendStartIST } }],
+        ...(eventFilter ? { registration: { eventId: eventFilter } } : {}),
+      },
+      select: { amountInPaise: true, paidAt: true, createdAt: true },
+    }),
+    // 7-day trend registrations
+    prisma.registration.findMany({
+      where: {
+        registeredAt: { gte: sevenDaysTrendStartIST },
+        ...(eventFilter ? { eventId: eventFilter } : {}),
+      },
+      select: { registeredAt: true },
+    }),
   ]);
 
   // Overall calculations for the active scope
@@ -243,30 +291,38 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     };
   });
 
-  // Calculate 7-day daily revenue trend
+  // Calculate 7-day daily revenue trend in IST
   const dailyTrendMap = new Map<string, { date: string; label: string; revenuePaise: number; regsCount: number; paidCount: number }>();
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    const key = d.toISOString().split("T")[0];
-    const label = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const dayIST = new Date(
+      Date.UTC(nowIST.getUTCFullYear(), nowIST.getUTCMonth(), nowIST.getUTCDate() - i, 0, 0, 0, 0),
+    );
+    const key = dayIST.toISOString().slice(0, 10);
+    const label = new Intl.DateTimeFormat("en-IN", {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "short",
+    }).format(dayIST);
     dailyTrendMap.set(key, { date: key, label, revenuePaise: 0, regsCount: 0, paidCount: 0 });
   }
 
-  // Backfill daily trend from filtered payments and registrations
-  for (const pay of filteredPayments) {
+  // Populate daily trend from trendPayments and trendRegs
+  for (const pay of trendPayments) {
     const payDate = pay.paidAt ?? pay.createdAt;
-    const key = payDate.toISOString().split("T")[0];
-    if (dailyTrendMap.has(key)) {
-      const existing = dailyTrendMap.get(key)!;
+    const payIST = new Date(payDate.getTime() + IST_OFFSET_MS);
+    const key = payIST.toISOString().slice(0, 10);
+    const existing = dailyTrendMap.get(key);
+    if (existing) {
       existing.revenuePaise += pay.amountInPaise;
       existing.paidCount += 1;
     }
   }
 
-  for (const reg of recentRegs) {
-    const key = reg.registeredAt.toISOString().split("T")[0];
-    if (dailyTrendMap.has(key)) {
-      const existing = dailyTrendMap.get(key)!;
+  for (const reg of trendRegs) {
+    const regIST = new Date(reg.registeredAt.getTime() + IST_OFFSET_MS);
+    const key = regIST.toISOString().slice(0, 10);
+    const existing = dailyTrendMap.get(key);
+    if (existing) {
       existing.regsCount += 1;
     }
   }
@@ -814,7 +870,18 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
           { razorpayPaymentId: { contains: search, mode: "insensitive" } },
           {
             registration: {
-              user: { email: { contains: search, mode: "insensitive" } },
+              user: {
+                OR: [
+                  { name: { contains: search, mode: "insensitive" } },
+                  { email: { contains: search, mode: "insensitive" } },
+                  { phone: { contains: search, mode: "insensitive" } },
+                ],
+              },
+            },
+          },
+          {
+            registration: {
+              shippingPhone: { contains: search, mode: "insensitive" },
             },
           },
           {
@@ -837,7 +904,7 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
       include: {
         registration: {
           include: {
-            user: { select: { name: true, email: true } },
+            user: { select: { name: true, email: true, phone: true } },
             event: { select: { title: true, slug: true } },
           },
         },
@@ -965,7 +1032,7 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       : {}),
   };
 
-  const [total, items] = await Promise.all([
+  const [total, items, totalPaidUsers] = await Promise.all([
     prisma.user.count({ where }),
     prisma.user.findMany({
       where,
@@ -979,6 +1046,20 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
             id: true,
             status: true,
             payment: { select: { status: true, amountInPaise: true } },
+          },
+        },
+      },
+    }),
+    prisma.user.count({
+      where: {
+        ...(role ? { role: role as never } : {}),
+        registrations: {
+          some: {
+            OR: [
+              { payment: { status: "PAID" } },
+              { status: "CONFIRMED" },
+              { status: "COMPLETED" },
+            ],
           },
         },
       },
@@ -1010,7 +1091,14 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
 
   response.json({
     data: formatted,
-    meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
+    meta: {
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      totalPaidUsers,
+      totalUnpaidUsers: Math.max(0, total - totalPaidUsers),
+    },
   });
 }
 
