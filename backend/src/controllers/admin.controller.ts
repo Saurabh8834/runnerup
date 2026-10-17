@@ -712,6 +712,41 @@ export async function adminMarkRegistrationPaid(
   response.json({ data: { registration, payment, emailSent: emailResult?.sent ?? false } });
 }
 
+export async function adminDeleteRegistration(
+  request: AuthenticatedRequest,
+  response: Response,
+) {
+  const id = routeParam(request, "id");
+  const reg = await prisma.registration.findUnique({
+    where: { id },
+    select: { id: true, bibNumber: true, shippingName: true, userId: true },
+  });
+
+  if (!reg) {
+    throw new ApiError(404, "Registration not found");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.certificate.deleteMany({ where: { registrationId: id } });
+    await tx.medalDelivery.deleteMany({ where: { registrationId: id } });
+    await tx.proofUpload.deleteMany({ where: { registrationId: id } });
+    await tx.payment.deleteMany({ where: { registrationId: id } });
+    await tx.registration.delete({ where: { id } });
+  });
+
+  await writeAdminAudit(request, {
+    action: "registration.delete",
+    entityType: "Registration",
+    entityId: id,
+    summary: `Deleted registration ${reg.bibNumber} for ${reg.shippingName}`,
+  });
+
+  response.json({
+    success: true,
+    message: `Registration ${reg.bibNumber} deleted successfully.`,
+  });
+}
+
 export async function adminExportRegistrationsCsv(
   request: AuthenticatedRequest,
   response: Response,
@@ -1222,6 +1257,64 @@ export async function adminUpdateUserRole(request: AuthenticatedRequest, respons
   });
 
   response.json({ data: user });
+}
+
+export async function adminDeleteUser(
+  request: AuthenticatedRequest,
+  response: Response,
+) {
+  const id = routeParam(request, "id");
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, email: true, name: true, role: true, clerkId: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const emailLower = user.email.toLowerCase().trim();
+  if (
+    emailLower === "sourav06556@gmail.com" ||
+    emailLower === "realblack009@gmail.com" ||
+    env.adminEmails.includes(emailLower)
+  ) {
+    throw new ApiError(403, "Cannot delete protected admin account");
+  }
+
+  const registrations = await prisma.registration.findMany({
+    where: { userId: id },
+    select: { id: true },
+  });
+  const registrationIds = registrations.map((r) => r.id);
+
+  await prisma.$transaction(async (tx) => {
+    if (registrationIds.length > 0) {
+      await tx.certificate.deleteMany({ where: { registrationId: { in: registrationIds } } });
+      await tx.medalDelivery.deleteMany({ where: { registrationId: { in: registrationIds } } });
+      await tx.proofUpload.deleteMany({ where: { registrationId: { in: registrationIds } } });
+      await tx.payment.deleteMany({ where: { registrationId: { in: registrationIds } } });
+      await tx.registration.deleteMany({ where: { id: { in: registrationIds } } });
+    }
+    await tx.referral.deleteMany({
+      where: {
+        OR: [{ referrerId: id }, { refereeId: id }],
+      },
+    });
+    await tx.user.delete({ where: { id } });
+  });
+
+  await writeAdminAudit(request, {
+    action: "user.delete",
+    entityType: "User",
+    entityId: id,
+    summary: `Deleted user ${user.name} (${user.email}) and ${registrationIds.length} registration(s)`,
+  });
+
+  response.json({
+    success: true,
+    message: `User ${user.name} and all associated test data were permanently deleted.`,
+  });
 }
 
 // ── Proofs ─────────────────────────────────────────────────────

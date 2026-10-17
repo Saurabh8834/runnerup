@@ -40,6 +40,8 @@ import {
   adminUpdateMedal,
   adminSyncPayments,
   adminUpdatePayment,
+  adminDeleteRegistration,
+  adminDeleteUser,
   adminUpdateRegistration,
   adminUpdateUserRole,
 } from "../controllers/admin.controller.js";
@@ -90,6 +92,7 @@ adminRouter.get("/registrations/export.csv", asyncHandler(adminExportRegistratio
 adminRouter.get("/registrations/:id", asyncHandler(adminGetRegistration));
 adminRouter.patch("/registrations/:id", asyncHandler(adminUpdateRegistration));
 adminRouter.post("/registrations/:id/mark-paid", asyncHandler(adminMarkRegistrationPaid));
+adminRouter.delete("/registrations/:id", asyncHandler(adminDeleteRegistration));
 
 adminRouter.get("/payments", asyncHandler(adminListPayments));
 adminRouter.get("/payments/export", asyncHandler(adminExportPaymentsCsv));
@@ -102,6 +105,7 @@ adminRouter.get("/users/export", asyncHandler(adminExportUsersCsv));
 adminRouter.get("/users/export.csv", asyncHandler(adminExportUsersCsv));
 adminRouter.get("/users/:id", asyncHandler(adminGetUser));
 adminRouter.patch("/users/:id/role", asyncHandler(adminUpdateUserRole));
+adminRouter.delete("/users/:id", asyncHandler(adminDeleteUser));
 
 adminRouter.get("/proofs", asyncHandler(adminListProofs));
 adminRouter.post("/proofs/:id/review", asyncHandler(adminReviewProof));
