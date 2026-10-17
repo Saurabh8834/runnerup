@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
     const isDev = process.env.NODE_ENV !== "production";
     const rawTarget = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
     const backendTarget =
-      rawTarget && !rawTarget.includes("railway.app")
+      rawTarget
         ? rawTarget
         : isDev
           ? "http://127.0.0.1:4000"

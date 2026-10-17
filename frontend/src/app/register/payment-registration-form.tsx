@@ -18,7 +18,7 @@ import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react
 import { Field, inputClass } from "../components/app-shell";
 import { PhoneInput } from "../components/phone-input";
 import { SearchableSelect } from "../components/searchable-select";
-import { authHeaders, getApiUrl, readApiError } from "../../lib/api";
+import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { INDIAN_STATES } from "../../lib/indian-states";
 import {
@@ -267,7 +267,7 @@ function PaymentRegistrationFormInner() {
     let cancelled = false;
     async function loadOpenEvents() {
       try {
-        const response = await fetch(getApiUrl("/api/events?scope=open"));
+        const response = await resilientFetch("/api/events?scope=open");
         if (!response.ok) return;
         const json = await response.json();
         const rows = (json.data ?? []) as Array<{
@@ -317,7 +317,7 @@ function PaymentRegistrationFormInner() {
         const token = await getToken();
         if (!token || cancelled) return;
 
-        await fetch(getApiUrl("/api/users/sync"), {
+        await resilientFetch("/api/users/sync", {
           method: "POST",
           headers: authHeaders(token),
           body: JSON.stringify({
@@ -330,7 +330,7 @@ function PaymentRegistrationFormInner() {
           }),
         });
 
-        const me = await fetch(getApiUrl("/api/users/me"), {
+        const me = await resilientFetch("/api/users/me", {
           headers: authHeaders(token),
         });
         if (!me.ok || cancelled) return;
@@ -519,7 +519,7 @@ function PaymentRegistrationFormInner() {
 
       let token = isSignedIn ? await getToken() : null;
 
-      let regRes = await fetch(getApiUrl("/api/registrations"), {
+      let regRes = await resilientFetch("/api/registrations", {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify(payload),
@@ -530,7 +530,7 @@ function PaymentRegistrationFormInner() {
           const freshToken = await getToken({ skipCache: true });
           if (freshToken) {
             token = freshToken;
-            regRes = await fetch(getApiUrl("/api/registrations"), {
+            regRes = await resilientFetch("/api/registrations", {
               method: "POST",
               headers: authHeaders(token),
               body: JSON.stringify(payload),
@@ -540,7 +540,7 @@ function PaymentRegistrationFormInner() {
         // If auth still rejected (or not signed in), retry as guest without authorization header
         if (regRes.status === 401) {
           token = null;
-          regRes = await fetch(getApiUrl("/api/registrations"), {
+          regRes = await resilientFetch("/api/registrations", {
             method: "POST",
             headers: authHeaders(null),
             body: JSON.stringify(payload),
@@ -550,7 +550,7 @@ function PaymentRegistrationFormInner() {
 
       if (!regRes.ok && (regRes.status >= 500 || regRes.status === 404)) {
         await new Promise((r) => setTimeout(r, 1200));
-        regRes = await fetch(getApiUrl("/api/registrations"), {
+        regRes = await resilientFetch("/api/registrations", {
           method: "POST",
           headers: authHeaders(token),
           body: JSON.stringify(payload),
@@ -585,7 +585,7 @@ function PaymentRegistrationFormInner() {
         return [...prev, item];
       });
 
-      let payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+      let payRes = await resilientFetch("/api/payments/create-order", {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({ registrationId }),
@@ -596,7 +596,7 @@ function PaymentRegistrationFormInner() {
           const freshToken = await getToken({ skipCache: true });
           if (freshToken) {
             token = freshToken;
-            payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+            payRes = await resilientFetch("/api/payments/create-order", {
               method: "POST",
               headers: authHeaders(token),
               body: JSON.stringify({ registrationId }),
@@ -606,7 +606,7 @@ function PaymentRegistrationFormInner() {
         // If auth still rejected (or not signed in), retry as guest without authorization header
         if (payRes.status === 401) {
           token = null;
-          payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+          payRes = await resilientFetch("/api/payments/create-order", {
             method: "POST",
             headers: authHeaders(null),
             body: JSON.stringify({ registrationId }),
@@ -616,7 +616,7 @@ function PaymentRegistrationFormInner() {
 
       if (!payRes.ok && (payRes.status >= 500 || payRes.status === 404)) {
         await new Promise((r) => setTimeout(r, 1200));
-        payRes = await fetch(getApiUrl("/api/payments/create-order"), {
+        payRes = await resilientFetch("/api/payments/create-order", {
           method: "POST",
           headers: authHeaders(token),
           body: JSON.stringify({ registrationId }),
@@ -647,14 +647,14 @@ function PaymentRegistrationFormInner() {
         handler: async (response: CheckoutResponse) => {
           let freshToken = isSignedIn ? await getToken() : null;
           try {
-            let verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+            let verifyResponse = await resilientFetch("/api/payments/verify", {
               method: "POST",
               headers: authHeaders(freshToken),
               body: JSON.stringify(response),
             });
 
             if (verifyResponse.status === 401) {
-              verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+              verifyResponse = await resilientFetch("/api/payments/verify", {
                 method: "POST",
                 headers: authHeaders(null),
                 body: JSON.stringify(response),

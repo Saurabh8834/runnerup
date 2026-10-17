@@ -12,7 +12,7 @@ import {
   setEmergencyAdminSession,
   clearEmergencyAdminSession,
 } from "../../lib/admin-api";
-import { getApiUrl } from "../../lib/api";
+import { getApiUrl, resilientFetch } from "../../lib/api";
 import { AdminThemeProvider, AdminThemeToggle, useAdminTheme } from "./admin-theme";
 import { BrandText } from "../components/brand-text";
 import "./admin.css";
@@ -211,7 +211,7 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(getApiUrl("/api/admin/emergency-login"), {
+      const res = await resilientFetch("/api/admin/emergency-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ passcode: passcode.trim() }),
@@ -483,7 +483,7 @@ function GateServerError({
         </div>
 
         <div className="admin-gate-divider">
-          Tip: Run <code style={{ background: "var(--panel-soft)", color: "var(--sage)", padding: "0.1rem 0.3rem", borderRadius: 4, fontSize: "0.7rem" }}>start-live.bat</code> to launch backend & tunnel
+          Cloud Infrastructure: 24/7 Cloud Backend Auto-Failover Enabled
         </div>
       </motion.div>
     </AdminThemed>
@@ -656,7 +656,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
       if (userEmail && (userEmail === "sourav06556@gmail.com" || userEmail === "realblack009@gmail.com" || userEmail.includes("sourav"))) {
         try {
-          const res = await fetch(getApiUrl("/api/admin/emergency-login"), {
+          const res = await resilientFetch("/api/admin/emergency-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ passcode: "RunnerUp@Admin2026!#" }),

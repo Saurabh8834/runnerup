@@ -1,4 +1,4 @@
-import { authHeaders, getApiUrl, readApiError } from "./api";
+import { authHeaders, getApiUrl, readApiError, resilientFetch } from "./api";
 
 export class AdminApiError extends Error {
   status: number;
@@ -44,11 +44,10 @@ export async function downloadAdminExport(
   const urlPath = isPasscodeToken
     ? `${path}${separator}admin_token=${encodeURIComponent(effectiveToken)}`
     : path;
-  const url = getApiUrl(urlPath);
 
   let response: Response;
   try {
-    response = await fetch(url, {
+    response = await resilientFetch(urlPath, {
       method: "GET",
       headers: {
         ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
@@ -84,7 +83,7 @@ export async function adminFetch<T = unknown>(
   const effectiveToken = token || getEmergencyAdminToken();
   let response: Response;
   try {
-    response = await fetch(getApiUrl(path), {
+    response = await resilientFetch(path, {
       ...init,
       headers: authHeaders(effectiveToken, init.headers),
     });
