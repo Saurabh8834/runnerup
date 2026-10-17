@@ -1,7 +1,7 @@
 const isDev = process.env.NODE_ENV !== "production";
 const configuredApiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.INTERNAL_API_URL || "").trim().replace(/\/+$/, "");
 
-export const CLOUD_BACKEND_URL = "https://mountainrun-production-c2c6.up.railway.app";
+export const CLOUD_BACKEND_URL = "https://runnerup-production.up.railway.app";
 
 // Production canonical API is https://api.runnerup.in by default, or configured environment variable
 export const CANONICAL_BACKEND_URL =
