@@ -38,7 +38,10 @@ export async function downloadAdminExport(
 ): Promise<void> {
   const effectiveToken = getEffectiveAdminToken(token);
   const separator = path.includes("?") ? "&" : "?";
-  const urlPath = effectiveToken
+  const isPasscodeToken =
+    effectiveToken &&
+    (effectiveToken.startsWith("ru_admin_") || !effectiveToken.startsWith("ey"));
+  const urlPath = isPasscodeToken
     ? `${path}${separator}admin_token=${encodeURIComponent(effectiveToken)}`
     : path;
   const url = getApiUrl(urlPath);

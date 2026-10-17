@@ -85,17 +85,20 @@ adminRouter.put("/events/:id", asyncHandler(adminUpdateEvent));
 adminRouter.delete("/events/:id", asyncHandler(adminDeleteEvent));
 
 adminRouter.get("/registrations", asyncHandler(adminListRegistrations));
+adminRouter.get("/registrations/export", asyncHandler(adminExportRegistrationsCsv));
 adminRouter.get("/registrations/export.csv", asyncHandler(adminExportRegistrationsCsv));
 adminRouter.get("/registrations/:id", asyncHandler(adminGetRegistration));
 adminRouter.patch("/registrations/:id", asyncHandler(adminUpdateRegistration));
 adminRouter.post("/registrations/:id/mark-paid", asyncHandler(adminMarkRegistrationPaid));
 
 adminRouter.get("/payments", asyncHandler(adminListPayments));
+adminRouter.get("/payments/export", asyncHandler(adminExportPaymentsCsv));
 adminRouter.get("/payments/export.csv", asyncHandler(adminExportPaymentsCsv));
 adminRouter.post("/payments/sync", asyncHandler(adminSyncPayments));
 adminRouter.patch("/payments/:id", asyncHandler(adminUpdatePayment));
 
 adminRouter.get("/users", asyncHandler(adminListUsers));
+adminRouter.get("/users/export", asyncHandler(adminExportUsersCsv));
 adminRouter.get("/users/export.csv", asyncHandler(adminExportUsersCsv));
 adminRouter.get("/users/:id", asyncHandler(adminGetUser));
 adminRouter.patch("/users/:id/role", asyncHandler(adminUpdateUserRole));
@@ -103,6 +106,7 @@ adminRouter.patch("/users/:id/role", asyncHandler(adminUpdateUserRole));
 adminRouter.get("/proofs", asyncHandler(adminListProofs));
 adminRouter.post("/proofs/:id/review", asyncHandler(adminReviewProof));
 
+adminRouter.get("/medals/export", asyncHandler(adminExportMedalsCsv));
 adminRouter.get("/medals/export.csv", asyncHandler(adminExportMedalsCsv));
 adminRouter.get("/medals", asyncHandler(adminListMedals));
 adminRouter.patch("/medals/:id", asyncHandler(adminUpdateMedal));

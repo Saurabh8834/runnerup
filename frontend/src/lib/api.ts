@@ -1,31 +1,27 @@
 const isDev = process.env.NODE_ENV !== "production";
-const BACKEND_INTERNAL_URL =
-  process.env.INTERNAL_API_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  (isDev ? "http://127.0.0.1:4000" : "https://api.runnerup.in");
 
-const CONFIGURED_API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
+export const CANONICAL_BACKEND_URL = isDev ? "http://127.0.0.1:4000" : "https://api.runnerup.in";
 
 export function getApiUrl(path = "") {
   const isServer = typeof window === "undefined";
   const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
 
   if (isServer) {
-    return `${BACKEND_INTERNAL_URL.replace(/\/+$/, "")}${cleanPath}`;
+    const rawInternal = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
+    if (rawInternal && !rawInternal.includes("railway") && !rawInternal.includes("localhost") && !isDev) {
+      return `${rawInternal.replace(/\/+$/, "")}${cleanPath}`;
+    }
+    return `${CANONICAL_BACKEND_URL}${cleanPath}`;
   }
 
-  // In the browser: if an external HTTPS API URL is configured (e.g. Railway or api subdomain), use it.
-  // Otherwise, use relative path so Next.js proxies to backend and eliminates Mixed Content & CORS.
-  const isLocalApi =
-    !CONFIGURED_API_URL ||
-    CONFIGURED_API_URL.includes("127.0.0.1") ||
-    CONFIGURED_API_URL.includes("localhost");
-
-  if (isLocalApi) {
+  // In local development, use relative path so Next.js proxies to local backend
+  if (isDev) {
     return cleanPath;
   }
 
-  return `${CONFIGURED_API_URL.replace(/\/+$/, "")}${cleanPath}`;
+  // In production browser, communicate directly with the live HTTPS backend https://api.runnerup.in
+  // This avoids any obsolete Railway proxy or Vercel rewrite issues
+  return `https://api.runnerup.in${cleanPath}`;
 }
 
 export function authHeaders(token: string | null | undefined, init: HeadersInit = {}): HeadersInit {
