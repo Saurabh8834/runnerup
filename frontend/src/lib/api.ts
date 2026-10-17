@@ -3,7 +3,7 @@ const configuredApiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.INTERNA
 
 export const CLOUD_BACKEND_URL = "https://runnerup-production.up.railway.app";
 
-// Production canonical API is https://api.runnerup.in by default, or configured environment variable
+// Production canonical API connects directly to the 24/7 Railway cloud backend
 export const CANONICAL_BACKEND_URL =
   configuredApiUrl &&
   !configuredApiUrl.includes("127.0.0.1") &&
@@ -11,7 +11,7 @@ export const CANONICAL_BACKEND_URL =
     ? configuredApiUrl
     : isDev
       ? "http://127.0.0.1:4000"
-      : "https://api.runnerup.in";
+      : CLOUD_BACKEND_URL;
 
 let dynamicBackendUrl: string | null = null;
 
