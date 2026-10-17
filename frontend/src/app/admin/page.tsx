@@ -365,7 +365,11 @@ export default function AdminOverviewPage() {
             <div className="text-xl sm:text-2xl font-black tabular-nums text-(--foreground)">
               {data?.stats.medalsPending ?? 0}
             </div>
-            <p className="text-[0.65rem] text-(--muted) mt-0.5">Pending fulfillment</p>
+            <p className="text-[0.65rem] text-(--muted) mt-0.5">
+              <Link href="/admin/medals" className="text-(--sage) hover:underline">
+                Ready to ship →
+              </Link>
+            </p>
           </div>
         </div>
 

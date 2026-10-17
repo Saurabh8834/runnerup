@@ -202,7 +202,14 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     prisma.user.count(),
     prisma.registration.count({ where: { proofStatus: "SUBMITTED", ...(eventFilter ? { eventId: eventFilter } : {}) } }),
     prisma.certificate.count({ where: eventFilter ? { registration: { eventId: eventFilter } } : undefined }),
-    prisma.medalDelivery.count({ where: { status: { in: ["PENDING", "DISPATCHED"] }, ...(eventFilter ? { registration: { eventId: eventFilter } } : {}) } }),
+    prisma.registration.count({
+      where: {
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+        proofStatus: "APPROVED",
+        OR: [{ medalDelivery: null }, { medalDelivery: { status: "PENDING" } }],
+        ...(eventFilter ? { eventId: eventFilter } : {}),
+      },
+    }),
     prisma.registration.findMany({
       where: regWhere,
       select: { id: true, status: true, eventId: true },
