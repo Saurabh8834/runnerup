@@ -91,7 +91,7 @@ export default function SignUpPage() {
             <div className="text-center lg:text-left">
               <p className="auth-classic-kicker">Get started</p>
               <h1 className="auth-classic-form-title mt-3">Create your runner account</h1>
-              <p className="mt-3 text-sm leading-6 text-(--muted)">Sign up with Google or email. You&apos;ll land on your runner portal after.</p>
+              <p className="mt-3 text-sm leading-6 text-(--muted)">Sign up with Google or email (minimum 8 characters password). Valid phone number is required for official race registration & race kit dispatch.</p>
             </div>
           <div className="mt-6 w-full sm:mt-8">
             <ClerkLoading>

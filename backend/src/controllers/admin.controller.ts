@@ -752,15 +752,51 @@ export async function adminExportRegistrationsCsv(
   response: Response,
 ) {
   const eventId = q(request, "eventId");
+  const status = q(request, "status");
+  const search = q(request, "q") || q(request, "search");
+
+  const where: Prisma.RegistrationWhereInput = {
+    ...(eventId ? { eventId } : {}),
+    ...(status
+      ? status === "PAID"
+        ? {
+            OR: [
+              { status: { in: ["CONFIRMED", "COMPLETED"] } },
+              { payment: { status: "PAID" } },
+            ],
+          }
+        : status === "UNPAID"
+          ? {
+              status: { notIn: ["CONFIRMED", "COMPLETED"] },
+              OR: [{ payment: null }, { payment: { status: { not: "PAID" } } }],
+            }
+          : { status: status as never }
+      : {}),
+    ...(search
+      ? {
+          OR: [
+            { bibNumber: { contains: search, mode: "insensitive" } },
+            { shippingName: { contains: search, mode: "insensitive" } },
+            { shippingPhone: { contains: search, mode: "insensitive" } },
+            { user: { email: { contains: search, mode: "insensitive" } } },
+            { user: { name: { contains: search, mode: "insensitive" } } },
+            { user: { phone: { contains: search, mode: "insensitive" } } },
+            { payment: { razorpayPaymentId: { contains: search, mode: "insensitive" } } },
+            { payment: { razorpayOrderId: { contains: search, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  };
+
   const rows = await prisma.registration.findMany({
-    where: eventId ? { eventId } : undefined,
+    where,
     orderBy: { registeredAt: "desc" },
     include: {
       user: true,
       event: true,
       payment: true,
     },
-    take: 5000,
+    take: 10000,
   });
 
   const header = [
@@ -770,7 +806,7 @@ export async function adminExportRegistrationsCsv(
     "phone",
     "event",
     "distance",
-    "status",
+    "registrationStatus",
     "proofStatus",
     "paymentStatus",
     "amountInr",
@@ -793,18 +829,29 @@ export async function adminExportRegistrationsCsv(
 
   const lines = [
     header.join(","),
-    ...rows.map((r) =>
-      [
+    ...rows.map((r) => {
+      const runnerName = r.shippingName?.trim() || r.user.name?.trim() || "";
+      const phoneVal =
+        (r.shippingPhone && r.shippingPhone.trim().length > 3 ? r.shippingPhone.trim() : "") ||
+        (r.user.phone && r.user.phone.trim().length > 3 ? r.user.phone.trim() : "");
+      const isPaid =
+        r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED";
+      const paymentStatus = isPaid ? "PAID" : (r.payment?.status ?? "UNPAID");
+      const amountInr = r.payment
+        ? Math.round(r.payment.amountInPaise / 100)
+        : Math.round(r.event.priceInPaise / 100);
+
+      return [
         r.bibNumber,
-        r.user.name,
+        runnerName,
         r.user.email,
-        r.user.phone ?? r.shippingPhone ?? "",
+        phoneVal,
         r.event.title,
         r.distance,
         r.status,
         r.proofStatus,
-        r.payment?.status ?? (r.status === "CONFIRMED" ? "PAID" : "UNPAID"),
-        r.payment ? Math.round(r.payment.amountInPaise / 100) : 0,
+        paymentStatus,
+        amountInr,
         r.payment?.razorpayPaymentId ?? "",
         r.payment?.razorpayOrderId ?? "",
         r.shippingLine1 ?? "",
@@ -814,8 +861,8 @@ export async function adminExportRegistrationsCsv(
         r.registeredAt.toISOString(),
       ]
         .map(escape)
-        .join(","),
-    ),
+        .join(",");
+    }),
   ];
 
   response.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -832,8 +879,30 @@ export async function adminExportPaymentsCsv(
   response: Response,
 ) {
   const status = q(request, "status");
+  const eventId = q(request, "eventId");
+  const search = q(request, "q") || q(request, "search");
+
+  const where: Prisma.PaymentWhereInput = {
+    ...(status ? { status: status as never } : {}),
+    ...(eventId ? { registration: { eventId } } : {}),
+    ...(search
+      ? {
+          OR: [
+            { razorpayOrderId: { contains: search, mode: "insensitive" } },
+            { razorpayPaymentId: { contains: search, mode: "insensitive" } },
+            { registration: { bibNumber: { contains: search, mode: "insensitive" } } },
+            { registration: { shippingName: { contains: search, mode: "insensitive" } } },
+            { registration: { shippingPhone: { contains: search, mode: "insensitive" } } },
+            { registration: { user: { name: { contains: search, mode: "insensitive" } } } },
+            { registration: { user: { email: { contains: search, mode: "insensitive" } } } },
+            { registration: { user: { phone: { contains: search, mode: "insensitive" } } } },
+          ],
+        }
+      : {}),
+  };
+
   const rows = await prisma.payment.findMany({
-    where: status ? { status: status as never } : undefined,
+    where,
     orderBy: { createdAt: "desc" },
     include: {
       registration: {
@@ -843,7 +912,7 @@ export async function adminExportPaymentsCsv(
         },
       },
     },
-    take: 5000,
+    take: 10000,
   });
 
   const header = [
@@ -853,9 +922,10 @@ export async function adminExportPaymentsCsv(
     "email",
     "phone",
     "event",
+    "distance",
     "bibNumber",
     "amountInr",
-    "status",
+    "paymentStatus",
     "paidAt",
     "createdAt",
   ];
@@ -870,14 +940,25 @@ export async function adminExportPaymentsCsv(
 
   const lines = [
     header.join(","),
-    ...rows.map((p) =>
-      [
+    ...rows.map((p) => {
+      const runnerName =
+        p.registration?.shippingName?.trim() || p.registration?.user?.name?.trim() || "";
+      const phoneVal =
+        (p.registration?.shippingPhone && p.registration.shippingPhone.trim().length > 3
+          ? p.registration.shippingPhone.trim()
+          : "") ||
+        (p.registration?.user?.phone && p.registration.user.phone.trim().length > 3
+          ? p.registration.user.phone.trim()
+          : "");
+
+      return [
         p.razorpayPaymentId ?? p.id,
         p.razorpayOrderId,
-        p.registration?.user?.name ?? "",
+        runnerName,
         p.registration?.user?.email ?? "",
-        p.registration?.user?.phone ?? p.registration?.shippingPhone ?? "",
+        phoneVal,
         p.registration?.event?.title ?? "",
+        p.registration?.distance ?? "",
         p.registration?.bibNumber ?? "",
         Math.round(p.amountInPaise / 100),
         p.status,
@@ -885,8 +966,8 @@ export async function adminExportPaymentsCsv(
         p.createdAt.toISOString(),
       ]
         .map(escape)
-        .join(","),
-    ),
+        .join(",");
+    }),
   ];
 
   response.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -1060,9 +1141,37 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
   const { page, pageSize, skip } = parsePage(request);
   const search = q(request, "q");
   const role = q(request, "role");
+  const status = q(request, "status");
 
   const where: Prisma.UserWhereInput = {
     ...(role ? { role: role as never } : {}),
+    ...(status
+      ? status === "PAID"
+        ? {
+            registrations: {
+              some: {
+                OR: [
+                  { payment: { status: "PAID" } },
+                  { status: "CONFIRMED" },
+                  { status: "COMPLETED" },
+                ],
+              },
+            },
+          }
+        : status === "UNPAID"
+          ? {
+              registrations: {
+                none: {
+                  OR: [
+                    { payment: { status: "PAID" } },
+                    { status: "CONFIRMED" },
+                    { status: "COMPLETED" },
+                  ],
+                },
+              },
+            }
+          : {}
+      : {}),
     ...(search
       ? {
         OR: [
@@ -1088,6 +1197,7 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
           select: {
             id: true,
             status: true,
+            shippingPhone: true,
             payment: { select: { status: true, amountInPaise: true } },
           },
         },
@@ -1115,12 +1225,16 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
     );
     const totalPaidInPaise = paidRegs.reduce((sum, r) => sum + (r.payment?.amountInPaise ?? 0), 0);
     const hasPaid = paidRegs.length > 0;
+    const resolvedPhone =
+      u.phone ||
+      u.registrations.find((r) => r.shippingPhone && r.shippingPhone.trim().length > 3)?.shippingPhone ||
+      null;
 
     return {
       id: u.id,
       name: u.name,
       email: u.email,
-      phone: u.phone,
+      phone: resolvedPhone,
       role: u.role,
       clerkId: u.clerkId,
       createdAt: u.createdAt,
@@ -1146,20 +1260,68 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
 }
 
 export async function adminExportUsersCsv(
-  _request: AuthenticatedRequest,
+  request: AuthenticatedRequest,
   response: Response,
 ) {
+  const search = q(request, "q") || q(request, "search");
+  const role = q(request, "role");
+  const status = q(request, "status");
+
+  const where: Prisma.UserWhereInput = {
+    ...(role ? { role: role as never } : {}),
+    ...(status
+      ? status === "PAID"
+        ? {
+            registrations: {
+              some: {
+                OR: [
+                  { payment: { status: "PAID" } },
+                  { status: "CONFIRMED" },
+                  { status: "COMPLETED" },
+                ],
+              },
+            },
+          }
+        : status === "UNPAID"
+          ? {
+              registrations: {
+                none: {
+                  OR: [
+                    { payment: { status: "PAID" } },
+                    { status: "CONFIRMED" },
+                    { status: "COMPLETED" },
+                  ],
+                },
+              },
+            }
+          : {}
+      : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+            { phone: { contains: search, mode: "insensitive" } },
+            { clerkId: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
   const users = await prisma.user.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     include: {
       registrations: {
+        orderBy: { registeredAt: "desc" },
         include: {
           payment: true,
+          event: true,
         },
       },
       _count: { select: { registrations: true } },
     },
-    take: 5000,
+    take: 10000,
   });
 
   const header = [
@@ -1171,6 +1333,8 @@ export async function adminExportUsersCsv(
     "paidRegistrationsCount",
     "totalSpentInr",
     "totalRegistrations",
+    "latestEvent",
+    "latestBibNumber",
     "joinedAt",
   ];
 
@@ -1191,15 +1355,29 @@ export async function adminExportUsersCsv(
       const totalPaidInPaise = paidRegs.reduce((sum, r) => sum + (r.payment?.amountInPaise ?? 0), 0);
       const hasPaid = paidRegs.length > 0;
 
+      const regWithPhone = u.registrations.find(
+        (r) => r.shippingPhone && r.shippingPhone.trim().length > 3,
+      );
+      const resolvedPhone =
+        (u.phone && u.phone.trim().length > 3 ? u.phone.trim() : "") ||
+        regWithPhone?.shippingPhone?.trim() ||
+        "";
+
+      const latestReg = u.registrations[0];
+      const latestEvent = latestReg?.event?.title ?? "";
+      const latestBibNumber = latestReg?.bibNumber ?? "";
+
       return [
         u.name,
         u.email,
-        u.phone ?? "",
+        resolvedPhone,
         u.role,
         hasPaid ? "PAID" : "UNPAID",
         paidRegs.length,
         Math.round(totalPaidInPaise / 100),
         u._count.registrations,
+        latestEvent,
+        latestBibNumber,
         u.createdAt.toISOString(),
       ]
         .map(escape)

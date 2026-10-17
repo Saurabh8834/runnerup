@@ -93,8 +93,9 @@ export function parseStoredPhone(value: string) {
 }
 
 export function formatFullPhone(countryCode: string, phoneNumber: string) {
-  const country = findPhoneCountry(countryCode);
   const digits = phoneNumber.replace(/\D/g, "");
+  if (!digits) return "";
+  const country = findPhoneCountry(countryCode);
   return `${country.dialCode}${digits}`;
 }
 
@@ -106,9 +107,14 @@ export function validatePhoneFields(formData: FormData, fieldName = "phone") {
   const phoneNumber = String(formData.get(`${fieldName}Number`) ?? "").replace(/\D/g, "");
   const country = findPhoneCountry(countryCode);
 
+  if (!phoneNumber) {
+    return "Mobile phone number is required.";
+  }
+
   if (!country.pattern.test(phoneNumber)) {
-    return `Enter a valid ${country.name} mobile number.`;
+    return `Enter a valid ${country.name} mobile number (${country.placeholder}).`;
   }
 
   return null;
 }
+

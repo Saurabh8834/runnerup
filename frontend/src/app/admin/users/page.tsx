@@ -27,6 +27,7 @@ export default function AdminUsersPage() {
   const [meta, setMeta] = useState({ total: 0, totalPaidUsers: 0, totalUnpaidUsers: 0 });
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export default function AdminUsersPage() {
       const params = new URLSearchParams({ pageSize: "50" });
       if (q.trim()) params.set("q", q.trim());
       if (role) params.set("role", role);
+      if (status) params.set("status", status);
       const json = await adminFetch<{
         data: UserRow[];
         meta: { total: number; totalPaidUsers?: number; totalUnpaidUsers?: number };
@@ -103,7 +105,7 @@ export default function AdminUsersPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     }
-  }, [getToken, q, role]);
+  }, [getToken, q, role, status]);
 
   useEffect(() => {
     void load();
@@ -114,8 +116,13 @@ export default function AdminUsersPage() {
     setError(null);
     try {
       const token = await getToken().catch(() => null);
+      const params = new URLSearchParams();
+      if (q.trim()) params.set("q", q.trim());
+      if (role) params.set("role", role);
+      if (status) params.set("status", status);
+      const query = params.toString() ? `?${params.toString()}` : "";
       await downloadAdminExport(
-        "/api/admin/users/export.csv",
+        `/api/admin/users/export.csv${query}`,
         `RunnerUp-Users-${new Date().toISOString().slice(0, 10)}.csv`,
         token,
       );
@@ -212,6 +219,11 @@ export default function AdminUsersPage() {
               {r}
             </option>
           ))}
+        </select>
+        <select className="input" onChange={(e) => setStatus(e.target.value)} value={status}>
+          <option value="">All payment statuses</option>
+          <option value="PAID">Paid runners only (🟢)</option>
+          <option value="UNPAID">Unpaid runners only (🔴)</option>
         </select>
         <button className="btn btn-primary" onClick={() => void load()} type="button">
           Refresh

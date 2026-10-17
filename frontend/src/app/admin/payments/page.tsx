@@ -118,6 +118,7 @@ export default function AdminPaymentsPage() {
     try {
       const token = await getToken().catch(() => null);
       const params = new URLSearchParams();
+      if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
       const query = params.toString() ? `?${params.toString()}` : "";
       await downloadAdminExport(

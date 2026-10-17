@@ -22,8 +22,8 @@ function getEventScarcity(slug: string) {
     hash |= 0;
   }
   const positive = Math.abs(hash);
-  const percent = 20; // 20% booked
-  const bibsLeft = 380 + (positive % 30); // ~380-409 bibs left
+  const percent = 40; // 40% booked
+  const bibsLeft = 280 + (positive % 30); // ~280-309 bibs left
   return { percent, bibsLeft };
 }
 

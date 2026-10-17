@@ -106,10 +106,15 @@ export const createRegistrationSchema = z
       });
     }
 
-    if (!value.shippingPhone) {
+    if (!value.shippingPhone || value.shippingPhone.trim().length < 8) {
       context.addIssue({
         code: "custom",
-        message: "Valid mobile phone number with country code is required",
+        message: "Valid mobile phone number with country code is required (e.g. +91 9876543210)",
+        path: ["phone"],
+      });
+      context.addIssue({
+        code: "custom",
+        message: "Valid mobile phone number with country code is required (e.g. +91 9876543210)",
         path: ["shippingPhone"],
       });
     }
