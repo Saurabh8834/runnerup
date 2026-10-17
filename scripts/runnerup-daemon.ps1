@@ -31,20 +31,40 @@ function Write-DaemonLog {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     $line = "[$timestamp] $Message"
     Add-Content -Path $DaemonLog -Value $line -Encoding UTF8
+    Write-Output $line
 }
 
-# 1. Engage sleep prevention and configure laptop lid to NEVER sleep when closed
-try {
-    # Set Lid Close action to "Do Nothing" (0) and keep Wi-Fi active in standby
-    powercfg /setacvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
-    powercfg /setdcvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
-    powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
-    powercfg /setdcvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
-    powercfg /SetActive SCHEME_CURRENT 2>&1 | Out-Null
-    Write-DaemonLog "Configured Windows Power Scheme: Lid close action set to 'Do Nothing' (0) and standby network enabled."
-} catch {
-    Write-DaemonLog "Notice: Could not set lid close power settings: $_"
+# 1. Comprehensive Windows Power Scheme: Prevent Sleep, Hibernate, and Wi-Fi throttling
+function Apply-PowerSettings {
+    try {
+        # Lid Close Action: 0 = Do Nothing
+        powercfg /setacvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
+        powercfg /setdcvalueindex SCHEME_CURRENT 4f971e89-eebd-4455-a8de-9e59040e7347 5ca83367-6e45-459f-a27b-476b1d01c936 0 2>&1 | Out-Null
+
+        # System Sleep Timeout: 0 = Never
+        powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP STANDBYIDLE 0 2>&1 | Out-Null
+        powercfg /setdcvalueindex SCHEME_CURRENT SUB_SLEEP STANDBYIDLE 0 2>&1 | Out-Null
+
+        # System Hibernate Timeout: 0 = Never
+        powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP HIBERNATEIDLE 0 2>&1 | Out-Null
+        powercfg /setdcvalueindex SCHEME_CURRENT SUB_SLEEP HIBERNATEIDLE 0 2>&1 | Out-Null
+
+        # Wireless Adapter Power Saving: 0 = Maximum Performance
+        powercfg /setacvalueindex SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 0 2>&1 | Out-Null
+        powercfg /setdcvalueindex SCHEME_CURRENT 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 0 2>&1 | Out-Null
+
+        # Connectivity in Standby: 1 = Always On
+        powercfg /setacvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
+        powercfg /setdcvalueindex SCHEME_CURRENT SUB_NONE CONNECTIVITYINSTANDBY 1 2>&1 | Out-Null
+
+        powercfg /SetActive SCHEME_CURRENT 2>&1 | Out-Null
+        Write-DaemonLog "Power policy verified: Lid close = Do Nothing, Sleep = Never, Wi-Fi = Max Performance."
+    } catch {
+        Write-DaemonLog "Notice: Could not set power settings: $_"
+    }
 }
+
+Apply-PowerSettings
 
 try {
     Add-Type -TypeDefinition @"
@@ -55,9 +75,9 @@ try {
         public static extern uint SetThreadExecutionState(uint esFlags);
     }
 "@ -ErrorAction SilentlyContinue
-    # ES_CONTINUOUS (0x80000000) | ES_SYSTEM_REQUIRED (0x00000001) = 2147483649
-    [PowerManagement]::SetThreadExecutionState([uint32]2147483649) | Out-Null
-    Write-DaemonLog "Power sleep prevention engaged (ES_CONTINUOUS | ES_SYSTEM_REQUIRED)."
+    # ES_CONTINUOUS (0x80000000) | ES_SYSTEM_REQUIRED (0x00000001) | ES_AWAYMODE_REQUIRED (0x00000040)
+    [PowerManagement]::SetThreadExecutionState([uint32]2147483713) | Out-Null
+    Write-DaemonLog "Power sleep prevention engaged (ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE)."
 } catch {
     Write-DaemonLog "Notice: Could not set sleep flags: $_"
 }
@@ -108,8 +128,12 @@ function Start-BackendProcess {
     Clean-Port4000
     Start-Sleep -Milliseconds 500
 
+    # Prefer compiled production server dist/server.js for lower RAM and no watcher lag
+    $serverDist = Join-Path $BackendDir "dist\server.js"
+    $arg = if (Test-Path $serverDist) { "/c node dist/server.js" } else { "/c npm run dev" }
+
     $proc = Start-Process -FilePath "cmd.exe" `
-        -ArgumentList @("/c", "npm run dev") `
+        -ArgumentList @($arg) `
         -WorkingDirectory $BackendDir `
         -RedirectStandardOutput $BackendLog `
         -RedirectStandardError $BackendErrLog `
@@ -119,11 +143,6 @@ function Start-BackendProcess {
 }
 
 function Start-TunnelProcess {
-    Write-DaemonLog "Verifying and provisioning DNS route for api.runnerup.in..."
-    try {
-        & $CloudflaredExe tunnel route dns -f "8bfe691c-7440-49a8-9c5c-620a1bd3dafe" "api.runnerup.in" 2>&1 | Out-Null
-    } catch {}
-
     Write-DaemonLog "Starting Cloudflare Tunnel (HTTP/2 with 10s heartbeat)..."
     $proc = Start-Process -FilePath $CloudflaredExe `
         -ArgumentList @("tunnel", "--config", $ConfigYaml, "--protocol", "http2", "--heartbeat-interval", "10s", "--heartbeat-count", "3", "run") `
@@ -158,9 +177,18 @@ if ($IncludeFrontend) {
 
 # Supervise loop
 $cycle = 0
+$script:consecutiveEdgeFails = 0
+
 while ($true) {
     Start-Sleep -Seconds 5
     $cycle++
+
+    # Periodically re-assert execution state to keep Windows from sleeping
+    if ($cycle % 12 -eq 0) {
+        try {
+            [PowerManagement]::SetThreadExecutionState([uint32]2147483713) | Out-Null
+        } catch {}
+    }
 
     # Backend check: process alive or port 4000 listening
     $portActive = Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue
@@ -173,7 +201,6 @@ while ($true) {
     } elseif (-not $portActive) {
         if ($script:backendGraceCycles -gt 0) {
             $script:backendGraceCycles--
-            # Backend is still warming up, allow grace period
         } else {
             Write-DaemonLog "Watchdog: Backend process alive but port 4000 unresponsive after grace period. Restarting..."
             try {
@@ -185,15 +212,14 @@ while ($true) {
             $script:backendGraceCycles = 6
         }
     } else {
-        # Backend is healthy and listening on 4000
         $script:backendGraceCycles = 0
     }
 
     # Cloudflare Tunnel check: process alive?
     if ($null -eq $TunnelProc -or $TunnelProc.HasExited) {
-        Write-DaemonLog "Watchdog: Cloudflare Tunnel exited. Restarting..."
+        Write-DaemonLog "Watchdog: Cloudflare Tunnel process exited. Restarting..."
         $TunnelProc = Start-TunnelProcess
-        $script:tunnelFailCount = 0
+        $script:consecutiveEdgeFails = 0
     }
 
     # Frontend check if enabled
@@ -202,34 +228,50 @@ while ($true) {
         $FrontendProc = Start-FrontendProcess
     }
 
-    # Active Edge Probe: Check public endpoint every 15 seconds (every 3 cycles)
-    if ($cycle % 3 -eq 0 -and $portActive) {
-        $edgeOk = $false
+    # Active Edge Probe: Check public endpoint every 20 seconds (every 4 cycles)
+    if ($cycle % 4 -eq 0 -and $portActive) {
+        # First verify local internet connectivity before blaming tunnel
+        $hasInternet = $true
         try {
-            $resp = Invoke-WebRequest -Uri "https://api.runnerup.in/health" -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
-            if ($resp.StatusCode -eq 200) {
-                $edgeOk = $true
-                $script:tunnelFailCount = 0
-            }
+            $dnsTest = [System.Net.Dns]::GetHostAddresses("1.1.1.1")
+            if (-not $dnsTest) { $hasInternet = $false }
         } catch {
-            $edgeOk = $false
+            $hasInternet = $false
         }
 
-        if (-not $edgeOk) {
-            $script:tunnelFailCount = [int]$script:tunnelFailCount + 1
-            Write-DaemonLog "Watchdog: Public edge probe failed (consecutive failures: $script:tunnelFailCount)"
-            if ($script:tunnelFailCount -ge 2) {
-                Write-DaemonLog "Watchdog: Public API (https://api.runnerup.in) unreachable. Recycling Cloudflare Tunnel..."
-                try {
-                    if ($TunnelProc -and -not $TunnelProc.HasExited) {
-                        Stop-Process -Id $TunnelProc.Id -Force -ErrorAction SilentlyContinue
-                    }
-                } catch {}
-                Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-                Start-Sleep -Seconds 1
-                $TunnelProc = Start-TunnelProcess
-                $script:tunnelFailCount = 0
+        if ($hasInternet) {
+            $edgeOk = $false
+            try {
+                $resp = Invoke-WebRequest -Uri "https://api.runnerup.in/health" -TimeoutSec 6 -UseBasicParsing -ErrorAction Stop
+                if ($resp.StatusCode -eq 200) {
+                    $edgeOk = $true
+                    $script:consecutiveEdgeFails = 0
+                }
+            } catch {
+                $edgeOk = $false
             }
+
+            if (-not $edgeOk) {
+                $script:consecutiveEdgeFails++
+                Write-DaemonLog "Watchdog: Public edge probe failed (attempt $script:consecutiveEdgeFails / 4)"
+                # Allow 4 failures (80 seconds) before recycling to avoid thrashing during momentary Wi-Fi blips
+                if ($script:consecutiveEdgeFails -ge 4) {
+                    Write-DaemonLog "Watchdog: Public API (https://api.runnerup.in) unreachable for 80s while internet is online. Recycling tunnel..."
+                    try {
+                        if ($TunnelProc -and -not $TunnelProc.HasExited) {
+                            Stop-Process -Id $TunnelProc.Id -Force -ErrorAction SilentlyContinue
+                        }
+                    } catch {}
+                    Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                    Start-Sleep -Seconds 1
+                    $TunnelProc = Start-TunnelProcess
+                    $script:consecutiveEdgeFails = 0
+                }
+            }
+        } else {
+            # Network temporarily down (e.g. Wi-Fi re-associating after lid reopen)
+            # Cloudflared will self-heal once Wi-Fi reconnects; do NOT thrash tunnel
+            $script:consecutiveEdgeFails = 0
         }
     }
 
@@ -237,12 +279,8 @@ while ($true) {
     if ($cycle % 12 -eq 0) {
         try {
             $resp = Invoke-WebRequest -Uri "http://127.0.0.1:4000/health" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
-            if ($resp.StatusCode -ne 200) {
-                Write-DaemonLog "Warning: Local health endpoint returned $($resp.StatusCode)"
-            }
         } catch {
             Write-DaemonLog "Warning: Local health check failed: $($_.Exception.Message)"
         }
     }
 }
-

@@ -283,9 +283,11 @@ export async function requireAdmin(
 
     if (dbUser && (dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN" || env.adminEmails.includes(dbUser.email.toLowerCase()))) {
       if (dbUser.clerkId !== clerkId) {
+        const emailLower = dbUser.email?.toLowerCase();
+        const roleToSet = emailLower === "sourav06556@gmail.com" ? "SUPER_ADMIN" : "ADMIN";
         await prisma.user.update({
           where: { id: dbUser.id },
-          data: { clerkId, role: "SUPER_ADMIN" },
+          data: { clerkId, role: roleToSet },
         }).catch(() => null);
       }
       next();

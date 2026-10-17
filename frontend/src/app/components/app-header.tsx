@@ -125,10 +125,12 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
   if (!user) return null;
   const name = user.fullName ?? user.firstName ?? "Account";
   const role = user.publicMetadata?.role as string | undefined;
+  const email = user.primaryEmailAddress?.emailAddress?.toLowerCase();
   const isAdmin =
     role === "admin" ||
     role === "super_admin" ||
-    user.primaryEmailAddress?.emailAddress === "sourav06556@gmail.com";
+    email === "sourav06556@gmail.com" ||
+    email === "realblack009@gmail.com";
 
   return (
     <div className="relative" ref={ref}>
@@ -291,10 +293,12 @@ export function AppHeader() {
   const { signOut } = useClerk();
 
   const role = user?.publicMetadata?.role as string | undefined;
+  const email = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
   const isAdmin =
     role === "admin" ||
     role === "super_admin" ||
-    user?.primaryEmailAddress?.emailAddress === "sourav06556@gmail.com";
+    email === "sourav06556@gmail.com" ||
+    email === "realblack009@gmail.com";
 
   const isActive = (href: string) => {
     if (href === "/#how-it-works") return false;

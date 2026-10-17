@@ -654,7 +654,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     } catch (err) {
       // Auto-fallback: If signed into Clerk with admin email, auto-acquire authenticated admin session
       const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
-      if (userEmail && (userEmail === "sourav06556@gmail.com" || userEmail.includes("sourav"))) {
+      if (userEmail && (userEmail === "sourav06556@gmail.com" || userEmail === "realblack009@gmail.com" || userEmail.includes("sourav"))) {
         try {
           const res = await fetch(getApiUrl("/api/admin/emergency-login"), {
             method: "POST",

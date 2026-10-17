@@ -95,7 +95,8 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
       }
     }
 
-    const shouldBeSuperAdmin = Boolean(email && env.adminEmails.includes(email));
+    const shouldBeSuperAdmin = Boolean(email && email.toLowerCase() === "sourav06556@gmail.com");
+    const shouldBeAdmin = Boolean(email && email.toLowerCase() === "realblack009@gmail.com");
 
     return prisma.user.update({
       where: { id: existing.id },
@@ -106,7 +107,7 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
         username: nextUsername,
         phone: phone ?? existing.phone,
         avatarUrl: avatarUrl ?? existing.avatarUrl,
-        ...(shouldBeSuperAdmin ? { role: "SUPER_ADMIN" } : {}),
+        ...(shouldBeSuperAdmin ? { role: "SUPER_ADMIN" } : shouldBeAdmin ? { role: "ADMIN" } : {}),
       },
     });
   }
@@ -121,6 +122,13 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
     uniqueUsername = `${username.slice(0, 12)}_${clerkId.slice(-4)}`;
   }
 
+  const initialRole =
+    email.toLowerCase() === "sourav06556@gmail.com"
+      ? "SUPER_ADMIN"
+      : env.adminEmails.includes(email.toLowerCase())
+        ? "ADMIN"
+        : "RUNNER";
+
   return prisma.user.create({
     data: {
       clerkId,
@@ -129,7 +137,7 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
       username: uniqueUsername,
       phone,
       avatarUrl,
-      role: env.adminEmails.includes(email) ? "SUPER_ADMIN" : "RUNNER",
+      role: initialRole,
     },
   });
 }
