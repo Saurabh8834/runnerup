@@ -1,17 +1,21 @@
 // @ts-nocheck
+import "dotenv/config";
 import { v2 as cloudinary } from "cloudinary";
-import { env } from "../src/config/env.js";
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
 console.log("==================================================");
 console.log("       RUNNER UP - CLOUDINARY CONFIG CHECK");
 console.log("==================================================");
 
-if (!env.cloudinaryCloudName || !env.cloudinaryApiKey || !env.cloudinaryApiSecret) {
+if (!cloudName || !apiKey || !apiSecret) {
   console.log("\n[STATUS: NOT CONFIGURED]");
   console.log("Missing Cloudinary environment variables in backend/.env:");
-  console.log("  CLOUDINARY_CLOUD_NAME:", env.cloudinaryCloudName ? "✓ Present" : "✗ Missing");
-  console.log("  CLOUDINARY_API_KEY:   ", env.cloudinaryApiKey ? "✓ Present" : "✗ Missing");
-  console.log("  CLOUDINARY_API_SECRET:", env.cloudinaryApiSecret ? "✓ Present" : "✗ Missing");
+  console.log("  CLOUDINARY_CLOUD_NAME:", cloudName ? "✓ Present" : "✗ Missing");
+  console.log("  CLOUDINARY_API_KEY:   ", apiKey ? "✓ Present" : "✗ Missing");
+  console.log("  CLOUDINARY_API_SECRET:", apiSecret ? "✓ Present" : "✗ Missing");
   console.log("\nYou can configure either:");
   console.log("Option A (Individual keys in backend/.env):");
   console.log('  CLOUDINARY_CLOUD_NAME="your_cloud_name"');
@@ -23,14 +27,14 @@ if (!env.cloudinaryCloudName || !env.cloudinaryApiKey || !env.cloudinaryApiSecre
 }
 
 console.log("\n[CONFIG DETECTED]");
-console.log("  Cloud Name:", env.cloudinaryCloudName);
-console.log("  API Key:   ", env.cloudinaryApiKey ? `***${env.cloudinaryApiKey.slice(-4)}` : "None");
-console.log("  API Secret:", env.cloudinaryApiSecret ? "****** (Set)" : "None");
+console.log("  Cloud Name:", cloudName);
+console.log("  API Key:   ", apiKey ? `***${apiKey.slice(-4)}` : "None");
+console.log("  API Secret:", apiSecret ? "****** (Set)" : "None");
 
 cloudinary.config({
-  cloud_name: env.cloudinaryCloudName,
-  api_key: env.cloudinaryApiKey,
-  api_secret: env.cloudinaryApiSecret,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
   secure: true,
 });
 
@@ -39,8 +43,15 @@ try {
   const result = await cloudinary.api.ping();
   console.log("\n[SUCCESS] Cloudinary is ACTIVE and working!");
   console.log("  Response:", result);
-  console.log("  GPS Proof uploads, Gallery submissions, and Event Banners will now use Cloudinary CDN!");
+
+  const usage = await cloudinary.api.usage();
+  console.log("\n[CURRENT USAGE REPORT]");
+  console.log("  Credits Total:       ", usage.credits?.usage, "/", usage.credits?.credits, `(${usage.credits?.percent_of_limit?.toFixed(1)}%)`);
+  console.log("  Bandwidth (Bytes):   ", usage.bandwidth?.usage, "credits used:", usage.bandwidth?.credits);
+  console.log("  Storage (Bytes):     ", usage.storage?.usage, "credits used:", usage.storage?.credits);
+  console.log("  Transformations:     ", usage.transformations?.usage, "credits used:", usage.transformations?.credits);
+  console.log("  Objects:             ", usage.objects?.usage);
 } catch (err: any) {
-  console.error("\n[ERROR] Cloudinary ping failed:", err.message || err);
+  console.error("\n[ERROR] Cloudinary call failed:", err.message || err);
   process.exit(1);
 }
