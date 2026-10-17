@@ -24,14 +24,12 @@ const nextConfig: NextConfig = {
   // so external clients accessing runnerup.in can reach the API without CORS or mixed-content issues.
   async rewrites() {
     const isDev = process.env.NODE_ENV !== "production";
-    const rawTarget = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL;
-    const backendTarget = (
-      rawTarget && !rawTarget.includes("railway") && (!isDev || rawTarget.includes("127.0.0.1") || rawTarget.includes("localhost"))
-        ? rawTarget
-        : isDev
-          ? "http://127.0.0.1:4000"
-          : "https://api.runnerup.in"
-    ).replace(/\/+$/, "");
+    const rawTarget = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
+    const backendTarget = rawTarget
+      ? rawTarget
+      : isDev
+        ? "http://127.0.0.1:4000"
+        : "https://api.runnerup.in";
 
     return [
       {
