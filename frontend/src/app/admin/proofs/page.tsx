@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, formatDateTime } from "../../../lib/admin-api";
+import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
 import {
   CheckCircle,
@@ -499,12 +500,12 @@ export default function AdminProofsPage() {
                         <img
                           alt="GPS proof screenshot"
                           className="h-full w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
-                          src={row.proofUpload.activityImageUrl}
-                          onClick={() => setLightboxUrl(row.proofUpload?.activityImageUrl ?? null)}
+                          src={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl, 600)}
+                          onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
                         />
                         <button
                           type="button"
-                          onClick={() => setLightboxUrl(row.proofUpload?.activityImageUrl ?? null)}
+                          onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
                           className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold gap-1.5"
                         >
                           <ZoomIn className="h-4 w-4" /> Click to Zoom

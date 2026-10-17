@@ -58,22 +58,14 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
   "indian-air-force-day-virtual-challenge": "/images/event-medal.webp",
   "indian-air-force-day-2026": "/images/event-medal.webp",
-  "october-runner":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564508/runnerup/events/october-runner.jpg",
-  "independence-day-virtual-run-2026":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
-  "monsoon-mountain-miles":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
-  "independence-endurance-run":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
-  "himalayan-winter-sprint":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
-  "spring-valley-dash":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
-  "holi-color-virtual-run":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
-  "new-year-night-miles":
-    "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
+  "october-runner": "/events/october-runner.webp",
+  "independence-day-virtual-run-2026": "/events/independence-day-virtual-run-2026.webp",
+  "monsoon-mountain-miles": "/events/monsoon-mountain-miles.webp",
+  "independence-endurance-run": "/events/independence-endurance-run.webp",
+  "himalayan-winter-sprint": "/events/himalayan-winter-sprint.webp",
+  "spring-valley-dash": "/events/spring-valley-dash.webp",
+  "holi-color-virtual-run": "/events/holi-color-virtual-run.webp",
+  "new-year-night-miles": "/events/new-year-night-miles.webp",
 };
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
@@ -83,9 +75,11 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
     event.name.toLowerCase().includes("air force");
 
   const defaultPoster =
-    event.bannerImageUrl ||
-    (isAirForce ? "/images/event-medal.webp" : FALLBACK_EVENT_IMAGES[event.slug]) ||
-    `/events/${event.slug}.webp`;
+    (isAirForce
+      ? "/images/event-medal.webp"
+      : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+      ? event.bannerImageUrl
+      : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
@@ -93,9 +87,11 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
   useEffect(() => {
     const nextPoster =
-      event.bannerImageUrl ||
-      (isAirForce ? "/images/event-medal.webp" : FALLBACK_EVENT_IMAGES[event.slug]) ||
-      `/events/${event.slug}.webp`;
+      (isAirForce
+        ? "/images/event-medal.webp"
+        : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+        ? event.bannerImageUrl
+        : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug, isAirForce]);
@@ -304,13 +300,17 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 /* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const defaultPoster =
-    event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+    (event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+      ? event.bannerImageUrl
+      : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
     const nextPoster =
-      event.bannerImageUrl || FALLBACK_EVENT_IMAGES[event.slug] || `/events/${event.slug}.webp`;
+      (event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+        ? event.bannerImageUrl
+        : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug]);

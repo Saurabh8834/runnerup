@@ -65,8 +65,7 @@ export const defaultEvents: DefaultEvent[] = [
     status: "COMPLETED",
     city: "Virtual (All India)",
     featured: false,
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564521/runnerup/events/independence-day-virtual-run-2026.jpg",
+    bannerImageUrl: "/events/independence-day-virtual-run-2026.webp",
     medalImageUrl: "/images/medals/independence-day-virtual-run-2026.jpg",
     banner: "Flagship run",
     reward: "Premium medal + T-shirt + certificate",
@@ -92,8 +91,7 @@ export const defaultEvents: DefaultEvent[] = [
     status: "COMPLETED",
     city: "Virtual",
     featured: false,
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564525/runnerup/events/monsoon-mountain-miles.jpg",
+    bannerImageUrl: "/events/monsoon-mountain-miles.webp",
     medalImageUrl: "/images/medals/monsoon-mountain-miles.jpg",
     banner: "Rain-ready challenge",
     reward: "Medal + certificate",
@@ -118,8 +116,7 @@ export const defaultEvents: DefaultEvent[] = [
     status: "COMPLETED",
     city: "Virtual",
     featured: false,
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564535/runnerup/events/himalayan-winter-sprint.jpg",
+    bannerImageUrl: "/events/himalayan-winter-sprint.webp",
     medalImageUrl: "/images/medals/himalayan-winter-sprint.jpg",
     banner: "Fast festive sprint",
     reward: "Digital kit + medal",
@@ -143,8 +140,7 @@ export const defaultEvents: DefaultEvent[] = [
     status: "COMPLETED",
     city: "Virtual",
     featured: false,
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564531/runnerup/events/independence-endurance-run.jpg",
+    bannerImageUrl: "/events/independence-endurance-run.webp",
     medalImageUrl: "/images/medals/independence-endurance-run.jpg",
     banner: "Flagship endurance week",
     reward: "Premium medal + T-shirt",
@@ -168,8 +164,7 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 44900,
     status: "COMPLETED",
     city: "Virtual",
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564545/runnerup/events/spring-valley-dash.jpg",
+    bannerImageUrl: "/events/spring-valley-dash.webp",
     medalImageUrl: "/images/medals/spring-valley-dash.jpg",
     banner: "Season opener",
     reward: "Medal + certificate",
@@ -191,8 +186,7 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 34900,
     status: "COMPLETED",
     city: "Virtual",
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564549/runnerup/events/holi-color-virtual-run.jpg",
+    bannerImageUrl: "/events/holi-color-virtual-run.webp",
     medalImageUrl: "/images/medals/holi-color-virtual-run.jpg",
     banner: "Festival run",
     reward: "Digital kit + medal",
@@ -214,8 +208,7 @@ export const defaultEvents: DefaultEvent[] = [
     priceInPaise: 54900,
     status: "COMPLETED",
     city: "Virtual",
-    bannerImageUrl:
-      "https://res.cloudinary.com/gpy6aiwy/image/upload/v1791564555/runnerup/events/new-year-night-miles.jpg",
+    bannerImageUrl: "/events/new-year-night-miles.webp",
     medalImageUrl: "/images/medals/new-year-night-miles.jpg",
   },
 ];

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../../lib/admin-api";
+import { optimizeCloudinaryUrl } from "../../../../lib/cloudinary";
 import { AdminBackLink, AdminPageHeader, AdminPanel } from "../../ui";
 
 type RegistrationDetail = {
@@ -203,7 +204,7 @@ export default function AdminRegistrationDetailPage() {
                   <img
                     alt="GPS proof screenshot"
                     className="h-44 w-full object-cover"
-                    src={data.proofUpload.activityImageUrl}
+                    src={optimizeCloudinaryUrl(data.proofUpload.activityImageUrl, 600)}
                   />
                 </a>
                 {data.proofUpload.reviewerNote ? (

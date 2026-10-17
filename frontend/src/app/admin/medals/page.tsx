@@ -26,6 +26,7 @@ import {
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { adminFetch, downloadAdminExport } from "../../../lib/admin-api";
+import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { getApiUrl } from "../../../lib/api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
 
@@ -732,7 +733,7 @@ export default function AdminMedalDispatchPage() {
                     <div className="mt-3 overflow-hidden rounded-lg border border-(--line)">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={activeItem.proofUpload.activityImageUrl}
+                        src={optimizeCloudinaryUrl(activeItem.proofUpload.activityImageUrl, 600)}
                         alt="GPS Proof screenshot"
                         className="max-h-48 w-full object-contain bg-black"
                       />

@@ -32,9 +32,13 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
     event.slug.includes("air-force") ||
     event.name.toLowerCase().includes("air force");
 
-  const initialImage =
-    event.bannerImageUrl ||
-    (isAirForce ? "/images/event-medal.webp" : `/events/${event.slug}.webp`);
+  const resolvePoster = (slug: string, bannerUrl?: string) => {
+    if (isAirForce) return "/images/event-medal.webp";
+    if (bannerUrl && !bannerUrl.includes("res.cloudinary.com")) return bannerUrl;
+    return `/events/${slug}.webp`;
+  };
+
+  const initialImage = resolvePoster(event.slug, event.bannerImageUrl);
 
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
@@ -42,10 +46,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
 
   useEffect(() => {
-    setImgSrc(
-      event.bannerImageUrl ||
-        (isAirForce ? "/images/event-medal.webp" : `/events/${event.slug}.webp`)
-    );
+    setImgSrc(resolvePoster(event.slug, event.bannerImageUrl));
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug, isAirForce]);
 
