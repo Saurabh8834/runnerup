@@ -135,6 +135,15 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
               data: { status: "CONFIRMED" },
             });
 
+            if (paymentToUpdate.registration?.userId) {
+              await prisma.user
+                .update({
+                  where: { id: paymentToUpdate.registration.userId },
+                  data: { updatedAt: new Date() },
+                })
+                .catch(() => null);
+            }
+
             if (paymentToUpdate.registration?.event?.medalIncluded) {
               await prisma.medalDelivery
                 .upsert({
@@ -212,6 +221,15 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
           where: { id: payment.registrationId },
           data: { status: "CONFIRMED" },
         });
+
+        if (payment.registration?.userId) {
+          await prisma.user
+            .update({
+              where: { id: payment.registration.userId },
+              data: { updatedAt: new Date() },
+            })
+            .catch(() => null);
+        }
 
         if (payment.registration?.event?.medalIncluded) {
           await prisma.medalDelivery

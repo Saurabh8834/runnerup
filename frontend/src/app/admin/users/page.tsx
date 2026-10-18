@@ -24,7 +24,12 @@ type UserRow = {
 export default function AdminUsersPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<UserRow[]>([]);
-  const [meta, setMeta] = useState({ total: 0, totalPaidUsers: 0, totalUnpaidUsers: 0 });
+  const [meta, setMeta] = useState<{
+    total: number;
+    totalPaidUsers: number;
+    totalUnpaidUsers: number;
+    totalPaidRegistrations?: number;
+  }>({ total: 0, totalPaidUsers: 0, totalUnpaidUsers: 0 });
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
@@ -48,7 +53,12 @@ export default function AdminUsersPage() {
       if (status) params.set("status", status);
       const json = await adminFetch<{
         data: UserRow[];
-        meta: { total: number; totalPaidUsers?: number; totalUnpaidUsers?: number };
+        meta: {
+          total: number;
+          totalPaidUsers?: number;
+          totalUnpaidUsers?: number;
+          totalPaidRegistrations?: number;
+        };
       }>(`/api/admin/users?${params}`, token);
       let userList = json.data;
       let totalPaid = json.meta?.totalPaidUsers;
@@ -100,6 +110,7 @@ export default function AdminUsersPage() {
         total: json.meta?.total ?? userList.length,
         totalPaidUsers: totalPaid ?? paidInPage,
         totalUnpaidUsers: totalUnpaid ?? Math.max(0, (json.meta?.total ?? userList.length) - paidInPage),
+        totalPaidRegistrations: json.meta?.totalPaidRegistrations,
       });
       setError(null);
     } catch (err) {
@@ -190,7 +201,7 @@ export default function AdminUsersPage() {
       <AdminPageHeader
         kicker="People"
         title="Users"
-        description={`${meta.total} total · ${meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴)`}
+        description={`${meta.total} total · ${meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴)${meta.totalPaidRegistrations && meta.totalPaidRegistrations !== meta.totalPaidUsers ? ` · (${meta.totalPaidRegistrations} paid registrations across ${meta.totalPaidUsers} runners)` : ""}`}
         actions={
           <button
             className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"

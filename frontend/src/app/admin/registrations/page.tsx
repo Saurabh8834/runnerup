@@ -16,13 +16,18 @@ type Row = {
   registeredAt: string;
   user: { name: string; email: string };
   event: { title: string };
-  payment?: { status: string; amountInPaise: number } | null;
+  payment?: { status: string; amountInPaise: number; paidAt?: string | null } | null;
 };
 
 export default function AdminRegistrationsPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
+  const [meta, setMeta] = useState<{ total: number; paidCount: number; unpaidCount: number }>({
+    total: 0,
+    paidCount: 0,
+    unpaidCount: 0,
+  });
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -42,12 +47,23 @@ export default function AdminRegistrationsPage() {
       const params = new URLSearchParams({ pageSize: "50" });
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
-      const json = await adminFetch<{ data: Row[]; meta: { total: number } }>(
-        `/api/admin/registrations?${params}`,
-        token,
-      );
+      const json = await adminFetch<{
+        data: Row[];
+        meta: { total: number; paidCount?: number; unpaidCount?: number };
+      }>(`/api/admin/registrations?${params}`, token);
       setItems(json.data);
-      setTotal(json.meta.total);
+      const totalCount = json.meta.total ?? json.data.length;
+      const paid =
+        json.meta.paidCount ??
+        json.data.filter(
+          (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
+        ).length;
+      setMeta({
+        total: totalCount,
+        paidCount: paid,
+        unpaidCount: json.meta.unpaidCount ?? Math.max(0, totalCount - paid),
+      });
+      setTotal(totalCount);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
@@ -123,16 +139,12 @@ export default function AdminRegistrationsPage() {
     }
   }
 
-  const paidCount = items.filter(
-    (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
-  ).length;
-
   return (
     <div className="admin-stack">
       <AdminPageHeader
         kicker="Operations"
         title="Registrations"
-        description={`${total} total · ${paidCount} Paid (🟢) · ${items.length - paidCount} Unpaid (🔴)`}
+        description={`${meta.total} total · ${meta.paidCount} Paid (🟢) · ${meta.unpaidCount} Unpaid (🔴)`}
         actions={
           <button
             className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"
@@ -227,7 +239,23 @@ export default function AdminRegistrationsPage() {
                       ) : null}
                     </div>
                   </td>
-                  <td className="text-xs">{formatDateTime(row.registeredAt)}</td>
+                  <td
+                    className="text-xs"
+                    title={
+                      row.payment?.paidAt
+                        ? `Paid: ${formatDateTime(row.payment.paidAt)} | Registered: ${formatDateTime(row.registeredAt)}`
+                        : undefined
+                    }
+                  >
+                    <div>{formatDateTime(row.payment?.paidAt ?? row.registeredAt)}</div>
+                    {row.payment?.paidAt &&
+                    new Date(row.payment.paidAt).getTime() - new Date(row.registeredAt).getTime() >
+                      60000 ? (
+                      <div className="text-[10px] text-emerald-400 font-medium">
+                        Paid {formatDateTime(row.payment.paidAt)}
+                      </div>
+                    ) : null}
+                  </td>
                   <td>
                     <div className="flex items-center gap-2.5">
                       <Link

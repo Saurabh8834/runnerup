@@ -57,6 +57,13 @@ export async function createPaymentOrder(request: Request, response: Response) {
           data: { status: "CONFIRMED" },
         });
 
+        await prisma.user
+          .update({
+            where: { id: registration.userId },
+            data: { updatedAt: new Date() },
+          })
+          .catch(() => null);
+
         if (registration.event.medalIncluded) {
           await prisma.medalDelivery
             .upsert({
@@ -266,6 +273,13 @@ export async function verifyPayment(request: Request, response: Response) {
       include: { user: true, event: true },
     });
 
+    await prisma.user
+      .update({
+        where: { id: registration.userId },
+        data: { updatedAt: new Date() },
+      })
+      .catch(() => null);
+
     if (registration.event?.medalIncluded) {
       await prisma.medalDelivery
         .upsert({
@@ -394,6 +408,13 @@ export async function handleRazorpayWebhook(request: Request, response: Response
           data: { status: "CONFIRMED" },
           include: { user: true, event: true },
         });
+
+        await prisma.user
+          .update({
+            where: { id: registration.userId },
+            data: { updatedAt: new Date() },
+          })
+          .catch(() => null);
 
         if (registration.event?.medalIncluded) {
           await prisma.medalDelivery

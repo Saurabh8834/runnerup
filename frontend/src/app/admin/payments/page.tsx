@@ -138,7 +138,7 @@ export default function AdminPaymentsPage() {
       <AdminPageHeader
         kicker="Finance"
         title="Payments"
-        description={`Paid ${meta.paidCount} (🟢) · Total Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
+        description={`${meta.total} total · ${meta.paidCount} Paid (🟢) · ${Math.max(0, meta.total - meta.paidCount)} Unpaid (🔴) · Total Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
         actions={
           <div className="flex items-center gap-2">
             <button
