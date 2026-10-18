@@ -87,8 +87,8 @@ export function FloatingContact() {
       aria-label="Customer Support Chat"
       className={`fixed z-50 right-3.5 sm:right-6 transition-all duration-200 ${
         isEventDetail
-          ? "bottom-[5.5rem] md:bottom-[5.85rem]"
-          : "bottom-[4.85rem] md:bottom-[5.25rem]"
+          ? "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-[5.85rem]"
+          : "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-[5.25rem]"
       }`}
     >
       {/* ─── Expandable Support / WhatsApp Popup (BeyondRun Reference) ─── */}

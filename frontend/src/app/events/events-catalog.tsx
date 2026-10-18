@@ -6,12 +6,14 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
+  FileBadge,
   IndianRupee,
   Users,
   BadgeCheck,
   MapPin,
   Sparkles,
   Medal,
+  Ticket,
   Flame,
   Zap,
   Timer,
@@ -206,8 +208,23 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
       {/* Body Content */}
       <div className="flex flex-1 flex-col p-5 sm:p-6 bg-[#172c34]">
-        {/* Reward Highlight Badge for Medal Cards (Positioned in body so medal is 100% visible) */}
-        {isAirForce && (
+        {/* Reward Highlight Badges for Medal Cards */}
+        {isAirForce ? (
+          <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300 shadow-sm">
+              <Medal className="h-3 w-3 text-amber-400 shrink-0" />
+              Solid Metal Medal
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-cyan-300 shadow-sm">
+              <Ticket className="h-3 w-3 text-cyan-400 shrink-0" />
+              Digital Race Bib
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-300 shadow-sm">
+              <FileBadge className="h-3 w-3 text-emerald-400 shrink-0" />
+              E-Certificate
+            </span>
+          </div>
+        ) : (
           <div className="mb-3.5 inline-flex items-center gap-2 rounded-xl border border-[#90aead]/25 bg-[#244855]/35 px-3 py-1.5 text-xs font-bold text-[#fbe9d0] shadow-sm">
             <Medal className="h-4 w-4 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>

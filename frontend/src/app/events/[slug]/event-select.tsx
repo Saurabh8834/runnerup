@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Bike, Footprints, IndianRupee, Route, Sparkles, Timer } from "lucide-react";
+import { Bike, FileBadge, Footprints, IndianRupee, Medal, Route, Shirt, Sparkles, Ticket, Timer, Trophy, Truck } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
 import { EventCountdown } from "./countdown";
@@ -111,24 +111,63 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                 ) : null}
 
                 {/* What's included */}
-                <div className="mt-5 rounded-2xl border border-(--gold-line) bg-(--gold-soft) p-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-(--gold-deep)">
-                    Every entry includes
-                  </p>
-                  <ul className="mt-3 space-y-1.5 text-[0.72rem] font-medium text-(--muted)">
-                    <li className="flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3 shrink-0 text-(--gold-deep)" />
-                      Finisher medal · Printed certificate · Top 3 T-shirt award
+                <div className="mt-5 rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#14242a]/95 to-[#122329]/95 p-4 sm:p-5 shadow-lg">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <p className="text-xs font-black uppercase tracking-widest text-[#f59e0b]">
+                      Every Entry Includes
+                    </p>
+                    <span className="text-[0.62rem] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/35 text-amber-300 tracking-wider">
+                      Official Kit
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2.5 text-xs font-medium">
+                    <li className="flex items-center gap-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                        <Medal className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="font-semibold text-[#fcf8f2]">100% Solid Heavy Metal Finisher Medal</span>
                     </li>
-                    <li className="flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3 shrink-0 text-(--gold-deep)" />
-                      Verified finish on the public leaderboard
+                    <li className="flex items-center gap-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+                        <Ticket className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="font-semibold text-[#fcf8f2]">Official Digital Race Bib with Unique Number</span>
                     </li>
-                    <li className="flex items-center gap-1.5">
-                      <Sparkles className="h-3 w-3 shrink-0 text-(--gold-deep)" />
-                      Free doorstep delivery across India
+                    <li className="flex items-center gap-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <FileBadge className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-[#90aead]">Verifiable Official Finisher Certificate</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
+                        <Trophy className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-[#90aead]">GPS-Verified Public Leaderboard Ranking</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <Truck className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="text-[#90aead]">Free Doorstep Delivery Across India (All Pincodes)</span>
                     </li>
                   </ul>
+
+                  {/* Special Podium Trophy Award (Top 3 T-Shirt) */}
+                  <div className="mt-4 pt-3.5 border-t border-white/10 flex items-start gap-2.5 rounded-xl bg-black/35 border border-amber-500/25 p-3">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300">
+                      <Shirt className="h-3.5 w-3.5" />
+                    </span>
+                    <div className="min-w-0 flex flex-col">
+                      <span className="text-[0.68rem] font-bold text-amber-300 uppercase tracking-wide">
+                        🏆 Top 3 Podium Award
+                      </span>
+                      <p className="text-[0.72rem] text-[#fbe9d0] leading-tight mt-0.5">
+                        Exclusive athletic DRI-FIT performance T-shirt awarded to the top 3 leaderboard finishers.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* CTA */}
