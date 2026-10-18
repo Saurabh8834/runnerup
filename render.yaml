@@ -31,7 +31,9 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
-        value: Runner Up <onboarding@resend.dev>
+        value: Runner Up <team@runnerup.in>
+      - key: RESEND_REPLY_TO
+        value: runnerupofficials@gmail.com
       - key: CERTIFICATE_AUTO_SEND
         value: "true"
       - key: CLERK_SECRET_KEY

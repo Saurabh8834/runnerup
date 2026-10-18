@@ -137,6 +137,7 @@ export const env = {
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET ?? "",
   resendApiKey: readEnv("RESEND_API_KEY"),
   resendFromEmail: normalizeResendFrom(process.env.RESEND_FROM_EMAIL),
+  resendReplyToEmail: readEnv("RESEND_REPLY_TO", "runnerupofficials@gmail.com"),
   cloudinaryCloudName: cloudinaryConfig.cloudName,
   cloudinaryApiKey: cloudinaryConfig.apiKey,
   cloudinaryApiSecret: cloudinaryConfig.apiSecret,

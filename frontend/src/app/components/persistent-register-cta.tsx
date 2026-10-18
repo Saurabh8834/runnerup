@@ -3,13 +3,66 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { authHeaders, getApiUrl } from "../../lib/api";
 
 export function PersistentRegisterCta() {
   const pathname = usePathname();
+  const { isSignedIn, getToken } = useAuth();
+  const [isPaidCustomer, setIsPaidCustomer] = useState(false);
 
-  // Hide on registration page itself (user is already on the payment checkout form)
-  // and inside the admin portal
-  if (pathname === "/register" || pathname?.startsWith("/admin")) {
+  // 1. Immediately hide on athlete profile / dashboard, checkout, admin, and certificates
+  if (
+    pathname === "/register" ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/profile") ||
+    pathname?.startsWith("/certificates")
+  ) {
+    return null;
+  }
+
+  // 2. If user is signed in, check if they already have an active paid registration
+  // If so, do not bother them with "Register Now" banners anywhere on the site
+  useEffect(() => {
+    if (!isSignedIn) {
+      setIsPaidCustomer(false);
+      return;
+    }
+
+    let isMounted = true;
+    async function checkPaidStatus() {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetch(getApiUrl("/api/users/me"), {
+          headers: authHeaders(token),
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const registrations = json.data?.registrations ?? [];
+        const hasPaid = registrations.some(
+          (r: any) =>
+            r.status === "CONFIRMED" ||
+            r.status === "COMPLETED" ||
+            r.payment?.status === "PAID"
+        );
+        if (isMounted && hasPaid) {
+          setIsPaidCustomer(true);
+        }
+      } catch {
+        // Silently keep default on network errors
+      }
+    }
+
+    void checkPaidStatus();
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, getToken]);
+
+  if (isPaidCustomer) {
     return null;
   }
 
