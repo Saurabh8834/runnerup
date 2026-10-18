@@ -201,7 +201,7 @@ export default function AdminUsersPage() {
       <AdminPageHeader
         kicker="People"
         title="Users"
-        description={`${meta.total} total · ${meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴)${meta.totalPaidRegistrations && meta.totalPaidRegistrations !== meta.totalPaidUsers ? ` · (${meta.totalPaidRegistrations} paid registrations across ${meta.totalPaidUsers} runners)` : ""}`}
+        description={`${meta.total} total · ${meta.totalPaidRegistrations ?? meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴) · (${meta.totalPaidUsers} individual runners)`}
         actions={
           <button
             className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"

@@ -66,13 +66,8 @@ const nextConfig: NextConfig = {
 
   // ── Image optimisation ───────────────────────────────────
   images: {
+    unoptimized: true,
     formats: ["image/avif", "image/webp"],
-    deviceSizes: [390, 640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 64, 96, 128, 200, 256, 384],
-    minimumCacheTTL: 31536000, // 1 year
-    dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: "https",
@@ -88,6 +83,15 @@ const nextConfig: NextConfig = {
   // ── Edge Cache for Public Static Assets ─────────────────
   async headers() {
     return [
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
       {
         source: "/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff2|webmanifest)",
         headers: [
