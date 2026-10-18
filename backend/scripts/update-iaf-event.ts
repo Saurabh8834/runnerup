@@ -9,7 +9,7 @@ async function main() {
     title: "Indian Air Force Day Virtual Challenge 2026",
     description: desc,
     bannerImageUrl: "/images/event-medal.webp",
-    reward: "100% Solid Metal Finisher Medal + E-Certificate",
+    reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
     banner: "Air Force Day Virtual Challenge",
     highlight: "Salute the Air Warriors · Run, Walk or Ride on 25–30 Oct",
     startsAt: new Date("2026-10-25T00:00:00.000Z"),
@@ -24,9 +24,10 @@ async function main() {
     city: "Virtual (All India)",
     benefits: [
       "100% Solid Metal Finisher Medal Included",
+      "Official Digital Race Bib with Unique Number",
       "Free doorstep delivery across India",
       "Works with Strava, Garmin, NRC",
-      "Official Verifiable E-Certificate & Digital Bib",
+      "Official Verifiable E-Certificate",
       "Live GPS-Verified Leaderboard Ranking",
     ],
   };

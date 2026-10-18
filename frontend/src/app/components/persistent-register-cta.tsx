@@ -12,13 +12,14 @@ export function PersistentRegisterCta() {
   const { isSignedIn, getToken } = useAuth();
   const [isPaidCustomer, setIsPaidCustomer] = useState(false);
 
-  // 1. Immediately hide on athlete profile / dashboard, checkout, admin, and certificates
+  // 1. Immediately hide on athlete profile / dashboard, checkout, admin, certificates, and event detail pages (which have their own EventStickyCta)
   if (
     pathname === "/register" ||
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/dashboard") ||
     pathname?.startsWith("/profile") ||
-    pathname?.startsWith("/certificates")
+    pathname?.startsWith("/certificates") ||
+    (pathname?.startsWith("/events/") && pathname !== "/events")
   ) {
     return null;
   }
@@ -112,7 +113,7 @@ export function PersistentRegisterCta() {
                   </span>
                 </div>
                 <p className="text-[9.5px] font-medium text-[#90aead] truncate">
-                  Medals · DRI-FIT Bib · Official Kits
+                  Medals · Digital Race Bib · Official Kits
                 </p>
               </div>
             </div>

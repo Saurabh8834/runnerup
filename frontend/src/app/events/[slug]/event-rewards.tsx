@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Trophy, Truck } from "lucide-react";
+import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Ticket, Trophy, Truck } from "lucide-react";
 import { getEventMedalImage, type PublicEvent } from "../../data/events";
 import { Medal3D, Medal3DViewer } from "./medal";
 import { Reveal, SectionHeader } from "./reveal";
@@ -9,6 +9,11 @@ const items = [
     icon: Medal,
     title: "Finisher medal",
     desc: "A heavyweight metal medal with a gold-trimmed ribbon, designed to be worn.",
+  },
+  {
+    icon: Ticket,
+    title: "Official Digital Race Bib",
+    desc: "Personalized official digital race bib with your name and unique runner number, ready to download and share instantly on registration.",
   },
   {
     icon: Shirt,
@@ -109,6 +114,10 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-amber-300 shadow-sm backdrop-blur-md">
                   <Shirt className="h-3.5 w-3.5 text-amber-400" />
                   <span>Top 3 Podium T-shirt</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-cyan-500/30 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-cyan-300 shadow-sm backdrop-blur-md">
+                  <Ticket className="h-3.5 w-3.5 text-cyan-400" />
+                  <span>Digital Race Bib</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
                   <FileBadge className="h-3.5 w-3.5 text-[#e64833]" />

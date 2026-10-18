@@ -78,12 +78,18 @@ export function FloatingContact() {
     return null;
   }
 
+  const isEventDetail = pathname?.startsWith("/events/") && pathname !== "/events";
+
   return (
     <aside
       ref={containerRef}
       data-floating-contact="true"
       aria-label="Customer Support Chat"
-      className="fixed z-50 right-3.5 sm:right-6 bottom-[4.85rem] md:bottom-[5.25rem]"
+      className={`fixed z-50 right-3.5 sm:right-6 transition-all duration-200 ${
+        isEventDetail
+          ? "bottom-[5.5rem] md:bottom-[5.85rem]"
+          : "bottom-[4.85rem] md:bottom-[5.25rem]"
+      }`}
     >
       {/* ─── Expandable Support / WhatsApp Popup (BeyondRun Reference) ─── */}
       <AnimatePresence>

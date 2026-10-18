@@ -258,7 +258,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                 )}
               </div>
               <p className="mt-1 text-xs sm:text-sm text-zinc-400 font-normal text-center lg:text-left">
-                Solid Metal Medal, QR Certificate & delivery across India included.
+                Solid Metal Medal, Digital Race Bib, QR Certificate & delivery across India included.
               </p>
             </motion.div>
 
@@ -318,19 +318,23 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.45 }}
-              className="mt-6 pt-5 border-t border-white/10 w-full grid grid-cols-1 xs:grid-cols-3 gap-2.5 text-xs font-semibold text-zinc-300"
+              className="mt-6 pt-5 border-t border-white/10 w-full grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-semibold text-zinc-300"
             >
-              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-3 border border-white/5">
-                <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 stroke-[2.5]" />
-                <span className="text-[0.72rem] sm:text-xs">Free Pan-India Delivery</span>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-3 border border-white/5">
-                <Check className="h-3.5 w-3.5 text-sky-400 shrink-0 stroke-[2.5]" />
-                <span className="text-[0.72rem] sm:text-xs">Strava, NRC, Garmin</span>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-3 border border-white/5">
+              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-2.5 border border-white/5">
                 <Check className="h-3.5 w-3.5 text-amber-400 shrink-0 stroke-[2.5]" />
-                <span className="text-[0.72rem] sm:text-xs">100% Solid Metal Medal</span>
+                <span className="text-[0.7rem] sm:text-xs">100% Solid Metal Medal</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-2.5 border border-white/5">
+                <Check className="h-3.5 w-3.5 text-cyan-400 shrink-0 stroke-[2.5]" />
+                <span className="text-[0.7rem] sm:text-xs">Digital Race Bib</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-2.5 border border-white/5">
+                <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0 stroke-[2.5]" />
+                <span className="text-[0.7rem] sm:text-xs">Free Pan-India Delivery</span>
+              </div>
+              <div className="flex items-center justify-center lg:justify-start gap-1.5 bg-white/5 rounded-xl py-2 px-2.5 border border-white/5">
+                <Check className="h-3.5 w-3.5 text-sky-400 shrink-0 stroke-[2.5]" />
+                <span className="text-[0.7rem] sm:text-xs">Strava, NRC, Garmin</span>
               </div>
             </motion.div>
 

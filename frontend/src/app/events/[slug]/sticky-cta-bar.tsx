@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Sparkles, Truck } from "lucide-react";
+import { ArrowRight, Sparkles, Ticket, Truck } from "lucide-react";
 import { getEventMedalImage } from "../../data/events";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { authHeaders, getApiUrl } from "../../../lib/api";
 
 function formatPrice(price: string) {
   return price.replace(/^Rs\.\s*/, "₹");
@@ -22,6 +25,44 @@ export function EventStickyCta({
   const amount = price.toLowerCase().includes("free") ? "Free" : formatPrice(price);
   const registerHref = `/register?event=${encodeURIComponent(slug)}`;
   const medalImg = getEventMedalImage(slug);
+  const { isSignedIn, getToken } = useAuth();
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setIsRegistered(false);
+      return;
+    }
+
+    let isMounted = true;
+    async function checkRegistration() {
+      try {
+        const token = await getToken();
+        if (!token) return;
+        const res = await fetch(getApiUrl("/api/users/me"), {
+          headers: authHeaders(token),
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const registrations = json.data?.registrations ?? [];
+        const hasRegisteredForThisEvent = registrations.some(
+          (r: any) =>
+            (r.event?.slug === slug || r.eventId === slug) &&
+            (r.status === "CONFIRMED" || r.status === "COMPLETED" || r.payment?.status === "PAID")
+        );
+        if (isMounted && hasRegisteredForThisEvent) {
+          setIsRegistered(true);
+        }
+      } catch {
+        // Silently keep default
+      }
+    }
+
+    void checkRegistration();
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, getToken, slug]);
 
   return (
     <>
@@ -49,7 +90,7 @@ export function EventStickyCta({
               <p className="truncate font-display text-xs sm:text-sm font-extrabold text-white tracking-tight leading-tight">
                 {eventName}
               </p>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 flex-wrap">
                 <span className="font-display font-black text-sm sm:text-base text-amber-400">
                   {amount}
                 </span>
@@ -62,28 +103,50 @@ export function EventStickyCta({
                   <Truck className="h-2.5 w-2.5" />
                   Free Delivery
                 </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-1.5 py-0.2 text-[0.6rem] font-bold text-cyan-400">
+                  <Ticket className="h-2.5 w-2.5" />
+                  Digital Race Bib
+                </span>
               </div>
             </div>
           </div>
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Submit Proof shortcut (Desktop/tablet) */}
-            <Link
-              href="/dashboard"
-              className="hidden md:inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 transition-all cursor-pointer"
-            >
-              Submit Proof
-            </Link>
+            {isRegistered ? (
+              <>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 rounded-full px-2.5 py-1">
+                  ✓ Confirmed Entry
+                </span>
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-black text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 transition-all duration-200 cursor-pointer border border-emerald-400/40"
+                >
+                  <span>Submit Proof</span>
+                  <ArrowRight className="h-3.5 w-3.5 stroke-[3]" />
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* Submit Proof shortcut (Desktop/tablet) */}
+                <Link
+                  href="/dashboard"
+                  className="hidden md:inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 transition-all cursor-pointer"
+                >
+                  Submit Proof
+                </Link>
 
-            {/* Primary High-Converting Register Button */}
-            <Link
-              href={registerHref}
-              className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] hover:brightness-110 text-white font-black text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_0_24px_rgba(230,72,51,0.6)] active:scale-95 transition-all duration-200 cursor-pointer border border-amber-300/40"
-            >
-              <span>Claim Your Kit</span>
-              <ArrowRight className="h-3.5 w-3.5 stroke-[3]" />
-            </Link>
+                {/* Primary High-Converting Register Button */}
+                <Link
+                  href={registerHref}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] hover:brightness-110 text-white font-black text-xs sm:text-sm px-4 sm:px-6 py-2.5 sm:py-3 shadow-[0_0_24px_rgba(230,72,51,0.6)] active:scale-95 transition-all duration-200 cursor-pointer border border-amber-300/40"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-amber-200" />
+                  <span>Register Now</span>
+                  <ArrowRight className="h-3.5 w-3.5 stroke-[3]" />
+                </Link>
+              </>
+            )}
           </div>
 
         </div>

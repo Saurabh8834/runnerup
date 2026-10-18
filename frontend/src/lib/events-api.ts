@@ -111,7 +111,7 @@ export function mapApiEventToPublic(
       (isPast
         ? "Completed · Tap to view recap and rewards."
         : isAirForce
-        ? "Indian Air Force Day Virtual Challenge · Solid metal finisher medal included."
+        ? "Indian Air Force Day Virtual Challenge · Solid metal finisher medal & digital race bib included."
         : "Open for registration · Choose distance and join."),
     banner: staticMatch?.banner ?? (isAirForce ? "Air Force Day Virtual Challenge" : (isPast ? "Past race" : "Open event")),
     bannerImageUrl:
@@ -124,7 +124,7 @@ export function mapApiEventToPublic(
       (isAirForce ? "/images/event-medal.webp" : undefined),
     reward:
       (isAirForce
-        ? "100% Solid Metal Finisher Medal + E-Certificate"
+        ? "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate"
         : undefined) ??
       staticMatch?.reward ??
       (isPast ? "Medal + certificate" : "Register now"),
