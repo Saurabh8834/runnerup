@@ -22,8 +22,8 @@ const items = [
   },
   {
     icon: FileBadge,
-    title: "Official printed certificate",
-    desc: "Your name, distance and verified time on a real certificate, delivered to your door.",
+    title: "Official Verifiable E-Certificate",
+    desc: "Your name, distance, and verified time on an official QR-verified E-Certificate, unlocked immediately upon proof verification.",
   },
   {
     icon: Trophy,
@@ -121,7 +121,7 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
                   <FileBadge className="h-3.5 w-3.5 text-[#e64833]" />
-                  <span>Official certificate</span>
+                  <span>Official E-Certificate</span>
                 </div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/25 bg-[#14242a]/90 px-3.5 py-1.5 text-[0.72rem] sm:text-xs font-bold text-[#fbe9d0] shadow-sm backdrop-blur-md">
                   <Truck className="h-3.5 w-3.5 text-[#e64833]" />

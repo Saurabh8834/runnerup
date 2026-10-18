@@ -121,36 +121,36 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                     </span>
                   </div>
 
-                  <ul className="space-y-2.5 text-xs font-medium">
+                  <ul className="space-y-2.5 text-xs font-semibold text-[#fcf8f2]">
                     <li className="flex items-center gap-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30">
                         <Medal className="h-3.5 w-3.5" />
                       </span>
-                      <span className="font-semibold text-[#fcf8f2]">100% Solid Heavy Metal Finisher Medal</span>
+                      <span>100% Solid Heavy Metal Finisher Medal</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
                         <Ticket className="h-3.5 w-3.5" />
                       </span>
-                      <span className="font-semibold text-[#fcf8f2]">Official Digital Race Bib with Unique Number</span>
+                      <span>Official Digital Race Bib with Unique Number</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                         <FileBadge className="h-3.5 w-3.5" />
                       </span>
-                      <span className="text-[#90aead]">Verifiable Official Finisher Certificate</span>
+                      <span>Official Verifiable E-Certificate with QR Code</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
                         <Trophy className="h-3.5 w-3.5" />
                       </span>
-                      <span className="text-[#90aead]">GPS-Verified Public Leaderboard Ranking</span>
+                      <span>GPS-Verified Public Leaderboard Ranking</span>
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-400 border border-sky-500/30">
                         <Truck className="h-3.5 w-3.5" />
                       </span>
-                      <span className="text-[#90aead]">Free Doorstep Delivery Across India (All Pincodes)</span>
+                      <span>Free Doorstep Delivery Across India (All Pincodes)</span>
                     </li>
                   </ul>
 

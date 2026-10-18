@@ -12,20 +12,7 @@ export function PersistentRegisterCta() {
   const { isSignedIn, getToken } = useAuth();
   const [isPaidCustomer, setIsPaidCustomer] = useState(false);
 
-  // 1. Immediately hide on athlete profile / dashboard, checkout, admin, certificates, and event detail pages (which have their own EventStickyCta)
-  if (
-    pathname === "/register" ||
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/dashboard") ||
-    pathname?.startsWith("/profile") ||
-    pathname?.startsWith("/certificates") ||
-    (pathname?.startsWith("/events/") && pathname !== "/events")
-  ) {
-    return null;
-  }
-
-  // 2. If user is signed in, check if they already have an active paid registration
-  // If so, do not bother them with "Register Now" banners anywhere on the site
+  // Always call all React hooks unconditionally to obey React Rules of Hooks
   useEffect(() => {
     if (!isSignedIn) {
       setIsPaidCustomer(false);
@@ -63,7 +50,17 @@ export function PersistentRegisterCta() {
     };
   }, [isSignedIn, getToken]);
 
-  if (isPaidCustomer) {
+  // Hide on athlete profile / dashboard, checkout, admin, certificates, event detail pages, and for already paid customers
+  const shouldHide =
+    pathname === "/register" ||
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/profile") ||
+    pathname?.startsWith("/certificates") ||
+    (pathname?.startsWith("/events/") && pathname !== "/events") ||
+    isPaidCustomer;
+
+  if (shouldHide) {
     return null;
   }
 
