@@ -3,6 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { cn } from "../../lib/cn";
 import { inputClass } from "./app-shell";
+import { normalizeIndianState } from "../../lib/indian-states";
 
 type SearchableSelectProps = {
   name: string;
@@ -46,20 +47,47 @@ export function SearchableSelect({
     if (!needle) {
       return [...options];
     }
-    return options.filter((option) => option.toLowerCase().includes(needle));
+    const cleanNeedle = needle
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return options.filter((option) => {
+      const lower = option.toLowerCase();
+      if (lower.includes(needle)) return true;
+      const cleanOption = lower
+        .replace(/&/g, "and")
+        .replace(/[^a-z0-9]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (cleanNeedle && cleanOption.includes(cleanNeedle)) return true;
+
+      const norm = normalizeIndianState(needle);
+      if (norm && norm.toLowerCase() === lower) return true;
+
+      return false;
+    });
   }, [options, query]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
       if (!containerRef.current?.contains(event.target as Node)) {
         setOpen(false);
-        setQuery(selected);
+        const resolved =
+          options.find((o) => o.toLowerCase() === query.trim().toLowerCase()) ||
+          normalizeIndianState(query);
+        if (resolved && (options as readonly string[]).includes(resolved)) {
+          chooseOption(resolved);
+        } else {
+          setQuery(selected);
+        }
       }
     }
 
     document.addEventListener("mousedown", handlePointerDown);
     return () => document.removeEventListener("mousedown", handlePointerDown);
-  }, [selected]);
+  }, [selected, query, options]);
 
   function chooseOption(option: string) {
     if (value === undefined) {
@@ -88,6 +116,19 @@ export function SearchableSelect({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const resolved =
+              options.find((o) => o.toLowerCase() === query.trim().toLowerCase()) ||
+              normalizeIndianState(query);
+            if (resolved && (options as readonly string[]).includes(resolved)) {
+              chooseOption(resolved);
+            } else if (filtered.length > 0) {
+              chooseOption(filtered[0]);
+            }
+          }
+        }}
         placeholder={placeholder}
         role="combobox"
         type="text"

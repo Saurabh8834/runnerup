@@ -20,7 +20,7 @@ import { PhoneInput } from "../components/phone-input";
 import { SearchableSelect } from "../components/searchable-select";
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
-import { INDIAN_STATES } from "../../lib/indian-states";
+import { INDIAN_STATES, normalizeIndianState } from "../../lib/indian-states";
 import {
   asString,
   type FieldErrors,
@@ -394,13 +394,19 @@ function PaymentRegistrationFormInner() {
             const detectedState = po.State;
             if (detectedCity) setCity(detectedCity);
             if (detectedState) {
-              const matched = INDIAN_STATES.find(
-                (s) => s.toLowerCase() === detectedState.toLowerCase(),
-              );
+              const matched = normalizeIndianState(detectedState);
               if (matched) setStateVal(matched);
               else setStateVal(detectedState);
             }
             setPincodeSuccess(true);
+            setErrors((prev) => {
+              if (!prev.pincode && !prev.city && !prev.state) return prev;
+              const next = { ...prev };
+              delete next.pincode;
+              if (detectedCity) delete next.city;
+              if (detectedState) delete next.state;
+              return next;
+            });
           }
         }
       } catch {
@@ -465,8 +471,10 @@ function PaymentRegistrationFormInner() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const rawState = (stateVal || asString(formData.get("state"))).trim();
+    const stateValue = normalizeIndianState(rawState) || rawState;
     if (city) formData.set("city", city);
-    if (stateVal) formData.set("state", stateVal);
+    if (stateValue) formData.set("state", stateValue);
     if (pincode) formData.set("pincode", pincode);
     if (selectedTshirt) formData.set("tshirtSize", selectedTshirt);
 
@@ -483,7 +491,6 @@ function PaymentRegistrationFormInner() {
     const streetAddress = asString(formData.get("address"));
     const landmarkVal = asString(formData.get("landmark"));
     const cityVal = (city || asString(formData.get("city"))).trim();
-    const stateValue = (stateVal || asString(formData.get("state"))).trim();
     const pincodeVal = (pincode || asString(formData.get("pincode"))).trim();
 
     const payload = {
@@ -980,7 +987,15 @@ function PaymentRegistrationFormInner() {
                   emptyMessage="No state found."
                   invalid={Boolean(errors.state)}
                   name="state"
-                  onChange={(val) => setStateVal(val)}
+                  onChange={(val) => {
+                    setStateVal(val);
+                    setErrors((prev) => {
+                      if (!prev.state) return prev;
+                      const next = { ...prev };
+                      delete next.state;
+                      return next;
+                    });
+                  }}
                   options={INDIAN_STATES}
                   placeholder="Select State"
                   required

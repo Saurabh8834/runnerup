@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { isIndianState } from "../data/indian-states.js";
+import { isIndianState, normalizeIndianState } from "../data/indian-states.js";
 
 const phoneSchema = z
   .string()
@@ -18,6 +18,7 @@ const phoneSchema = z
 const indianStateSchema = z
   .string()
   .trim()
+  .transform((value) => normalizeIndianState(value) ?? value)
   .refine((value) => isIndianState(value), {
     message: "Choose a valid Indian state",
   });
