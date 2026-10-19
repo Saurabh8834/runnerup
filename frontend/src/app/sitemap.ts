@@ -14,7 +14,7 @@ async function getEvents(): Promise<EventData[]> {
   try {
     const url = getApiUrl('/api/events');
     const response = await fetch(url, {
-      cache: 'no-store',
+      next: { revalidate: 3600 },
     });
     if (!response.ok) return [];
     const data = await response.json();
