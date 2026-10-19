@@ -262,6 +262,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Primary CTA */}
         <Link
+          prefetch={false}
           className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
           href={`/events/${event.slug}`}
           onClick={(e) => e.stopPropagation()}

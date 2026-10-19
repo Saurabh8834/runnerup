@@ -262,6 +262,7 @@ function NavLink({
   return (
     <Link
       href={href}
+      prefetch={false}
       onClick={onClick}
       className={`relative inline-flex flex-col items-center justify-center px-3.5 py-1.5 text-xs sm:text-sm transition-all duration-200 whitespace-nowrap shrink-0 ${
         active

@@ -463,6 +463,7 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
         {/* CTA Buttons */}
         <div className="mt-auto pt-4 border-t border-[#90aead]/15 flex items-center gap-2.5">
           <Link
+            prefetch={false}
             className="flex-1 h-10 rounded-full border border-[#90aead]/20 bg-[#fbf6ee] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#14242a] hover:bg-[#f5ecdd] transition-all shadow-xs"
             href={`/events/${event.slug}`}
             onClick={(e) => e.stopPropagation()}
@@ -472,6 +473,7 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
           </Link>
 
           <Link
+            prefetch={false}
             data-prevent-card-nav
             className="flex-1 h-10 rounded-full border border-[#e64833]/30 bg-[#e64833]/10 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#e64833] hover:bg-[#e64833]/20 transition-all"
             href="/leaderboard"

@@ -93,6 +93,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/events/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         source: "/:all*(svg|jpg|jpeg|png|webp|avif|ico|woff2|webmanifest)",
         headers: [
           {
