@@ -181,7 +181,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               transition={{ duration: 0.5, delay: 0.22 }}
               className="lg:hidden my-5 w-full flex flex-col items-center justify-center relative"
             >
-              <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" />
+              <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" isPast={isPast} />
 
               {/* Live Mobile Social Proof Counter */}
               <div className="mt-2.5 inline-flex items-center gap-1.5 text-[0.72rem] text-zinc-400 font-semibold">
@@ -344,7 +344,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               RIGHT COLUMN: INTERACTIVE 3D MEDAL PREVIEW (Desktop)
              ══════════════════════════════════════════════════════ */}
           <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-center">
-            <Medal3DViewer slug={event.slug} eventName={event.name} size="desktop" />
+            <Medal3DViewer slug={event.slug} eventName={event.name} size="desktop" isPast={isPast} />
           </div>
 
         </div>

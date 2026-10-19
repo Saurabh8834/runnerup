@@ -25,6 +25,7 @@ import { type ApiEvent, mapApiEventToPublic } from "../../lib/events-api";
 import {
   pastEvents as staticPastEvents,
   publicEvents as staticUpcomingEvents,
+  getEventMedalImage,
   type PublicEvent,
 } from "../data/events";
 
@@ -334,21 +335,14 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 /* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
   const router = useRouter();
-  const defaultPoster =
-    (event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
-      ? event.bannerImageUrl
-      : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
-  const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
+  const medalPoster = event.medalImageUrl || getEventMedalImage(event.slug);
+  const [imgSrc, setImgSrc] = useState<string | undefined>(medalPoster);
   const [imgFailed, setImgFailed] = useState(false);
 
   useEffect(() => {
-    const nextPoster =
-      (event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
-        ? event.bannerImageUrl
-        : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
-    setImgSrc(nextPoster);
+    setImgSrc(event.medalImageUrl || getEventMedalImage(event.slug));
     setImgFailed(false);
-  }, [event.bannerImageUrl, event.slug]);
+  }, [event.medalImageUrl, event.slug]);
 
   const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
@@ -363,26 +357,33 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
       onClick={handleCardClick}
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-2xl cursor-pointer"
     >
-      {/* Banner / Poster */}
-      <div className="h-56 sm:h-72 relative overflow-hidden bg-[#14242a]">
+      {/* Banner / Poster: Showcase Official Medal with Transparent Background */}
+      <div className="h-64 sm:h-76 relative overflow-hidden bg-gradient-to-b from-[#14242a] via-[#101c21] to-[#0c161a] flex items-center justify-center p-3 sm:p-4">
+        {/* Subtle Radial Glow */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+          <div className="h-44 w-44 rounded-full bg-amber-500/10 blur-3xl" />
+        </div>
+
         {imgSrc && !imgFailed ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
-            src={imgSrc}
-            loading="lazy"
-            decoding="async"
-            onError={() => {
-              if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
-                setImgSrc(`/events/${event.slug}.webp`);
-              } else if (imgSrc && imgSrc.endsWith(".webp")) {
-                setImgSrc(`/events/${event.slug}.jpg`);
-              } else {
-                setImgFailed(true);
-              }
-            }}
-          />
+          <div className="relative z-[2] h-full w-full flex items-center justify-center p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt={`${event.name} Finisher Medal`}
+              className="h-full w-full object-contain transition-all duration-500 group-hover:scale-108 drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] select-none"
+              src={imgSrc}
+              loading="lazy"
+              decoding="async"
+              onError={() => {
+                if (imgSrc && imgSrc.endsWith(".webp")) {
+                  setImgSrc(`/images/medals/${event.slug}.png`);
+                } else if (imgSrc && imgSrc.endsWith(".png")) {
+                  setImgSrc(`/images/medals/${event.slug}.jpg`);
+                } else {
+                  setImgFailed(true);
+                }
+              }}
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#1b323b] via-[#172c34] to-[#14242a]">
             <div className="h-14 w-14 rounded-2xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center mb-3">
@@ -396,14 +397,9 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
             </span>
           </div>
         )}
-        
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
-        />
 
         {/* Top Badges */}
-        <div className="relative z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2">
+        <div className="absolute top-0 inset-x-0 z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 pointer-events-none">
           <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-black/60 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.65rem] font-bold uppercase tracking-wider text-slate-300">
             <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
             Closed
@@ -416,8 +412,8 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
         </div>
 
         {/* Reward / Medal Highlight Strip */}
-        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
+        <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10 pointer-events-none">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/70 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
             <Medal className="h-3.5 w-3.5 text-[#e64833] shrink-0" />
             <span className="truncate">{event.reward}</span>
           </div>

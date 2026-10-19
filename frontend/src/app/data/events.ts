@@ -79,7 +79,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Flagship virtual run with official finisher medals and e-certificates.",
     banner: "Flagship run",
     bannerImageUrl: "/events/independence-day-virtual-run-2026.webp",
-    medalImageUrl: "/images/medals/independence-day-virtual-run-2026.jpg",
+    medalImageUrl: "/images/medals/independence-day-virtual-run-2026.webp",
     reward: "Premium medal + T-shirt + certificate",
     status: "past",
     compareAtPrice: "Rs. 699",
@@ -97,7 +97,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Ideal for first virtual races and running clubs.",
     banner: "Rain-ready challenge",
     bannerImageUrl: "/events/monsoon-mountain-miles.webp",
-    medalImageUrl: "/images/medals/monsoon-mountain-miles.jpg",
+    medalImageUrl: "/images/medals/monsoon-mountain-miles.webp",
     reward: "Medal + certificate",
     status: "past",
     compareAtPrice: "Rs. 850",
@@ -115,7 +115,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Built for runners chasing a longer verified effort.",
     banner: "Flagship endurance week",
     bannerImageUrl: "/events/independence-endurance-run.webp",
-    medalImageUrl: "/images/medals/independence-endurance-run.jpg",
+    medalImageUrl: "/images/medals/independence-endurance-run.webp",
     reward: "Premium medal + T-shirt",
     status: "past",
     compareAtPrice: "Rs. 1100",
@@ -133,7 +133,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Quick, beginner-friendly participation.",
     banner: "Fast festive sprint",
     bannerImageUrl: "/events/himalayan-winter-sprint.webp",
-    medalImageUrl: "/images/medals/himalayan-winter-sprint.jpg",
+    medalImageUrl: "/images/medals/himalayan-winter-sprint.webp",
     reward: "Digital kit + medal",
     status: "past",
     compareAtPrice: "Rs. 700",
@@ -151,7 +151,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Completed · Strong beginner turnout across 40+ cities.",
     banner: "Season opener",
     bannerImageUrl: "/events/spring-valley-dash.webp",
-    medalImageUrl: "/images/medals/spring-valley-dash.jpg",
+    medalImageUrl: "/images/medals/spring-valley-dash.webp",
     reward: "Medal + certificate",
     status: "past",
     finishers: 1842,
@@ -173,7 +173,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Completed · Festival favorite for clubs and first-timers.",
     banner: "Festival run",
     bannerImageUrl: "/events/holi-color-virtual-run.webp",
-    medalImageUrl: "/images/medals/holi-color-virtual-run.jpg",
+    medalImageUrl: "/images/medals/holi-color-virtual-run.webp",
     reward: "Digital kit + medal",
     status: "past",
     finishers: 2560,
@@ -195,7 +195,7 @@ export const allPublicEvents: PublicEvent[] = [
     highlight: "Completed · Highest 21 km completion rate of the season.",
     banner: "Year-end challenge",
     bannerImageUrl: "/events/new-year-night-miles.webp",
-    medalImageUrl: "/images/medals/new-year-night-miles.jpg",
+    medalImageUrl: "/images/medals/new-year-night-miles.webp",
     reward: "Premium medal + certificate",
     status: "past",
     finishers: 1295,
@@ -244,15 +244,15 @@ export function getEventMedalImage(slug: string): string {
     return "/images/iaf-medal-front.webp";
   }
   const medalMap: Record<string, string> = {
-    "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.jpg",
-    "independence-endurance-run": "/images/medals/independence-endurance-run.jpg",
-    "himalayan-winter-sprint": "/images/medals/himalayan-winter-sprint.jpg",
-    "independence-day-virtual-run-2026": "/images/medals/independence-day-virtual-run-2026.jpg",
-    "spring-valley-dash": "/images/medals/spring-valley-dash.jpg",
-    "holi-color-virtual-run": "/images/medals/holi-color-virtual-run.jpg",
-    "new-year-night-miles": "/images/medals/new-year-night-miles.jpg",
+    "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.webp",
+    "independence-endurance-run": "/images/medals/independence-endurance-run.webp",
+    "himalayan-winter-sprint": "/images/medals/himalayan-winter-sprint.webp",
+    "independence-day-virtual-run-2026": "/images/medals/independence-day-virtual-run-2026.webp",
+    "spring-valley-dash": "/images/medals/spring-valley-dash.webp",
+    "holi-color-virtual-run": "/images/medals/holi-color-virtual-run.webp",
+    "new-year-night-miles": "/images/medals/new-year-night-miles.webp",
   };
-  return medalMap[slug] || "/images/iaf-medal-front.jpg";
+  return medalMap[slug] || "/images/iaf-medal-front.webp";
 }
 
 export function getEventBySlug(slug: string) {

@@ -45,6 +45,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
                   eventName={event.name}
                   size="compact"
                   showBadges={false}
+                  isPast={event.status === "past"}
                 />
               </div>
 

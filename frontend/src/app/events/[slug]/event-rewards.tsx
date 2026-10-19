@@ -106,6 +106,7 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
                   eventName={event?.name}
                   size="rewards"
                   showBadges={false}
+                  isPast={event?.status === "past"}
                 />
               </div>
 

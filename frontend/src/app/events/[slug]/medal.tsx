@@ -12,7 +12,7 @@ import {
   Flame,
   CheckCircle2,
 } from "lucide-react";
-import { getEventMedalImages } from "../../data/events";
+import { getEventMedalImages, allPublicEvents } from "../../data/events";
 
 interface Medal3DViewerProps {
   slug: string;
@@ -21,6 +21,7 @@ interface Medal3DViewerProps {
   className?: string;
   autoRotateInterval?: number; // optional auto-flip interval in ms (0 = disabled)
   showBadges?: boolean;
+  isPast?: boolean;
 }
 
 export function Medal3DViewer({
@@ -29,6 +30,7 @@ export function Medal3DViewer({
   size = "desktop",
   className = "",
   showBadges = true,
+  isPast,
 }: Medal3DViewerProps) {
   const images = getEventMedalImages(slug);
   const [activeFace, setActiveFace] = useState<"front" | "back">("front");
@@ -38,15 +40,29 @@ export function Medal3DViewer({
   const [hasInteracted, setHasInteracted] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Preload both images so flip has zero latency or flicker
+  const isAirForce =
+    slug.includes("air-force") ||
+    slug.includes("airforce") ||
+    slug === "iaf-2026" ||
+    slug === "indian-air-force-day-2026" ||
+    slug === "indian-air-force-day-virtual-challenge";
+
+  const isPastEvent =
+    isPast !== undefined
+      ? isPast
+      : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || !isAirForce);
+
+  // Preload images - only preload back face if active event
   useEffect(() => {
     if (typeof window !== "undefined") {
       const img1 = new Image();
       img1.src = images.front;
-      const img2 = new Image();
-      img2.src = images.back;
+      if (!isPastEvent && images.back && images.back !== images.front) {
+        const img2 = new Image();
+        img2.src = images.back;
+      }
     }
-  }, [images.front, images.back]);
+  }, [images.front, images.back, isPastEvent]);
 
   const toggleFace = useCallback(() => {
     setHasInteracted(true);
@@ -131,6 +147,80 @@ export function Medal3DViewer({
   ];
 
   const activeFeatures = isBack ? backFeatures : frontFeatures;
+
+  // ════════ PAST EVENT CLEAN STATIC SHOWCASE (Zero Cloudinary, Zero Flip / 360) ════════
+  if (isPastEvent) {
+    return (
+      <div
+        className={`relative flex flex-col items-center justify-center select-none ${className}`}
+      >
+        {/* ── Ambient Radial Atmosphere Halo Behind Medal ── */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+          <div
+            className={`${sizeConfig.haloSize} rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#e64833]/15 to-[#874f41]/10 blur-[75px] transition-all duration-700 ${
+              isHovered ? "scale-110 opacity-100" : "scale-100 opacity-80"
+            }`}
+          />
+        </div>
+
+        {/* ── Static Medal Container with 3D Depth & Specular Sheen ── */}
+        <div
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className={`relative w-full ${sizeConfig.containerMaxW} flex items-center justify-center group`}
+          style={{
+            transform: `perspective(1000px) rotateX(${tilt.rx * 0.4}deg) rotateY(${tilt.ry * 0.4}deg)`,
+            transition: isHovered ? "transform 0.1s ease-out" : "transform 0.4s ease-out",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={images.front}
+            alt={`${eventName} - Official Finisher Medal`}
+            fetchPriority="high"
+            decoding="async"
+            className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.92)] filter brightness-105 contrast-[1.03] transition-transform duration-300 group-hover:scale-105`}
+          />
+
+          {/* Dynamic Metallic Specular Glare Overlay */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-35 transition-opacity duration-300 mix-blend-overlay"
+            style={{
+              background: `radial-gradient(circle 220px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255,255,255,0.7) 0%, rgba(245,158,11,0.2) 40%, transparent 70%)`,
+            }}
+          />
+        </div>
+
+        {/* ── Medal Label Descriptor ── */}
+        <div className="mt-3.5 text-center max-w-sm px-2">
+          <p className="text-[0.75rem] sm:text-xs font-semibold text-zinc-300 leading-snug">
+            <span className="text-amber-400 font-bold">Official Finisher Medal: </span>
+            Heavyweight Die-Cast Metal with Custom Event Ribbon
+          </p>
+        </div>
+
+        {/* ── Micro Feature Badges Under Medal ── */}
+        {showBadges && (
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 max-w-md px-1">
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300">
+              <Award className="h-3 w-3 text-amber-400 shrink-0" />
+              <span>Authentic Finisher Medal</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300">
+              <ShieldCheck className="h-3 w-3 text-amber-400 shrink-0" />
+              <span>Solid Metal Die-Cast</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300">
+              <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+              <span>Verified Finish</span>
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
