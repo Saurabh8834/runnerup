@@ -130,15 +130,26 @@ function Start-BackendProcess {
 
     # Prefer compiled production server dist/server.js for lower RAM and no watcher lag
     $serverDist = Join-Path $BackendDir "dist\server.js"
-    $arg = if (Test-Path $serverDist) { "/c node dist/server.js" } else { "/c npm run dev" }
+    $nodeCmd = Get-Command "node" -ErrorAction SilentlyContinue
+    $nodeExe = if ($nodeCmd) { $nodeCmd.Source } else { "node.exe" }
 
-    $proc = Start-Process -FilePath "cmd.exe" `
-        -ArgumentList @($arg) `
-        -WorkingDirectory $BackendDir `
-        -RedirectStandardOutput $BackendLog `
-        -RedirectStandardError $BackendErrLog `
-        -WindowStyle Hidden `
-        -PassThru
+    if (Test-Path $serverDist) {
+        $proc = Start-Process -FilePath $nodeExe `
+            -ArgumentList @("dist/server.js") `
+            -WorkingDirectory $BackendDir `
+            -RedirectStandardOutput $BackendLog `
+            -RedirectStandardError $BackendErrLog `
+            -WindowStyle Hidden `
+            -PassThru
+    } else {
+        $proc = Start-Process -FilePath "cmd.exe" `
+            -ArgumentList @("/c npm run dev") `
+            -WorkingDirectory $BackendDir `
+            -RedirectStandardOutput $BackendLog `
+            -RedirectStandardError $BackendErrLog `
+            -WindowStyle Hidden `
+            -PassThru
+    }
     return $proc
 }
 
@@ -190,29 +201,38 @@ while ($true) {
         } catch {}
     }
 
-    # Backend check: process alive or port 4000 listening
+    # Backend check: Is port 4000 actively listening?
     $portActive = Get-NetTCPConnection -LocalPort 4000 -State Listen -ErrorAction SilentlyContinue
-    $backendDead = ($null -eq $BackendProc -or $BackendProc.HasExited)
 
-    if ($backendDead) {
-        Write-DaemonLog "Watchdog: Backend process exited. Restarting..."
-        $BackendProc = Start-BackendProcess
-        $script:backendGraceCycles = 6
-    } elseif (-not $portActive) {
-        if ($script:backendGraceCycles -gt 0) {
-            $script:backendGraceCycles--
-        } else {
-            Write-DaemonLog "Watchdog: Backend process alive but port 4000 unresponsive after grace period. Restarting..."
-            try {
-                if ($BackendProc -and -not $BackendProc.HasExited) {
-                    Stop-Process -Id $BackendProc.Id -Force -ErrorAction SilentlyContinue
-                }
-            } catch {}
-            $BackendProc = Start-BackendProcess
-            $script:backendGraceCycles = 6
+    if ($portActive) {
+        # Backend is healthy and actively serving requests!
+        $script:backendGraceCycles = 0
+        # If $BackendProc is null or was a wrapper that exited, adopt the live node process
+        if ($null -eq $BackendProc -or $BackendProc.HasExited) {
+            $owningPid = ($portActive | Select-Object -First 1).OwningProcess
+            if ($owningPid) {
+                $BackendProc = Get-Process -Id $owningPid -ErrorAction SilentlyContinue
+            }
         }
     } else {
-        $script:backendGraceCycles = 0
+        # Port 4000 is NOT listening
+        $procDead = ($null -eq $BackendProc -or $BackendProc.HasExited)
+        if ($procDead) {
+            Write-DaemonLog "Watchdog: Backend process exited and port 4000 not listening. Restarting..."
+            $BackendProc = Start-BackendProcess
+            $script:backendGraceCycles = 6
+        } else {
+            if ($script:backendGraceCycles -gt 0) {
+                $script:backendGraceCycles--
+            } else {
+                Write-DaemonLog "Watchdog: Backend process alive but port 4000 unresponsive after grace period. Restarting..."
+                try {
+                    Stop-Process -Id $BackendProc.Id -Force -ErrorAction SilentlyContinue
+                } catch {}
+                $BackendProc = Start-BackendProcess
+                $script:backendGraceCycles = 6
+            }
+        }
     }
 
     # Cloudflare Tunnel check: process alive?
