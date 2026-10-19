@@ -2,6 +2,7 @@
 
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState, useMemo } from "react";
 import {
   ArrowUpRight,
@@ -98,6 +99,8 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug, isAirForce]);
 
+  const router = useRouter();
+
   // Live countdown state updated once per minute to avoid CPU lag
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
     hours: 14 + ((index * 6) % 24),
@@ -115,8 +118,19 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
     return () => clearInterval(timer);
   }, []);
 
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-prevent-card-nav]")) {
+      return;
+    }
+    router.push(`/events/${event.slug}`);
+  };
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)] shadow-2xl">
+    <article
+      onClick={handleCardClick}
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34] text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-[0_12px_40px_rgba(230,72,51,0.25)] shadow-2xl cursor-pointer"
+    >
       {/* Banner / Poster */}
       <div className={`relative overflow-hidden ${isAirForce ? "h-80 sm:h-96 bg-black" : "h-60 sm:h-72 bg-[#14242a]"}`}>
         {isAirForce && (
@@ -296,14 +310,17 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           <Link
             className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-all border border-[#90aead]/30 bg-[#244855]/60 text-[#fbe9d0] hover:bg-[#244855]"
             href={`/events/${event.slug}`}
+            onClick={(e) => e.stopPropagation()}
           >
             <span>Details</span>
             <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
           <Link
+            data-prevent-card-nav
             className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
             href={`/register?event=${encodeURIComponent(event.slug)}`}
+            onClick={(e) => e.stopPropagation()}
           >
             <span>Register</span>
             <ArrowRight className="h-3.5 w-3.5" />
@@ -316,6 +333,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
 /* ─── Archive Race Card (Warm Ivory #fbf6ee Theme) ─── */
 function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
+  const router = useRouter();
   const defaultPoster =
     (event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
       ? event.bannerImageUrl
@@ -332,8 +350,19 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug]);
 
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-prevent-card-nav]")) {
+      return;
+    }
+    router.push(`/events/${event.slug}`);
+  };
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-2xl">
+    <article
+      onClick={handleCardClick}
+      className="group flex h-full flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-white shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833] hover:shadow-2xl cursor-pointer"
+    >
       {/* Banner / Poster */}
       <div className="h-56 sm:h-72 relative overflow-hidden bg-[#14242a]">
         {imgSrc && !imgFailed ? (
@@ -440,14 +469,17 @@ function ArchiveEventCard({ event, index = 0 }: { event: PublicEvent; index?: nu
           <Link
             className="flex-1 h-10 rounded-full border border-[#90aead]/20 bg-[#fbf6ee] inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#14242a] hover:bg-[#f5ecdd] transition-all shadow-xs"
             href={`/events/${event.slug}`}
+            onClick={(e) => e.stopPropagation()}
           >
             <span>View Recap</span>
             <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
           <Link
+            data-prevent-card-nav
             className="flex-1 h-10 rounded-full border border-[#e64833]/30 bg-[#e64833]/10 inline-flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#e64833] hover:bg-[#e64833]/20 transition-all"
             href="/leaderboard"
+            onClick={(e) => e.stopPropagation()}
           >
             <span>Results</span>
             <ArrowUpRight className="h-3.5 w-3.5" />

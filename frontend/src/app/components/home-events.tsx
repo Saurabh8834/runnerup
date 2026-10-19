@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   FileBadge,
@@ -52,6 +53,8 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
     setImgFailed(false);
   }, [event.bannerImageUrl, event.slug, isAirForce]);
 
+  const router = useRouter();
+
   // Live countdown state updated once per minute to prevent unnecessary 1s CPU thrashing
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number }>({
     hours: 14 + ((index * 6) % 24),
@@ -69,9 +72,18 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
     return () => clearInterval(timer);
   }, []);
 
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-prevent-card-nav]")) {
+      return;
+    }
+    router.push(`/events/${event.slug}`);
+  };
+
   return (
     <article
-      className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] shadow-2xl"
+      onClick={handleCardClick}
+      className="group flex flex-col overflow-hidden rounded-3xl border border-[#90aead]/20 bg-[#172c34]/95 text-[#fbe9d0] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]/60 hover:shadow-[0_16px_50px_rgba(230,72,51,0.25)] shadow-2xl cursor-pointer"
     >
       {/* Banner / Poster */}
       <div className={`relative overflow-hidden ${isAirForce ? "h-80 sm:h-96 bg-black" : "h-60 sm:h-72 bg-[#14242a]"}`}>
@@ -252,6 +264,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         <Link
           className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
           href={`/events/${event.slug}`}
+          onClick={(e) => e.stopPropagation()}
         >
           <Sparkles className="h-4 w-4" />
           <span>Claim Your Kit</span>
