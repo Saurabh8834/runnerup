@@ -31,16 +31,11 @@ export async function createPaymentOrder(request: Request, response: Response) {
     throw new ApiError(409, "Registration is already paid");
   }
 
-  // 2. Prevent orphaned duplicate orders: check existing order if present
+  // 2. Prevent orphaned duplicate orders: check if existing order was already captured
   if (registration.payment?.razorpayOrderId) {
     try {
       const existingOrderId = registration.payment.razorpayOrderId;
-      // Fetch payments and order details concurrently to cut latency in half
-      const [orderPayments, existingRzpOrder] = await Promise.all([
-        fetchPaymentsForOrder(existingOrderId).catch(() => null),
-        fetchRazorpayOrder(existingOrderId).catch(() => null),
-      ]);
-
+      const orderPayments = await fetchPaymentsForOrder(existingOrderId).catch(() => null);
       const captured = orderPayments?.find((p) => p.status === "captured");
       if (captured) {
         logger.info("[Payment] Existing order already captured in Razorpay, confirming registration", {
@@ -107,43 +102,16 @@ export async function createPaymentOrder(request: Request, response: Response) {
           },
         });
       }
-
-      // Check if existing order in Razorpay is still open & valid with same amount
-      if (
-        existingRzpOrder &&
-        existingRzpOrder.status === "created" &&
-        existingRzpOrder.amount === registration.event.priceInPaise
-      ) {
-        logger.info("[Payment] Reusing active valid Razorpay order", {
-          orderId: existingOrderId,
-          registrationId: registration.id,
-        });
-
-        return response.status(200).json({
-          data: {
-            keyId: env.razorpayKeyId,
-            orderId: existingOrderId,
-            amountInPaise: registration.payment.amountInPaise,
-            currency: "INR",
-            registrationId: registration.id,
-            bibNumber: registration.bibNumber,
-            runner: {
-              name: registration.user.name,
-              email: registration.user.email,
-              phone: registration.user.phone,
-            },
-            payment: registration.payment,
-          },
-        });
-      }
     } catch (checkErr) {
-      logger.warn("[Payment] Could not check existing Razorpay order status, proceeding to create new", {
+      logger.warn("[Payment] Could not check existing Razorpay order status, proceeding to create fresh order", {
         error: checkErr instanceof Error ? checkErr.message : String(checkErr),
       });
     }
   }
 
-  logger.info("[Payment] Creating new Razorpay order", {
+  // Always generate a fresh Razorpay order for retries.
+  // Reusing an old order that had a failed UPI attempt triggers "Payment could not be completed / cancelled" error screen.
+  logger.info("[Payment] Creating fresh Razorpay order", {
     registrationId: registration.id,
     bibNumber: registration.bibNumber,
     amountInPaise: registration.event.priceInPaise,

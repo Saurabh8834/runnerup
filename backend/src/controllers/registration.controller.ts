@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
 import { createBibNumber } from "../services/bib.service.js";
@@ -7,8 +8,10 @@ import {
   createCertificateQrPayload,
 } from "../services/certificate.service.js";
 import { ensureDefaultEvents, isRegistrationOpen } from "../services/event.service.js";
+import { createRazorpayOrder } from "../services/razorpay.service.js";
 import { upsertUserFromClerk } from "../services/user.service.js";
 import { ApiError } from "../utils/api-error.js";
+import { logger } from "../utils/logger.js";
 import { routeParam } from "../utils/params.js";
 import { validateBody } from "../utils/validate.js";
 import {
@@ -16,6 +19,49 @@ import {
   reviewProofSchema,
   submitProofSchema,
 } from "../validators/registration.validator.js";
+
+async function generateFreshOrderForRegistration(regId: string, bibNumber: string, amountInPaise: number) {
+  try {
+    const order = await createRazorpayOrder({
+      amountInPaise,
+      receipt: bibNumber,
+      registrationId: regId,
+    });
+
+    const payment = await prisma.payment.upsert({
+      where: { registrationId: regId },
+      create: {
+        registrationId: regId,
+        razorpayOrderId: order.id,
+        amountInPaise: order.amount,
+        status: "CREATED",
+      },
+      update: {
+        razorpayOrderId: order.id,
+        amountInPaise: order.amount,
+        status: "CREATED",
+        razorpayPaymentId: null,
+        razorpaySignature: null,
+        paidAt: null,
+      },
+    });
+
+    return {
+      keyId: env.razorpayKeyId,
+      orderId: order.id,
+      amountInPaise: order.amount,
+      currency: order.currency,
+      registrationId: regId,
+      bibNumber,
+      payment,
+    };
+  } catch (err) {
+    logger.warn("[createRegistration] Could not pre-generate Razorpay order, client will fallback", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    return null;
+  }
+}
 
 export async function createRegistration(request: AuthenticatedRequest, response: Response) {
   const payload = validateBody(createRegistrationSchema, request);
@@ -125,6 +171,8 @@ export async function createRegistration(request: AuthenticatedRequest, response
     throw new ApiError(404, "User not found");
   }
 
+  const freeEntry = !event.paymentRequired || event.priceInPaise <= 0;
+
   // Unique key is (userId + eventId + distance) — other events/distances are always allowed.
   const existingRegistration = await prisma.registration.findUnique({
     where: {
@@ -159,8 +207,17 @@ export async function createRegistration(request: AuthenticatedRequest, response
         include: { event: true, user: true, payment: true },
       });
 
+      let order = null;
+      if (!freeEntry) {
+        order = await generateFreshOrderForRegistration(updated.id, updated.bibNumber, event.priceInPaise);
+      }
+
       response.status(200).json({
-        data: updated,
+        data: {
+          ...updated,
+          registration: updated,
+          order,
+        },
         meta: {
           freeEntry: false,
           resumed: true,
@@ -175,8 +232,6 @@ export async function createRegistration(request: AuthenticatedRequest, response
       `You are already registered for ${payload.distance} in “${event.title}”. Pick another distance or a different event.`,
     );
   }
-
-  const freeEntry = !event.paymentRequired || event.priceInPaise <= 0;
 
   let registration;
   try {
@@ -220,8 +275,16 @@ export async function createRegistration(request: AuthenticatedRequest, response
       raced.status !== "COMPLETED" &&
       raced.payment?.status !== "PAID"
     ) {
+      let order = null;
+      if (!freeEntry) {
+        order = await generateFreshOrderForRegistration(raced.id, raced.bibNumber, event.priceInPaise);
+      }
       response.status(200).json({
-        data: raced,
+        data: {
+          ...raced,
+          registration: raced,
+          order,
+        },
         meta: { freeEntry: false, resumed: true },
       });
       return;
@@ -253,7 +316,19 @@ export async function createRegistration(request: AuthenticatedRequest, response
     }
   }
 
-  response.status(201).json({ data: registration, meta: { freeEntry } });
+  let order = null;
+  if (!freeEntry) {
+    order = await generateFreshOrderForRegistration(registration.id, registration.bibNumber, event.priceInPaise);
+  }
+
+  response.status(201).json({
+    data: {
+      ...registration,
+      registration,
+      order,
+    },
+    meta: { freeEntry },
+  });
 }
 
 export async function submitProof(request: AuthenticatedRequest, response: Response) {
