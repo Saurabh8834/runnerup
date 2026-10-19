@@ -98,6 +98,8 @@ adminRouter.get("/payments", asyncHandler(adminListPayments));
 adminRouter.get("/payments/export", asyncHandler(adminExportPaymentsCsv));
 adminRouter.get("/payments/export.csv", asyncHandler(adminExportPaymentsCsv));
 adminRouter.post("/payments/sync", asyncHandler(adminSyncPayments));
+adminRouter.post("/users/sync", asyncHandler(adminSyncPayments));
+adminRouter.post("/sync", asyncHandler(adminSyncPayments));
 adminRouter.patch("/payments/:id", asyncHandler(adminUpdatePayment));
 
 adminRouter.get("/users", asyncHandler(adminListUsers));

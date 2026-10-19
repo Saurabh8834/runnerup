@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { AlertTriangle, CheckCircle2, FileSpreadsheet, Trash2, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileSpreadsheet, RefreshCw, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime } from "../../../lib/admin-api";
@@ -34,6 +34,7 @@ export default function AdminUsersPage() {
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -196,6 +197,25 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function syncData() {
+    setSyncing(true);
+    setSuccessMsg(null);
+    setError(null);
+    try {
+      const token = await getToken().catch(() => null);
+      const json = await adminFetch<{
+        data: { message: string };
+      }>("/api/admin/users/sync", token, { method: "POST" });
+      setSuccessMsg(json.data.message);
+      await load();
+      setTimeout(() => setSuccessMsg(null), 7000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sync failed");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
     <div className="admin-stack">
       <AdminPageHeader
@@ -203,16 +223,28 @@ export default function AdminUsersPage() {
         title="Users"
         description={`${meta.total} total · ${meta.totalPaidRegistrations ?? meta.totalPaidUsers} Paid (🟢) · ${meta.totalUnpaidUsers} Unpaid (🔴) · (${meta.totalPaidUsers} individual runners)`}
         actions={
-          <button
-            className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"
-            disabled={exporting}
-            onClick={() => void exportExcel()}
-            type="button"
-            title="Download users directory in an Excel-compatible spreadsheet"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span>{exporting ? "Generating Sheet..." : "Download Excel Sheet"}</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="btn btn-secondary flex items-center gap-2 text-amber-400 border-amber-500/30 hover:border-amber-500/60"
+              disabled={syncing}
+              onClick={() => void syncData()}
+              type="button"
+              title="Sync users and payments with Razorpay and Clerk"
+            >
+              <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+              <span>{syncing ? "Syncing..." : "Sync User & Payment Data"}</span>
+            </button>
+            <button
+              className="btn btn-secondary flex items-center gap-2 text-emerald-400 border-emerald-500/30 hover:border-emerald-500/60"
+              disabled={exporting}
+              onClick={() => void exportExcel()}
+              type="button"
+              title="Download users directory in an Excel-compatible spreadsheet"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>{exporting ? "Generating Sheet..." : "Download Excel Sheet"}</span>
+            </button>
+          </div>
         }
       />
 

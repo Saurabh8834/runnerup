@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createPaymentOrder,
+  getPaymentStatus,
   handleRazorpayWebhook,
   verifyPayment,
 } from "../controllers/payment.controller.js";
@@ -9,6 +10,8 @@ import { asyncHandler } from "../utils/async-handler.js";
 
 export const paymentRouter = Router();
 
+paymentRouter.get("/status", optionalClerkAuth, asyncHandler(getPaymentStatus));
 paymentRouter.post("/create-order", optionalClerkAuth, asyncHandler(createPaymentOrder));
 paymentRouter.post("/verify", optionalClerkAuth, asyncHandler(verifyPayment));
 paymentRouter.post("/webhook", asyncHandler(handleRazorpayWebhook));
+

@@ -242,16 +242,86 @@ function PaymentRegistrationFormInner() {
   // Confetti and modal state
   const [confirmedBib, setConfirmedBib] = useState<string | null>(null);
   const [streetAddress, setStreetAddress] = useState("");
+  const [checkingStatus, setCheckingStatus] = useState(false);
 
-  // Auto-reset stuck 'paying' or 'creating' state when user returns to tab after UPI app or external redirect
+  // Active tracking refs for high-speed live payment polling
+  const activeOrderIdRef = useRef<string | null>(null);
+  const activeRegIdRef = useRef<string | null>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Pre-load Razorpay checkout script on mount so it is ready instantly with zero button-click lag
   useEffect(() => {
-    function handleVisibility() {
+    void loadRazorpayScript();
+  }, []);
+
+  const stopPolling = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  };
+
+  // High-speed live verification: queries server to see if payment was captured on Razorpay
+  // Completely unblocks mobile UPI users without waiting for slow iframe polling
+  const checkLivePaymentStatus = async (orderId?: string | null, regId?: string | null) => {
+    const oId = orderId || activeOrderIdRef.current;
+    const rId = regId || activeRegIdRef.current;
+    if (!oId && !rId) return false;
+    if (paidRef.current) return true;
+
+    try {
+      setCheckingStatus(true);
+      const q = new URLSearchParams();
+      if (oId) q.set("orderId", oId);
+      if (rId) q.set("registrationId", rId);
+
+      const res = await resilientFetch(`/api/payments/status?${q.toString()}`);
+      if (!res.ok) return false;
+      const json = await res.json();
+
+      if (json.data?.paid) {
+        paidRef.current = true;
+        stopPolling();
+        if (json.data.bibNumber) {
+          setConfirmedBib(json.data.bibNumber);
+        }
+        setStatus("paid");
+        if (rId) {
+          setExistingRegs((prev) =>
+            prev.map((r) =>
+              r.id === rId
+                ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
+                : r,
+            ),
+          );
+        }
+        return true;
+      }
+    } catch {
+      // non-blocking
+    } finally {
+      setCheckingStatus(false);
+    }
+    return false;
+  };
+
+  // Auto-detect payment completion when user switches back from UPI app (Google Pay / PhonePe)
+  useEffect(() => {
+    async function handleVisibility() {
       if (document.visibilityState === "visible" && !paidRef.current) {
-        setTimeout(() => {
-          if (!paidRef.current) {
-            setStatus((curr) => (curr === "paying" || curr === "creating" ? "idle" : curr));
+        if (activeOrderIdRef.current || activeRegIdRef.current) {
+          const isPaid = await checkLivePaymentStatus();
+          if (isPaid) return;
+        }
+
+        setTimeout(async () => {
+          if (!paidRef.current && (activeOrderIdRef.current || activeRegIdRef.current)) {
+            const isPaid = await checkLivePaymentStatus();
+            if (!isPaid && status === "creating") {
+              setStatus("idle");
+            }
           }
-        }, 1000);
+        }, 1500);
       }
     }
     document.addEventListener("visibilitychange", handleVisibility);
@@ -259,8 +329,9 @@ function PaymentRegistrationFormInner() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("focus", handleVisibility);
+      stopPolling();
     };
-  }, []);
+  }, [status]);
 
   // Load events
   useEffect(() => {
@@ -634,8 +705,18 @@ function PaymentRegistrationFormInner() {
       const payJson = await payRes.json();
       const order = payJson.data;
 
+      activeOrderIdRef.current = order.orderId;
+      activeRegIdRef.current = registrationId;
+
       setStatus("paying");
       setMessage("Complete payment in the Razorpay window...");
+
+      // Start high-frequency background polling (every 2s) so mobile users who pay via UPI (Google Pay, PhonePe, Paytm)
+      // get INSTANT confirmation without being held up by the Razorpay iframe!
+      stopPolling();
+      pollIntervalRef.current = setInterval(() => {
+        void checkLivePaymentStatus(order.orderId, registrationId);
+      }, 2000);
 
       const checkout = new window.Razorpay!({
         key: order?.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TjmOBLaIqe8Kz0",
@@ -651,7 +732,26 @@ function PaymentRegistrationFormInner() {
           contact: payload.phone,
         },
         theme: { color: "#e64833" },
+        retry: {
+          enabled: true,
+          max_count: 2,
+        },
+        send_sms_hash: true,
         handler: async (response: CheckoutResponse) => {
+          stopPolling();
+          paidRef.current = true;
+          // INSTANT UX: Immediately display the confirmed bib and celebratory screen!
+          // The user is never kept waiting on background network calls.
+          setStatus("paid");
+          setConfirmedBib(assignedBib);
+          setExistingRegs((prev) =>
+            prev.map((r) =>
+              r.id === registrationId
+                ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
+                : r,
+            ),
+          );
+
           let freshToken = isSignedIn ? await getToken() : null;
           try {
             let verifyResponse = await resilientFetch("/api/payments/verify", {
@@ -668,39 +768,27 @@ function PaymentRegistrationFormInner() {
               });
             }
 
-            if (!verifyResponse.ok) {
-              throw new Error(await readApiError(verifyResponse, "Payment verification error"));
+            if (verifyResponse.ok) {
+              const vJson = await verifyResponse.json();
+              if (vJson.data?.bibNumber) {
+                setConfirmedBib(vJson.data.bibNumber);
+              }
             }
-
-            paidRef.current = true;
-            setStatus("paid");
-            setConfirmedBib(assignedBib);
-            setExistingRegs((prev) =>
-              prev.map((r) =>
-                r.id === registrationId
-                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
-                  : r,
-              ),
-            );
           } catch {
-            paidRef.current = true;
-            setStatus("paid");
-            setConfirmedBib(assignedBib);
-            setExistingRegs((prev) =>
-              prev.map((r) =>
-                r.id === registrationId
-                  ? { ...r, status: "CONFIRMED", payment: { status: "PAID" } }
-                  : r,
-              ),
-            );
+            // Already optimistically confirmed; background reconciliation & webhooks ensure DB is in sync.
           }
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: async () => {
             if (paidRef.current) return;
-            setStatus("idle");
-            if (!failedRef.current) {
-              setMessage("Payment paused. You can click below to complete your checkout anytime.");
+            // Before reverting to idle, immediately check if the user completed payment in their UPI app!
+            const wasPaid = await checkLivePaymentStatus(order.orderId, registrationId);
+            if (!wasPaid) {
+              stopPolling();
+              setStatus("idle");
+              if (!failedRef.current) {
+                setMessage("Payment paused. You can click below to complete your checkout anytime.");
+              }
             }
           },
         },
@@ -709,6 +797,7 @@ function PaymentRegistrationFormInner() {
       checkout.on("payment.failed", (response: unknown) => {
         const err = response as { error?: { description?: string } };
         failedRef.current = true;
+        stopPolling();
         setStatus("error");
         setMessage(err?.error?.description ?? "Payment failed or was cancelled. Please try again or use another payment method (UPI/Card).");
       });
@@ -1035,6 +1124,31 @@ function PaymentRegistrationFormInner() {
             </div>
           )}
 
+          {status === "paying" && (
+            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 font-medium flex flex-col sm:flex-row items-center justify-between gap-3 animate-pulse">
+              <div className="flex items-center gap-2.5">
+                <RefreshCw className="h-4 w-4 animate-spin text-amber-400 shrink-0" />
+                <span>
+                  Waiting for bank & UPI authorization...
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => void checkLivePaymentStatus()}
+                disabled={checkingStatus}
+                className="btn btn-secondary text-xs font-bold px-3 py-1.5 h-8 shrink-0 flex items-center gap-1.5 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40"
+              >
+                {checkingStatus ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" /> Verifying...
+                  </>
+                ) : (
+                  "Completed in UPI app? Verify Now →"
+                )}
+              </button>
+            </div>
+          )}
+
           {status === "idle" && message && message !== "Complete the form and continue to secure checkout." && (
             <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300 font-medium flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
@@ -1071,7 +1185,7 @@ function PaymentRegistrationFormInner() {
             {status === "creating"
               ? "Generating Order..."
               : status === "paying"
-                ? "Opening Razorpay..."
+                ? "Processing with Razorpay..."
                 : distanceAlreadyTaken
                   ? "Already Registered"
                   : pendingSame

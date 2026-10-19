@@ -22,6 +22,7 @@ import {
 } from "../services/certificate.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
 import { reconcilePaymentsWithRazorpay } from "../services/payment-reconciliation.service.js";
+import { syncUserAndPaymentData } from "../services/data-sync.service.js";
 import { ensureDefaultEvents } from "../services/event.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
@@ -1245,24 +1246,26 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
 // ── Sync ────────────────────────────────────────────────────────
 
 export async function adminSyncPayments(request: AuthenticatedRequest, response: Response) {
-  const result = await reconcilePaymentsWithRazorpay();
+  const result = await syncUserAndPaymentData();
 
   await writeAdminAudit(request, {
-    action: "payment.sync",
-    entityType: "Payment",
+    action: "data.sync",
+    entityType: "System",
     entityId: "bulk",
-    summary: `Synced ${result.syncedCount} payments against Razorpay, ${result.errors.length} errors`,
+    summary: `Full sync: ${result.paymentsSynced} payments, ${result.fixedRegistrations} regs, ${result.clerkUsersSynced} users, ${result.phonesSynced} phones`,
   });
 
   response.json({
     data: {
-      synced: result.syncedCount,
-      totalPaid: result.totalPaidCount,
+      synced: result.paymentsSynced,
+      totalPaid: result.totalPaidPayments,
       totalRevenue: result.totalRevenueInInr,
-      errors: result.errors.length > 0 ? result.errors : undefined,
-      message: result.syncedCount > 0
-        ? `Successfully synced ${result.syncedCount} payment${result.syncedCount === 1 ? "" : "s"}! Total paid revenue: ₹${result.totalRevenueInInr}`
-        : `All payments are already in sync! Total paid revenue: ₹${result.totalRevenueInInr}`,
+      fixedRegistrations: result.fixedRegistrations,
+      clerkUsersSynced: result.clerkUsersSynced,
+      phonesSynced: result.phonesSynced,
+      totalUsers: result.totalUsers,
+      totalPaidUsers: result.totalPaidUsers,
+      message: result.message,
     },
   });
 }

@@ -155,10 +155,10 @@ export default function AdminPaymentsPage() {
               className="btn btn-secondary flex items-center gap-1.5 text-amber-500 border-amber-500/30"
               disabled={syncing}
               onClick={() => void syncPayments()}
-              type="button"
+              title="Reconcile captured payments with Razorpay and sync user accounts"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-              <span>{syncing ? "Syncing..." : "Sync Razorpay"}</span>
+              <span>{syncing ? "Syncing..." : "Sync Users & Payments"}</span>
             </button>
           </div>
         }
