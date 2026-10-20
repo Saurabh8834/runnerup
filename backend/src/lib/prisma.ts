@@ -19,10 +19,17 @@ function isTransientDbError(error: unknown): boolean {
     msg.includes("Connection refused") ||
     msg.includes("socket has been closed") ||
     msg.includes("terminating connection due to administrator command") ||
+    msg.includes("Endpoint is suspended") ||
+    msg.includes("compute is suspended") ||
+    msg.includes("57P01") ||
+    msg.includes("57P03") ||
+    msg.includes("ETIMEDOUT") ||
+    msg.includes("ECONNRESET") ||
     code === "P1001" ||
     code === "P1002" ||
     code === "P1008" ||
-    code === "P1017"
+    code === "P1017" ||
+    code === "P2024"
   );
 }
 
@@ -30,23 +37,29 @@ export const prisma = basePrisma.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
-        try {
-          return await query(args);
-        } catch (error) {
-          if (isTransientDbError(error)) {
-            logger.warn(
-              `[Prisma] Transient connection issue on ${model}.${operation}, reconnecting engine and retrying...`,
-            );
-            try {
-              await basePrisma.$connect().catch(() => {});
-              await new Promise((r) => setTimeout(r, 200));
-            } catch (reconnectErr) {
-              logger.error("[Prisma] Reconnect attempt failed", reconnectErr);
-            }
-            // Retry the operation once with fresh connection
+        const delays = [300, 800, 1500];
+        let attempt = 0;
+
+        while (true) {
+          try {
             return await query(args);
+          } catch (error) {
+            if (isTransientDbError(error) && attempt < delays.length) {
+              const delay = delays[attempt];
+              attempt++;
+              logger.warn(
+                `[Prisma] Transient DB issue on ${model}.${operation} (attempt ${attempt}/${delays.length}). Reconnecting in ${delay}ms...`,
+              );
+              try {
+                await basePrisma.$connect().catch(() => {});
+              } catch {
+                // ignore connect error during wake-up
+              }
+              await new Promise((r) => setTimeout(r, delay));
+              continue;
+            }
+            throw error;
           }
-          throw error;
         }
       },
     },
