@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2, FileSpreadsheet, Trash2, X } from "lucide-
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
-import { AdminPageHeader, CustomerStatusDot } from "../ui";
+import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
 type Row = {
   id: string;
@@ -22,11 +22,24 @@ type Row = {
 export default function AdminRegistrationsPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<Row[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [meta, setMeta] = useState<{ total: number; paidCount: number; unpaidCount: number }>({
+  const [meta, setMeta] = useState<{
+    total: number;
+    paidCount: number;
+    unpaidCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>({
     total: 0,
     paidCount: 0,
     unpaidCount: 0,
+    page: 1,
+    pageSize: 50,
+    totalPages: 1,
   });
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
@@ -41,15 +54,26 @@ export default function AdminRegistrationsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+    setLoading(true);
     try {
       const token = await getToken().catch(() => null);
-      const params = new URLSearchParams({ pageSize: "50" });
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
       const json = await adminFetch<{
         data: Row[];
-        meta: { total: number; paidCount?: number; unpaidCount?: number };
+        meta: {
+          total: number;
+          paidCount?: number;
+          unpaidCount?: number;
+          page?: number;
+          pageSize?: number;
+          totalPages?: number;
+        };
       }>(`/api/admin/registrations?${params}`, token);
       setItems(json.data);
       const totalCount = json.meta.total ?? json.data.length;
@@ -58,21 +82,38 @@ export default function AdminRegistrationsPage() {
         json.data.filter(
           (r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED",
         ).length;
+      const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalCount / targetPageSize));
       setMeta({
         total: totalCount,
         paidCount: paid,
         unpaidCount: json.meta.unpaidCount ?? Math.max(0, totalCount - paid),
+        page: json.meta?.page ?? targetPage,
+        pageSize: json.meta?.pageSize ?? targetPageSize,
+        totalPages: computedTotalPages,
       });
       setTotal(totalCount);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
+    } finally {
+      setLoading(false);
     }
-  }, [getToken, q, status]);
+  }, [getToken, page, pageSize, q, status]);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    void load(newPage, pageSize);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+    void load(1, newSize);
+  };
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(page, pageSize);
+  }, [load, page, pageSize]);
 
   async function exportExcel() {
     setExporting(true);
@@ -162,11 +203,21 @@ export default function AdminRegistrationsPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
           placeholder="Search name, email, bib, phone"
           value={q}
         />
-        <select className="input" onChange={(e) => setStatus(e.target.value)} value={status}>
+        <select
+          className="input"
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          value={status}
+        >
           <option value="">All statuses</option>
           {["PENDING_PAYMENT", "CONFIRMED", "CANCELLED", "COMPLETED"].map((s) => (
             <option key={s} value={s}>
@@ -174,7 +225,14 @@ export default function AdminRegistrationsPage() {
             </option>
           ))}
         </select>
-        <button className="btn btn-primary" onClick={() => void load()} type="button">
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            setPage(1);
+            void load(1, pageSize);
+          }}
+          type="button"
+        >
           Refresh
         </button>
       </div>
@@ -281,6 +339,17 @@ export default function AdminRegistrationsPage() {
           </tbody>
         </table>
       </div>
+
+      <AdminPagination
+        page={page}
+        pageSize={pageSize}
+        total={meta.total}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        itemName="registrations"
+        pageSizeOptions={[50, 100, 200, 500, 1000]}
+        loading={loading}
+      />
 
       {/* ── Double-Confirmation Delete Registration Modal (Ask Twice Safety) ── */}
       {deleteTarget ? (

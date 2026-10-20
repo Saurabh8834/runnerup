@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -154,4 +155,197 @@ export function CustomerStatusDot({
     </span>
   );
 }
+
+export type AdminPaginationProps = {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (newPage: number) => void;
+  onPageSizeChange: (newPageSize: number) => void;
+  itemName?: string;
+  pageSizeOptions?: number[];
+  loading?: boolean;
+};
+
+/**
+ * Reusable, high-performance Admin Pagination Toolbar
+ * Supports min 50 items per page, page jumping, custom page sizes, and full toggle controls.
+ */
+export function AdminPagination({
+  page,
+  pageSize,
+  total,
+  onPageChange,
+  onPageSizeChange,
+  itemName = "records",
+  pageSizeOptions = [50, 100, 200, 500, 1000],
+  loading = false,
+}: AdminPaginationProps) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+
+  const startRecord = total === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const endRecord = Math.min(safePage * pageSize, total);
+
+  // Compute page number pills (with smart windowing & ellipsis)
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: (number | "ellipsis-start" | "ellipsis-end")[] = [1];
+    const leftBound = Math.max(2, safePage - 1);
+    const rightBound = Math.min(totalPages - 1, safePage + 1);
+
+    if (leftBound > 2) {
+      pages.push("ellipsis-start");
+    }
+
+    for (let p = leftBound; p <= rightBound; p++) {
+      pages.push(p);
+    }
+
+    if (rightBound < totalPages - 1) {
+      pages.push("ellipsis-end");
+    }
+
+    pages.push(totalPages);
+    return pages;
+  };
+
+  const pages = getPageNumbers();
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3.5 px-4 rounded-xl border border-[var(--line)] bg-[var(--panel)] text-xs text-[var(--muted)] shadow-xs">
+      {/* ── Left: Summary & Per-Page Selector ── */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-medium text-[var(--foreground)]">
+          Showing <span className="font-bold text-amber-400 font-mono">{startRecord}</span>–
+          <span className="font-bold text-amber-400 font-mono">{endRecord}</span> of{" "}
+          <span className="font-bold text-[var(--foreground)] font-mono">{total}</span> {itemName}
+        </span>
+
+        <div className="flex items-center gap-1.5 pl-2 border-l border-[var(--line)]">
+          <span className="text-[11px] text-[var(--muted-soft)] uppercase font-semibold tracking-wider">
+            Per page:
+          </span>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              onPageSizeChange(val);
+            }}
+            disabled={loading}
+            className="input h-7 px-2 py-0 text-xs font-semibold bg-[var(--panel-soft)] border-[var(--line)] text-[var(--foreground)] rounded-lg cursor-pointer hover:border-amber-400/50 transition-colors"
+          >
+            {pageSizeOptions.map((sz) => (
+              <option key={sz} value={sz}>
+                {sz >= 1000 ? "All (1000)" : `${sz} per page`}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* ── Right: Page Navigation Buttons ── */}
+      <div className="flex items-center gap-1">
+        {/* First Page */}
+        <button
+          type="button"
+          onClick={() => onPageChange(1)}
+          disabled={safePage <= 1 || loading}
+          className="btn btn-secondary h-7 px-2 text-[11px] flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          title="First Page"
+        >
+          <ChevronsLeft className="h-3.5 w-3.5" />
+          <span className="hidden md:inline">First</span>
+        </button>
+
+        {/* Previous Page */}
+        <button
+          type="button"
+          onClick={() => onPageChange(safePage - 1)}
+          disabled={safePage <= 1 || loading}
+          className="btn btn-secondary h-7 px-2 text-[11px] flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          title="Previous Page"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          <span>Prev</span>
+        </button>
+
+        {/* Page Pills */}
+        <div className="flex items-center gap-1 px-1">
+          {pages.map((p, idx) => {
+            if (typeof p === "string") {
+              return (
+                <span key={`${p}-${idx}`} className="px-1 text-[var(--muted-soft)] font-mono select-none">
+                  •••
+                </span>
+              );
+            }
+            const isActive = p === safePage;
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPageChange(p)}
+                disabled={loading}
+                className={`h-7 min-w-7 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-amber-500 text-black shadow-sm shadow-amber-500/30 scale-105"
+                    : "bg-[var(--panel-soft)] text-[var(--foreground)] border border-[var(--line)] hover:border-amber-400/50 hover:bg-[var(--line)]"
+                }`}
+              >
+                {p}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Next Page */}
+        <button
+          type="button"
+          onClick={() => onPageChange(safePage + 1)}
+          disabled={safePage >= totalPages || loading}
+          className="btn btn-secondary h-7 px-2 text-[11px] flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          title="Next Page"
+        >
+          <span>Next</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Last Page */}
+        <button
+          type="button"
+          onClick={() => onPageChange(totalPages)}
+          disabled={safePage >= totalPages || loading}
+          className="btn btn-secondary h-7 px-2 text-[11px] flex items-center gap-1 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+          title="Last Page"
+        >
+          <span className="hidden md:inline">Last</span>
+          <ChevronsRight className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Direct Page Jump Selector if > 3 pages */}
+        {totalPages > 3 && (
+          <div className="ml-2 pl-2 border-l border-[var(--line)] flex items-center gap-1.5">
+            <span className="text-[11px] text-[var(--muted-soft)]">Go:</span>
+            <select
+              value={safePage}
+              onChange={(e) => onPageChange(Number(e.target.value))}
+              disabled={loading}
+              className="input h-7 px-1.5 py-0 text-xs font-mono font-semibold bg-[var(--panel-soft)] border-[var(--line)] text-[var(--foreground)] rounded-lg cursor-pointer"
+            >
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pn) => (
+                <option key={pn} value={pn}>
+                  p.{pn}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 

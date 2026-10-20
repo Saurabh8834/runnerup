@@ -1,7 +1,7 @@
 import { app } from "./app.js";
 import { env } from "./config/env.js";
 import { prisma } from "./lib/prisma.js";
-import { reconcilePaymentsWithRazorpay } from "./services/payment-reconciliation.service.js";
+import { syncUserAndPaymentData } from "./services/data-sync.service.js";
 import { logger } from "./utils/logger.js";
 
 const server = app.listen(env.port, "0.0.0.0", () => {
@@ -11,34 +11,32 @@ const server = app.listen(env.port, "0.0.0.0", () => {
   });
 });
 
-// Automated background reconciliation: keeps DB and Razorpay in permanent sync
-// Runs every 5 minutes without blocking or interrupting live user requests
+// Automated background synchronization: keeps DB, Clerk users, and Razorpay payments in permanent sync
+// Runs every 5 minutes completely asynchronously without blocking or interrupting live user requests
 const SYNC_INTERVAL_MS = 5 * 60 * 1000;
 let syncTimer: NodeJS.Timeout | null = null;
 let initialTimer: NodeJS.Timeout | null = null;
 
 initialTimer = setTimeout(() => {
-  void reconcilePaymentsWithRazorpay()
+  void syncUserAndPaymentData()
     .then((res) => {
-      if (res.syncedCount > 0) {
-        logger.info(`[Startup Reconcile] Synced ${res.syncedCount} missing payments`);
-      }
+      logger.info(`[Startup Sync] User and payment data in sync: ${res.totalPaidPayments} paid, ${res.totalUsers} users`);
     })
     .catch((err) => {
-      logger.warn("[Startup Reconcile] Background reconciliation check failed", {
+      logger.warn("[Startup Sync] Background data sync check failed", {
         error: err instanceof Error ? err.message : String(err),
       });
     });
 
   syncTimer = setInterval(() => {
-    void reconcilePaymentsWithRazorpay()
+    void syncUserAndPaymentData()
       .then((res) => {
-        if (res.syncedCount > 0) {
-          logger.info(`[Periodic Reconcile] Synced ${res.syncedCount} missing payments`);
+        if (res.paymentsSynced > 0 || res.clerkUsersSynced > 0 || res.fixedRegistrations > 0 || res.phonesSynced > 0) {
+          logger.info(`[Periodic Sync] Synced: ${res.paymentsSynced} payments, ${res.clerkUsersSynced} users, ${res.fixedRegistrations} regs, ${res.phonesSynced} phones`);
         }
       })
       .catch((err) => {
-        logger.warn("[Periodic Reconcile] Background reconciliation check failed", {
+        logger.warn("[Periodic Sync] Background sync check failed", {
           error: err instanceof Error ? err.message : String(err),
         });
       });

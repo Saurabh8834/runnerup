@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
+import { syncUserAndPaymentData } from "../services/data-sync.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
 import {
   createRazorpayOrder,
@@ -556,6 +557,11 @@ export async function handleRazorpayWebhook(request: Request, response: Response
       } catch (err) {
         logger.error("[Webhook] Failed to update registration or send email", err, { orderId, paymentId });
       }
+    } else {
+      logger.info("[Webhook] Payment record not immediately found in DB, queuing background sync", { orderId, paymentId });
+      setImmediate(() => {
+        void syncUserAndPaymentData().catch(() => null);
+      });
     }
   }
 

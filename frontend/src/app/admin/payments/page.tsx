@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Check, Copy, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
-import { AdminPageHeader, CustomerStatusDot } from "../ui";
+import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
 type PaymentRow = {
   id: string;
@@ -25,7 +25,24 @@ type PaymentRow = {
 export default function AdminPaymentsPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<PaymentRow[]>([]);
-  const [meta, setMeta] = useState({ paidCount: 0, paidRevenueInPaise: 0, total: 0 });
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [loading, setLoading] = useState(false);
+  const [meta, setMeta] = useState<{
+    paidCount: number;
+    paidRevenueInPaise: number;
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>({
+    paidCount: 0,
+    paidRevenueInPaise: 0,
+    total: 0,
+    page: 1,
+    pageSize: 50,
+    totalPages: 1,
+  });
   const [status, setStatus] = useState("");
   const [q, setQ] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -56,27 +73,60 @@ export default function AdminPaymentsPage() {
     }
   };
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+    setLoading(true);
     try {
       const token = await getToken().catch(() => null);
-      const params = new URLSearchParams({ pageSize: "50" });
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
       if (status) params.set("status", status);
       if (q.trim()) params.set("q", q.trim());
       const json = await adminFetch<{
         data: PaymentRow[];
-        meta: { paidCount: number; paidRevenueInPaise: number; total: number };
+        meta: {
+          paidCount: number;
+          paidRevenueInPaise: number;
+          total: number;
+          page?: number;
+          pageSize?: number;
+          totalPages?: number;
+        };
       }>(`/api/admin/payments?${params}`, token);
       setItems(json.data);
-      setMeta(json.meta);
+      const totalItems = json.meta?.total ?? json.data.length;
+      const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / targetPageSize));
+      setMeta({
+        paidCount: json.meta?.paidCount ?? 0,
+        paidRevenueInPaise: json.meta?.paidRevenueInPaise ?? 0,
+        total: totalItems,
+        page: json.meta?.page ?? targetPage,
+        pageSize: json.meta?.pageSize ?? targetPageSize,
+        totalPages: computedTotalPages,
+      });
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
+    } finally {
+      setLoading(false);
     }
-  }, [getToken, q, status]);
+  }, [getToken, page, pageSize, q, status]);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    void load(newPage, pageSize);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+    void load(1, newSize);
+  };
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(page, pageSize);
+  }, [load, page, pageSize]);
 
   async function setPaymentStatus(id: string, next: string) {
     try {
@@ -167,11 +217,21 @@ export default function AdminPaymentsPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
           placeholder="Search order id, email, bib"
           value={q}
         />
-        <select className="input" onChange={(e) => setStatus(e.target.value)} value={status}>
+        <select
+          className="input"
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          value={status}
+        >
           <option value="">All</option>
           {["CREATED", "PAID", "FAILED", "REFUNDED"].map((s) => (
             <option key={s} value={s}>
@@ -179,7 +239,14 @@ export default function AdminPaymentsPage() {
             </option>
           ))}
         </select>
-        <button className="btn btn-primary" onClick={() => void load()} type="button">
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            setPage(1);
+            void load(1, pageSize);
+          }}
+          type="button"
+        >
           Refresh
         </button>
       </div>
@@ -288,6 +355,17 @@ export default function AdminPaymentsPage() {
           </tbody>
         </table>
       </div>
+
+      <AdminPagination
+        page={page}
+        pageSize={pageSize}
+        total={meta.total}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        itemName="payments"
+        pageSizeOptions={[50, 100, 200, 500, 1000]}
+        loading={loading}
+      />
     </div>
   );
 }

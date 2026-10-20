@@ -105,19 +105,34 @@ export async function fetchRecentCapturedPayments(count = 100): Promise<Razorpay
   requireRazorpayCredentials();
 
   const auth = Buffer.from(`${env.razorpayKeyId}:${env.razorpayKeySecret}`).toString("base64");
-  const response = await fetch(`https://api.razorpay.com/v1/payments?status=captured&count=${count}`, {
-    headers: { Authorization: `Basic ${auth}` },
-  });
+  const items: RazorpayCapturedItem[] = [];
+  let skip = 0;
+  const batchSize = Math.min(100, Math.max(1, count));
 
-  if (!response.ok) {
-    return null;
+  try {
+    while (items.length < count) {
+      const fetchLimit = Math.min(batchSize, count - items.length);
+      const url = `https://api.razorpay.com/v1/payments?status=captured&count=${fetchLimit}${skip > 0 ? `&skip=${skip}` : ""}`;
+      const response = await fetch(url, {
+        headers: { Authorization: `Basic ${auth}` },
+      });
+
+      if (!response.ok) {
+        if (items.length > 0) return items;
+        return null;
+      }
+
+      const json = (await response.json()) as { items?: RazorpayCapturedItem[] };
+      const batch = json.items ?? [];
+      if (batch.length === 0) break;
+      items.push(...batch);
+      if (batch.length < fetchLimit) break;
+      skip += batch.length;
+    }
+    return items;
+  } catch {
+    return items.length > 0 ? items : null;
   }
-
-  const json = (await response.json()) as {
-    items: RazorpayCapturedItem[];
-  };
-
-  return json.items ?? [];
 }
 
 export async function fetchRazorpayOrder(orderId: string): Promise<RazorpayOrder | null> {

@@ -41,9 +41,9 @@ import {
   adminUserRoleSchema,
 } from "../validators/admin.validator.js";
 
-function parsePage(request: AuthenticatedRequest, maxLimit = 200) {
+function parsePage(request: AuthenticatedRequest, maxLimit = 1000) {
   const page = Math.max(1, Number(request.query.page ?? 1) || 1);
-  const pageSize = Math.min(maxLimit, Math.max(1, Number(request.query.pageSize ?? 20) || 20));
+  const pageSize = Math.min(maxLimit, Math.max(1, Number(request.query.pageSize ?? 50) || 50));
   return { page, pageSize, skip: (page - 1) * pageSize };
 }
 

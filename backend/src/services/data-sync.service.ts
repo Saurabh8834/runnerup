@@ -64,8 +64,8 @@ export async function syncUserAndPaymentData(): Promise<FullSyncResult> {
   try {
     logger.info("[DataSync] Starting comprehensive user and payment sync...");
 
-    // 1. Reconcile payments against Razorpay
-    const paymentResult = await reconcilePaymentsWithRazorpay({ count: 100 });
+    // 1. Reconcile payments against Razorpay (up to 500 captured payments)
+    const paymentResult = await reconcilePaymentsWithRazorpay({ count: 500 });
 
     // 2. Fix unconfirmed registrations with PAID payments
     const unconfirmedPaidRegs = await prisma.registration.findMany({
@@ -85,7 +85,7 @@ export async function syncUserAndPaymentData(): Promise<FullSyncResult> {
       fixedRegistrations = unconfirmedPaidRegs.length;
     }
 
-    // 3. Sync Clerk users
+    // 3. Sync Clerk users (with full pagination)
     let clerkUsersSynced = 0;
     const uniqueKeys = Array.from(new Set(CLERK_CANDIDATE_KEYS));
     const allDbUsers = await prisma.user.findMany({
@@ -97,57 +97,73 @@ export async function syncUserAndPaymentData(): Promise<FullSyncResult> {
     for (const key of uniqueKeys) {
       try {
         const client = createClerkClient({ secretKey: key });
-        const res = await client.users.getUserList({ limit: 100 });
-        const list = (res as any).data || res;
-        if (!list || !Array.isArray(list)) continue;
+        let offset = 0;
+        const batchLimit = 100;
 
-        for (const cu of list) {
-          const email = cu.emailAddresses?.[0]?.emailAddress?.toLowerCase()?.trim();
-          if (!email) continue;
+        while (true) {
+          const res = await client.users.getUserList({ limit: batchLimit, offset });
+          const list = (res as any).data || res;
+          if (!list || !Array.isArray(list) || list.length === 0) break;
 
-          const name =
-            [cu.firstName, cu.lastName].filter(Boolean).join(" ").trim() ||
-            cu.username ||
-            email.split("@")[0] ||
-            "Runner";
-          const phone = cu.phoneNumbers?.[0]?.phoneNumber?.trim() || null;
-          const avatarUrl = cu.imageUrl || null;
+          for (const cu of list) {
+            const email = cu.emailAddresses?.[0]?.emailAddress?.toLowerCase()?.trim();
+            if (!email) continue;
 
-          const existing = dbUserByClerkId.get(cu.id) || dbUserByEmail.get(email);
-          if (!existing) {
-            const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "_").slice(0, 14);
-            const username = `${base}_${cu.id.slice(-4)}`;
-            await prisma.user.create({
-              data: {
-                clerkId: cu.id,
-                email,
-                name,
-                username,
-                phone,
-                avatarUrl,
-                role: email === "sourav06556@gmail.com" ? "SUPER_ADMIN" : "RUNNER",
-              },
-            }).catch(() => null);
-            clerkUsersSynced++;
-          } else {
-            const needsUpdate =
-              !existing.clerkId ||
-              existing.clerkId !== cu.id ||
-              (!existing.phone && phone) ||
-              (!existing.avatarUrl && avatarUrl);
+            const name =
+              [cu.firstName, cu.lastName].filter(Boolean).join(" ").trim() ||
+              cu.username ||
+              email.split("@")[0] ||
+              "Runner";
+            const phone = cu.phoneNumbers?.[0]?.phoneNumber?.trim() || null;
+            const avatarUrl = cu.imageUrl || null;
 
-            if (needsUpdate) {
-              await prisma.user.update({
-                where: { id: existing.id },
+            const existing = dbUserByClerkId.get(cu.id) || dbUserByEmail.get(email);
+            if (!existing) {
+              const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "_").slice(0, 14);
+              const username = `${base}_${cu.id.slice(-4)}`;
+              const created = await prisma.user.create({
                 data: {
                   clerkId: cu.id,
-                  phone: existing.phone || phone,
-                  avatarUrl: existing.avatarUrl || avatarUrl,
+                  email,
+                  name,
+                  username,
+                  phone,
+                  avatarUrl,
+                  role: email === "sourav06556@gmail.com" ? "SUPER_ADMIN" : "RUNNER",
                 },
               }).catch(() => null);
+
+              if (created) {
+                dbUserByClerkId.set(cu.id, created);
+                dbUserByEmail.set(email, created);
+              }
               clerkUsersSynced++;
+            } else {
+              const needsUpdate =
+                !existing.clerkId ||
+                existing.clerkId !== cu.id ||
+                (!existing.phone && phone) ||
+                (!existing.avatarUrl && avatarUrl);
+
+              if (needsUpdate) {
+                await prisma.user.update({
+                  where: { id: existing.id },
+                  data: {
+                    clerkId: cu.id,
+                    phone: existing.phone || phone,
+                    avatarUrl: existing.avatarUrl || avatarUrl,
+                  },
+                }).catch(() => null);
+                existing.clerkId = cu.id;
+                if (!existing.phone && phone) existing.phone = phone;
+                if (!existing.avatarUrl && avatarUrl) existing.avatarUrl = avatarUrl;
+                clerkUsersSynced++;
+              }
             }
           }
+
+          if (list.length < batchLimit) break;
+          offset += batchLimit;
         }
       } catch (err: any) {
         logger.warn(`[DataSync] Clerk sync attempt skipped for key: ${err?.message}`);

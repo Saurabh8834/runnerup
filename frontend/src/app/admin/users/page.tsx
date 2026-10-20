@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2, FileSpreadsheet, RefreshCw, Trash2, X } fr
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime } from "../../../lib/admin-api";
-import { AdminPageHeader, CustomerStatusDot } from "../ui";
+import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
 type UserRow = {
   id: string;
@@ -24,12 +24,18 @@ type UserRow = {
 export default function AdminUsersPage() {
   const { getToken } = useAuth();
   const [items, setItems] = useState<UserRow[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [loading, setLoading] = useState(false);
   const [meta, setMeta] = useState<{
     total: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
     totalPaidUsers: number;
     totalUnpaidUsers: number;
     totalPaidRegistrations?: number;
-  }>({ total: 0, totalPaidUsers: 0, totalUnpaidUsers: 0 });
+  }>({ total: 0, page: 1, pageSize: 50, totalPages: 1, totalPaidUsers: 0, totalUnpaidUsers: 0 });
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
@@ -45,10 +51,14 @@ export default function AdminUsersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+    setLoading(true);
     try {
       const token = await getToken().catch(() => null);
-      const params = new URLSearchParams({ pageSize: "50" });
+      const params = new URLSearchParams({
+        page: String(targetPage),
+        pageSize: String(targetPageSize),
+      });
       if (q.trim()) params.set("q", q.trim());
       if (role) params.set("role", role);
       if (status) params.set("status", status);
@@ -56,6 +66,9 @@ export default function AdminUsersPage() {
         data: UserRow[];
         meta: {
           total: number;
+          page?: number;
+          pageSize?: number;
+          totalPages?: number;
           totalPaidUsers?: number;
           totalUnpaidUsers?: number;
           totalPaidRegistrations?: number;
@@ -107,21 +120,40 @@ export default function AdminUsersPage() {
         return Boolean(u.hasPaid ?? ((u.paidCount && u.paidCount > 0) || (u.totalPaidInr && u.totalPaidInr > 0)));
       }).length;
 
+      const totalItems = json.meta?.total ?? userList.length;
+      const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / targetPageSize));
+
       setMeta({
-        total: json.meta?.total ?? userList.length,
+        total: totalItems,
+        page: json.meta?.page ?? targetPage,
+        pageSize: json.meta?.pageSize ?? targetPageSize,
+        totalPages: computedTotalPages,
         totalPaidUsers: totalPaid ?? paidInPage,
-        totalUnpaidUsers: totalUnpaid ?? Math.max(0, (json.meta?.total ?? userList.length) - paidInPage),
+        totalUnpaidUsers: totalUnpaid ?? Math.max(0, totalItems - paidInPage),
         totalPaidRegistrations: json.meta?.totalPaidRegistrations,
       });
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
+    } finally {
+      setLoading(false);
     }
-  }, [getToken, q, role, status]);
+  }, [getToken, page, pageSize, q, role, status]);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    void load(newPage, pageSize);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+    void load(1, newSize);
+  };
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(page, pageSize);
+  }, [load, page, pageSize]);
 
   async function exportExcel() {
     setExporting(true);
@@ -251,11 +283,21 @@ export default function AdminUsersPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setPage(1);
+          }}
           placeholder="Name, email, phone, clerk id"
           value={q}
         />
-        <select className="input" onChange={(e) => setRole(e.target.value)} value={role}>
+        <select
+          className="input"
+          onChange={(e) => {
+            setRole(e.target.value);
+            setPage(1);
+          }}
+          value={role}
+        >
           <option value="">All roles</option>
           {["RUNNER", "ADMIN", "SUPER_ADMIN"].map((r) => (
             <option key={r} value={r}>
@@ -263,12 +305,26 @@ export default function AdminUsersPage() {
             </option>
           ))}
         </select>
-        <select className="input" onChange={(e) => setStatus(e.target.value)} value={status}>
+        <select
+          className="input"
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          value={status}
+        >
           <option value="">All payment statuses</option>
           <option value="PAID">Paid runners only (🟢)</option>
           <option value="UNPAID">Unpaid runners only (🔴)</option>
         </select>
-        <button className="btn btn-primary" onClick={() => void load()} type="button">
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            setPage(1);
+            void load(1, pageSize);
+          }}
+          type="button"
+        >
           Refresh
         </button>
       </div>
@@ -362,6 +418,17 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
       </div>
+
+      <AdminPagination
+        page={page}
+        pageSize={pageSize}
+        total={meta.total}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        itemName="users"
+        pageSizeOptions={[50, 100, 200, 500, 1000]}
+        loading={loading}
+      />
 
       {/* ── Double-Confirmation Delete Modal (Ask Twice Safety) ── */}
       {deleteTarget ? (
