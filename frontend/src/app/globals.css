@@ -677,6 +677,19 @@ html[data-theme="dark"] .badge-danger {
   display: none !important;
 }
 
+/* Suppress development error alerts & quota warnings so users never see them */
+.cl-alert:has(a[href*="clerk.com"]),
+.cl-alert:has(a[href*="go.clerk.com"]),
+.cl-alert:has(a[href*="test-emails"]),
+[class*="cl-alert"]:has(a[href*="clerk.com"]),
+[class*="cl-alert"]:has(a[href*="go.clerk.com"]),
+[class*="cl-alert"]:has(a[href*="test-emails"]),
+[class*="cl-formFieldError"]:has(a[href*="clerk.com"]),
+[class*="cl-formErrorText"]:has(a[href*="clerk.com"]),
+.cl-dev-warning-suppressed {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .fade-up {
     animation: fade-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;

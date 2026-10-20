@@ -112,10 +112,25 @@ function buildPrizeItems(
 }
 
 export async function lookupPrizeByBib(request: AuthenticatedRequest, response: Response) {
-  const bibNumber = routeParam(request, "bibNumber");
+  const query = routeParam(request, "bibNumber").trim();
+  const cleanDigits = query.replace(/\D/g, "");
 
   const registration = await prisma.registration.findFirst({
-    where: { bibNumber },
+    where: {
+      OR: [
+        { bibNumber: { equals: query, mode: "insensitive" } },
+        { user: { email: { equals: query, mode: "insensitive" } } },
+        ...(query.includes("@")
+          ? []
+          : cleanDigits.length >= 8
+            ? [
+                { shippingPhone: { contains: cleanDigits.slice(-10) } },
+                { user: { phone: { contains: cleanDigits.slice(-10) } } },
+              ]
+            : []),
+      ],
+    },
+    orderBy: { registeredAt: "desc" },
     include: {
       user: { select: { name: true, email: true } },
       event: { select: { title: true, slug: true, distances: true, benefits: true } },
@@ -126,7 +141,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
   });
 
   if (!registration) {
-    throw new ApiError(404, "No registration found with this bib number");
+    throw new ApiError(404, "No registration found for this bib number, email, or phone");
   }
 
   const prizes = buildPrizeItems(

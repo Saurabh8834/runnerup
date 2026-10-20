@@ -35,7 +35,7 @@ export default function PrizeSearchPage() {
               Track your prizes
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-(--muted) sm:text-base">
-              Enter your bib number to check the status of your certificate, medal, and other event rewards.
+              Enter your bib number, email, or registered phone number to check the status of your certificate, medal, and other event rewards.
             </p>
 
             <form className="mt-8 mx-auto flex max-w-md gap-2" onSubmit={handleSubmit}>
@@ -43,7 +43,7 @@ export default function PrizeSearchPage() {
                 autoComplete="off"
                 className="input flex-1 h-12 px-4 text-base"
                 onChange={(e) => setBib(e.target.value)}
-                placeholder="e.g. MR-2026-0042"
+                placeholder="Bib number, email, or phone"
                 type="text"
                 value={bib}
               />

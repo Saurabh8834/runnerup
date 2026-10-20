@@ -3,7 +3,7 @@
 import { ClerkLoaded, ClerkLoading, SignUp } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect } from "react";
-import { ChevronRight, Medal, Route } from "lucide-react";
+import { ChevronRight, Medal, Route, Zap } from "lucide-react";
 import { PageShell } from "../../components/app-shell";
 import { useTheme } from "../../components/theme-provider";
 
@@ -12,13 +12,75 @@ function ThemedSignUp() {
   const dark = theme === "dark";
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const card = document.querySelector("[class*='cl-card'], [class*='cl-internal']");
-      if (card) {
-        const form = card.querySelector("form");
-        if (form) { form.noValidate = true; observer.disconnect(); }
-      }
-    });
+    const sanitizeClerkDom = () => {
+      // 1. Ensure forms do not trigger native browser validation bubbles
+      document.querySelectorAll("form").forEach((f) => {
+        if (f.closest("[class*='cl-']")) f.noValidate = true;
+      });
+
+      // 2. Intercept and completely suppress development/quota alerts
+      const alerts = document.querySelectorAll(
+        "[class*='cl-alert'], [role='alert'], .cl-formFieldErrorText, .cl-alertText, [class*='cl-formErrorText']"
+      );
+
+      alerts.forEach((alertNode) => {
+        const el = alertNode as HTMLElement;
+        const text = (el.innerText || el.textContent || "").toLowerCase();
+        const hasDevKeywords =
+          text.includes("monthly limit") ||
+          text.includes("development") ||
+          text.includes("test emails") ||
+          text.includes("test-emails") ||
+          text.includes("go.clerk.com") ||
+          el.querySelector("a[href*='clerk.com']") !== null ||
+          el.querySelector("a[href*='go.clerk.com']") !== null;
+
+        if (hasDevKeywords) {
+          el.style.display = "none";
+          el.classList.add("cl-dev-warning-suppressed");
+
+          const parent = el.closest("[class*='cl-card'], form, .cl-rootBox");
+          if (parent && !parent.querySelector(".runnerup-dev-fallback")) {
+            const fallback = document.createElement("div");
+            fallback.className =
+              "runnerup-dev-fallback mt-3 mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-left";
+            fallback.innerHTML = `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:#e64833;color:#ffffff;font-size:10px;font-weight:bold;">⚡</span>
+                <span style="font-size:12px;font-weight:700;color:#fbe9d0;">Instant 1-Click Sign-Up</span>
+              </div>
+              <p style="font-size:11.5px;line-height:1.5;color:#fcf8f2;margin:0 0 10px 0;">
+                Please continue with <strong>Google</strong> for instant account creation without email codes.
+              </p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="runnerup-switch-to-google-btn" style="background:#e64833;color:#ffffff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">
+                  ← Back to 1-Click Google
+                </button>
+              </div>
+            `;
+
+            const btn = fallback.querySelector(".runnerup-switch-to-google-btn");
+            if (btn) {
+              btn.addEventListener("click", () => {
+                const editBtn = document.querySelector<HTMLElement>(
+                  "button[aria-label*='Edit'], .cl-identityPreviewEditButton, [class*='identityPreviewEditButton'], button[data-localization-key*='back']"
+                );
+                if (editBtn) {
+                  editBtn.click();
+                } else {
+                  window.location.href = "/sign-up";
+                }
+              });
+            }
+
+            el.parentNode?.insertBefore(fallback, el);
+          }
+        }
+      });
+    };
+
+    sanitizeClerkDom();
+    const observer = new MutationObserver(sanitizeClerkDom);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
@@ -91,9 +153,27 @@ export default function SignUpPage() {
             <div className="text-center lg:text-left">
               <p className="auth-classic-kicker">Get started</p>
               <h1 className="auth-classic-form-title mt-3">Create your runner account</h1>
-              <p className="mt-3 text-sm leading-6 text-(--muted)">Sign up with Google or email (minimum 8 characters password). Valid phone number is required for official race registration & race kit dispatch.</p>
+              <p className="mt-3 text-sm leading-6 text-(--muted)">Sign up with Google 1-Click or email and password.</p>
             </div>
-          <div className="mt-6 w-full sm:mt-8">
+
+            {/* Instant access tip */}
+            <div className="mt-4 rounded-xl border border-white/10 bg-gradient-to-r from-[#244855]/70 to-[#1b323b]/90 p-3.5 backdrop-blur-md">
+              <div className="flex items-start gap-2.5">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e64833] text-white text-xs font-bold mt-0.5">
+                  <Zap className="h-3.5 w-3.5 fill-current" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold text-[#fcf8f2]">
+                    Recommended: 1-Click Google Sign-Up
+                  </p>
+                  <p className="text-[11.5px] text-[#90aead] mt-0.5 leading-relaxed">
+                    Click <strong className="text-white">&ldquo;Continue with Google&rdquo;</strong> for instant account creation without waiting for email verification codes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          <div className="mt-4 w-full">
             <ClerkLoading>
               <div className="w-full rounded-2xl border border-(--line) bg-(--panel) p-6">
                 <div className="h-5 w-36 rounded-full bg-(--panel-soft)" />
