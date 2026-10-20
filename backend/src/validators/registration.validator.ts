@@ -59,6 +59,7 @@ export const createRegistrationSchema = z
     state: indianStateSchema.optional(),
     pincode: pincodeSchema.optional(),
     referralCode: z.string().min(4).max(12).optional(),
+    couponCode: z.string().trim().max(30).optional(),
   })
   .transform((data) => {
     const shippingName = data.shippingName ?? data.name ?? "";

@@ -10,6 +10,7 @@ import {
 import { ensureDefaultEvents, isRegistrationOpen } from "../services/event.service.js";
 import { createRazorpayOrder } from "../services/razorpay.service.js";
 import { upsertUserFromClerk } from "../services/user.service.js";
+import { resolveCouponDiscount } from "./payment.controller.js";
 import { ApiError } from "../utils/api-error.js";
 import { logger } from "../utils/logger.js";
 import { routeParam } from "../utils/params.js";
@@ -275,9 +276,17 @@ export async function createRegistration(request: AuthenticatedRequest, response
       raced.status !== "COMPLETED" &&
       raced.payment?.status !== "PAID"
     ) {
+      let chargedAmount = event.priceInPaise;
+      if (payload.couponCode) {
+        const couponResult = await resolveCouponDiscount(payload.couponCode, event);
+        if (couponResult.valid) {
+          chargedAmount = Math.max(100, event.priceInPaise - couponResult.discountPaise);
+        }
+      }
+
       let order = null;
       if (!freeEntry) {
-        order = await generateFreshOrderForRegistration(raced.id, raced.bibNumber, event.priceInPaise);
+        order = await generateFreshOrderForRegistration(raced.id, raced.bibNumber, chargedAmount);
       }
       response.status(200).json({
         data: {
@@ -316,9 +325,17 @@ export async function createRegistration(request: AuthenticatedRequest, response
     }
   }
 
+  let chargedAmount = event.priceInPaise;
+  if (payload.couponCode) {
+    const couponResult = await resolveCouponDiscount(payload.couponCode, event);
+    if (couponResult.valid) {
+      chargedAmount = Math.max(100, event.priceInPaise - couponResult.discountPaise);
+    }
+  }
+
   let order = null;
   if (!freeEntry) {
-    order = await generateFreshOrderForRegistration(registration.id, registration.bibNumber, event.priceInPaise);
+    order = await generateFreshOrderForRegistration(registration.id, registration.bibNumber, chargedAmount);
   }
 
   response.status(201).json({

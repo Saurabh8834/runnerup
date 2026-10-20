@@ -1,17 +1,18 @@
 const isDev = process.env.NODE_ENV !== "production";
 const configuredApiUrl = (process.env.NEXT_PUBLIC_API_URL || process.env.INTERNAL_API_URL || "").trim().replace(/\/+$/, "");
 
-export const CLOUD_BACKEND_URL = "https://runnerup-production.up.railway.app";
+export const CLOUD_BACKEND_URL = "https://api.runnerup.in";
+export const RAILWAY_FALLBACK_URL = "https://runnerup-production.up.railway.app";
 
-// Production canonical API connects directly to the 24/7 Railway cloud backend
-export const CANONICAL_BACKEND_URL =
-  configuredApiUrl &&
-  !configuredApiUrl.includes("127.0.0.1") &&
-  !configuredApiUrl.includes("localhost")
+// Production canonical API connects directly to the live production API (api.runnerup.in)
+export const CANONICAL_BACKEND_URL = isDev
+  ? "http://127.0.0.1:4000"
+  : configuredApiUrl &&
+      !configuredApiUrl.includes("127.0.0.1") &&
+      !configuredApiUrl.includes("localhost") &&
+      !configuredApiUrl.includes("railway.app")
     ? configuredApiUrl
-    : isDev
-      ? "http://127.0.0.1:4000"
-      : CLOUD_BACKEND_URL;
+    : CLOUD_BACKEND_URL;
 
 let dynamicBackendUrl: string | null = null;
 
@@ -48,23 +49,35 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
 
   try {
     const res = await fetch(primaryUrl, init);
-    // If the server responded with Cloudflare tunnel down (530) or gateway error (502/503/504)
-    if (res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
-      if (typeof window !== "undefined" && !primaryUrl.includes(CLOUD_BACKEND_URL)) {
-        setActiveBackendUrl(CLOUD_BACKEND_URL);
-        const fallbackUrl = `${CLOUD_BACKEND_URL}${cleanPath}`;
-        const fallbackRes = await fetch(fallbackUrl, init);
-        return fallbackRes;
+    // If 404 or tunnel down (530) or gateway error (502/503/504), attempt alternative backend
+    if (res.status === 404 || res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
+      if (typeof window !== "undefined") {
+        const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
+        try {
+          const fallbackUrl = `${altBackend}${cleanPath}`;
+          const fallbackRes = await fetch(fallbackUrl, init);
+          if (fallbackRes.ok || (res.status === 404 && fallbackRes.status !== 404)) {
+            setActiveBackendUrl(altBackend);
+            return fallbackRes;
+          }
+        } catch {
+          // ignore fallback error and return original response
+        }
       }
     }
     return res;
   } catch (err) {
     // Network failure (e.g. laptop closed, connection refused, CORS failure on dead tunnel)
-    if (typeof window !== "undefined" && !primaryUrl.includes(CLOUD_BACKEND_URL)) {
-      setActiveBackendUrl(CLOUD_BACKEND_URL);
-      const fallbackUrl = `${CLOUD_BACKEND_URL}${cleanPath}`;
-      const fallbackRes = await fetch(fallbackUrl, init);
-      return fallbackRes;
+    if (typeof window !== "undefined") {
+      const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
+      try {
+        const fallbackUrl = `${altBackend}${cleanPath}`;
+        const fallbackRes = await fetch(fallbackUrl, init);
+        setActiveBackendUrl(altBackend);
+        return fallbackRes;
+      } catch {
+        // ignore fallback error
+      }
     }
     throw err;
   }
