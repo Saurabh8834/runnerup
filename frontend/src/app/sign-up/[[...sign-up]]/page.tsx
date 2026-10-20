@@ -32,6 +32,8 @@ function ThemedSignUp() {
           text.includes("test emails") ||
           text.includes("test-emails") ||
           text.includes("go.clerk.com") ||
+          text.includes("unable to complete action") ||
+          text.includes("if the problem persists") ||
           el.querySelector("a[href*='clerk.com']") !== null ||
           el.querySelector("a[href*='go.clerk.com']") !== null;
 

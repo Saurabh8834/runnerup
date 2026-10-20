@@ -152,6 +152,10 @@ const publishableKey =
   process.env.CLERK_PUBLISHABLE_KEY ||
   "";
 
+const clerkProxyUrl =
+  process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
+  (process.env.NODE_ENV === "production" ? "https://runnerup.in/__clerk" : undefined);
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -168,9 +172,7 @@ export default function RootLayout({
     >
       <head>
         {/* Preconnect to external origins to reduce latency */}
-        <link rel="preconnect" href="https://tidy-haddock-9482.clerk.accounts.dev" />
         <link rel="preconnect" href="https://img.clerk.com" />
-        <link rel="dns-prefetch" href="https://tidy-haddock-9482.clerk.accounts.dev" />
         <link rel="dns-prefetch" href="https://img.clerk.com" />
         <StructuredData />
       </head>
@@ -193,6 +195,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ClerkProvider
             publishableKey={publishableKey || undefined}
+            proxyUrl={clerkProxyUrl}
             appearance={{
               variables: {
                 colorPrimary: "#e64833",
