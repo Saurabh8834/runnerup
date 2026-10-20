@@ -94,8 +94,18 @@ app.use((_request, _response, next) => {
 
 app.use((error: Error, request: Request, response: Response, _next: NextFunction) => {
   void _next;
-  const statusCode = error instanceof ApiError ? error.statusCode : 500;
-  if (statusCode === 500) {
+  const statusCode =
+    error instanceof ApiError
+      ? error.statusCode
+      : "status" in error && typeof (error as any).status === "number"
+        ? (error as any).status
+        : "statusCode" in error && typeof (error as any).statusCode === "number"
+          ? (error as any).statusCode
+          : error instanceof SyntaxError
+            ? 400
+            : 500;
+
+  if (statusCode >= 500) {
     logger.error("[Unhandled Server Error]", error, { path: request.path, method: request.method });
   } else {
     logger.warn(`API Error (${statusCode}): ${error.message}`, { statusCode, path: request.path, method: request.method });
@@ -103,7 +113,7 @@ app.use((error: Error, request: Request, response: Response, _next: NextFunction
 
   response.status(statusCode).json({
     error: {
-      message: statusCode === 500 ? "Internal server error" : error.message,
+      message: statusCode >= 500 ? "Internal server error" : error.message,
     },
   });
 });
