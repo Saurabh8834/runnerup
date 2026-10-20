@@ -19,23 +19,6 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: publishableKey,
   },
 
-  // ── Canonical host redirect: www.runnerup.in -> runnerup.in ──
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "www.runnerup.in",
-          },
-        ],
-        destination: "https://runnerup.in/:path*",
-        permanent: true,
-      },
-    ];
-  },
-
   // ── Backend API & Webhook proxy ─────────────────────────
   // Forwards /api/* and /health to the backend server (locally or configured URL)
   // so external clients accessing runnerup.in can reach the API without CORS or mixed-content issues.

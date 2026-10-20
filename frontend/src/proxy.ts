@@ -3,14 +3,6 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
-  const host = request.headers.get("host") || "";
-  if (host.startsWith("www.runnerup.in")) {
-    const url = new URL(request.url);
-    url.host = "runnerup.in";
-    url.protocol = "https:";
-    return Response.redirect(url.toString(), 308);
-  }
-
   // Allow dedicated admin login route without Clerk protection
   if (pathname.startsWith("/admin/login")) {
     return;
