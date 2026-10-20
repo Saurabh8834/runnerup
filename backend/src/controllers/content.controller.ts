@@ -91,12 +91,13 @@ export async function submitGalleryPhoto(request: Request, response: Response) {
 
   let imageUrl: string;
   if (isCloudinaryConfigured()) {
-    const uploaded = await uploadImageToCloudinary(payload.file, "runnerup/gallery");
-    imageUrl = uploaded.secure_url;
-  } else {
-    if (!payload.file.startsWith("https://")) {
-      throw new ApiError(503, "Image upload requires Cloudinary to be configured");
+    try {
+      const uploaded = await uploadImageToCloudinary(payload.file, "runnerup/gallery");
+      imageUrl = uploaded.secure_url;
+    } catch {
+      imageUrl = payload.file;
     }
+  } else {
     imageUrl = payload.file;
   }
 

@@ -11,6 +11,7 @@ function isTransientDbError(error: unknown): boolean {
   const code = String((error as { code?: string }).code || "");
 
   return (
+    msg.includes("Engine is not yet connected") ||
     msg.includes("Server has closed the connection") ||
     msg.includes("Timed out fetching a new connection") ||
     msg.includes("connection pool") ||
@@ -34,11 +35,11 @@ export const prisma = basePrisma.$extends({
         } catch (error) {
           if (isTransientDbError(error)) {
             logger.warn(
-              `[Prisma] Recoverable connection issue on ${model}.${operation}, reconnecting client...`,
+              `[Prisma] Transient connection issue on ${model}.${operation}, reconnecting engine and retrying...`,
             );
             try {
-              await basePrisma.$disconnect().catch(() => {});
               await basePrisma.$connect().catch(() => {});
+              await new Promise((r) => setTimeout(r, 200));
             } catch (reconnectErr) {
               logger.error("[Prisma] Reconnect attempt failed", reconnectErr);
             }

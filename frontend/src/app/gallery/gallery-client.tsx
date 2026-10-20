@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-mot
 import { Camera, Heart, Loader2, MapPin, Sparkles, Trophy, Upload, X, ArrowRight, Award } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getApiUrl } from "../../lib/api";
+import { getApiUrl, resilientFetch } from "../../lib/api";
 import { fileToDataUrl, validateImageFile } from "../../lib/cloudinary";
 import {
   galleryCategories,
@@ -238,7 +238,7 @@ function SubmitPhotoModal({ onClose }: { onClose: () => void }) {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(getApiUrl("/api/content/gallery/submit"), {
+      const res = await resilientFetch("/api/content/gallery/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

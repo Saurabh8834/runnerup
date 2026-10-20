@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { authHeaders, getApiUrl, readApiError } from "../../lib/api";
+import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
 
@@ -146,14 +146,15 @@ async function fileToPayload(file: File): Promise<string> {
   if (!isImageMime && !isImageExt) {
     throw new Error("Please choose an image file (JPEG, PNG, WebP).");
   }
-  if (file.size > 15 * 1024 * 1024) {
-    throw new Error("Image file is too large (maximum 15 MB). Please choose a smaller image.");
+  if (file.size > 20 * 1024 * 1024) {
+    throw new Error("Image file is too large (maximum 20 MB). Please choose a smaller image.");
   }
 
+  // 1. Hardware-accelerated compression via createImageBitmap
   try {
     if (typeof window !== "undefined" && typeof createImageBitmap === "function") {
       const bmp = await createImageBitmap(file);
-      const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const scale = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
       const c = document.createElement("canvas");
       c.width = Math.max(1, Math.round(bmp.width * scale));
       c.height = Math.max(1, Math.round(bmp.height * scale));
@@ -161,12 +162,47 @@ async function fileToPayload(file: File): Promise<string> {
       if (ctx) {
         ctx.drawImage(bmp, 0, 0, c.width, c.height);
         bmp.close();
-        return c.toDataURL("image/jpeg", 0.85);
+        return c.toDataURL("image/jpeg", 0.82);
       }
       bmp.close();
     }
-  } catch (err) {
-    console.warn("Canvas compression failed, falling back to FileReader:", err);
+  } catch {
+    // Non-blocking: proceed to standard HTMLImageElement compression
+  }
+
+  // 2. HTMLImageElement fallback (works on iOS Safari and webviews where createImageBitmap may fail)
+  try {
+    if (typeof window !== "undefined" && typeof URL !== "undefined" && typeof Image !== "undefined") {
+      const objectUrl = URL.createObjectURL(file);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const scale = Math.min(1, 1400 / Math.max(img.width, img.height));
+            const c = document.createElement("canvas");
+            c.width = Math.max(1, Math.round(img.width * scale));
+            c.height = Math.max(1, Math.round(img.height * scale));
+            const ctx = c.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, c.width, c.height);
+              URL.revokeObjectURL(objectUrl);
+              resolve(c.toDataURL("image/jpeg", 0.82));
+              return;
+            }
+          } catch {}
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Canvas draw failed"));
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Image load failed"));
+        };
+        img.src = objectUrl;
+      });
+      return dataUrl;
+    }
+  } catch {
+    // Non-blocking: proceed to raw FileReader
   }
 
   return new Promise((resolve, reject) => {
@@ -256,7 +292,7 @@ export function DashboardClient() {
     try {
       const token = await getToken();
       if (!token) throw new Error("Could not get session token.");
-      await fetch(getApiUrl("/api/users/sync"), {
+      await resilientFetch("/api/users/sync", {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({
@@ -267,7 +303,7 @@ export function DashboardClient() {
           avatarUrl: user?.imageUrl,
         }),
       });
-      const res = await fetch(getApiUrl("/api/users/me"), {
+      const res = await resilientFetch("/api/users/me", {
         headers: authHeaders(token),
       });
       if (!res.ok) throw new Error(await readApiError(res, "Could not load dashboard"));
@@ -286,7 +322,7 @@ export function DashboardClient() {
     try {
       const token = await getToken();
       if (!token) return;
-      const res = await fetch(getApiUrl("/api/users/me"), { headers: authHeaders(token) });
+      const res = await resilientFetch("/api/users/me", { headers: authHeaders(token) });
       if (!res.ok) return;
       const json = await res.json();
       if (seq.current === id) setDbUser(json.data as DbUser);
@@ -391,18 +427,19 @@ export function DashboardClient() {
 
       if (url.startsWith("data:") || url.startsWith("https://") || url.startsWith("http://")) {
         if (url.startsWith("data:")) {
-          const up = await fetch(getApiUrl("/api/uploads/image"), {
-            method: "POST",
-            headers: authHeaders(token),
-            body: JSON.stringify({ file: url, folder: "runnerup/proofs" }),
-          });
-          if (!up.ok) {
-            if (!url.startsWith("https://")) {
-              throw new Error(await readApiError(up, "Image upload failed. Please try again."));
+          try {
+            const up = await resilientFetch("/api/uploads/image", {
+              method: "POST",
+              headers: authHeaders(token),
+              body: JSON.stringify({ file: url, folder: "runnerup/proofs" }),
+            });
+            if (up.ok) {
+              const upJson = await up.json();
+              url = upJson.data?.url || url;
             }
-          } else {
-            const upJson = await up.json();
-            url = upJson.data?.url || url;
+          } catch (uploadErr) {
+            // Non-blocking: If Cloudinary or upload proxy has an issue, proceed with submitting the inline compressed proof!
+            console.warn("Cloudinary upload failed, submitting proof inline:", uploadErr);
           }
         }
       }
@@ -418,7 +455,7 @@ export function DashboardClient() {
 
       const secs = totalSecs > 0 ? totalSecs : undefined;
 
-      const res = await fetch(getApiUrl(`/api/registrations/${proofRegId}/proof`), {
+      const res = await resilientFetch(`/api/registrations/${proofRegId}/proof`, {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({

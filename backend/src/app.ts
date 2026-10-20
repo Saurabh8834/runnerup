@@ -57,8 +57,9 @@ app.use(cors({
   credentials: true,
 }));
 app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
-// 2mb: proof screenshots as data URLs before Cloudinary (prefer Cloudinary in prod)
-app.use(express.json({ limit: "2mb" }));
+// 15mb: allows high-res phone screenshots & GPS activity photos without 413 Payload Too Large
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
 app.get("/health", (_request, response) => {
   response.json({ status: "ok", service: "runnerup-api" });

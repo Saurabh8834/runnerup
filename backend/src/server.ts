@@ -9,6 +9,11 @@ const server = app.listen(env.port, "0.0.0.0", () => {
     port: env.port,
     env: env.nodeEnv,
   });
+
+  // Warm up and verify Prisma database connection on launch
+  void prisma.$connect()
+    .then(() => logger.info("[Prisma] Database connection established successfully"))
+    .catch((err) => logger.error("[Prisma] Initial database connection error", err));
 });
 
 // Automated background synchronization: keeps DB, Clerk users, and Razorpay payments in permanent sync
