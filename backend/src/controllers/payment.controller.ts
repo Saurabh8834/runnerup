@@ -14,7 +14,113 @@ import {
 import { ApiError } from "../utils/api-error.js";
 import { logger } from "../utils/logger.js";
 import { validateBody } from "../utils/validate.js";
-import { createPaymentOrderSchema, verifyPaymentSchema } from "../validators/payment.validator.js";
+import {
+  createPaymentOrderSchema,
+  validateCouponSchema,
+  verifyPaymentSchema,
+} from "../validators/payment.validator.js";
+
+export async function resolveCouponDiscount(
+  rawCode: string,
+  event: { priceInPaise: number; couponCode?: string | null },
+): Promise<{
+  valid: boolean;
+  code: string;
+  discountPaise: number;
+  message?: string;
+  couponId?: string;
+}> {
+  const code = rawCode.trim().toUpperCase();
+  if (!code) {
+    return { valid: false, code, discountPaise: 0, message: "Please enter a coupon code" };
+  }
+
+  // 1. Check Coupon model in database
+  const dbCoupon = await prisma.coupon.findUnique({
+    where: { code },
+  });
+
+  if (dbCoupon) {
+    if (!dbCoupon.active) {
+      return { valid: false, code, discountPaise: 0, message: "This coupon is no longer active" };
+    }
+    if (dbCoupon.expiresAt && dbCoupon.expiresAt < new Date()) {
+      return { valid: false, code, discountPaise: 0, message: "This coupon has expired" };
+    }
+    if (dbCoupon.maxRedemptions !== null && dbCoupon.redeemedCount >= dbCoupon.maxRedemptions) {
+      return { valid: false, code, discountPaise: 0, message: "This coupon has reached maximum redemptions" };
+    }
+    return {
+      valid: true,
+      code,
+      discountPaise: dbCoupon.discountPaise,
+      couponId: dbCoupon.id,
+      message: `Coupon applied: ₹${Math.round(dbCoupon.discountPaise / 100)} OFF!`,
+    };
+  }
+
+  // 2. Check Event-level couponCode (e.g. DUSSEHRA50)
+  if (event.couponCode && event.couponCode.trim().toUpperCase() === code) {
+    const match = code.match(/\d+/);
+    let discountPaise = 5000; // default ₹50 off (10% of ₹499)
+    if (match) {
+      const num = parseInt(match[0], 10);
+      if (num > 0 && num < 1000) {
+        discountPaise = num * 100;
+      }
+    }
+    return {
+      valid: true,
+      code,
+      discountPaise,
+      message: `Coupon applied: ₹${Math.round(discountPaise / 100)} OFF!`,
+    };
+  }
+
+  return { valid: false, code, discountPaise: 0, message: "Invalid coupon code" };
+}
+
+export async function validateCoupon(request: Request, response: Response) {
+  const payload = validateBody(validateCouponSchema, request);
+  const code = payload.code.trim().toUpperCase();
+
+  let event = payload.eventSlug
+    ? await prisma.event.findFirst({ where: { slug: payload.eventSlug } })
+    : null;
+
+  if (!event) {
+    event = await prisma.event.findFirst({
+      where: { status: "OPEN" },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  if (!event) {
+    throw new ApiError(404, "No active event found to apply coupon");
+  }
+
+  const result = await resolveCouponDiscount(code, event);
+  if (!result.valid) {
+    throw new ApiError(400, result.message || "Invalid coupon code");
+  }
+
+  const originalAmountInPaise = event.priceInPaise;
+  const finalAmountInPaise = Math.max(100, originalAmountInPaise - result.discountPaise);
+
+  response.json({
+    data: {
+      valid: true,
+      code,
+      discountInPaise: result.discountPaise,
+      discountInRupees: Math.round(result.discountPaise / 100),
+      originalAmountInPaise,
+      originalAmountInRupees: Math.round(originalAmountInPaise / 100),
+      finalAmountInPaise,
+      finalAmountInRupees: Math.round(finalAmountInPaise / 100),
+      message: result.message,
+    },
+  });
+}
 
 export async function createPaymentOrder(request: Request, response: Response) {
   const payload = validateBody(createPaymentOrderSchema, request);
@@ -110,16 +216,34 @@ export async function createPaymentOrder(request: Request, response: Response) {
     }
   }
 
+  // 3. Compute final charged amount considering optional coupon
+  let chargedAmount = registration.event.priceInPaise;
+  let appliedCouponId: string | null = null;
+  let discountPaise = 0;
+  let appliedCouponCode: string | null = null;
+
+  if (payload.couponCode) {
+    const couponResult = await resolveCouponDiscount(payload.couponCode, registration.event);
+    if (couponResult.valid) {
+      discountPaise = couponResult.discountPaise;
+      chargedAmount = Math.max(100, registration.event.priceInPaise - discountPaise);
+      appliedCouponId = couponResult.couponId || null;
+      appliedCouponCode = couponResult.code;
+    }
+  }
+
   // Always generate a fresh Razorpay order for retries.
   // Reusing an old order that had a failed UPI attempt triggers "Payment could not be completed / cancelled" error screen.
   logger.info("[Payment] Creating fresh Razorpay order", {
     registrationId: registration.id,
     bibNumber: registration.bibNumber,
-    amountInPaise: registration.event.priceInPaise,
+    amountInPaise: chargedAmount,
+    discountPaise,
+    couponCode: appliedCouponCode,
   });
 
   const order = await createRazorpayOrder({
-    amountInPaise: registration.event.priceInPaise,
+    amountInPaise: chargedAmount,
     receipt: registration.bibNumber,
     registrationId: registration.id,
   });
@@ -142,6 +266,15 @@ export async function createPaymentOrder(request: Request, response: Response) {
     },
   });
 
+  if (appliedCouponId) {
+    await prisma.coupon
+      .update({
+        where: { id: appliedCouponId },
+        data: { redeemedCount: { increment: 1 } },
+      })
+      .catch(() => null);
+  }
+
   response.status(201).json({
     data: {
       keyId: env.razorpayKeyId,
@@ -150,6 +283,8 @@ export async function createPaymentOrder(request: Request, response: Response) {
       currency: order.currency,
       registrationId: registration.id,
       bibNumber: registration.bibNumber,
+      discountInPaise: discountPaise,
+      couponCode: appliedCouponCode,
       runner: {
         name: registration.user.name,
         email: registration.user.email,

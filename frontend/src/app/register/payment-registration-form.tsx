@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Shirt,
   Sparkles,
+  Tag,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -50,6 +51,8 @@ type RegisterEventOption = {
   label: string;
   value: string;
   amount: string;
+  priceInPaise?: number;
+  couponCode?: string | null;
   distances: string[];
   activityTypes?: string[];
 };
@@ -76,6 +79,8 @@ const fallbackEvents: RegisterEventOption[] = [
     label: "Indian Air Force Day Virtual Challenge 2026",
     value: "indian-air-force-day-virtual-challenge",
     amount: "₹499",
+    priceInPaise: 49900,
+    couponCode: "DUSSEHRA50",
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     activityTypes: ["running", "cycling", "walking"],
   },
@@ -244,6 +249,17 @@ function PaymentRegistrationFormInner() {
   const [streetAddress, setStreetAddress] = useState("");
   const [checkingStatus, setCheckingStatus] = useState(false);
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountInRupees: number;
+    discountInPaise: number;
+    finalAmountInRupees: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
   // Active tracking refs for high-speed live payment polling
   const activeOrderIdRef = useRef<string | null>(null);
   const activeRegIdRef = useRef<string | null>(null);
@@ -346,6 +362,7 @@ function PaymentRegistrationFormInner() {
           slug: string;
           distances: string[];
           priceInPaise: number;
+          couponCode?: string | null;
           registrationOpen?: boolean;
         }>;
 
@@ -355,6 +372,8 @@ function PaymentRegistrationFormInner() {
             label: row.title,
             value: row.slug,
             amount: `₹${Math.round(row.priceInPaise / 100)}`,
+            priceInPaise: row.priceInPaise,
+            couponCode: row.couponCode ?? null,
             distances: row.distances?.length ? row.distances : ["5 km"],
             activityTypes: (row as { activityTypes?: string[] }).activityTypes ?? ["running"],
           }));
@@ -488,7 +507,61 @@ function PaymentRegistrationFormInner() {
     }
   }
 
-  const selectedAmount = activeEvent?.amount ?? "₹499";
+  async function applyCoupon(codeToApply?: string) {
+    const raw = (codeToApply ?? couponInput).trim().toUpperCase();
+    if (!raw) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const res = await resilientFetch("/api/payments/validate-coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: raw,
+          eventSlug: selectedEvent,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error?.message || "Invalid or expired coupon code");
+      }
+
+      setAppliedCoupon({
+        code: json.data.code,
+        discountInRupees: json.data.discountInRupees,
+        discountInPaise: json.data.discountInPaise,
+        finalAmountInRupees: json.data.finalAmountInRupees,
+      });
+      setCouponInput(json.data.code);
+      setCouponError(null);
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(err instanceof Error ? err.message : "Failed to apply coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  }
+
+  const baseAmountInRupees = activeEvent?.priceInPaise
+    ? Math.round(activeEvent.priceInPaise / 100)
+    : parseInt((activeEvent?.amount || "₹499").replace(/\D/g, "") || "499", 10);
+  const finalAmountInRupees = appliedCoupon
+    ? Math.max(1, baseAmountInRupees - appliedCoupon.discountInRupees)
+    : baseAmountInRupees;
+  const selectedAmount = `₹${finalAmountInRupees}`;
+
   const defaultName = profileName || user?.fullName || user?.firstName || "";
   const defaultEmail = user?.primaryEmailAddress?.emailAddress ?? "";
   const defaultPhone = user?.primaryPhoneNumber?.phoneNumber ?? "";
@@ -671,7 +744,10 @@ function PaymentRegistrationFormInner() {
         let payRes = await resilientFetch("/api/payments/create-order", {
           method: "POST",
           headers: authHeaders(token),
-          body: JSON.stringify({ registrationId }),
+          body: JSON.stringify({
+            registrationId,
+            couponCode: appliedCoupon?.code || undefined,
+          }),
         });
 
         if (payRes.status === 401) {
@@ -682,7 +758,10 @@ function PaymentRegistrationFormInner() {
               payRes = await resilientFetch("/api/payments/create-order", {
                 method: "POST",
                 headers: authHeaders(token),
-                body: JSON.stringify({ registrationId }),
+                body: JSON.stringify({
+                  registrationId,
+                  couponCode: appliedCoupon?.code || undefined,
+                }),
               });
             }
           }
@@ -692,7 +771,10 @@ function PaymentRegistrationFormInner() {
             payRes = await resilientFetch("/api/payments/create-order", {
               method: "POST",
               headers: authHeaders(null),
-              body: JSON.stringify({ registrationId }),
+              body: JSON.stringify({
+                registrationId,
+                couponCode: appliedCoupon?.code || undefined,
+              }),
             });
           }
         }
@@ -701,7 +783,10 @@ function PaymentRegistrationFormInner() {
           payRes = await resilientFetch("/api/payments/create-order", {
             method: "POST",
             headers: authHeaders(token),
-            body: JSON.stringify({ registrationId }),
+            body: JSON.stringify({
+              registrationId,
+              couponCode: appliedCoupon?.code || undefined,
+            }),
           });
         }
 
@@ -1115,15 +1200,99 @@ function PaymentRegistrationFormInner() {
             </Field>
           </div>
 
+          {/* Coupon Code Section */}
+          <div className="rounded-2xl border border-(--line) bg-(--panel-soft) p-4 space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-1.5">
+              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-amber-500" /> Have a Coupon Code?
+              </span>
+              {activeEvent?.couponCode && !appliedCoupon && (
+                <button
+                  type="button"
+                  onClick={() => void applyCoupon(activeEvent.couponCode!)}
+                  className="text-[11.5px] font-bold text-amber-400 hover:text-amber-300 underline cursor-pointer"
+                >
+                  Apply &ldquo;{activeEvent.couponCode}&rdquo; (₹50 OFF)
+                </button>
+              )}
+            </div>
+
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-3.5 py-2.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] font-black">
+                    ✓
+                  </span>
+                  <div>
+                    <span className="font-mono font-bold text-emerald-300 uppercase">
+                      {appliedCoupon.code}
+                    </span>
+                    <span className="text-emerald-400 font-semibold ml-2">
+                      (-₹{appliedCoupon.discountInRupees} OFF applied)
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeCoupon}
+                  className="text-xs text-rose-400 hover:text-rose-300 font-bold cursor-pointer"
+                >
+                  ✕ Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter code (e.g. DUSSEHRA50)"
+                  value={couponInput}
+                  onChange={(e) => {
+                    setCouponInput(e.target.value.toUpperCase());
+                    setCouponError(null);
+                  }}
+                  className="flex-1 rounded-xl border border-white/10 bg-(--input-bg) px-3 py-2 text-xs text-white uppercase placeholder:text-(--muted-soft) focus:outline-none focus:border-amber-500 font-mono tracking-wider"
+                />
+                <button
+                  type="button"
+                  onClick={() => void applyCoupon(couponInput)}
+                  disabled={couponLoading || !couponInput.trim()}
+                  className="btn btn-secondary h-9 px-4 text-xs font-bold rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 cursor-pointer disabled:opacity-50"
+                >
+                  {couponLoading ? "Checking..." : "Apply"}
+                </button>
+              </div>
+            )}
+
+            {couponError && (
+              <p className="text-[11.5px] text-rose-400 font-medium">{couponError}</p>
+            )}
+          </div>
+
           {/* Checkout Notice */}
           <div className="rounded-2xl border border-(--line) bg-(--panel-soft) p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs text-(--muted)">
               <Lock className="h-4 w-4 text-(--sage)" />
-              <span>Instant UPI, Cards & Netbanking with Razorpay</span>
+              <span>Instant UPI, Cards &amp; Netbanking with Razorpay</span>
             </div>
-            <span className="font-mono text-lg font-black text-foreground">
-              {selectedAmount}
-            </span>
+            <div className="text-right">
+              {appliedCoupon ? (
+                <div>
+                  <span className="text-xs text-(--muted) line-through mr-2 font-mono">
+                    {activeEvent.amount}
+                  </span>
+                  <span className="font-mono text-xl font-black text-emerald-400">
+                    ₹{finalAmountInRupees}
+                  </span>
+                  <span className="block text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                    ₹{appliedCoupon.discountInRupees} Saved!
+                  </span>
+                </div>
+              ) : (
+                <span className="font-mono text-lg font-black text-foreground">
+                  {selectedAmount}
+                </span>
+              )}
+            </div>
           </div>
 
           {status === "error" && (
