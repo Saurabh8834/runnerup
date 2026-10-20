@@ -3,7 +3,9 @@
 import { useAuth, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import {
+  Check,
   CheckCircle2,
+  Copy,
   Lock,
   MapPin,
   RefreshCw,
@@ -258,6 +260,7 @@ function PaymentRegistrationFormInner() {
   } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [copiedCoupon, setCopiedCoupon] = useState(false);
 
   // Active tracking refs for high-speed live payment polling
   const activeOrderIdRef = useRef<string | null>(null);
@@ -591,6 +594,35 @@ function PaymentRegistrationFormInner() {
     setCouponError(null);
   }
 
+  const handleCopyPromoCode = async (code = "DUSSEHRA50") => {
+    setCouponInput(code);
+    setCouponError(null);
+
+    try {
+      if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(code);
+      } else if (typeof document !== "undefined") {
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedCoupon(true);
+      setTimeout(() => setCopiedCoupon(false), 2000);
+    } catch {
+      setCopiedCoupon(true);
+      setTimeout(() => setCopiedCoupon(false), 2000);
+    }
+
+    void applyCoupon(code);
+  };
+
+  const promoCode = activeEvent?.couponCode || "DUSSEHRA50";
   const baseAmountInRupees = activeEvent?.priceInPaise
     ? Math.round(activeEvent.priceInPaise / 100)
     : parseInt((activeEvent?.amount || "₹499").replace(/\D/g, "") || "499", 10);
@@ -1243,10 +1275,36 @@ function PaymentRegistrationFormInner() {
 
           {/* Coupon Code Section */}
           <div className="rounded-2xl border border-(--line) bg-(--panel-soft) p-4 space-y-3">
-            <div className="flex items-center justify-between flex-wrap gap-1.5">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-amber-500" /> Have a Coupon Code?
               </span>
+
+              {!appliedCoupon && (
+                <button
+                  type="button"
+                  onClick={() => void handleCopyPromoCode(promoCode)}
+                  className="group flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 text-xs font-mono text-amber-300 transition-all cursor-pointer shadow-sm active:scale-95"
+                  title="Click to copy and auto-apply coupon"
+                >
+                  <Sparkles className="h-3 w-3 text-amber-400 group-hover:rotate-12 transition-transform" />
+                  <span className="font-bold tracking-wider">{promoCode}</span>
+                  <span className="text-[11px] font-sans text-amber-400/90 font-semibold">(₹50 OFF)</span>
+                  <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-500/25 px-1.5 py-0.5 text-[10.5px] font-sans font-bold text-amber-200 group-hover:bg-amber-400 group-hover:text-amber-950 transition-colors">
+                    {copiedCoupon ? (
+                      <>
+                        <Check className="h-3 w-3 text-emerald-400 group-hover:text-emerald-900" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              )}
             </div>
 
             {appliedCoupon ? (
