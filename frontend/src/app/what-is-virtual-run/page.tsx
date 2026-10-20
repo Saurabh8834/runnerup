@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { PageShell } from "../components/app-shell";
 
+export const dynamic = "force-static";
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 export const metadata: Metadata = {

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PageShell } from "../components/app-shell";
 import { DashboardClient } from "./dashboard-client";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Athlete Dashboard | RunnerUp India",
   description: "Manage your registered races, upload GPS activity proofs, track finisher medal shipments, and download official certificates.",

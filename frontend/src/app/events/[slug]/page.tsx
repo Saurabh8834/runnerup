@@ -80,7 +80,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hour ISR cache to preserve Vercel free tier quota
+
+export async function generateStaticParams() {
+  return allPublicEvents.map((evt) => ({
+    slug: evt.slug,
+  }));
+}
 
 export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

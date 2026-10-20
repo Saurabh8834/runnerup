@@ -154,7 +154,7 @@ export function mapApiEventToPublic(
 export const fetchEventBySlug = cache(async function fetchEventBySlug(slug: string): Promise<PublicEvent | null> {
   try {
     const response = await fetch(getApiUrl(`/api/events/${encodeURIComponent(slug)}`), {
-      next: { revalidate: 60 },
+      next: { revalidate: 3600 },
     });
     if (response.ok) {
       const json = (await response.json()) as { data: ApiEvent };
@@ -197,7 +197,7 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
   const limit = options?.limit;
   try {
     const response = await fetch(getApiUrl("/api/events?scope=open"), {
-      next: { revalidate: 60 },
+      next: { revalidate: 3600 },
     });
     if (response.ok) {
       const json = (await response.json()) as { data: ApiEvent[] };
@@ -241,7 +241,7 @@ export const fetchHomeContent = cache(async function fetchHomeContent(): Promise
 }> {
   try {
     const response = await fetch(getApiUrl("/api/content/home"), {
-      next: { revalidate: 60 },
+      next: { revalidate: 3600 },
     });
     if (response.ok) {
       const json = (await response.json()) as {
@@ -262,7 +262,7 @@ export async function fetchGalleryContent(category?: string) {
   try {
     const qs = category && category !== "All" ? `?category=${encodeURIComponent(category)}` : "";
     const response = await fetch(getApiUrl(`/api/content/gallery${qs}`), {
-      next: { revalidate: 60 },
+      next: { revalidate: 3600 },
     });
     if (response.ok) {
       const json = await response.json();

@@ -29,8 +29,5 @@ export default clerkMiddleware(async (auth, request) => {
 export const config = {
   matcher: [
     "/admin/:path*",
-    "/sign-in/:path*",
-    "/sign-up/:path*",
-    "/dashboard/:path*",
   ],
 };

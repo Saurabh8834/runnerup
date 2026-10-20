@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hour ISR cache to preserve Vercel free tier quota
 
 export default async function Home() {
   const [serverEvents, serverHome] = await Promise.all([

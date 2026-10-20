@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { BrandText } from "../../components/brand-text";
 import { getApiUrl } from "../../../lib/api";
 import { setEmergencyAdminSession } from "../../../lib/admin-api";
@@ -187,7 +187,9 @@ function AdminLoginForm() {
 export default function AdminLoginPage() {
   return (
     <AdminThemeProvider>
-      <AdminLoginForm />
+      <Suspense fallback={null}>
+        <AdminLoginForm />
+      </Suspense>
     </AdminThemeProvider>
   );
 }

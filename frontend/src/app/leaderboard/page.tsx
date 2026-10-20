@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { PageShell } from "../components/app-shell";
 import { LeaderboardClient } from "./leaderboard-client";
 
+export const dynamic = "force-static";
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 export const metadata: Metadata = {

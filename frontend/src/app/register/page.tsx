@@ -1,6 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PageShell } from "../components/app-shell";
 import { PaymentRegistrationForm } from "./payment-registration-form";
+
+export const dynamic = "force-static";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
@@ -80,7 +83,15 @@ export default function RegisterPage() {
 
       <section className="pb-6 sm:pb-8 md:pb-10">
         <div className="container-page max-w-5xl">
-          <PaymentRegistrationForm />
+          <Suspense
+            fallback={
+              <div className="flex min-h-[40vh] items-center justify-center py-16">
+                <div className="h-10 w-10 animate-spin rounded-full border-3 border-emerald-500/20 border-t-emerald-500" />
+              </div>
+            }
+          >
+            <PaymentRegistrationForm />
+          </Suspense>
         </div>
       </section>
     </PageShell>

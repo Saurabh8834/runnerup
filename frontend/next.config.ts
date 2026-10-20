@@ -80,20 +80,11 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ── Edge Cache for Public Static Assets ─────────────────
+  // ── Edge Cache for Public Static Assets & Pages ──────────
   async headers() {
     return [
       {
         source: "/images/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/events/:path*",
         headers: [
           {
             key: "Cache-Control",
@@ -107,6 +98,33 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/(about|what-is-virtual-run|refer|gallery|leaderboard|register)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/events/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        source: "/",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
           },
         ],
       },
