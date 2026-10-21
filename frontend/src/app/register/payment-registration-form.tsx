@@ -519,8 +519,6 @@ function PaymentRegistrationFormInner() {
     setCouponLoading(true);
     setCouponError(null);
 
-    const isKnownCoupon = raw === "DUSSEHRA50";
-
     try {
       const res = await resilientFetch("/api/payments/validate-coupon", {
         method: "POST",
@@ -532,18 +530,6 @@ function PaymentRegistrationFormInner() {
       });
 
       if (!res.ok) {
-        if (isKnownCoupon) {
-          setAppliedCoupon({
-            code: "DUSSEHRA50",
-            discountInRupees: 50,
-            discountInPaise: 5000,
-            finalAmountInRupees: Math.max(1, baseAmountInRupees - 50),
-          });
-          setCouponInput("DUSSEHRA50");
-          setCouponError(null);
-          return;
-        }
-
         const json = await res.json().catch(() => null);
         const serverMsg = json?.error?.message;
         if (serverMsg === "Route not found" || serverMsg === "Internal server error" || !serverMsg) {
@@ -566,23 +552,12 @@ function PaymentRegistrationFormInner() {
       setCouponInput(json.data.code);
       setCouponError(null);
     } catch (err) {
-      if (isKnownCoupon) {
-        setAppliedCoupon({
-          code: "DUSSEHRA50",
-          discountInRupees: 50,
-          discountInPaise: 5000,
-          finalAmountInRupees: Math.max(1, baseAmountInRupees - 50),
-        });
-        setCouponInput("DUSSEHRA50");
-        setCouponError(null);
-      } else {
-        setAppliedCoupon(null);
-        setCouponError(
-          err instanceof Error && err.message !== "Failed to fetch"
-            ? err.message
-            : "Invalid or expired coupon code",
-        );
-      }
+      setAppliedCoupon(null);
+      setCouponError(
+        err instanceof Error && err.message !== "Failed to fetch"
+          ? err.message
+          : "Invalid or expired coupon code",
+      );
     } finally {
       setCouponLoading(false);
     }
@@ -594,7 +569,8 @@ function PaymentRegistrationFormInner() {
     setCouponError(null);
   }
 
-  const handleCopyPromoCode = async (code = "DUSSEHRA50") => {
+  const handleCopyPromoCode = async (code?: string | null) => {
+    if (!code) return;
     setCouponInput(code);
     setCouponError(null);
 
@@ -622,7 +598,7 @@ function PaymentRegistrationFormInner() {
     void applyCoupon(code);
   };
 
-  const promoCode = activeEvent?.couponCode || "DUSSEHRA50";
+  const promoCode = activeEvent?.couponCode || null;
   const baseAmountInRupees = activeEvent?.priceInPaise
     ? Math.round(activeEvent.priceInPaise / 100)
     : parseInt((activeEvent?.amount || "₹499").replace(/\D/g, "") || "499", 10);
@@ -1280,7 +1256,7 @@ function PaymentRegistrationFormInner() {
                 <Tag className="h-3.5 w-3.5 text-amber-500" /> Have a Coupon Code?
               </span>
 
-              {!appliedCoupon && (
+              {!appliedCoupon && Boolean(promoCode) && (
                 <button
                   type="button"
                   onClick={() => void handleCopyPromoCode(promoCode)}
@@ -1289,7 +1265,7 @@ function PaymentRegistrationFormInner() {
                 >
                   <Sparkles className="h-3 w-3 text-amber-400 group-hover:rotate-12 transition-transform" />
                   <span className="font-bold tracking-wider">{promoCode}</span>
-                  <span className="text-[11px] font-sans text-amber-400/90 font-semibold">(₹50 OFF)</span>
+                  <span className="text-[11px] font-sans text-amber-400/90 font-semibold">(Special Offer)</span>
                   <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-500/25 px-1.5 py-0.5 text-[10.5px] font-sans font-bold text-amber-200 group-hover:bg-amber-400 group-hover:text-amber-950 transition-colors">
                     {copiedCoupon ? (
                       <>

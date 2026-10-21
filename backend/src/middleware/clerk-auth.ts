@@ -270,26 +270,13 @@ export async function requireAdmin(
 
     const clerkId = request.auth.userId;
 
-    // 1) DB role already admin (by clerkId OR admin email)
+    // 1) DB role already admin (by specific clerkId)
     let dbUser = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { clerkId },
-          { email: { in: env.adminEmails } },
-        ],
-      },
+      where: { clerkId },
       select: { id: true, role: true, email: true, clerkId: true },
     });
 
-    if (dbUser && (dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN" || env.adminEmails.includes(dbUser.email.toLowerCase()))) {
-      if (dbUser.clerkId !== clerkId) {
-        const emailLower = dbUser.email?.toLowerCase();
-        const roleToSet = emailLower === "sourav06556@gmail.com" ? "SUPER_ADMIN" : "ADMIN";
-        await prisma.user.update({
-          where: { id: dbUser.id },
-          data: { clerkId, role: roleToSet },
-        }).catch(() => null);
-      }
+    if (dbUser && (dbUser.role === "ADMIN" || dbUser.role === "SUPER_ADMIN" || (dbUser.email && env.adminEmails.includes(dbUser.email.toLowerCase())))) {
       next();
       return;
     }

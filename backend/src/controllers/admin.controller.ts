@@ -1,10 +1,15 @@
 import type { Response } from "express";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { createClerkClient } from "@clerk/backend";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
 import { logger } from "../utils/logger.js";
+
+const clerkClient = env.clerkEnabled && env.clerkSecretKey
+  ? createClerkClient({ secretKey: env.clerkSecretKey })
+  : null;
 import { Resend } from "resend";
 import { writeAdminAudit } from "../services/admin-audit.service.js";
 import {
@@ -83,16 +88,32 @@ export async function adminMe(request: AuthenticatedRequest, response: Response)
   }
 
   let user = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { clerkId },
-        { email: { in: env.adminEmails } },
-      ],
-    },
+    where: { clerkId },
   });
 
+  if (!user && clerkClient) {
+    try {
+      const clerkUser = await clerkClient.users.getUser(clerkId);
+      const email =
+        clerkUser.emailAddresses.find(
+          (item: { id: string; emailAddress: string }) => item.id === clerkUser.primaryEmailAddressId,
+        )?.emailAddress?.toLowerCase() ?? clerkUser.emailAddresses[0]?.emailAddress?.toLowerCase();
+      if (email) {
+        user = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
+        });
+        if (user && user.clerkId !== clerkId) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { clerkId },
+          }).catch(() => null);
+        }
+      }
+    } catch {}
+  }
+
   const emailLower = user?.email?.toLowerCase() || "";
-  const isSuper = user?.role === "SUPER_ADMIN" || emailLower === "sourav06556@gmail.com";
+  const isSuper = user?.role === "SUPER_ADMIN" || emailLower === "sourav06556@gmail.com" || emailLower === "realblack009@gmail.com";
   response.json({
     data: {
       id: user?.id,
