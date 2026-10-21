@@ -147,14 +147,21 @@ export const viewport: Viewport = {
   themeColor: "#244855",
 };
 
-const publishableKey =
+const LIVE_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsucnVubmVydXAuaW4k";
+
+const envPubKey =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
   process.env.CLERK_PUBLISHABLE_KEY ||
   "";
 
+const publishableKey =
+  envPubKey && !envPubKey.startsWith("pk_test_")
+    ? envPubKey
+    : LIVE_CLERK_PUBLISHABLE_KEY;
+
 const clerkProxyUrl =
   process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
-  (process.env.NODE_ENV === "production" ? "https://www.runnerup.in/__clerk" : undefined);
+  (process.env.NODE_ENV === "production" ? "/__clerk" : undefined);
 
 export default function RootLayout({
   children,

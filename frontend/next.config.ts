@@ -1,13 +1,18 @@
 import type { NextConfig } from "next";
 
-const publishableKey =
+const LIVE_CLERK_PUBLISHABLE_KEY = "pk_live_Y2xlcmsucnVubmVydXAuaW4k";
+
+const rawPublishableKey =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
   process.env.CLERK_PUBLISHABLE_KEY ||
   "";
 
-if (publishableKey && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publishableKey;
-}
+const publishableKey =
+  rawPublishableKey && !rawPublishableKey.startsWith("pk_test_")
+    ? rawPublishableKey
+    : LIVE_CLERK_PUBLISHABLE_KEY;
+
+process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publishableKey;
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
