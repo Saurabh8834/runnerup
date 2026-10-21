@@ -252,7 +252,7 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
         </div>
 
         <h1>Admin Console</h1>
-        <p>Restricted to authorised admins only. Enter master passcode to unlock.</p>
+        <p>Restricted to authorised admins only. Sign in to continue.</p>
 
         {error && (
           <div
@@ -271,42 +271,27 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
           </div>
         )}
 
-        <form onSubmit={handlePasscodeSubmit} style={{ width: "100%", marginBottom: "1rem" }}>
-          <input
-            type="password"
-            placeholder="Admin Master Passcode"
-            value={passcode}
-            onChange={(e) => setPasscode(e.target.value)}
-            disabled={loading}
+        <div style={{ width: "100%", marginBottom: "1rem" }}>
+          <Link
+            className="btn btn-primary"
+            href="/sign-in?redirect_url=/admin"
             style={{
               width: "100%",
-              padding: "0.75rem 1rem",
-              borderRadius: "0.75rem",
-              border: "1px solid var(--line)",
-              background: "var(--panel-soft)",
-              color: "var(--foreground)",
-              fontSize: "0.92rem",
-              outline: "none",
-              boxSizing: "border-box",
-              marginBottom: "0.75rem",
+              height: "2.75rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 600,
+              textDecoration: "none",
             }}
-          />
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-            style={{ width: "100%", height: "2.6rem", fontWeight: 600 }}
           >
-            {loading ? "Unlocking Console…" : "Unlock with Passcode"}
-          </button>
-        </form>
-
-        <div className="admin-gate-actions">
-          <Link className="btn btn-ghost" href="/sign-in?redirect_url=/admin">
-            Sign in with Clerk
+            Sign in with Google or Email
           </Link>
+        </div>
+
+        <div className="admin-gate-actions" style={{ marginTop: "0.5rem" }}>
           <Link className="btn btn-ghost" href="/">
-            Back to site
+            ← Back to main site
           </Link>
         </div>
 
@@ -627,9 +612,9 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     setEmergencyTokenState(null);
     setMe(null);
     if (isSignedIn) {
-      void signOut({ redirectUrl: "/admin/login" });
+      void signOut({ redirectUrl: "/sign-in?redirect_url=/admin" });
     } else {
-      window.location.href = "/admin/login";
+      window.location.href = "/sign-in?redirect_url=/admin";
     }
   }, [isSignedIn, signOut]);
 

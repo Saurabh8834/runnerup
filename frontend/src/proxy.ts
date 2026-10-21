@@ -19,7 +19,7 @@ export default clerkMiddleware(async (auth, request) => {
   if (pathname.startsWith("/admin")) {
     await auth.protect({
       unauthenticatedUrl: new URL(
-        `/admin/login?redirect_url=${encodeURIComponent(pathname)}`,
+        `/sign-in?redirect_url=${encodeURIComponent(pathname)}`,
         request.url,
       ).toString(),
     });

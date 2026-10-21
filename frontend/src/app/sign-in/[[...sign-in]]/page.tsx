@@ -236,7 +236,7 @@ export default function SignInPage() {
 
           <div className="mt-4 text-center">
             <Link
-              href="/admin/login"
+              href="/admin"
               className="text-[0.72rem] text-[#90aead]/60 hover:text-[#90aead]"
             >
               Admin Console Access →
