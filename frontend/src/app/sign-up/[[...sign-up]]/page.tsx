@@ -10,6 +10,7 @@ import { useTheme } from "../../components/theme-provider";
 function ThemedSignUp() {
   const { theme } = useTheme();
   const dark = theme === "dark";
+  const enableGoogle = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
   useEffect(() => {
     const sanitizeClerkDom = () => {
@@ -48,15 +49,15 @@ function ThemedSignUp() {
               "runnerup-dev-fallback mt-3 mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-left";
             fallback.innerHTML = `
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:#e64833;color:#ffffff;font-size:10px;font-weight:bold;">⚡</span>
-                <span style="font-size:12px;font-weight:700;color:#fbe9d0;">Instant 1-Click Sign-Up</span>
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:#e64833;color:#ffffff;font-size:10px;font-weight:bold;">✉️</span>
+                <span style="font-size:12px;font-weight:700;color:#fbe9d0;">Sign Up with Email or Google</span>
               </div>
               <p style="font-size:11.5px;line-height:1.5;color:#fcf8f2;margin:0 0 10px 0;">
-                Please continue with <strong>Google</strong> for instant account creation without email codes.
+                Enter your <strong>email address</strong> to receive an instant verification code, or sign up with Google.
               </p>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" class="runnerup-switch-to-google-btn" style="background:#e64833;color:#ffffff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">
-                  ← Back to 1-Click Google
+                  ← Back to Sign-Up Options
                 </button>
               </div>
             `;
@@ -115,10 +116,14 @@ function ThemedSignUp() {
           formFieldLabel: dark ? "text-[#fbe9d0] font-medium" : "text-slate-700 font-medium",
           headerTitle: dark ? "text-white font-bold" : "text-slate-900 font-bold",
           headerSubtitle: dark ? "text-[#90aead]" : "text-slate-500",
-          socialButtonsBlockButton: dark
-            ? "border-white/10 bg-[#14242a] text-white hover:bg-[#1b323b] h-11 font-semibold"
-            : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 h-11 font-semibold shadow-xs",
+          socialButtons: enableGoogle ? undefined : "hidden",
+          socialButtonsBlockButton: enableGoogle
+            ? (dark
+                ? "border-white/10 bg-[#14242a] text-white hover:bg-[#1b323b] h-11 font-semibold"
+                : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 h-11 font-semibold shadow-xs")
+            : "hidden",
           socialButtonsBlockButtonText: dark ? "text-white" : "text-slate-800",
+          dividerRow: enableGoogle ? undefined : "hidden",
           dividerLine: dark ? "bg-white/10" : "bg-slate-200",
           dividerText: dark ? "text-[#90aead]" : "text-slate-400",
           formFieldAction: "text-[#e64833] font-medium",
@@ -166,10 +171,10 @@ export default function SignUpPage() {
                 </span>
                 <div>
                   <p className="text-xs font-bold text-[#fcf8f2]">
-                    Recommended: 1-Click Google Sign-Up
+                    Quick Account Setup
                   </p>
                   <p className="text-[11.5px] text-[#90aead] mt-0.5 leading-relaxed">
-                    Click <strong className="text-white">&ldquo;Continue with Google&rdquo;</strong> for instant account creation without waiting for email verification codes.
+                    Sign up using your <strong className="text-white">email address</strong> (with an instant verification code) or Google. If you already registered for a race, use the same email to link your bib!
                   </p>
                 </div>
               </div>
