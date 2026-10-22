@@ -25,7 +25,7 @@ function getEventScarcity(slug: string) {
     hash |= 0;
   }
   const positive = Math.abs(hash);
-  const percent = 40; // 40% booked
+  const percent = 70; // 70% booked
   const bibsLeft = 280 + (positive % 30); // ~280-309 bibs left
   return { percent, bibsLeft };
 }
@@ -204,7 +204,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
               <Zap className="h-3.5 w-3.5 fill-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
             </span>
             <span className="text-[#90aead] font-mono text-[0.72rem]">
-              {scarcity.percent}% Filled
+              {scarcity.percent}% filled
             </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full p-0.5 border bg-black/30 border-[#90aead]/20">
