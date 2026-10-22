@@ -61,13 +61,21 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
             return fallbackRes;
           }
         } catch {
-          // ignore fallback error and return original response
+          // ignore fallback error and attempt relative proxy
+        }
+
+        // Also try same-origin proxy (Next.js server-side rewrites)
+        try {
+          const proxyRes = await fetch(cleanPath, init);
+          if (proxyRes.ok) return proxyRes;
+        } catch {
+          // ignore proxy error
         }
       }
     }
     return res;
   } catch (err) {
-    // Network failure (e.g. laptop closed, connection refused, CORS failure on dead tunnel)
+    // Network failure (e.g. DNS failure, connection refused, CORS failure on dead tunnel)
     if (typeof window !== "undefined") {
       const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
       try {
@@ -77,6 +85,14 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
         return fallbackRes;
       } catch {
         // ignore fallback error
+      }
+
+      // Final fallback: try same-origin relative URL (proxied by Next.js server rewrites)
+      try {
+        const proxyRes = await fetch(cleanPath, init);
+        return proxyRes;
+      } catch {
+        // ignore proxy error
       }
     }
     throw err;
@@ -93,8 +109,12 @@ export function authHeaders(token: string | null | undefined, init: HeadersInit 
 
 export async function readApiError(response: Response, fallback: string) {
   if (response.status === 521 || response.status === 522 || response.status === 530 || response.status === 502 || response.status === 504) {
-    return "Server is momentarily reconnecting. Please wait 5 seconds and click Pay again.";
+    return "Server is momentarily reconnecting. Please wait a moment and try again.";
   }
   const error = await response.json().catch(() => null);
-  return (error?.error?.message as string | undefined) ?? fallback;
+  const msg = (error?.error?.message as string | undefined) ?? fallback;
+  if (msg === "Failed to fetch") {
+    return "Could not connect to server. Please check your internet connection or try again.";
+  }
+  return msg;
 }

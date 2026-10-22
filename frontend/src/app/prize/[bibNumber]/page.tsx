@@ -6,7 +6,7 @@ import { ArrowRight, Award, BadgeCheck, Clock, Copy, ExternalLink, Gift, Medal, 
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { authHeaders, getApiUrl, readApiError } from "../../../lib/api";
+import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../../lib/api";
 import { PageShell } from "../../components/app-shell";
 
 type PrizeStatus = "pending" | "processing" | "ready" | "sent" | "dispatched" | "delivered" | "not_eligible";
@@ -169,33 +169,70 @@ function Timeline({ stages }: { stages: TimelineStage[] }) {
 
 export default function PrizeBibPage() {
   const params = useParams<{ bibNumber: string }>();
-  const bibNumber = decodeURIComponent(params.bibNumber ?? "");
+  const rawBib = decodeURIComponent(params.bibNumber ?? "");
+  const bibNumber = rawBib.trim();
   const { getToken } = useAuth();
   const [data, setData] = useState<PrizeData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchBib, setSearchBib] = useState(bibNumber);
   const [copied, setCopied] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
-    if (!bibNumber) { setLoading(false); return; }
+    if (!bibNumber) {
+      setLoading(false);
+      return;
+    }
+
+    let active = true;
     setLoading(true);
     setError(null);
-    const tokenPromise = getToken();
-    const headers = async () => {
-      const token = await tokenPromise;
-      return token ? authHeaders(token) : { "Content-Type": "application/json" };
+
+    async function loadPrize() {
+      try {
+        let headers: Record<string, string> = {};
+        try {
+          const token = await getToken();
+          if (token) headers = { Authorization: `Bearer ${token}` };
+        } catch {
+          // Unauthenticated or token error does not block public bib tracking
+        }
+
+        const res = await resilientFetch(`/api/prizes/${encodeURIComponent(bibNumber)}`, {
+          headers,
+        });
+
+        if (!active) return;
+
+        if (!res.ok) {
+          const message = await readApiError(res, "Could not find a registration for this bib number");
+          setError(message);
+          setLoading(false);
+          return;
+        }
+
+        const json = (await res.json()) as { data: PrizeData };
+        if (active) {
+          setData(json.data);
+          setLoading(false);
+        }
+      } catch (err: any) {
+        if (!active) return;
+        const msg = err?.message && err.message !== "Failed to fetch"
+          ? err.message
+          : "Could not connect to server. Please tap retry or check your internet connection.";
+        setError(msg);
+        setLoading(false);
+      }
+    }
+
+    void loadPrize();
+
+    return () => {
+      active = false;
     };
-    headers().then((h) => {
-      fetch(getApiUrl(`/api/prizes/${encodeURIComponent(bibNumber)}`), { headers: h })
-        .then(async (res) => {
-          if (!res.ok) throw new Error(await readApiError(res, "Could not find this bib number"));
-          return res.json() as Promise<{ data: PrizeData }>;
-        })
-        .then((json) => { setData(json.data); setLoading(false); })
-        .catch((err) => { setError(err.message); setLoading(false); });
-    });
-  }, [bibNumber, getToken]);
+  }, [bibNumber, getToken, retryKey]);
 
   function handleSearch(e: FormEvent) {
     e.preventDefault();
@@ -255,11 +292,22 @@ export default function PrizeBibPage() {
             ) : error ? (
               <div className="flex flex-col items-center rounded-2xl border border-(--line) bg-(--panel) px-6 py-12 text-center">
                 <Search className="h-10 w-10 text-(--muted-soft)" />
-                <p className="mt-4 text-sm font-semibold text-(--foreground)">No results found</p>
+                <p className="mt-4 text-sm font-semibold text-(--foreground)">Unable to load results</p>
                 <p className="mt-1 text-sm text-(--muted)">{error}</p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRetryKey((k) => k + 1)}
+                    className="btn btn-secondary h-9 px-4 text-xs font-semibold cursor-pointer"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Try Again
+                  </button>
+                  <Link className="btn btn-primary h-9 px-4 text-xs font-semibold" href="/dashboard">
+                    Go to Dashboard →
+                  </Link>
+                </div>
                 <p className="mt-4 text-xs text-(--muted-soft)">
-                  Double-check your bib number or{" "}
-                  <Link className="text-(--sage) underline-offset-2 hover:underline" href="/dashboard">go to dashboard →</Link>
+                  Double-check your bib number or registered phone number.
                 </p>
               </div>
             ) : data ? (

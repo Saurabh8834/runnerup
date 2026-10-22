@@ -1954,6 +1954,24 @@ html[data-theme="dark"] .cl-userButtonPopoverCard {
 .auth-classic .cl-socialButtonsBlockButton { border-color: rgba(144,174,173,.22) !important; background: #172c34 !important; color: #fcf8f2 !important; }
 .auth-classic .cl-dividerLine { background: rgba(144,174,173,.15) !important; }
 
+/* Suppress unconfigured Google OAuth buttons in Clerk */
+.no-google-auth .cl-socialButtonsRoot,
+.no-google-auth .cl-socialButtons,
+.no-google-auth .cl-socialButtonsBlockButton,
+.no-google-auth .cl-socialButtonsProviderIcon,
+.no-google-auth .cl-dividerRow,
+.no-google-auth [data-localization-key*="socialButtons"],
+.no-google-auth [data-localization-key*="divider"],
+.auth-classic .no-google-auth .cl-socialButtonsBlockButton,
+.auth-classic .no-google-auth .cl-dividerRow {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
 @media (max-width: 639px) {
   .auth-classic-form { padding: 1.35rem; box-shadow: 6px 6px 0 rgba(230,72,51,.14), 0 18px 42px rgba(0,0,0,.35); }
 }

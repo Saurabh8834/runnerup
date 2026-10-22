@@ -2,7 +2,7 @@
 
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useEffect, useRef } from "react";
-import { authHeaders, getApiUrl } from "../lib/api";
+import { authHeaders, resilientFetch } from "../lib/api";
 
 /**
  * After Clerk login, push the user into our Postgres DB.
@@ -31,7 +31,7 @@ export function ClerkUserSync() {
           return;
         }
 
-        const response = await fetch(getApiUrl("/api/users/sync"), {
+        const response = await resilientFetch("/api/users/sync", {
           method: "POST",
           headers: authHeaders(token),
           body: JSON.stringify({

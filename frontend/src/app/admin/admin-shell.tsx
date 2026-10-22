@@ -285,7 +285,7 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
               textDecoration: "none",
             }}
           >
-            Sign in with Google or Email
+            Sign in with Email
           </Link>
         </div>
 

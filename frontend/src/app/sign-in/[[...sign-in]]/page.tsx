@@ -20,7 +20,18 @@ function ThemedSignIn() {
         if (f.closest("[class*='cl-']")) f.noValidate = true;
       });
 
-      // 2. Intercept and completely suppress development/quota alerts
+      // 2. Hide Google social button if unconfigured
+      if (!enableGoogle) {
+        document
+          .querySelectorAll<HTMLElement>(
+            ".cl-socialButtonsRoot, .cl-socialButtons, .cl-socialButtonsBlockButton, .cl-socialButtonsProviderIcon, .cl-dividerRow, [data-localization-key*='socialButtons'], [data-localization-key*='divider']"
+          )
+          .forEach((node) => {
+            node.style.setProperty("display", "none", "important");
+          });
+      }
+
+      // 3. Intercept and completely suppress development/quota alerts
       const alerts = document.querySelectorAll(
         "[class*='cl-alert'], [role='alert'], .cl-formFieldErrorText, .cl-alertText, [class*='cl-formErrorText']"
       );
@@ -53,14 +64,14 @@ function ThemedSignIn() {
             fallback.innerHTML = `
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:#e64833;color:#ffffff;font-size:10px;font-weight:bold;">✉️</span>
-                <span style="font-size:12px;font-weight:700;color:#fbe9d0;">Sign in with Email or Google</span>
+                <span style="font-size:12px;font-weight:700;color:#fbe9d0;">Sign in with Email</span>
               </div>
               <p style="font-size:11.5px;line-height:1.5;color:#fcf8f2;margin:0 0 10px 0;">
-                Enter your <strong>registered email address</strong> to receive an instant verification code, or sign in with Google.
+                Enter your <strong>registered email address</strong> to receive an instant verification code.
               </p>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button type="button" class="runnerup-switch-to-google-btn" style="background:#e64833;color:#ffffff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;">
-                  ← Back to Sign-In Options
+                  ← Retry Sign-In
                 </button>
               </div>
             `;
@@ -89,55 +100,57 @@ function ThemedSignIn() {
     const observer = new MutationObserver(sanitizeClerkDom);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, []);
+  }, [enableGoogle]);
 
   return (
-    <SignIn
-      fallbackRedirectUrl="/dashboard"
-      path="/sign-in"
-      routing="path"
-      signUpUrl="/sign-up"
-      appearance={{
-        variables: {
-          colorPrimary: "#e64833",
-          colorBackground: dark ? "#172c34" : "#ffffff",
-          colorNeutral: dark ? "#90aead" : "#64748b",
-          borderRadius: "12px",
-        },
-        elements: {
-          rootBox: "mx-auto w-full",
-          cardBox: "w-full shadow-none",
-          card: "w-full shadow-none rounded-2xl border border-(--line) bg-(--panel)",
-          footer: "hidden",
-          formButtonPrimary:
-            "bg-[#e64833] hover:bg-[#d83d28] text-[#fbe9d0] font-bold normal-case h-11 shadow-lg",
-          formFieldInput: dark
-            ? "bg-[#14242a] border-white/10 text-white h-10"
-            : "bg-white border-slate-200 text-slate-900 h-10",
-          formFieldError: "text-red-500 text-xs mt-1",
-          formFieldErrorText: dark ? "text-red-400" : "text-red-600",
-          formFieldLabel: dark ? "text-[#fbe9d0] font-medium" : "text-slate-700 font-medium",
-          headerTitle: dark ? "text-white font-bold" : "text-slate-900 font-bold",
-          headerSubtitle: dark ? "text-[#90aead]" : "text-slate-500",
-          socialButtons: enableGoogle ? undefined : "hidden",
-          socialButtonsBlockButton: enableGoogle
-            ? (dark
-                ? "border-white/10 bg-[#14242a] text-white hover:bg-[#1b323b] h-11 font-semibold"
-                : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 h-11 font-semibold shadow-xs")
-            : "hidden",
-          socialButtonsBlockButtonText: dark ? "text-white" : "text-slate-800",
-          dividerRow: enableGoogle ? undefined : "hidden",
-          dividerLine: dark ? "bg-white/10" : "bg-slate-200",
-          dividerText: dark ? "text-[#90aead]" : "text-slate-400",
-          formFieldAction: "text-[#e64833] font-medium",
-          footerActionLink: "text-[#e64833] font-semibold",
-          formResendCodeLink: "text-[#e64833] font-medium",
-          alert: dark
-            ? "bg-red-900/20 border-red-800/30 text-red-300 rounded-xl"
-            : "bg-red-50 border-red-200 text-red-700 rounded-xl",
-        },
-      }}
-    />
+    <div className={enableGoogle ? "w-full" : "no-google-auth w-full"}>
+      <SignIn
+        fallbackRedirectUrl="/dashboard"
+        path="/sign-in"
+        routing="path"
+        signUpUrl="/sign-up"
+        appearance={{
+          variables: {
+            colorPrimary: "#e64833",
+            colorBackground: dark ? "#172c34" : "#ffffff",
+            colorNeutral: dark ? "#90aead" : "#64748b",
+            borderRadius: "12px",
+          },
+          elements: {
+            rootBox: "mx-auto w-full",
+            cardBox: "w-full shadow-none",
+            card: "w-full shadow-none rounded-2xl border border-(--line) bg-(--panel)",
+            footer: "hidden",
+            formButtonPrimary:
+              "bg-[#e64833] hover:bg-[#d83d28] text-[#fbe9d0] font-bold normal-case h-11 shadow-lg",
+            formFieldInput: dark
+              ? "bg-[#14242a] border-white/10 text-white h-10"
+              : "bg-white border-slate-200 text-slate-900 h-10",
+            formFieldError: "text-red-500 text-xs mt-1",
+            formFieldErrorText: dark ? "text-red-400" : "text-red-600",
+            formFieldLabel: dark ? "text-[#fbe9d0] font-medium" : "text-slate-700 font-medium",
+            headerTitle: dark ? "text-white font-bold" : "text-slate-900 font-bold",
+            headerSubtitle: dark ? "text-[#90aead]" : "text-slate-500",
+            socialButtons: enableGoogle ? undefined : "!hidden",
+            socialButtonsBlockButton: enableGoogle
+              ? (dark
+                  ? "border-white/10 bg-[#14242a] text-white hover:bg-[#1b323b] h-11 font-semibold"
+                  : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 h-11 font-semibold shadow-xs")
+              : "!hidden",
+            socialButtonsBlockButtonText: dark ? "text-white" : "text-slate-800",
+            dividerRow: enableGoogle ? undefined : "!hidden",
+            dividerLine: dark ? "bg-white/10" : "bg-slate-200",
+            dividerText: dark ? "text-[#90aead]" : "text-slate-400",
+            formFieldAction: "text-[#e64833] font-medium",
+            footerActionLink: "text-[#e64833] font-semibold",
+            formResendCodeLink: "text-[#e64833] font-medium",
+            alert: dark
+              ? "bg-red-900/20 border-red-800/30 text-red-300 rounded-xl"
+              : "bg-red-50 border-red-200 text-red-700 rounded-xl",
+          },
+        }}
+      />
+    </div>
   );
 }
 
@@ -173,7 +186,7 @@ export default function SignInPage() {
             <div className="text-center lg:text-left">
               <p className="auth-classic-kicker">Welcome back</p>
               <h1 className="auth-classic-form-title mt-3">Sign in to your runner portal</h1>
-              <p className="mt-3 text-sm leading-6 text-(--muted)">Use Google 1-Click or your email and password.</p>
+              <p className="mt-3 text-sm leading-6 text-(--muted)">Sign in with your email to receive an instant verification code.</p>
             </div>
 
             {/* Instant access tip */}
@@ -187,7 +200,7 @@ export default function SignInPage() {
                     Registered Runners Access
                   </p>
                   <p className="text-[11.5px] text-[#90aead] mt-0.5 leading-relaxed">
-                    Sign in with your <strong className="text-white">registered email</strong> to receive an instant verification code, or use Google. Already registered? Your race bib, results &amp; certificates link automatically!
+                    Enter your <strong className="text-white">registered email address</strong> to receive an instant verification code. Already registered? Your race bib, results &amp; certificates link automatically!
                   </p>
                 </div>
               </div>
