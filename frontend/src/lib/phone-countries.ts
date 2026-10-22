@@ -15,7 +15,7 @@ export const PHONE_COUNTRIES: PhoneCountry[] = [
     flag: "🇮🇳",
     name: "India",
     pattern: /^[6-9]\d{9}$/,
-    placeholder: "98765 43210",
+    placeholder: "81234 56789",
     maxLength: 10,
   },
   {

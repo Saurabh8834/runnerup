@@ -166,7 +166,7 @@ function deriveUsername(input: {
     if (base.length >= 3) return base;
   }
   const suffix = (input.clerkId ?? "run").slice(-5);
-  return `runner_${suffix}`;
+  return `pranav_singh`;
 }
 
 // Confetti Particle Explosion
@@ -1043,7 +1043,7 @@ function PaymentRegistrationFormInner() {
                 defaultValue={defaultName}
                 onChange={(e) => setRunnerName(e.target.value)}
                 name="name"
-                placeholder="e.g. Rahul Sharma"
+                placeholder="e.g. Pranav Singh"
                 required
               />
               <FieldError message={errors.name} />
@@ -1062,7 +1062,7 @@ function PaymentRegistrationFormInner() {
                 defaultValue={defaultEmail}
                 onChange={(e) => setRunnerEmail(e.target.value)}
                 name="email"
-                placeholder="runner@example.com"
+                placeholder="pranav@example.com"
                 required
                 type="email"
               />
@@ -1185,7 +1185,7 @@ function PaymentRegistrationFormInner() {
                     maxLength={6}
                     name="pincode"
                     onChange={(e) => void handlePincodeChange(e.target.value)}
-                    placeholder="e.g. 110001"
+                    placeholder="e.g. 201301"
                     required
                     value={pincode}
                   />
@@ -1206,7 +1206,7 @@ function PaymentRegistrationFormInner() {
                   className={inputClass}
                   name="city"
                   onChange={(e) => setCity(e.target.value)}
-                  placeholder="e.g. Mumbai"
+                  placeholder="e.g. Noida"
                   required
                   value={city}
                 />
@@ -1228,7 +1228,7 @@ function PaymentRegistrationFormInner() {
                     });
                   }}
                   options={INDIAN_STATES}
-                  placeholder="Select State"
+                  placeholder="e.g. Uttar Pradesh"
                   required
                   value={stateVal}
                 />
