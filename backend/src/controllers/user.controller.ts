@@ -75,3 +75,39 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
 
   response.json({ data: user });
 }
+
+/**
+ * Public check/provision endpoint for sign-in assistance.
+ * If a registered runner types an email that doesn't yet exist in Clerk,
+ * this endpoint provisions their Clerk identity in real-time so they can
+ * sign in without hitting "Couldn't find your account".
+ */
+export async function ensureAccountByEmail(request: any, response: Response) {
+  const email = (request.body?.email || "").trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    throw new ApiError(400, "Valid email is required");
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { email },
+    include: {
+      registrations: {
+        where: { payment: { status: "PAID" } },
+        select: { id: true, bibNumber: true },
+      },
+    },
+  });
+
+  if (!user) {
+    return response.json({ found: false, provisioned: false });
+  }
+
+  const { ensureClerkAccountForDbUser } = await import("../services/user.service.js");
+  const clerkId = await ensureClerkAccountForDbUser(user.id);
+
+  return response.json({
+    found: true,
+    provisioned: Boolean(clerkId),
+    bibNumber: user.registrations[0]?.bibNumber || null,
+  });
+}

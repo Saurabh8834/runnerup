@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { BadgeCheck, ChevronRight, Trophy, Zap } from "lucide-react";
 import { PageShell } from "../../components/app-shell";
 import { useTheme } from "../../components/theme-provider";
+import { resilientFetch } from "../../../lib/api";
 
 function ThemedSignIn() {
   const { theme } = useTheme();
@@ -91,6 +92,59 @@ function ThemedSignIn() {
             }
 
             el.parentNode?.insertBefore(fallback, el);
+          }
+        }
+
+        // 4. Intercept "Couldn't find your account" to auto-link registered runners or guide them
+        if (text.includes("couldn't find your account") || text.includes("could not find your account")) {
+          const input = document.querySelector<HTMLInputElement>("input[name='identifier'], input[type='email']");
+          const email = input?.value?.trim().toLowerCase();
+          const parent = el.closest("[class*='cl-card'], form, .cl-rootBox");
+
+          if (email && parent && !parent.querySelector(".runnerup-notfound-helper")) {
+            const helper = document.createElement("div");
+            helper.className =
+              "runnerup-notfound-helper mt-2 mb-3 rounded-xl border border-amber-500/30 bg-amber-950/40 p-3 text-left text-xs";
+            helper.innerHTML = `
+              <div style="color:#fbe9d0;font-weight:600;margin-bottom:4px;">🔍 Checking runner registration...</div>
+            `;
+            el.parentNode?.insertBefore(helper, el.nextSibling);
+
+            resilientFetch("/api/users/ensure-account", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            })
+              .then((r: Response) => r.json())
+              .then((res: any) => {
+                const data = res?.data || res;
+                if (data?.provisioned) {
+                  helper.className =
+                    "runnerup-notfound-helper mt-2 mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/50 p-3 text-left text-xs";
+                  helper.innerHTML = `
+                    <div style="color:#34d399;font-weight:700;margin-bottom:3px;">✓ Runner Registration Found! (Bib: ${data.bibNumber || 'Active'})</div>
+                    <p style="color:#fbe9d0;margin-bottom:6px;">Your login access is activated. Click <strong>Continue</strong> below to receive your verification code.</p>
+                  `;
+                  el.style.display = "none";
+                } else {
+                  helper.className =
+                    "runnerup-notfound-helper mt-2 mb-3 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left text-xs";
+                  helper.innerHTML = `
+                    <p style="color:#fbe9d0;margin-bottom:8px;">No account found with this email. Registered for a race?</p>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                      <a href="/prize/${encodeURIComponent(email)}" style="background:#e64833;color:#ffffff;border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:11px;">Track Bib / Medals →</a>
+                      <a href="/sign-up" style="background:#244855;color:#fbe9d0;border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:11px;">Create Account</a>
+                    </div>
+                  `;
+                }
+              })
+              .catch(() => {
+                helper.innerHTML = `
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                    <a href="/prize/${encodeURIComponent(email)}" style="background:#e64833;color:#ffffff;border-radius:6px;padding:6px 12px;text-decoration:none;font-weight:600;font-size:11px;">Track Bib / Medals →</a>
+                  </div>
+                `;
+              });
           }
         }
       });

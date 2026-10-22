@@ -3,6 +3,7 @@ import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { syncUserAndPaymentData } from "../services/data-sync.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
+import { ensureClerkAccountForDbUser } from "../services/user.service.js";
 import {
   createRazorpayOrder,
   fetchPaymentsForOrder,
@@ -415,6 +416,9 @@ export async function verifyPayment(request: Request, response: Response) {
         })
         .catch(() => null);
 
+      // Ensure Clerk account is provisioned so user can log in without "account not found"
+      void ensureClerkAccountForDbUser(registration.userId).catch(() => null);
+
       if (registration.event?.medalIncluded) {
         await prisma.medalDelivery
           .upsert({
@@ -550,6 +554,8 @@ export async function getPaymentStatus(request: Request, response: Response) {
               bibNumber: updatedReg.bibNumber,
               amountInPaise: updatedPayment.amountInPaise,
             }).catch(() => null);
+
+            void ensureClerkAccountForDbUser(updatedReg.userId).catch(() => null);
           } catch {
             // non-blocking
           }
@@ -665,6 +671,8 @@ export async function handleRazorpayWebhook(request: Request, response: Response
             data: { updatedAt: new Date() },
           })
           .catch(() => null);
+
+        void ensureClerkAccountForDbUser(registration.userId).catch(() => null);
 
         if (registration.event?.medalIncluded) {
           await prisma.medalDelivery

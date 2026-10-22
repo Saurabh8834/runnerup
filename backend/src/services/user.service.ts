@@ -141,3 +141,59 @@ export async function upsertUserFromClerk(input: SyncUserInput) {
     },
   });
 }
+
+/**
+ * Ensures a database user has a corresponding Clerk account provisioned.
+ * Automatically called after payment or registration so users can immediately
+ * log in via email verification code without hitting "Couldn't find your account".
+ */
+export async function ensureClerkAccountForDbUser(userId: string): Promise<string | null> {
+  if (!clerkClient) return null;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, name: true, phone: true, clerkId: true },
+    });
+
+    if (!user || !user.email) return null;
+    if (user.clerkId) return user.clerkId;
+
+    // Check if user already exists in Clerk
+    const existing = await clerkClient.users.getUserList({
+      emailAddress: [user.email],
+    });
+    const list = (existing as any).data || existing;
+
+    if (list && list.length > 0) {
+      const clerkId = list[0].id;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { clerkId },
+      });
+      return clerkId;
+    }
+
+    // Auto-create user in Clerk with verified email and skipPasswordRequirement
+    const nameParts = (user.name || "Runner").trim().split(" ");
+    const firstName = nameParts[0] || "Runner";
+    const lastName = nameParts.slice(1).join(" ") || undefined;
+
+    const newClerkUser = await clerkClient.users.createUser({
+      emailAddress: [user.email],
+      firstName,
+      lastName,
+      skipPasswordRequirement: true,
+    });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { clerkId: newClerkUser.id },
+    });
+
+    return newClerkUser.id;
+  } catch (err) {
+    // Non-blocking, return null if Clerk rejects or is unreachable
+    return null;
+  }
+}
