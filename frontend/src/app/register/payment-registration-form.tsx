@@ -1471,8 +1471,8 @@ function PaymentRegistrationFormInner() {
                 </div>
               </div>
 
-              {/* Card 2: Trust & Security Badges (Image 2) */}
-              <div className="rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-5 sm:p-6 shadow-xl flex flex-col justify-between gap-4">
+              {/* Card 2: Trust & Security Badges (Visible on Desktop, hidden on mobile) */}
+              <div className="hidden lg:flex rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-5 sm:p-6 shadow-xl flex-col justify-between gap-4">
                 {/* 100% Secure Payments */}
                 <div className="flex items-start gap-3.5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
