@@ -605,7 +605,17 @@ function PaymentRegistrationFormInner() {
     void applyCoupon(code);
   };
 
-  const promoCode = activeEvent?.couponCode || null;
+  const autoAppliedRef = useRef(false);
+  useEffect(() => {
+    const couponFromQuery = searchParams.get("coupon")?.trim();
+    if (couponFromQuery && !autoAppliedRef.current && selectedEvent) {
+      autoAppliedRef.current = true;
+      setCouponInput(couponFromQuery.toUpperCase());
+      void applyCoupon(couponFromQuery.toUpperCase());
+    }
+  }, [searchParams, selectedEvent]);
+
+  const promoCode = activeEvent?.couponCode || "RUN50";
   const baseAmountInRupees = activeEvent?.priceInPaise
     ? Math.round(activeEvent.priceInPaise / 100)
     : parseInt((activeEvent?.amount || "₹499").replace(/\D/g, "") || "499", 10);
@@ -1272,7 +1282,7 @@ function PaymentRegistrationFormInner() {
                 >
                   <Sparkles className="h-3 w-3 text-amber-400 group-hover:rotate-12 transition-transform" />
                   <span className="font-bold tracking-wider">{promoCode}</span>
-                  <span className="text-[11px] font-sans text-amber-400/90 font-semibold">(Special Offer)</span>
+                  <span className="text-[11px] font-sans text-amber-400/90 font-semibold">(10% OFF · ₹50 Saved)</span>
                   <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-500/25 px-1.5 py-0.5 text-[10.5px] font-sans font-bold text-amber-200 group-hover:bg-amber-400 group-hover:text-amber-950 transition-colors">
                     {copiedCoupon ? (
                       <>
