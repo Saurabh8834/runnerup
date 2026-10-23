@@ -85,10 +85,12 @@ export const metadata: Metadata = {
     "running events Kolkata",
     "running events Jaipur",
   ],
-  authors: [{ name: "RunnerUp" }],
+  authors: [{ name: "RunnerUp", url: SITE_URL }],
   creator: "RunnerUp",
   publisher: "RunnerUp",
   category: "Sports & Marathon Events",
+  applicationName: "RunnerUp",
+  classification: "Virtual Marathon & Running Events Platform",
   robots: {
     index: true,
     follow: true,
@@ -108,7 +110,7 @@ export const metadata: Metadata = {
     siteName: "RUNNERUP",
     title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
     description:
-      "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates.",
+      "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates with free doorstep delivery.",
     images: [
       {
         url: "/og-image.png",
@@ -125,6 +127,7 @@ export const metadata: Metadata = {
       "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates.",
     images: ["/og-image.png"],
     creator: "@runnerup",
+    site: "@runnerup",
   },
 
   icons: {
@@ -139,6 +142,29 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   alternates: {
     canonical: SITE_URL,
+    languages: {
+      "en-IN": SITE_URL,
+      "en-US": SITE_URL,
+      "x-default": SITE_URL,
+    },
+  },
+  verification: {
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      "runnerup-google-site-verification",
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
+    other: {
+      "msvalidate.01":
+        process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",
+    },
+  },
+  other: {
+    "geo.region": "IN",
+    "geo.placename": "India",
+    "geo.position": "28.6139;77.2090",
+    ICBM: "28.6139, 77.2090",
+    rating: "general",
+    "apple-mobile-web-app-title": "RunnerUp",
   },
 };
 

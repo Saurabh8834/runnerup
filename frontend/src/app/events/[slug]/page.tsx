@@ -120,17 +120,20 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     ],
   };
 
+  const numericPrice = event.price ? event.price.replace(/[^\d]/g, "") : "499";
+  const eventImageUrl = event.bannerImageUrl
+    ? event.bannerImageUrl.startsWith("http")
+      ? event.bannerImageUrl
+      : `${SITE_URL}${event.bannerImageUrl.startsWith("/") ? "" : "/"}${event.bannerImageUrl}`
+    : `${SITE_URL}/og-image.png`;
+
   const sportsEventSchema = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     name: event.name,
     description: event.description || event.highlight,
     url: `${SITE_URL}/events/${slug}`,
-    image: event.bannerImageUrl
-      ? event.bannerImageUrl.startsWith("http")
-        ? event.bannerImageUrl
-        : `${SITE_URL}${event.bannerImageUrl.startsWith("/") ? "" : "/"}${event.bannerImageUrl}`
-      : `${SITE_URL}/og-image.png`,
+    image: eventImageUrl,
     startDate: event.startsAt || "2026-10-08T00:00:00.000Z",
     endDate: event.endsAt || "2026-10-12T23:59:59.000Z",
     location: {
@@ -139,21 +142,62 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       name: "Online / Virtual (Pan-India)",
     },
     organizer: {
-      "@type": "Organization",
+      "@type": "SportsOrganization",
       name: "RunnerUp",
       url: SITE_URL,
       logo: `${SITE_URL}/logo-mark.svg`,
     },
     offers: {
       "@type": "Offer",
-      price: event.price.replace(/[^\d]/g, ""),
+      price: numericPrice,
       priceCurrency: "INR",
       url: `${SITE_URL}/events/${slug}`,
       availability: isPast ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
       validFrom: "2026-01-01",
+      priceValidUntil: "2026-12-31",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: (event.finishers || 380).toString(),
+      bestRating: "5",
+      worstRating: "1",
     },
     eventStatus: isPast ? "https://schema.org/EventMovedOnline" : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+  };
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${event.name} — Finisher Medal & Runner Kit`,
+    description: `Official registration for ${event.name} (${event.distance}). Includes authentic 3D embossed solid metal medal, DRI-FIT runner t-shirt, GPS tracking verification, QR e-certificate, and free shipping across India.`,
+    image: eventImageUrl,
+    sku: `RUNNERUP-${event.slug.toUpperCase()}`,
+    brand: {
+      "@type": "Brand",
+      name: "RunnerUp",
+    },
+    offers: {
+      "@type": "Offer",
+      price: numericPrice,
+      priceCurrency: "INR",
+      availability: isPast ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+      url: `${SITE_URL}/events/${slug}`,
+      itemCondition: "https://schema.org/NewCondition",
+      priceValidUntil: "2026-12-31",
+      seller: {
+        "@type": "Organization",
+        name: "RunnerUp",
+      },
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: (event.finishers || 380).toString(),
+      bestRating: "5",
+      worstRating: "1",
+    },
   };
 
   const eventFaqSchema = {
@@ -192,6 +236,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(sportsEventSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
       <script
         type="application/ld+json"

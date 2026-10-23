@@ -46,12 +46,45 @@ const organizationSchema = {
     '@type': 'PostalAddress',
     addressCountry: 'IN',
   },
+  priceRange: '₹299 - ₹999',
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'UPI, Google Pay, PhonePe, Paytm, Credit Card, Debit Card, Net Banking',
   aggregateRating: {
     '@type': 'AggregateRating',
     ratingValue: '4.9',
     reviewCount: '1840',
     bestRating: '5',
     worstRating: '1',
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Virtual Running & Marathon Challenges',
+    itemListElement: [
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: '5K Virtual Run Challenge with Metal Medal',
+          description: '5 Kilometer virtual running event for all fitness levels. Complete with Strava/Garmin, receive solid metal medal and verified e-certificate.',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: '10K Virtual Endurance Run with Medal & T-shirt',
+          description: '10 Kilometer virtual endurance run. Receive authentic heavy finisher medal, technical Dri-Fit t-shirt, and verified e-certificate.',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: '21K Half Marathon Virtual Challenge',
+          description: '21.1 Kilometer virtual half marathon challenge. Track with GPS, earn heavy embossed medal, event shirt, and official ranking.',
+        },
+      },
+    ],
   },
   contactPoint: {
     '@type': 'ContactPoint',
@@ -61,6 +94,63 @@ const organizationSchema = {
     areaServed: 'IN',
     availableLanguage: ['English', 'Hindi'],
   },
+};
+
+const siteNavigationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'RunnerUp Navigation Links',
+  itemListElement: [
+    {
+      '@type': 'SiteNavigationElement',
+      position: 1,
+      name: 'Virtual Running Events',
+      description: 'Explore upcoming virtual marathons, 5K, 10K, and 21K races in India',
+      url: `${SITE_URL}/events`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 2,
+      name: 'What is a Virtual Run?',
+      description: 'Step-by-step runner guide to GPS virtual running events and medal rewards',
+      url: `${SITE_URL}/what-is-virtual-run`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 3,
+      name: 'National Leaderboard',
+      description: 'Live GPS-verified finish times, runner rankings, and marathon pace',
+      url: `${SITE_URL}/leaderboard`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 4,
+      name: 'Finisher Gallery',
+      description: 'Finisher moments, runner medals unboxing, and race photos across India',
+      url: `${SITE_URL}/gallery`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 5,
+      name: 'Prize & Medal Tracking',
+      description: 'Track medal courier dispatch, bib status, and download certificates',
+      url: `${SITE_URL}/prize`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 6,
+      name: 'Register Online',
+      description: 'Fast online registration for virtual running challenges with instant UPI',
+      url: `${SITE_URL}/register`,
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      position: 7,
+      name: 'About RunnerUp',
+      description: 'India premier GPS-verified virtual running platform and community',
+      url: `${SITE_URL}/about`,
+    },
+  ],
 };
 
 const websiteSchema = {
@@ -158,9 +248,14 @@ export function StructuredData() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
       />
     </>
   );
 }
+
 

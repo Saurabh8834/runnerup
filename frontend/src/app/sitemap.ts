@@ -42,12 +42,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/what-is-virtual-run`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.9,
+      priority: 0.92,
     },
     {
       url: `${SITE_URL}/leaderboard`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
+      priority: 0.92,
+    },
+    {
+      url: `${SITE_URL}/register`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
@@ -57,28 +63,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/prize`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.85,
+    },
+    {
       url: `${SITE_URL}/gallery`,
       lastModified: new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${SITE_URL}/prize`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
+      priority: 0.82,
     },
     {
       url: `${SITE_URL}/refer`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.75,
-    },
-    {
-      url: `${SITE_URL}/register`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.85,
     },
   ];
 
