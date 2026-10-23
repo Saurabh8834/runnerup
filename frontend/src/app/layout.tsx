@@ -5,6 +5,7 @@ import { ClerkUserSync } from "../components/clerk-user-sync";
 import { ThemeProvider } from "./components/theme-provider";
 import { FloatingContact } from "./components/floating-contact";
 import { PersistentRegisterCta } from "./components/persistent-register-cta";
+// Vercel Web Analytics
 import { Analytics } from "@vercel/analytics/next";
 import { StructuredData } from "./components/structured-data";
 import "./globals.css";
