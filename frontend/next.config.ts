@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
         ? rawTarget
         : isDev
           ? "http://127.0.0.1:4000"
-          : "https://runnerup-production.up.railway.app";
+          : "https://api.runnerup.in";
 
     return [
       {

@@ -509,6 +509,8 @@ function deduplicateEvents(list: PublicEvent[]): PublicEvent[] {
   return result;
 }
 
+let cachedGroupEvents: { data: any; timestamp: number } | null = null;
+
 export function EventsCatalog() {
   const [upcoming, setUpcoming] = useState<PublicEvent[]>(() => deduplicateEvents(staticUpcomingEvents));
   const [past, setPast] = useState<PublicEvent[]>(() => deduplicateEvents(staticPastEvents));
@@ -516,6 +518,17 @@ export function EventsCatalog() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // Check memory cache first (valid for 3 minutes)
+    const now = Date.now();
+    if (cachedGroupEvents && now - cachedGroupEvents.timestamp < 180000) {
+      const { upcoming: up, past: pst } = cachedGroupEvents.data;
+      setUpcoming(deduplicateEvents(up.map((event: ApiEvent) => mapApiEventToPublic(event, "upcoming"))));
+      setPast(deduplicateEvents(pst.map((event: ApiEvent) => mapApiEventToPublic(event, "past"))));
+      setSource("api");
+      return;
+    }
+
     async function load() {
       try {
         const response = await fetch(getApiUrl("/api/events?group=true"));
@@ -524,6 +537,12 @@ export function EventsCatalog() {
         const upcomingApi = (json.data?.upcoming ?? []) as ApiEvent[];
         const pastApi = (json.data?.past ?? []) as ApiEvent[];
         if (cancelled || (upcomingApi.length === 0 && pastApi.length === 0)) return;
+
+        cachedGroupEvents = {
+          data: { upcoming: upcomingApi, past: pastApi },
+          timestamp: Date.now(),
+        };
+
         setUpcoming(deduplicateEvents(upcomingApi.map((event) => mapApiEventToPublic(event, "upcoming"))));
         setPast(deduplicateEvents(pastApi.map((event) => mapApiEventToPublic(event, "past"))));
         setSource("api");

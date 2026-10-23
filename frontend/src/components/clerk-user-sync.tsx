@@ -22,6 +22,17 @@ export function ClerkUserSync() {
       return;
     }
 
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem(`ru_synced_${user.id}`)) {
+          lastSyncedId.current = user.id;
+          return;
+        }
+      } catch {
+        // ignore storage errors
+      }
+    }
+
     let cancelled = false;
 
     async function sync() {
@@ -54,6 +65,13 @@ export function ClerkUserSync() {
         }
 
         lastSyncedId.current = user!.id;
+        if (typeof window !== "undefined") {
+          try {
+            sessionStorage.setItem(`ru_synced_${user!.id}`, "1");
+          } catch {
+            // ignore
+          }
+        }
       } catch (error) {
         console.warn("[ClerkUserSync] DB sync error:", error);
       }

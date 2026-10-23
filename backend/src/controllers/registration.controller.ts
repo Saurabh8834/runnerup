@@ -777,6 +777,12 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     clerkId: p.user.clerkId,
   }));
 
+  if (!clerkUserId) {
+    response.setHeader("Cache-Control", "public, max-age=30, s-maxage=120, stale-while-revalidate=300");
+  } else {
+    response.setHeader("Cache-Control", "private, no-cache");
+  }
+
   response.json({
     data: rankedLeaderboard,
     participants: participantRoster,

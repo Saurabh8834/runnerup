@@ -19,6 +19,31 @@ export function PersistentRegisterCta() {
       return;
     }
 
+    // Do NOT fire heavy DB query on pages where CTA is never shown anyway
+    const isExcludedPage =
+      pathname === "/register" ||
+      pathname?.startsWith("/admin") ||
+      pathname?.startsWith("/dashboard") ||
+      pathname?.startsWith("/profile") ||
+      pathname?.startsWith("/certificates") ||
+      (pathname?.startsWith("/events/") && pathname !== "/events");
+
+    if (isExcludedPage) {
+      return;
+    }
+
+    // Check cached session state to eliminate repeated API queries across page navigations
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem("ru_user_has_paid") === "1") {
+          setIsPaidCustomer(true);
+          return;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     let isMounted = true;
     async function checkPaidStatus() {
       try {
@@ -38,6 +63,13 @@ export function PersistentRegisterCta() {
         );
         if (isMounted && hasPaid) {
           setIsPaidCustomer(true);
+          if (typeof window !== "undefined") {
+            try {
+              sessionStorage.setItem("ru_user_has_paid", "1");
+            } catch {
+              // ignore
+            }
+          }
         }
       } catch {
         // Silently keep default on network errors
@@ -48,7 +80,7 @@ export function PersistentRegisterCta() {
     return () => {
       isMounted = false;
     };
-  }, [isSignedIn, getToken]);
+  }, [isSignedIn, getToken, pathname]);
 
   // Hide on athlete profile / dashboard, checkout, admin, certificates, event detail pages, and for already paid customers
   const shouldHide =

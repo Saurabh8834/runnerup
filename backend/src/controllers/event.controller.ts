@@ -48,6 +48,8 @@ export async function listEvents(request: Request, response: Response) {
     return true;
   });
 
+  response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+
   if (group) {
     const upcoming = dedupedEnriched
       .filter((event) => event.phase === "upcoming" || event.phase === "live")
@@ -106,6 +108,7 @@ export async function getEvent(request: Request, response: Response) {
     },
   });
 
+  response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
   response.json({
     data: {
       ...withEventMeta(event),

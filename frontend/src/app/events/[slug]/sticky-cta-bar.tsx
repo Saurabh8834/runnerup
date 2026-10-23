@@ -34,6 +34,17 @@ export function EventStickyCta({
       return;
     }
 
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem(`ru_reg_${slug}`) === "1") {
+          setIsRegistered(true);
+          return;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     let isMounted = true;
     async function checkRegistration() {
       try {
@@ -52,6 +63,13 @@ export function EventStickyCta({
         );
         if (isMounted && hasRegisteredForThisEvent) {
           setIsRegistered(true);
+          if (typeof window !== "undefined") {
+            try {
+              sessionStorage.setItem(`ru_reg_${slug}`, "1");
+            } catch {
+              // ignore
+            }
+          }
         }
       } catch {
         // Silently keep default

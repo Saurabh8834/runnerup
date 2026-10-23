@@ -16,9 +16,9 @@ const server = app.listen(env.port, "0.0.0.0", () => {
     .catch((err) => logger.error("[Prisma] Initial database connection error", err));
 });
 
-// Automated background synchronization: keeps DB, Clerk users, and Razorpay payments in permanent sync
-// Runs every 5 minutes completely asynchronously without blocking or interrupting live user requests
-const SYNC_INTERVAL_MS = 5 * 60 * 1000;
+// Automated background reconciliation: periodic safety check
+// Runs once an hour asynchronously to preserve API rate limits and avoid server exhaustion
+const SYNC_INTERVAL_MS = 60 * 60 * 1000;
 let syncTimer: NodeJS.Timeout | null = null;
 let initialTimer: NodeJS.Timeout | null = null;
 

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getApiUrl } from "../../lib/api";
 import { publicEvents } from "../data/events";
 
@@ -367,17 +367,36 @@ export function LeaderboardClient() {
     }
   }, [initialEventParam]);
 
+  // Cache to prevent hammering the server when users flip between distances
+  const cacheRef = useRef<Map<string, { json: any; timestamp: number }>>(new Map());
+
   // Load leaderboard & participants data for the selected event & distance
   const loadLeaderboard = useCallback(async () => {
     if (!selectedSlug) {
       setLoading(false);
       return;
     }
+
+    const distQuery = selectedDistance ? `?distance=${encodeURIComponent(selectedDistance)}` : "";
+    const cacheKey = `${selectedSlug}${distQuery}`;
+    const cached = cacheRef.current.get(cacheKey);
+
+    if (cached && Date.now() - cached.timestamp < 120000) {
+      const json = cached.json;
+      setEntries((json.data ?? []) as LeaderboardEntry[]);
+      setParticipants((json.participants ?? []) as ParticipantEntry[]);
+      setUserRegistrations((json.userRegistrations ?? []) as UserReg[]);
+      if (json.meta?.availableDistances?.length) {
+        setAvailableDistances(json.meta.availableDistances as string[]);
+      }
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const distQuery = selectedDistance ? `?distance=${encodeURIComponent(selectedDistance)}` : "";
       const response = await fetch(
         getApiUrl(`/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`),
       );
@@ -387,6 +406,8 @@ export function LeaderboardClient() {
       }
 
       const json = await response.json();
+      cacheRef.current.set(cacheKey, { json, timestamp: Date.now() });
+
       const rankedData = (json.data ?? []) as LeaderboardEntry[];
       const rosterData = (json.participants ?? []) as ParticipantEntry[];
       const userRegs = (json.userRegistrations ?? []) as UserReg[];

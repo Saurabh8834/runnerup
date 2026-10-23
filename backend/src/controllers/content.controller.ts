@@ -33,6 +33,7 @@ export async function getHomeContent(_request: Request, response: Response) {
     }),
   ]);
 
+  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
   response.json({
     data: {
       moments: moments.map((m) => ({
@@ -71,6 +72,7 @@ export async function getGalleryContent(request: Request, response: Response) {
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
 
+  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
   response.json({
     data: items.map((m) => ({
       id: m.id,

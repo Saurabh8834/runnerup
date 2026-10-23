@@ -409,18 +409,25 @@ function PaymentRegistrationFormInner() {
         const token = await getToken();
         if (!token || cancelled) return;
 
-        await resilientFetch("/api/users/sync", {
-          method: "POST",
-          headers: authHeaders(token),
-          body: JSON.stringify({
-            clerkId: user?.id,
-            email: user?.primaryEmailAddress?.emailAddress,
-            name: user?.fullName ?? user?.firstName,
-            username: user?.username,
-            phone: user?.primaryPhoneNumber?.phoneNumber,
-            avatarUrl: user?.imageUrl,
-          }),
-        });
+        // Only sync if not already synced in this session
+        const hasSynced = typeof window !== "undefined" && user?.id ? sessionStorage.getItem(`ru_synced_${user.id}`) : null;
+        if (!hasSynced && user?.id) {
+          await resilientFetch("/api/users/sync", {
+            method: "POST",
+            headers: authHeaders(token),
+            body: JSON.stringify({
+              clerkId: user?.id,
+              email: user?.primaryEmailAddress?.emailAddress,
+              name: user?.fullName ?? user?.firstName,
+              username: user?.username,
+              phone: user?.primaryPhoneNumber?.phoneNumber,
+              avatarUrl: user?.imageUrl,
+            }),
+          }).catch(() => null);
+          if (typeof window !== "undefined") {
+            try { sessionStorage.setItem(`ru_synced_${user.id}`, "1"); } catch {}
+          }
+        }
 
         const me = await resilientFetch("/api/users/me", {
           headers: authHeaders(token),

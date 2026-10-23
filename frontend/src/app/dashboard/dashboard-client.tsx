@@ -292,17 +292,24 @@ export function DashboardClient() {
     try {
       const token = await getToken();
       if (!token) throw new Error("Could not get session token.");
-      await resilientFetch("/api/users/sync", {
-        method: "POST",
-        headers: authHeaders(token),
-        body: JSON.stringify({
-          clerkId: user?.id,
-          email: user?.primaryEmailAddress?.emailAddress,
-          name: user?.fullName ?? user?.firstName,
-          phone: user?.primaryPhoneNumber?.phoneNumber,
-          avatarUrl: user?.imageUrl,
-        }),
-      });
+      // Only sync if not already synced in this session to eliminate redundant DB writes
+      const hasSynced = typeof window !== "undefined" && user?.id ? sessionStorage.getItem(`ru_synced_${user.id}`) : null;
+      if (!hasSynced && user?.id) {
+        await resilientFetch("/api/users/sync", {
+          method: "POST",
+          headers: authHeaders(token),
+          body: JSON.stringify({
+            clerkId: user?.id,
+            email: user?.primaryEmailAddress?.emailAddress,
+            name: user?.fullName ?? user?.firstName,
+            phone: user?.primaryPhoneNumber?.phoneNumber,
+            avatarUrl: user?.imageUrl,
+          }),
+        }).catch(() => null);
+        if (typeof window !== "undefined") {
+          try { sessionStorage.setItem(`ru_synced_${user.id}`, "1"); } catch {}
+        }
+      }
       const res = await resilientFetch("/api/users/me", {
         headers: authHeaders(token),
       });
