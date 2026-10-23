@@ -3,9 +3,14 @@
 import { useAuth, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import {
+  ArrowRight,
   Check,
   CheckCircle2,
+  ChevronLeft,
   Copy,
+  CreditCard,
+  FileText,
+  Headphones,
   Lock,
   MapPin,
   RefreshCw,
@@ -13,6 +18,7 @@ import {
   Shirt,
   Sparkles,
   Tag,
+  Truck,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +27,7 @@ import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react
 import { Field, inputClass } from "../components/app-shell";
 import { PhoneInput } from "../components/phone-input";
 import { SearchableSelect } from "../components/searchable-select";
+import { RazorpayTrustStrip } from "./payment-badges";
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { INDIAN_STATES, normalizeIndianState } from "../../lib/indian-states";
@@ -220,6 +227,9 @@ function PaymentRegistrationFormInner() {
 
   const [status, setStatus] = useState<"idle" | "creating" | "paying" | "paid" | "error">("idle");
   const [message, setMessage] = useState("Complete the form and continue to secure checkout.");
+  const [step, setStep] = useState<"details" | "payment">("details");
+  const [savedPayload, setSavedPayload] = useState<Record<string, unknown> | null>(null);
+  const [runnerPhone, setRunnerPhone] = useState("");
   const [countdown, setCountdown] = useState(0);
   const paidRef = useRef(false);
   const failedRef = useRef(false);
@@ -672,7 +682,7 @@ function PaymentRegistrationFormInner() {
     return `MR-${distNum}K-${Math.floor(100 + (runnerName.length * 17) % 899)}`;
   }, [selectedDistance, runnerName]);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  function handleProceedToPayment(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     const form = e.currentTarget;
@@ -687,19 +697,32 @@ function PaymentRegistrationFormInner() {
     const validationErrors = validateRegistrationForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      const firstField = Object.keys(validationErrors)[0];
+      const el = form.querySelector(`[name="${firstField}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
       return;
     }
     setErrors({});
 
-    const fullName = asString(formData.get("name"));
-    const phoneVal = asString(formData.get("phone"));
-    const emailVal = asString(formData.get("email"));
-    const streetAddress = asString(formData.get("address"));
-    const landmarkVal = asString(formData.get("landmark"));
+    const fullName = (asString(formData.get("name")) || runnerName || defaultName).trim();
+    const phoneVal = (asString(formData.get("phone")) || runnerPhone || defaultPhone).trim();
+    const emailVal = (asString(formData.get("email")) || runnerEmail || defaultEmail).trim();
+    const streetAddr = (asString(formData.get("address")) || streetAddress).trim();
+    const landmarkVal = asString(formData.get("landmark")).trim();
     const cityVal = (city || asString(formData.get("city"))).trim();
     const pincodeVal = (pincode || asString(formData.get("pincode"))).trim();
 
-    const payload = {
+    setRunnerName(fullName);
+    setRunnerEmail(emailVal);
+    setRunnerPhone(phoneVal);
+    setStreetAddress(streetAddr);
+    setCity(cityVal);
+    setStateVal(stateValue);
+    setPincode(pincodeVal);
+
+    const payload: Record<string, unknown> = {
       name: fullName,
       phone: phoneVal,
       email: emailVal,
@@ -710,16 +733,34 @@ function PaymentRegistrationFormInner() {
       tshirtSize: selectedTshirt,
       shippingName: fullName,
       shippingPhone: phoneVal,
-      shippingLine1: streetAddress,
+      shippingLine1: streetAddr,
       shippingLine2: landmarkVal || undefined,
       shippingCity: cityVal,
       shippingState: stateValue,
       shippingPincode: pincodeVal,
-      address: streetAddress,
+      address: streetAddr,
       city: cityVal,
       state: stateValue,
       pincode: pincodeVal,
       couponCode: appliedCoupon?.code || undefined,
+    };
+
+    setSavedPayload(payload);
+    setStep("payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function triggerPayment() {
+    if (!savedPayload) {
+      setStep("details");
+      return;
+    }
+
+    const payload: Record<string, unknown> = {
+      ...savedPayload,
+      couponCode: appliedCoupon?.code || undefined,
+      distance: selectedDistance,
+      eventSlug: selectedEvent,
     };
 
     setStatus("creating");
@@ -883,9 +924,9 @@ function PaymentRegistrationFormInner() {
         image: "https://runnerup.in/icon.png",
         order_id: order.orderId,
         prefill: {
-          name: payload.name,
-          email: payload.email,
-          contact: payload.phone,
+          name: (payload.name as string) || runnerName || defaultName,
+          email: (payload.email as string) || runnerEmail || defaultEmail,
+          contact: (payload.phone as string) || runnerPhone || defaultPhone,
         },
         theme: { color: "#e64833" },
         timeout: 600, // 10 minutes: prevents premature UPI session timeout during app-switch!
@@ -909,7 +950,7 @@ function PaymentRegistrationFormInner() {
             ),
           );
 
-          let freshToken = isSignedIn ? await getToken() : null;
+          const freshToken = isSignedIn ? await getToken() : null;
           try {
             let verifyResponse = await resilientFetch("/api/payments/verify", {
               method: "POST",
@@ -969,7 +1010,7 @@ function PaymentRegistrationFormInner() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <>
       {/* Confetti Explosion & Celebration Modal on Payment Success */}
       {status === "paid" && (
         <>
@@ -1035,21 +1076,301 @@ function PaymentRegistrationFormInner() {
         </>
       )}
 
-      {/* ── LEFT COLUMN: REGISTRATION FORM ── */}
-      <div className="lg:col-span-7">
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-3xl border border-(--line) bg-(--panel) p-5 sm:p-7 shadow-xs space-y-4"
-          noValidate
-        >
-          <div className="border-b border-(--line) pb-4">
-            <h2 className="text-lg font-black tracking-tight text-foreground">
-              Athlete Information
-            </h2>
-            <p className="text-xs text-(--muted)">
-              Enter your official race details for Bib & Certificate generation.
-            </p>
+      {step === "payment" ? (
+        /* ══════════════════════════════════════════════════════════════════
+           STEP 2: AUTHENTIC SECURE PAYMENT PAGE (Matches Mockup 100%)
+           ══════════════════════════════════════════════════════════════════ */
+        <div className="max-w-4xl mx-auto py-2 sm:py-6">
+          {/* Top Brand & Header Section */}
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-6 sm:mb-8">
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 16.5l-4-4 1.41-1.41L11 15.67l6.59-6.59L19 10.5l-8 8z" />
+                  </svg>
+                </div>
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-white font-sans">
+                  RunnerUp
+                </span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#fcf8f2] tracking-tight">
+                Secure Payment
+              </h1>
+              <p className="text-sm sm:text-base text-[#90aead] mt-1">
+                Your information is safe and protected.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setStep("details")}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-(--muted) hover:text-white transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>Edit Details</span>
+              </button>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+                <Lock className="h-3.5 w-3.5" />
+                <span>256-Bit SSL Encrypted</span>
+              </span>
+            </div>
           </div>
+
+          {/* Two Balanced Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {/* Card 1: Order Summary */}
+            <div className="rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-6 shadow-xl flex flex-col justify-between">
+              <div>
+                {/* Header with Document Icon */}
+                <div className="flex items-center gap-3 border-b border-[rgba(144,174,173,0.14)] pb-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#244855]/60 border border-[rgba(144,174,173,0.2)] text-cyan-300">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-[#fcf8f2]">Order Summary</h2>
+                    <p className="text-xs text-[#90aead] line-clamp-1">{activeEvent.label}</p>
+                  </div>
+                </div>
+
+                {/* Line Items */}
+                <div className="py-5 space-y-4 text-sm">
+                  <div className="flex items-center justify-between text-[#fcf8f2]">
+                    <span className="text-[#90aead]">Entry Fee ({selectedDistance || "5 km"})</span>
+                    <span className="font-mono font-bold text-white">₹{baseAmountInRupees}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                      <Tag className="h-4 w-4" />
+                      <span>Promo Discount</span>
+                      {appliedCoupon && (
+                        <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                          {appliedCoupon.code}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-mono font-bold text-emerald-400">
+                      - ₹{appliedCoupon ? appliedCoupon.discountInRupees : 50}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[#fcf8f2]">
+                      <Truck className="h-4 w-4 text-cyan-400" />
+                      <span>Pan-India Tracked Courier</span>
+                    </div>
+                    <span className="font-bold text-xs uppercase tracking-wider text-emerald-400">
+                      FREE
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Payable Box */}
+              <div>
+                <div className="rounded-2xl bg-[#1e3b46] border border-[rgba(144,174,173,0.25)] p-4 sm:p-5 flex items-center justify-between shadow-inner">
+                  <div>
+                    <p className="text-sm sm:text-base font-bold text-white">Total Payable</p>
+                    <p className="text-[11px] sm:text-xs text-[#90aead]">(All taxes &amp; delivery included)</p>
+                  </div>
+                  <div className="font-mono text-3xl sm:text-4xl font-black text-white tracking-tight">
+                    ₹{finalAmountInRupees}
+                  </div>
+                </div>
+
+                {/* Delivery Recipient Pill */}
+                <div className="mt-3 flex items-center justify-between rounded-xl bg-white/5 px-3 py-2 text-[11.5px] text-(--muted) border border-white/5">
+                  <span className="line-clamp-1">
+                    📍 Delivering to: <strong className="text-white">{runnerName || defaultName}</strong>, {city || "City"} ({pincode})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setStep("details")}
+                    className="text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer shrink-0 ml-2"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Trust Badges */}
+            <div className="rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-6 shadow-xl flex flex-col justify-between gap-5">
+              {/* 100% Secure Payments */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcf8f2]">100% Secure Payments</h3>
+                  <p className="mt-0.5 text-xs text-[#90aead] leading-relaxed">
+                    Your data is encrypted and protected with industry-standard security.
+                  </p>
+                </div>
+              </div>
+
+              {/* Multiple Payment Options */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
+                  <CreditCard className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcf8f2]">Multiple Payment Options</h3>
+                  <p className="mt-0.5 text-xs text-[#90aead] leading-relaxed">
+                    Pay via UPI (GPay, PhonePe, Paytm), Cards, Netbanking and more.
+                  </p>
+                </div>
+              </div>
+
+              {/* Pan-India Delivery */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+                  <Truck className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcf8f2]">Pan-India Delivery</h3>
+                  <p className="mt-0.5 text-xs text-[#90aead] leading-relaxed">
+                    Get your solid metal finisher kit delivered to your doorstep.
+                  </p>
+                </div>
+              </div>
+
+              {/* Need Help? */}
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                  <Headphones className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcf8f2]">Need Help?</h3>
+                  <p className="mt-0.5 text-xs text-[#90aead] leading-relaxed">
+                    Our support team is here for you at every step.
+                  </p>
+                  <a
+                    href="https://wa.me/918287831071"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-semibold"
+                  >
+                    Chat on WhatsApp (+91 8287831071) →
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Action Area */}
+          <div className="mt-8 space-y-4">
+            {status === "error" && (
+              <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-300 font-medium">
+                {message}
+              </div>
+            )}
+
+            {status === "paying" && (
+              <div className="rounded-2xl border border-amber-500/40 bg-amber-500/15 p-3.5 text-xs text-amber-200 font-medium flex flex-col sm:flex-row items-center justify-between gap-3 animate-pulse">
+                <div className="flex items-center gap-2.5">
+                  <RefreshCw className="h-4 w-4 animate-spin text-amber-400 shrink-0" />
+                  <span>Waiting for bank &amp; UPI authorization...</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void checkLivePaymentStatus()}
+                  disabled={checkingStatus}
+                  className="btn btn-secondary text-xs font-bold px-3 py-1.5 h-8 shrink-0 flex items-center gap-1.5 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40"
+                >
+                  {checkingStatus ? "Verifying..." : "Completed in UPI app? Verify Now →"}
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => void triggerPayment()}
+              disabled={status === "creating" || status === "paying" || distanceAlreadyTaken}
+              className={cn(
+                "w-full h-14 sm:h-15 rounded-full text-base sm:text-lg font-black tracking-wide flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer",
+                distanceAlreadyTaken
+                  ? "bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 cursor-not-allowed opacity-75"
+                  : "bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white shadow-[0_0_30px_rgba(230,72,51,0.65)] hover:shadow-[0_0_45px_rgba(230,72,51,0.9)] hover:brightness-110 active:scale-[0.99] border border-amber-300/40",
+                (status === "creating" || status === "paying") && "opacity-85 pointer-events-none cursor-wait",
+              )}
+            >
+              {status === "creating" ? (
+                <>
+                  <RefreshCw className="h-5 w-5 animate-spin" />
+                  <span>Generating Razorpay Order...</span>
+                </>
+              ) : status === "paying" ? (
+                <>
+                  <RefreshCw className="h-5 w-5 animate-spin" />
+                  <span>Processing with Razorpay...</span>
+                </>
+              ) : distanceAlreadyTaken ? (
+                "Already Registered & Paid"
+              ) : (
+                <>
+                  <Lock className="h-5 w-5" />
+                  <span>Pay ₹{finalAmountInRupees} and Book Your Slot</span>
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
+            </button>
+
+            <RazorpayTrustStrip />
+
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                onClick={() => setStep("details")}
+                className="text-xs text-[#90aead] hover:text-white transition-colors underline-offset-4 hover:underline cursor-pointer"
+              >
+                ← Edit Athlete or Delivery Details
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ══════════════════════════════════════════════════════════════════
+           STEP 1: ATHLETE & DELIVERY DETAILS
+           ══════════════════════════════════════════════════════════════════ */
+        <div>
+          {/* Stepper Bar */}
+          <div className="mb-6 flex items-center justify-center gap-2 text-xs font-semibold">
+            <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3.5 py-1">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-slate-950 font-black text-[10px]">1</span>
+              <span>Athlete &amp; Delivery Details</span>
+            </span>
+            <span className="text-white/20">───</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (savedPayload) setStep("payment");
+              }}
+              className="flex items-center gap-1.5 rounded-full bg-white/5 border border-white/10 text-(--muted) hover:text-white px-3.5 py-1 transition-colors cursor-pointer"
+            >
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-white font-bold text-[10px]">2</span>
+              <span>Secure Payment</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            {/* ── LEFT COLUMN: REGISTRATION FORM ── */}
+            <div className="lg:col-span-7">
+              <form
+                onSubmit={handleProceedToPayment}
+                className="rounded-3xl border border-(--line) bg-(--panel) p-5 sm:p-7 shadow-xs space-y-4"
+                noValidate
+              >
+                <div className="border-b border-(--line) pb-4">
+                  <h2 className="text-lg font-black tracking-tight text-foreground">
+                    Athlete Information
+                  </h2>
+                  <p className="text-xs text-(--muted)">
+                    Enter your official race details for Bib &amp; Certificate generation.
+                  </p>
+                </div>
 
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             <Field label="Full Name" required>
@@ -1437,20 +1758,20 @@ function PaymentRegistrationFormInner() {
               distanceAlreadyTaken
                 ? "bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 cursor-not-allowed opacity-75"
                 : "bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white shadow-[0_0_28px_rgba(230,72,51,0.65)] hover:shadow-[0_0_45px_rgba(230,72,51,0.9)] hover:brightness-110 active:scale-[0.99] border border-amber-300/40 cursor-pointer",
-              (status === "creating" || status === "paying") && "opacity-85 pointer-events-none cursor-wait",
             )}
-            disabled={status === "creating" || status === "paying" || distanceAlreadyTaken}
+            disabled={distanceAlreadyTaken}
             type="submit"
           >
-            {status === "creating"
-              ? "Generating Order..."
-              : status === "paying"
-                ? "Processing with Razorpay..."
-                : distanceAlreadyTaken
-                  ? "Already Registered"
-                  : pendingSame
-                    ? `Complete Payment (${selectedAmount}) · Claim Your Kit`
-                    : `Pay ${selectedAmount} · Claim Your Kit`}
+            {distanceAlreadyTaken ? (
+              "Already Registered"
+            ) : (
+              <>
+                <Lock className="h-4 w-4" />
+                <span>Continue to Secure Payment</span>
+                <span className="font-mono text-amber-200">({selectedAmount})</span>
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </button>
         </form>
       </div>
@@ -1548,7 +1869,10 @@ function PaymentRegistrationFormInner() {
         </div>
       </div>
     </div>
-  );
+  </div>
+)}
+</>
+);
 }
 
 export function PaymentRegistrationForm() {

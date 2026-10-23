@@ -17,6 +17,7 @@ type PhoneInputProps = {
   defaultValue?: string;
   invalid?: boolean;
   name?: string;
+  onChange?: (phone: string) => void;
 };
 
 function CountryCodePicker({
@@ -100,7 +101,7 @@ function CountryCodePicker({
   );
 }
 
-export function PhoneInput({ defaultValue = "", invalid, name = "phone" }: PhoneInputProps) {
+export function PhoneInput({ defaultValue = "", invalid, name = "phone", onChange }: PhoneInputProps) {
   const parsed = parseStoredPhone(defaultValue);
   const [countryCode, setCountryCode] = useState(
     defaultValue.trim() ? parsed.countryCode : DEFAULT_PHONE_COUNTRY.code,
@@ -108,6 +109,14 @@ export function PhoneInput({ defaultValue = "", invalid, name = "phone" }: Phone
   const [phoneNumber, setPhoneNumber] = useState(parsed.phoneNumber);
 
   const country = findPhoneCountry(countryCode);
+
+  useEffect(() => {
+    if (defaultValue && !phoneNumber) {
+      const p = parseStoredPhone(defaultValue);
+      setCountryCode(p.countryCode);
+      setPhoneNumber(p.phoneNumber);
+    }
+  }, [defaultValue, phoneNumber]);
 
   return (
     <div className="flex gap-2">
@@ -117,7 +126,9 @@ export function PhoneInput({ defaultValue = "", invalid, name = "phone" }: Phone
         onChange={(code) => {
           const nextCountry = findPhoneCountry(code);
           setCountryCode(nextCountry.code);
-          setPhoneNumber((current) => current.slice(0, nextCountry.maxLength));
+          const nextNum = phoneNumber.slice(0, nextCountry.maxLength);
+          setPhoneNumber(nextNum);
+          onChange?.(formatFullPhone(nextCountry.code, nextNum));
         }}
       />
       <input
@@ -130,6 +141,7 @@ export function PhoneInput({ defaultValue = "", invalid, name = "phone" }: Phone
         onChange={(event) => {
           const digits = event.target.value.replace(/\D/g, "").slice(0, country.maxLength);
           setPhoneNumber(digits);
+          onChange?.(formatFullPhone(countryCode, digits));
         }}
         placeholder={country.placeholder}
         required
