@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -25,20 +25,36 @@ function AdminLoginForm() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect_url") || "/admin";
   const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
 
   const [passcode, setPasscode] = useState("");
   const [showPasscodeField, setShowPasscodeField] = useState(false);
-  const [showPasscodeForm, setShowPasscodeForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // If already signed into Clerk, navigate straight to /admin
+  // If already signed into Clerk with an admin account, navigate straight to /admin
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      router.replace(redirectUrl);
+    if (isLoaded && isSignedIn && user) {
+      const userEmails = [
+        user?.primaryEmailAddress?.emailAddress,
+        ...(user?.emailAddresses?.map((e) => e.emailAddress) || []),
+      ]
+        .filter(Boolean)
+        .map((e) => e!.toLowerCase());
+
+      const isAdminEmail = userEmails.some(
+        (e) =>
+          e === "sourav06556@gmail.com" ||
+          e === "realblack009@gmail.com" ||
+          e.includes("sourav"),
+      );
+
+      if (isAdminEmail) {
+        router.replace(redirectUrl);
+      }
     }
-  }, [isLoaded, isSignedIn, redirectUrl, router]);
+  }, [isLoaded, isSignedIn, user, redirectUrl, router]);
 
   async function handlePasscodeSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -108,8 +124,8 @@ function AdminLoginForm() {
           <LockIcon />
         </div>
 
-        <h1>Admin Access</h1>
-        <p>Sign in with your administrator account to access the operations console.</p>
+        <h1>Admin Console Login</h1>
+        <p>Restricted to authorized administrators. Unlock with the master passcode or sign in.</p>
 
         {error && (
           <div
@@ -128,96 +144,81 @@ function AdminLoginForm() {
           </div>
         )}
 
-        {/* Primary action: Sign in with Google / Email */}
-        <div style={{ width: "100%", marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          <Link
+        <form onSubmit={handlePasscodeSubmit} style={{ width: "100%", marginTop: "0.75rem" }}>
+          <div style={{ position: "relative", marginBottom: "0.75rem" }}>
+            <input
+              type={showPasscodeField ? "text" : "password"}
+              placeholder="Admin Master Passcode"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              disabled={loading || isPending}
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "0.75rem 3.2rem 0.75rem 1rem",
+                borderRadius: "0.75rem",
+                border: "1px solid var(--line)",
+                background: "var(--panel-soft)",
+                color: "var(--foreground)",
+                fontSize: "0.95rem",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPasscodeField((s) => !s)}
+              style={{
+                position: "absolute",
+                right: "0.75rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "var(--muted)",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+              }}
+            >
+              {showPasscodeField ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          <button
+            type="submit"
             className="btn btn-primary"
+            disabled={loading || isPending}
+            style={{ width: "100%", height: "2.85rem", fontWeight: 600, fontSize: "0.95rem" }}
+          >
+            {loading || isPending ? "Unlocking Console…" : "Unlock Admin Console"}
+          </button>
+        </form>
+
+        <div style={{ display: "flex", alignItems: "center", width: "100%", margin: "1.25rem 0", color: "var(--muted)", fontSize: "0.75rem" }}>
+          <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+          <span style={{ padding: "0 0.75rem" }}>or continue with account</span>
+          <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+        </div>
+
+        <div style={{ width: "100%", marginBottom: "0.5rem" }}>
+          <Link
+            className="btn btn-secondary"
             href={`/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}`}
             style={{
               width: "100%",
-              height: "2.85rem",
+              height: "2.75rem",
               fontWeight: 600,
-              fontSize: "0.95rem",
+              fontSize: "0.9rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               textDecoration: "none",
             }}
           >
-            Sign in with Email
+            Sign in with RunnerUp Account
           </Link>
-        </div>
-
-        {/* Optional Collapsed Passcode Bypass (emergency fallback) */}
-        <div style={{ marginTop: "1.25rem", width: "100%", textAlign: "center" }}>
-          <button
-            type="button"
-            onClick={() => setShowPasscodeForm((v) => !v)}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--muted)",
-              fontSize: "0.75rem",
-              cursor: "pointer",
-              textDecoration: "underline",
-              padding: "0.25rem",
-            }}
-          >
-            {showPasscodeForm ? "Hide emergency passcode" : "Have an emergency bypass code?"}
-          </button>
-
-          {showPasscodeForm && (
-            <form onSubmit={handlePasscodeSubmit} style={{ width: "100%", marginTop: "0.75rem" }}>
-              <div style={{ position: "relative", marginBottom: "0.75rem" }}>
-                <input
-                  type={showPasscodeField ? "text" : "password"}
-                  placeholder="Admin Master Passcode"
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  disabled={loading || isPending}
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem 3rem 0.75rem 1rem",
-                    borderRadius: "0.75rem",
-                    border: "1px solid var(--line)",
-                    background: "var(--panel-soft)",
-                    color: "var(--foreground)",
-                    fontSize: "0.9rem",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPasscodeField((s) => !s)}
-                  style={{
-                    position: "absolute",
-                    right: "0.75rem",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "none",
-                    border: "none",
-                    color: "var(--muted)",
-                    cursor: "pointer",
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {showPasscodeField ? "Hide" : "Show"}
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-secondary"
-                disabled={loading || isPending}
-                style={{ width: "100%", height: "2.4rem", fontWeight: 600, fontSize: "0.85rem" }}
-              >
-                {loading || isPending ? "Unlocking…" : "Unlock with Passcode"}
-              </button>
-            </form>
-          )}
         </div>
 
         <div className="admin-gate-actions" style={{ marginTop: "1.25rem" }}>

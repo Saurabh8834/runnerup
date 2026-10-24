@@ -202,6 +202,7 @@ function AdminThemed({
 /* ── Gate: not signed in ────────────────────────────────── */
 function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void }) {
   const [passcode, setPasscode] = useState("");
+  const [showPasscode, setShowPasscode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -252,7 +253,7 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
         </div>
 
         <h1>Admin Console</h1>
-        <p>Restricted to authorised admins only. Sign in to continue.</p>
+        <p>Restricted to authorised admins only. Enter the admin master passcode or sign in.</p>
 
         {error && (
           <div
@@ -271,9 +272,67 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
           </div>
         )}
 
+        <form onSubmit={handlePasscodeSubmit} style={{ width: "100%", marginTop: "0.5rem" }}>
+          <div style={{ position: "relative", marginBottom: "0.75rem" }}>
+            <input
+              type={showPasscode ? "text" : "password"}
+              placeholder="Admin Master Passcode"
+              value={passcode}
+              onChange={(e) => setPasscode(e.target.value)}
+              disabled={loading}
+              autoFocus
+              style={{
+                width: "100%",
+                padding: "0.75rem 3.2rem 0.75rem 1rem",
+                borderRadius: "0.75rem",
+                border: "1px solid var(--line)",
+                background: "var(--panel-soft)",
+                color: "var(--foreground)",
+                fontSize: "0.95rem",
+                outline: "none",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPasscode((s) => !s)}
+              style={{
+                position: "absolute",
+                right: "0.75rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "var(--muted)",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                textTransform: "uppercase",
+              }}
+            >
+              {showPasscode ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ width: "100%", height: "2.75rem", fontWeight: 600, fontSize: "0.95rem" }}
+          >
+            {loading ? "Unlocking Console…" : "Unlock Admin Console"}
+          </button>
+        </form>
+
+        <div style={{ display: "flex", alignItems: "center", width: "100%", margin: "1.25rem 0", color: "var(--muted)", fontSize: "0.75rem" }}>
+          <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+          <span style={{ padding: "0 0.75rem" }}>or continue with account</span>
+          <div style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+        </div>
+
         <div style={{ width: "100%", marginBottom: "1rem" }}>
           <Link
-            className="btn btn-primary"
+            className="btn btn-secondary"
             href="/sign-in?redirect_url=/admin"
             style={{
               width: "100%",
@@ -285,7 +344,7 @@ function GateSignIn({ onEmergencySuccess }: { onEmergencySuccess?: () => void })
               textDecoration: "none",
             }}
           >
-            Sign in with Email
+            Sign in with RunnerUp Account
           </Link>
         </div>
 
@@ -316,10 +375,39 @@ function GateRestricted({
   onRetry: () => void;
 }) {
   const { signOut } = useClerk();
+  const [passcode, setPasscode] = useState("");
+  const [showPasscodeForm, setShowPasscodeForm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [passcodeError, setPasscodeError] = useState<string | null>(null);
 
   function handleSwitchAccount() {
     void signOut({ redirectUrl: "/sign-in?redirect_url=/admin" });
   }
+
+  async function handlePasscodeUnlock(e: React.FormEvent) {
+    e.preventDefault();
+    if (!passcode.trim()) return;
+    setLoading(true);
+    setPasscodeError(null);
+    try {
+      const res = await resilientFetch("/api/admin/emergency-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode: passcode.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Invalid admin passcode");
+      }
+      setEmergencyAdminSession(json.data.token);
+      onRetry();
+    } catch (err) {
+      setPasscodeError(err instanceof Error ? err.message : "Unlock failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <AdminThemed className="admin-app admin-gate">
       <motion.div
@@ -351,21 +439,77 @@ function GateRestricted({
               <strong>{email}</strong>
             </div>
             <p style={{ margin: 0, fontSize: "0.75rem", color: "var(--muted)" }}>
-              This account is not authorised. Contact the system owner to grant admin access,
-              or sign out and use a different account.
+              This account is not in the authorised admin list. Contact the system owner or unlock with the master passcode below.
             </p>
           </div>
         ) : null}
 
-        <div className="admin-gate-actions">
+        {/* Master passcode unlock fallback right in restricted screen */}
+        <div style={{ marginTop: "1rem", width: "100%" }}>
+          {!showPasscodeForm ? (
+            <button
+              type="button"
+              onClick={() => setShowPasscodeForm(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--sage)",
+                fontSize: "0.82rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                padding: "0.3rem",
+                textDecoration: "underline",
+              }}
+            >
+              Have the master admin passcode? Unlock directly →
+            </button>
+          ) : (
+            <form onSubmit={handlePasscodeUnlock} style={{ marginTop: "0.5rem" }}>
+              {passcodeError && (
+                <div style={{ color: "#f87171", fontSize: "0.78rem", marginBottom: "0.5rem" }}>
+                  {passcodeError}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <input
+                  type="password"
+                  placeholder="Master Passcode"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  disabled={loading}
+                  style={{
+                    flex: 1,
+                    padding: "0.6rem 0.8rem",
+                    borderRadius: "0.6rem",
+                    border: "1px solid var(--line)",
+                    background: "var(--panel-soft)",
+                    color: "var(--foreground)",
+                    fontSize: "0.85rem",
+                    outline: "none",
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                  style={{ height: "auto", padding: "0.6rem 1rem", fontSize: "0.85rem", whiteSpace: "nowrap" }}
+                >
+                  {loading ? "Unlocking…" : "Unlock"}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        <div className="admin-gate-actions" style={{ marginTop: "1.25rem" }}>
           <button
-            className="btn btn-primary"
+            className="btn btn-secondary"
             onClick={handleSwitchAccount}
             type="button"
           >
             Switch account
           </button>
-          <button className="btn btn-secondary" onClick={onRetry} type="button">
+          <button className="btn btn-ghost" onClick={onRetry} type="button">
             Retry
           </button>
           <Link className="btn btn-ghost" href="/">
@@ -374,12 +518,13 @@ function GateRestricted({
         </div>
 
         <div className="admin-gate-divider">
-          Need access? Ask the admin to add your email to <code style={{ background: "var(--panel-soft)", color: "var(--sage)", padding: "0.1rem 0.3rem", borderRadius: 4, fontSize: "0.7rem" }}>ADMIN_EMAILS</code>
+          RunnerUp Operations · Protected Area
         </div>
       </motion.div>
     </AdminThemed>
   );
 }
+
 
 /* ── Gate: server / network / tunnel offline (530, 502, 500, etc.) ── */
 function GateServerError({
@@ -638,8 +783,21 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       setMe(json.data);
     } catch (err) {
       // Auto-fallback: If signed into Clerk with admin email, auto-acquire authenticated admin session
-      const userEmail = user?.primaryEmailAddress?.emailAddress?.toLowerCase();
-      if (userEmail && (userEmail === "sourav06556@gmail.com" || userEmail === "realblack009@gmail.com" || userEmail.includes("sourav"))) {
+      const userEmails = [
+        user?.primaryEmailAddress?.emailAddress,
+        ...(user?.emailAddresses?.map((e) => e.emailAddress) || []),
+      ]
+        .filter(Boolean)
+        .map((e) => e!.toLowerCase());
+
+      const isAdminEmail = userEmails.some(
+        (e) =>
+          e === "sourav06556@gmail.com" ||
+          e === "realblack009@gmail.com" ||
+          e.includes("sourav"),
+      );
+
+      if (isAdminEmail) {
         try {
           const res = await resilientFetch("/api/admin/emergency-login", {
             method: "POST",
@@ -658,6 +816,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
           console.error("Auto admin elevation failed:", autoErr);
         }
       }
+
 
       setMe(null);
       if (err instanceof AdminApiError) {

@@ -2,8 +2,8 @@
 
 import { ClerkLoaded, ClerkLoading, SignIn } from "@clerk/nextjs";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { BadgeCheck, ChevronRight, Trophy, Zap } from "lucide-react";
 import { PageShell } from "../../components/app-shell";
 import { useTheme } from "../../components/theme-provider";
@@ -208,8 +208,11 @@ function ThemedSignIn() {
   );
 }
 
-export default function SignInPage() {
+function SignInContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect_url") || "";
+  const isAdminRedirect = redirectUrl.startsWith("/admin");
   const [bibInput, setBibInput] = useState("");
 
   function handleRunnerLookup(e: React.FormEvent) {
@@ -242,6 +245,31 @@ export default function SignInPage() {
               <h1 className="auth-classic-form-title mt-3">Sign in to your runner portal</h1>
               <p className="mt-3 text-sm leading-6 text-(--muted)">Sign in with your email to receive an instant verification code.</p>
             </div>
+
+            {/* Admin Console shortcut banner when arriving from /admin */}
+            {isAdminRedirect && (
+              <div className="mt-4 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/20 to-orange-500/20 p-3.5 backdrop-blur-md">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500/30 text-amber-300 text-xs font-bold">
+                      🛡️
+                    </span>
+                    <span className="text-xs font-bold text-amber-200">
+                      Admin Console Portal
+                    </span>
+                  </div>
+                  <Link
+                    href="/admin/login"
+                    className="rounded-lg bg-amber-500 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wider text-slate-950 transition hover:bg-amber-400"
+                  >
+                    Admin Login →
+                  </Link>
+                </div>
+                <p className="mt-1.5 text-[11px] text-slate-200">
+                  Are you an admin? Sign in with the master passcode or elevated account on the dedicated Admin Login portal.
+                </p>
+              </div>
+            )}
 
             {/* Instant access tip */}
             <div className="mt-4 rounded-xl border border-white/10 bg-gradient-to-r from-[#244855]/70 to-[#1b323b]/90 p-3.5 backdrop-blur-md">
@@ -308,10 +336,10 @@ export default function SignInPage() {
 
           <div className="mt-4 text-center">
             <Link
-              href="/admin"
-              className="text-[0.72rem] text-[#90aead]/60 hover:text-[#90aead]"
+              href="/admin/login"
+              className="text-xs font-semibold text-amber-400/80 hover:text-amber-300 inline-flex items-center gap-1"
             >
-              Admin Console Access →
+              🛡️ Admin Console Login →
             </Link>
           </div>
           </div>
@@ -321,3 +349,12 @@ export default function SignInPage() {
     </PageShell>
   );
 }
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInContent />
+    </Suspense>
+  );
+}
+
