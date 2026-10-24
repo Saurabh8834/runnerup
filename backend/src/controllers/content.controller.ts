@@ -4,6 +4,7 @@ import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
 import { writeAdminAudit } from "../services/admin-audit.service.js";
 import { ensureDefaultSiteContent } from "../services/content.service.js";
 import { isCloudinaryConfigured, uploadImageToCloudinary } from "../services/cloudinary.service.js";
+import { processAndStoreImage } from "../services/storage.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
 import { validateBody } from "../utils/validate.js";
@@ -91,17 +92,8 @@ export async function getGalleryContent(request: Request, response: Response) {
 export async function submitGalleryPhoto(request: Request, response: Response) {
   const payload = validateBody(publicGallerySubmissionSchema, request);
 
-  let imageUrl: string;
-  if (isCloudinaryConfigured()) {
-    try {
-      const uploaded = await uploadImageToCloudinary(payload.file, "runnerup/gallery");
-      imageUrl = uploaded.secure_url;
-    } catch {
-      imageUrl = payload.file;
-    }
-  } else {
-    imageUrl = payload.file;
-  }
+  const stored = await processAndStoreImage(payload.file, "gallery");
+  const imageUrl = stored.url;
 
   const item = await prisma.siteMedia.create({
     data: {

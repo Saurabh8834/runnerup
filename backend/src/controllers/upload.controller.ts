@@ -1,6 +1,7 @@
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
-import { isCloudinaryConfigured, uploadImageToCloudinary } from "../services/cloudinary.service.js";
+import { processAndStoreImage } from "../services/storage.service.js";
+import { isCloudinaryConfigured } from "../services/cloudinary.service.js";
 import { ApiError } from "../utils/api-error.js";
 import { logger } from "../utils/logger.js";
 import { validateBody } from "../utils/validate.js";
@@ -21,71 +22,31 @@ export async function uploadProofImage(request: AuthenticatedRequest, response: 
     throw new ApiError(413, "Image is too large. Use a photo or screenshot under 15 MB.");
   }
 
-  if (!payload.file.startsWith("data:") && !payload.file.startsWith("https://")) {
-    throw new ApiError(400, "Provide a data URL or https image URL");
+  if (!payload.file.startsWith("data:") && !payload.file.startsWith("https://") && !payload.file.startsWith("http://")) {
+    throw new ApiError(400, "Provide a data URL or valid image URL");
   }
 
-  // Prefer Cloudinary when configured (scalable CDN storage).
-  if (isCloudinaryConfigured()) {
-    try {
-      const uploaded = await uploadImageToCloudinary(
-        payload.file,
-        payload.folder ?? "runnerup/proofs",
-      );
-      response.status(201).json({
-        data: {
-          url: uploaded.secure_url,
-          provider: "cloudinary",
-          bytes: uploaded.bytes,
-        },
-      });
-      return;
-    } catch (err) {
-      logger.warn("[Upload] Cloudinary upload failed, falling back to inline data URL to protect user experience", {
-        error: err instanceof Error ? err.message : String(err),
-      });
-      // Fallback gracefully so proof submission NEVER fails for any user!
-      response.status(201).json({
-        data: {
-          url: payload.file,
-          provider: "inline-data-url",
-          warning: "Cloudinary temporarily unavailable; safely stored inline",
-        },
-      });
-      return;
-    }
-  }
+  try {
+    const subfolder = payload.folder ? payload.folder.replace(/^runnerup\/?/, "") || "proofs" : "proofs";
+    const result = await processAndStoreImage(payload.file, subfolder);
 
-  // Dev fallback: accept remote https URLs as-is; accept data URLs for small demos.
-  if (payload.file.startsWith("https://")) {
     response.status(201).json({
       data: {
-        url: payload.file,
-        provider: "direct-url",
+        url: result.url,
+        provider: result.provider,
+        bytes: result.bytes,
       },
     });
-    return;
+  } catch (err) {
+    logger.error("[Upload] Failed to process and store image", err);
+    throw new ApiError(500, "Could not process image upload. Please try again.");
   }
-
-  if (payload.file.length > 900_000) {
-    throw new ApiError(
-      503,
-      "Cloudinary is not configured. Set CLOUDINARY_* env vars for large proof image uploads, or paste a public image URL.",
-    );
-  }
-
-  response.status(201).json({
-    data: {
-      url: payload.file,
-      provider: "inline-data-url",
-      warning: "Stored as data URL (configure Cloudinary for production).",
-    },
-  });
 }
 
 export async function uploadConfig(_request: AuthenticatedRequest, response: Response) {
   response.json({
     data: {
+      storage: "local-cloudflare-cdn",
       cloudinary: isCloudinaryConfigured(),
       maxDataUrlChars: MAX_DATA_URL_CHARS,
       accepted: ["image/jpeg", "image/png", "image/webp", "image/heic"],

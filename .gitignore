@@ -52,4 +52,7 @@ scratch/
 /logs/
 *.pid
 backend_log.txt
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 

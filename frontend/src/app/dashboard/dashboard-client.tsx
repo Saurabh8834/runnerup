@@ -154,7 +154,7 @@ async function fileToPayload(file: File): Promise<string> {
   try {
     if (typeof window !== "undefined" && typeof createImageBitmap === "function") {
       const bmp = await createImageBitmap(file);
-      const scale = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
+      const scale = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
       const c = document.createElement("canvas");
       c.width = Math.max(1, Math.round(bmp.width * scale));
       c.height = Math.max(1, Math.round(bmp.height * scale));
@@ -162,7 +162,7 @@ async function fileToPayload(file: File): Promise<string> {
       if (ctx) {
         ctx.drawImage(bmp, 0, 0, c.width, c.height);
         bmp.close();
-        return c.toDataURL("image/jpeg", 0.82);
+        return c.toDataURL("image/jpeg", 0.78);
       }
       bmp.close();
     }
@@ -178,7 +178,7 @@ async function fileToPayload(file: File): Promise<string> {
         const img = new Image();
         img.onload = () => {
           try {
-            const scale = Math.min(1, 1400 / Math.max(img.width, img.height));
+            const scale = Math.min(1, 1200 / Math.max(img.width, img.height));
             const c = document.createElement("canvas");
             c.width = Math.max(1, Math.round(img.width * scale));
             c.height = Math.max(1, Math.round(img.height * scale));
@@ -186,7 +186,7 @@ async function fileToPayload(file: File): Promise<string> {
             if (ctx) {
               ctx.drawImage(img, 0, 0, c.width, c.height);
               URL.revokeObjectURL(objectUrl);
-              resolve(c.toDataURL("image/jpeg", 0.82));
+              resolve(c.toDataURL("image/jpeg", 0.78));
               return;
             }
           } catch {}
@@ -386,10 +386,34 @@ export function DashboardClient() {
 
   useEffect(() => {
     if (!hasPending || !isLoaded) return;
+    let pollCount = 0;
+    const maxPolls = 6; // Limit to 6 polls (~12 min) to protect Neon DB compute and prevent infinite loops
+
     const interval = setInterval(() => {
+      // Never poll database if tab is minimized or hidden in background
+      if (typeof document !== "undefined" && document.hidden) return;
+      pollCount++;
+      if (pollCount > maxPolls) {
+        clearInterval(interval);
+        return;
+      }
       void loadMe();
-    }, 30_000);
-    return () => clearInterval(interval);
+    }, 120_000); // 2-minute interval instead of 30s
+
+    // Refresh immediately on-demand when user returns to active tab
+    function handleVisibility() {
+      if (typeof document !== "undefined" && !document.hidden) {
+        void loadMe();
+      }
+    }
+    window.addEventListener("focus", handleVisibility);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleVisibility);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [hasPending, isLoaded, loadMe]);
 
   async function handleRefresh() {

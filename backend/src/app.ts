@@ -1,6 +1,8 @@
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
+import fs from "node:fs";
+import path from "node:path";
 import { env } from "./config/env.js";
 import { requestTraceMiddleware } from "./middleware/request-trace.js";
 import { adminRouter } from "./routes/admin.routes.js";
@@ -77,6 +79,26 @@ app.get("/", (_request, response) => {
     docs: "API routes are under /api/*",
   });
 });
+
+// Ensure local storage directory exists for user proof and activity uploads
+const uploadsRoot = path.join(process.cwd(), "uploads");
+const proofsDir = path.join(uploadsRoot, "proofs");
+if (!fs.existsSync(proofsDir)) {
+  fs.mkdirSync(proofsDir, { recursive: true });
+}
+
+// Serve /uploads static assets with 30-day edge cache (cached globally by Cloudflare tunnel CDN)
+app.use(
+  "/uploads",
+  (_req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
+    next();
+  },
+  express.static(uploadsRoot)
+);
+
 
 app.use("/api/admin", adminRouter);
 app.use("/api/admin/content", adminContentRouter);
