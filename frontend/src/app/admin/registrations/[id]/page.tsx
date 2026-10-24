@@ -5,7 +5,7 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../../lib/admin-api";
+import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../../lib/admin-api";
 import { optimizeCloudinaryUrl } from "../../../../lib/cloudinary";
 import { AdminBackLink, AdminPageHeader, AdminPanel } from "../../ui";
 
@@ -53,7 +53,7 @@ type RegistrationDetail = {
 export default function AdminRegistrationDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [data, setData] = useState<RegistrationDetail | null>(null);
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("");
@@ -69,7 +69,7 @@ export default function AdminRegistrationDetailPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: RegistrationDetail }>(
         `/api/admin/registrations/${params.id}`,
         token,
@@ -81,7 +81,7 @@ export default function AdminRegistrationDetailPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     }
-  }, [getToken, params.id]);
+  }, [getToken, isSignedIn, params.id]);
 
   useEffect(() => {
     void load();
@@ -90,7 +90,7 @@ export default function AdminRegistrationDetailPage() {
   async function save() {
     if (!data) return;
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/registrations/${data.id}`, token, {
         method: "PATCH",
         body: JSON.stringify({ status, adminNote: note }),
@@ -105,7 +105,7 @@ export default function AdminRegistrationDetailPage() {
   async function markPaid() {
     if (!data) return;
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/registrations/${data.id}/mark-paid`, token, {
         method: "POST",
         body: JSON.stringify({ note: "Marked paid by admin" }),
@@ -122,7 +122,7 @@ export default function AdminRegistrationDetailPage() {
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/registrations/${data.id}`, token, {
         method: "DELETE",
       });

@@ -9,6 +9,7 @@ import {
   adminFetch,
   AdminApiError,
   getEmergencyAdminToken,
+  getFastAdminToken,
   setEmergencyAdminSession,
   clearEmergencyAdminSession,
 } from "../../lib/admin-api";
@@ -770,13 +771,9 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     setError(null);
     setErrorStatus(null);
     try {
-      let token: string | null = null;
-      if (isSignedIn) {
-        for (let attempt = 0; attempt < 6; attempt += 1) {
-          token = await getToken().catch(() => null);
-          if (token) break;
-          await new Promise((resolve) => setTimeout(resolve, 250));
-        }
+      let token = getEmergencyAdminToken();
+      if (!token && isSignedIn) {
+        token = await getFastAdminToken(getToken, isSignedIn);
       }
       token = token || getEmergencyAdminToken();
       const json = await adminFetch<{ data: AdminMe }>("/api/admin/me", token);

@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useState } from "react";
 import { authHeaders, getApiUrl } from "../../../lib/api";
-import { adminFetch } from "../../../lib/admin-api";
+import { adminFetch, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel } from "../ui";
 import { validateMediaForm, validateReviewForm } from "../../../lib/validation";
 import { Check, X, Loader2, Clock, Image as ImageIcon } from "lucide-react";
@@ -63,7 +63,7 @@ const emptyTestimonial = {
 };
 
 export default function AdminContentPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [tab, setTab] = useState<"submissions" | "media" | "reviews">("submissions");
   const [media, setMedia] = useState<MediaRow[]>([]);
   const [testimonials, setTestimonials] = useState<TestimonialRow[]>([]);
@@ -77,7 +77,7 @@ export default function AdminContentPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const [m, t] = await Promise.all([
         adminFetch<{ data: MediaRow[] }>("/api/admin/content/media", token),
         adminFetch<{ data: TestimonialRow[] }>("/api/admin/content/testimonials", token),
@@ -88,7 +88,7 @@ export default function AdminContentPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load content");
     }
-  }, [getToken]);
+  }, [getToken, isSignedIn]);
 
   useEffect(() => {
     void load();
@@ -105,7 +105,7 @@ export default function AdminContentPage() {
       return;
     }
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch("/api/admin/content/media", token, {
         method: "POST",
         body: JSON.stringify({
@@ -130,7 +130,7 @@ export default function AdminContentPage() {
     setBusy(true);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/content/media/${id}`, token, {
         method: "PATCH",
         body: JSON.stringify(data),
@@ -147,7 +147,7 @@ export default function AdminContentPage() {
     if (!window.confirm("Delete this photo?")) return;
     setBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/content/media/${id}`, token, { method: "DELETE" });
       await load();
     } catch (err) {
@@ -168,7 +168,7 @@ export default function AdminContentPage() {
       return;
     }
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch("/api/admin/content/testimonials", token, {
         method: "POST",
         body: JSON.stringify({
@@ -189,7 +189,7 @@ export default function AdminContentPage() {
   async function patchReview(id: string, data: Partial<TestimonialRow>) {
     setBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/content/testimonials/${id}`, token, {
         method: "PATCH",
         body: JSON.stringify(data),
@@ -206,7 +206,7 @@ export default function AdminContentPage() {
     setReviewBusyId(id);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/content/media/${id}/review`, token, {
         method: "POST",
         body: JSON.stringify({
@@ -228,7 +228,7 @@ export default function AdminContentPage() {
     if (!window.confirm("Delete this review?")) return;
     setBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/content/testimonials/${id}`, token, {
         method: "DELETE",
       });
@@ -382,7 +382,7 @@ export default function AdminContentPage() {
                         return;
                       }
                       try {
-                        const token = await getToken();
+                        const token = await getFastAdminToken(getToken, isSignedIn);
                         const reader = new FileReader();
                         reader.onload = async () => {
                           const base64 = reader.result as string;

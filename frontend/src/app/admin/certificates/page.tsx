@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiUrl } from "../../../lib/api";
-import { adminFetch, formatDateTime } from "../../../lib/admin-api";
+import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
 import {
   CheckCircle,
@@ -83,9 +83,11 @@ function EmailPreviewModal({
       setLoading(true);
       setError(null);
       try {
-        const token = await getToken().catch(() => null);
+        const token = await getFastAdminToken(getToken);
         const res = await fetch(getApiUrl(`/api/admin/certificates/${certId}/email-preview`), {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}`, "x-admin-emergency-token": token } : {}),
+          },
         });
         if (!res.ok) throw new Error("Could not load preview");
         const text = await res.text();
@@ -296,7 +298,7 @@ const STATUS_INFO: Record<string, { label: string; color: string; hint: string }
 
 /* ── Page ───────────────────────────────────────────────── */
 export default function AdminCertificatesPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<CertRow[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -319,7 +321,7 @@ export default function AdminCertificatesPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({ pageSize: "1000" });
       if (statusFilter) params.set("status", statusFilter);
       if (search.trim()) params.set("search", search.trim());
@@ -337,7 +339,7 @@ export default function AdminCertificatesPage() {
     } catch (err) {
       toast("error", err instanceof Error ? err.message : "Failed to load certificates");
     }
-  }, [getToken, statusFilter, search]); // eslint-disable-line
+  }, [getToken, isSignedIn, statusFilter, search]); // eslint-disable-line
 
   useEffect(() => { void load(); }, [load]);
 
@@ -345,7 +347,7 @@ export default function AdminCertificatesPage() {
   async function runAction(id: string, path: string, successMsg: string) {
     setBusyId(id);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: CertRow; meta?: { email?: { sent?: boolean; error?: string } } }>(
         path, token, { method: "POST" });
       const emailMeta = json.meta?.email;
@@ -366,7 +368,7 @@ export default function AdminCertificatesPage() {
   async function runBulk(path: string, successLabel: string) {
     setBulkBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ meta?: { count?: number; sent?: number } }>(path, token, { method: "POST" });
       const count = json.meta?.count ?? 0;
       const sent = json.meta?.sent;
@@ -389,7 +391,7 @@ export default function AdminCertificatesPage() {
   async function handleResendAll() {
     setResendAllBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ meta?: { count?: number; sent?: number } }>(
         "/api/admin/certificates/bulk-resend-all",
         token,
@@ -426,7 +428,7 @@ export default function AdminCertificatesPage() {
           certId={previewCert.id}
           runnerName={previewCert.name}
           onClose={() => setPreviewCert(null)}
-          getToken={() => getToken().catch(() => null)}
+          getToken={() => getFastAdminToken(getToken, isSignedIn)}
         />
       )}
 

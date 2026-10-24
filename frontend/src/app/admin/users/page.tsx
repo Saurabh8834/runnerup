@@ -4,7 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { AlertTriangle, CheckCircle2, FileSpreadsheet, RefreshCw, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, downloadAdminExport, formatDateTime } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
 type UserRow = {
@@ -22,7 +22,7 @@ type UserRow = {
 };
 
 export default function AdminUsersPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<UserRow[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -54,7 +54,7 @@ export default function AdminUsersPage() {
   const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
     setLoading(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
         page: String(targetPage),
         pageSize: String(targetPageSize),
@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [getToken, page, pageSize, q, role, status]);
+  }, [getToken, isSignedIn, page, pageSize, q, role, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
     setExporting(true);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams();
       if (q.trim()) params.set("q", q.trim());
       if (role) params.set("role", role);
@@ -204,7 +204,7 @@ export default function AdminUsersPage() {
     setDeleteError(null);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/users/${deleteTarget.id}`, token, {
         method: "DELETE",
       });
@@ -234,7 +234,7 @@ export default function AdminUsersPage() {
     setSuccessMsg(null);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{
         data: { message: string };
       }>("/api/admin/users/sync", token, { method: "POST" });

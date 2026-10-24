@@ -7,6 +7,7 @@ import {
   adminFetch,
   formatDateTime,
   formatInrFromPaise,
+  getFastAdminToken,
   toDatetimeLocalValue,
 } from "../../../lib/admin-api";
 import { authHeaders, getApiUrl } from "../../../lib/api";
@@ -137,7 +138,7 @@ const STATUS_BADGE: Record<string, string> = {
 
 /* ── Page ───────────────────────────────────────────────── */
 export default function AdminEventsPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<EventRow[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -147,7 +148,7 @@ export default function AdminEventsPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: EventRow[] }>("/api/admin/events?pageSize=100", token);
       setItems(json.data);
     } catch (err) {
@@ -185,7 +186,7 @@ export default function AdminEventsPage() {
       city: event.city ?? "Virtual", status: event.status,
     });
     void (async () => {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: EventRow & { description: string; proofClosesAt: string; bannerImageUrl: string | null } }>(
         `/api/admin/events/${event.id}`, token);
       setForm((prev) => ({
@@ -214,7 +215,7 @@ export default function AdminEventsPage() {
     }
     setSaving(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const priceInPaise = Math.round(Number(form.priceInr || 0) * 100);
       const body = {
         title: form.title.trim(),
@@ -257,7 +258,7 @@ export default function AdminEventsPage() {
 
   async function patchEvent(id: string, patch: Partial<EventRow>) {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/events/${id}`, token, { method: "PUT", body: JSON.stringify(patch) });
       await load();
     } catch (err) {
@@ -278,7 +279,7 @@ export default function AdminEventsPage() {
   async function confirmDelete() {
     if (!deleteTarget) return;
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/events/${deleteTarget.id}`, token, { method: "DELETE" });
       toast("success", `"${deleteTarget.title}" deleted.`);
       setDeleteTarget(null);

@@ -186,6 +186,10 @@ const publishableKey =
     ? envPubKey
     : LIVE_CLERK_PUBLISHABLE_KEY;
 
+const clerkProxyUrl =
+  process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
+  (process.env.NODE_ENV === "production" ? "/__clerk" : undefined);
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -225,6 +229,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ClerkProvider
             publishableKey={publishableKey || undefined}
+            proxyUrl={clerkProxyUrl}
             appearance={{
               variables: {
                 colorPrimary: "#e64833",

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { adminFetch, formatDateTime } from "../../../lib/admin-api";
+import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel } from "../ui";
 import { validateNewsletterForm } from "../../../lib/validation";
 
@@ -21,7 +21,7 @@ type SendResult = {
 };
 
 export default function AdminNewsletterPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [total, setTotal] = useState(0);
   const [subject, setSubject] = useState("");
@@ -33,14 +33,14 @@ export default function AdminNewsletterPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: Subscriber[]; meta: { total: number } }>("/api/admin/subscribers", token);
       setSubscribers(json.data);
       setTotal(json.meta.total);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : "Failed to load");
     }
-  }, [getToken]);
+  }, [getToken, isSignedIn]);
 
   useEffect(() => {
     void load();
@@ -55,7 +55,7 @@ export default function AdminNewsletterPage() {
     setResult(null);
     setSendError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: SendResult }>(
         "/api/admin/newsletter/send",
         token,

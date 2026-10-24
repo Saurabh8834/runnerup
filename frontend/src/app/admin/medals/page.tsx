@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { adminFetch, downloadAdminExport } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, getFastAdminToken } from "../../../lib/admin-api";
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { getApiUrl } from "../../../lib/api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
@@ -106,7 +106,7 @@ function formatTime(seconds: number | null | undefined): string {
 }
 
 export default function AdminMedalDispatchPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<DispatchItem[]>([]);
   const [events, setEvents] = useState<EventOption[]>([]);
   const [stats, setStats] = useState<DispatchStats>({
@@ -141,7 +141,7 @@ export default function AdminMedalDispatchPage() {
   useEffect(() => {
     async function loadEvents() {
       try {
-        const token = await getToken().catch(() => null);
+        const token = await getFastAdminToken(getToken, isSignedIn);
         const res = await adminFetch<{ data: EventOption[] }>("/api/admin/events?pageSize=100", token);
         setEvents(res.data || []);
       } catch {
@@ -156,7 +156,7 @@ export default function AdminMedalDispatchPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({ pageSize: "100" });
       if (statusTab && statusTab !== "ALL") params.set("status", statusTab);
       if (selectedEventId) params.set("eventId", selectedEventId);
@@ -201,7 +201,7 @@ export default function AdminMedalDispatchPage() {
   async function handleExportCsv() {
     setExporting(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams();
       if (statusTab && statusTab !== "ALL") params.set("status", statusTab);
       if (selectedEventId) params.set("eventId", selectedEventId);
@@ -227,7 +227,7 @@ export default function AdminMedalDispatchPage() {
     if (!activeItem) return;
     setUpdating(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/medals/${activeItem.id}`, token, {
         method: "PATCH",
         body: JSON.stringify({

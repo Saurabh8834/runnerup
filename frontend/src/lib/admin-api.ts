@@ -31,6 +31,36 @@ export function getEffectiveAdminToken(token?: string | null): string | null {
   return getEmergencyAdminToken();
 }
 
+/**
+ * Resolves the admin authentication token in 0ms if a passcode session exists,
+ * or races Clerk's getToken with a short 1200ms timeout so the admin UI never hangs.
+ */
+export async function getFastAdminToken(
+  getToken?: () => Promise<string | null>,
+  isSignedIn?: boolean,
+): Promise<string | null> {
+  // If emergency passcode token exists, use it immediately in 0ms!
+  const emergencyToken = getEmergencyAdminToken();
+  if (emergencyToken) {
+    return emergencyToken;
+  }
+
+  // If signed into Clerk, query Clerk token with an aggressive 1200ms timeout race
+  if (isSignedIn && getToken) {
+    try {
+      const clerkPromise = getToken();
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1200));
+      const res = await Promise.race([clerkPromise, timeoutPromise]);
+      if (res) return res;
+    } catch {
+      // ignore
+    }
+  }
+
+  return emergencyToken;
+}
+
+
 export async function downloadAdminExport(
   path: string,
   filename: string,

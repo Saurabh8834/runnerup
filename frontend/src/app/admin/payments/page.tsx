@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { Check, Copy, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
+import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
 type PaymentRow = {
@@ -23,7 +23,7 @@ type PaymentRow = {
 };
 
 export default function AdminPaymentsPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<PaymentRow[]>([]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -76,7 +76,7 @@ export default function AdminPaymentsPage() {
   const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
     setLoading(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
         page: String(targetPage),
         pageSize: String(targetPageSize),
@@ -130,7 +130,7 @@ export default function AdminPaymentsPage() {
 
   async function setPaymentStatus(id: string, next: string) {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/payments/${id}`, token, {
         method: "PATCH",
         body: JSON.stringify({ status: next }),
@@ -146,7 +146,7 @@ export default function AdminPaymentsPage() {
     setSyncResult(null);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{
         data: { synced: number; totalPaid: number; totalRevenue: number; message: string; errors?: Array<{ id: string; orderId: string; error: string }> };
       }>("/api/admin/payments/sync", token, { method: "POST" });
@@ -166,7 +166,7 @@ export default function AdminPaymentsPage() {
     setExporting(true);
     setError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams();
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);

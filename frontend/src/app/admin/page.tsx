@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../lib/admin-api";
+import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel, AdminStat, CustomerStatusDot } from "./ui";
 
 type EventBreakdown = {
@@ -99,12 +99,13 @@ const TIME_RANGES = [
 ] as const;
 
 export default function AdminOverviewPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [data, setData] = useState<Overview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("today");
+  // Default to 30d (This Month) so all active revenue, registrations, and metrics show immediately
+  const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("30d");
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
 
   const [syncing, setSyncing] = useState(false);
@@ -113,7 +114,7 @@ export default function AdminOverviewPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const queryParams = new URLSearchParams();
       queryParams.set("range", selectedRange);
       if (selectedEventId && selectedEventId !== "all") {
@@ -128,13 +129,13 @@ export default function AdminOverviewPage() {
     } finally {
       setLoading(false);
     }
-  }, [getToken, selectedEventId, selectedRange]);
+  }, [getToken, isSignedIn, selectedEventId, selectedRange]);
 
   async function handleSyncRazorpay() {
     setSyncing(true);
     setSyncMessage(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{
         data: { synced: number; totalPaid: number; totalRevenue: number; message: string };
       }>("/api/admin/payments/sync", token, { method: "POST" });

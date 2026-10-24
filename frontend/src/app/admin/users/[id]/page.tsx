@@ -5,7 +5,7 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../../lib/admin-api";
+import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../../lib/admin-api";
 import { AdminBackLink, AdminEmpty, AdminPageHeader, AdminPanel } from "../../ui";
 
 type UserDetail = {
@@ -31,7 +31,7 @@ type UserDetail = {
 export default function AdminUserDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [data, setData] = useState<UserDetail | null>(null);
   const [role, setRole] = useState("RUNNER");
   const [message, setMessage] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function AdminUserDetailPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: UserDetail }>(`/api/admin/users/${params.id}`, token);
       setData(json.data);
       setRole(json.data.role);
@@ -54,7 +54,7 @@ export default function AdminUserDetailPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     }
-  }, [getToken, params.id]);
+  }, [getToken, isSignedIn, params.id]);
 
   useEffect(() => {
     void load();
@@ -62,7 +62,7 @@ export default function AdminUserDetailPage() {
 
   async function saveRole() {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/users/${params.id}/role`, token, {
         method: "PATCH",
         body: JSON.stringify({ role }),
@@ -83,7 +83,7 @@ export default function AdminUserDetailPage() {
     setIsDeleting(true);
     setDeleteError(null);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/users/${data.id}`, token, {
         method: "DELETE",
       });

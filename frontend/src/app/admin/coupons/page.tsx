@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { adminFetch, formatDateTime, formatInrFromPaise } from "../../../lib/admin-api";
+import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel } from "../ui";
 import { validateAdminCouponForm } from "../../../lib/validation";
 
@@ -18,7 +18,7 @@ type Coupon = {
 };
 
 export default function AdminCouponsPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<Coupon[]>([]);
   const [code, setCode] = useState("");
   const [discountInr, setDiscountInr] = useState("100");
@@ -29,14 +29,14 @@ export default function AdminCouponsPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: Coupon[] }>("/api/admin/coupons", token);
       setItems(json.data);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load");
     }
-  }, [getToken]);
+  }, [getToken, isSignedIn]);
 
   useEffect(() => {
     void load();
@@ -48,7 +48,7 @@ export default function AdminCouponsPage() {
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch("/api/admin/coupons", token, {
         method: "POST",
         body: JSON.stringify({
@@ -70,7 +70,7 @@ export default function AdminCouponsPage() {
 
   async function toggleActive(coupon: Coupon) {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/coupons/${coupon.id}`, token, {
         method: "PATCH",
         body: JSON.stringify({ active: !coupon.active }),
@@ -84,7 +84,7 @@ export default function AdminCouponsPage() {
   async function remove(id: string) {
     if (!window.confirm("Delete this coupon?")) return;
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/coupons/${id}`, token, { method: "DELETE" });
       await load();
     } catch (err) {

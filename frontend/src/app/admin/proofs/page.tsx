@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { adminFetch, formatDateTime } from "../../../lib/admin-api";
+import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
 import {
@@ -225,7 +225,7 @@ function formatSecondsToHms(secs: number | null | undefined) {
 
 /* ── Page ───────────────────────────────────────────────── */
 export default function AdminProofsPage() {
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<ProofRow[]>([]);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -244,7 +244,7 @@ export default function AdminProofsPage() {
 
   const load = useCallback(async () => {
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const json = await adminFetch<{ data: ProofRow[]; meta: { total: number } }>(
         "/api/admin/proofs?status=SUBMITTED&pageSize=50",
         token,
@@ -282,7 +282,7 @@ export default function AdminProofsPage() {
   async function approve(id: string) {
     setBusyId(id);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       const timeObj = verifiedTimes[id] ?? { h: "0", m: "0", s: "0" };
       const h = Math.max(0, parseInt(timeObj.h, 10) || 0);
       const m = Math.max(0, parseInt(timeObj.m, 10) || 0);
@@ -317,7 +317,7 @@ export default function AdminProofsPage() {
   async function reject(id: string, note: string) {
     setRejectBusy(true);
     try {
-      const token = await getToken().catch(() => null);
+      const token = await getFastAdminToken(getToken, isSignedIn);
       await adminFetch(`/api/admin/proofs/${id}/review`, token, {
         method: "POST",
         body: JSON.stringify({ approved: false, reviewerNote: note || undefined }),
