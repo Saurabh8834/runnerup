@@ -6,6 +6,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getEventMedalImage, type PublicEvent } from "../../data/events";
 import { Medal3DViewer } from "./medal";
+import { trackFbEvent } from "../../../lib/meta-pixel";
 
 export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boolean }) {
   // Extract available distances
@@ -66,6 +67,15 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     const interval = setInterval(calculate, 60000);
     return () => clearInterval(interval);
   }, [event.endsAt]);
+
+  useEffect(() => {
+    trackFbEvent("ViewContent", {
+      content_name: event.name,
+      content_category: event.distance,
+      value: numericPrice,
+      currency: "INR",
+    });
+  }, [event.name, event.distance, numericPrice]);
 
   const registerHref = `/register?event=${encodeURIComponent(
     event.slug

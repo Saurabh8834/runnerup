@@ -36,6 +36,7 @@ import {
   type FieldErrors,
   validateRegistrationForm,
 } from "../../lib/validation";
+import { trackFbEvent } from "../../lib/meta-pixel";
 
 type CheckoutResponse = {
   razorpay_order_id: string;
@@ -914,6 +915,12 @@ function PaymentRegistrationFormInner() {
           paidRef.current = true;
           setStatus("paid");
           setConfirmedBib(assignedBib);
+          trackFbEvent("Purchase", {
+            value: order.amount / 100,
+            currency: "INR",
+            content_name: activeEvent.label,
+            content_category: selectedDistance,
+          });
           setExistingRegs((prev) =>
             prev.map((r) =>
               r.id === registrationId
@@ -972,6 +979,12 @@ function PaymentRegistrationFormInner() {
         setMessage(err?.error?.description ?? "Payment could not be completed. Click below to retry with a fresh session.");
       });
 
+      trackFbEvent("InitiateCheckout", {
+        value: order.amount / 100,
+        currency: "INR",
+        content_name: activeEvent.label,
+        content_category: selectedDistance,
+      });
       checkout.open();
     } catch (error) {
       setStatus("error");

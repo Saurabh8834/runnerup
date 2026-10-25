@@ -8,6 +8,7 @@ import { PersistentRegisterCta } from "./components/persistent-register-cta";
 // Vercel Web Analytics
 import { Analytics } from "@vercel/analytics/next";
 import { StructuredData } from "./components/structured-data";
+import { MetaPixel } from "./components/meta-pixel";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
@@ -208,7 +209,24 @@ export default function RootLayout({
         {/* Preconnect to external origins to reduce latency */}
         <link rel="preconnect" href="https://img.clerk.com" />
         <link rel="dns-prefetch" href="https://img.clerk.com" />
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <StructuredData />
+        {/* Facebook / Meta Pixel Code */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js'); fbq('init', '3747848845367795'); fbq('track', 'PageView');`,
+          }}
+        />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=3747848845367795&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
       </head>
       <body className="relative min-h-full flex flex-col bg-[#14242a] text-[#fcf8f2] overflow-x-hidden">
         {/* Global Runner Backdrop Image Overlay */}
@@ -254,6 +272,7 @@ export default function RootLayout({
           </ClerkProvider>
         </ThemeProvider>
         <Analytics />
+        <MetaPixel />
       </body>
     </html>
   );
