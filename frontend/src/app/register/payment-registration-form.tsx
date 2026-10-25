@@ -886,7 +886,16 @@ function PaymentRegistrationFormInner() {
       setMessage("Complete payment in the Razorpay window...");
 
       stopPolling();
+      let pollCount = 0;
       pollIntervalRef.current = setInterval(() => {
+        pollCount++;
+        // Limit to 90 polls (~3 minutes) so abandoned tabs don't exhaust server compute
+        if (pollCount > 90) {
+          stopPolling();
+          return;
+        }
+        // Don't poll while tab is minimized/hidden — visibility listener fires on return
+        if (typeof document !== "undefined" && document.hidden) return;
         void checkLivePaymentStatus(order.orderId, registrationId);
       }, 2000);
 

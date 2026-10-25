@@ -46,9 +46,21 @@ export function PersistentRegisterCta() {
 
     let isMounted = true;
     async function checkPaidStatus() {
+      // 1. Instant check from sessionStorage to avoid redundant network & DB calls
+      if (typeof window !== "undefined") {
+        try {
+          if (sessionStorage.getItem("ru_user_has_paid") === "1") {
+            setIsPaidCustomer(true);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       try {
         const token = await getToken();
-        if (!token) return;
+        if (!token || !isMounted) return;
         const res = await fetch(getApiUrl("/api/users/me"), {
           headers: authHeaders(token),
         });
@@ -80,56 +92,40 @@ export function PersistentRegisterCta() {
     return () => {
       isMounted = false;
     };
-  }, [isSignedIn, getToken, pathname]);
+  }, [isSignedIn, getToken]);
 
-  // 30-minute Rolling Countdown Timer persisted in localStorage
-  const [timeLeft, setTimeLeft] = useState<{ minutes: string; seconds: string }>({
-    minutes: "29",
-    seconds: "59",
+  // Flash Sale Timer: Counts down to tonight 12:00 AM Midnight (25 Oct 2026, 23:59:59 IST)
+  // When tonight 12 passes, the timer closes completely.
+  const [timeState, setTimeState] = useState<{ display: string; isClosed: boolean }>({
+    display: "02:20:00",
+    isClosed: false,
   });
 
   useEffect(() => {
-    const STORAGE_KEY = "ru_flash_coupon_deadline";
-    const DURATION_MS = 30 * 60 * 1000;
-
-    function getOrSetDeadline(): number {
-      if (typeof window === "undefined") return Date.now() + DURATION_MS;
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const dl = parseInt(stored, 10);
-          if (!isNaN(dl) && dl > Date.now()) {
-            return dl;
-          }
-        }
-        const fresh = Date.now() + DURATION_MS;
-        localStorage.setItem(STORAGE_KEY, String(fresh));
-        return fresh;
-      } catch {
-        return Date.now() + DURATION_MS;
-      }
-    }
-
-    let deadline = getOrSetDeadline();
+    // Tonight 12:00 AM Midnight IST (25 Oct 2026 23:59:59 IST)
+    const deadline = new Date("2026-10-25T23:59:59+05:30").getTime();
 
     function tick() {
       const remaining = Math.max(0, deadline - Date.now());
-      const totalSec = Math.floor(remaining / 1000);
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      setTimeLeft({
-        minutes: String(m).padStart(2, "0"),
-        seconds: String(s).padStart(2, "0"),
-      });
-
       if (remaining <= 0) {
-        deadline = Date.now() + DURATION_MS;
-        try {
-          localStorage.setItem(STORAGE_KEY, String(deadline));
-        } catch {
-          // ignore
-        }
+        setTimeState({ display: "00:00", isClosed: true });
+        return;
       }
+
+      const totalSec = Math.floor(remaining / 1000);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+
+      const formatted =
+        h > 0
+          ? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+          : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+
+      setTimeState({
+        display: formatted,
+        isClosed: false,
+      });
     }
 
     tick();
@@ -137,7 +133,7 @@ export function PersistentRegisterCta() {
     return () => clearInterval(interval);
   }, []);
 
-  // Hide on athlete profile / dashboard, checkout, admin, certificates, event detail pages, and for already paid customers
+  // Hide on athlete profile / dashboard, checkout, admin, certificates, event detail pages, already paid customers, or when sale has closed
   const shouldHide =
     pathname === "/register" ||
     pathname?.startsWith("/admin") ||
@@ -145,7 +141,8 @@ export function PersistentRegisterCta() {
     pathname?.startsWith("/profile") ||
     pathname?.startsWith("/certificates") ||
     (pathname?.startsWith("/events/") && pathname !== "/events") ||
-    isPaidCustomer;
+    isPaidCustomer ||
+    timeState.isClosed;
 
   if (shouldHide) {
     return null;
@@ -183,7 +180,7 @@ export function PersistentRegisterCta() {
             </div>
             <div className="flex items-center gap-1 font-mono font-black text-amber-300 bg-black/50 px-2 py-0.5 rounded-full border border-amber-500/40 shrink-0 ml-1.5">
               <Timer className="h-2.5 w-2.5 text-amber-400" />
-              <span>{timeLeft.minutes}:{timeLeft.seconds}</span>
+              <span>{timeState.display}</span>
             </div>
           </div>
 
@@ -241,7 +238,7 @@ export function PersistentRegisterCta() {
 
             <div className="flex items-center gap-1 font-mono text-xs font-black text-[#fbe9d0] bg-[#14242a]/80 px-2.5 py-1 rounded-full border border-white/10">
               <Timer className="h-3.5 w-3.5 text-amber-400" />
-              <span>{timeLeft.minutes}:{timeLeft.seconds}</span>
+              <span>{timeState.display}</span>
             </div>
           </div>
 
