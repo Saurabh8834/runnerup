@@ -49,15 +49,14 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
 
   try {
     const res = await fetch(primaryUrl, init);
-    // If 404 or tunnel down (530) or gateway error (502/503/504), attempt alternative backend
-    if (res.status === 404 || res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
+    // If tunnel down (530) or gateway error (502/503/504), attempt alternative backend
+    if (res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
       if (typeof window !== "undefined") {
         const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
         try {
           const fallbackUrl = `${altBackend}${cleanPath}`;
           const fallbackRes = await fetch(fallbackUrl, init);
-          if (fallbackRes.ok || (res.status === 404 && fallbackRes.status !== 404)) {
-            setActiveBackendUrl(altBackend);
+          if (fallbackRes.ok) {
             return fallbackRes;
           }
         } catch {
@@ -81,8 +80,7 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
       try {
         const fallbackUrl = `${altBackend}${cleanPath}`;
         const fallbackRes = await fetch(fallbackUrl, init);
-        setActiveBackendUrl(altBackend);
-        return fallbackRes;
+        if (fallbackRes.ok) return fallbackRes;
       } catch {
         // ignore fallback error
       }
