@@ -22,6 +22,11 @@ model User {
   clerkId       String?        @unique
   registrations Registration[]
   referralsMade Referral[]     @relation("referrals_made")
+
+  @@index([role])
+  @@index([phone])
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model Event {
@@ -84,10 +89,13 @@ model Registration {
   user              User               @relation(fields: [userId], references: [id])
 
   @@unique([userId, eventId, distance])
+  @@index([userId])
+  @@index([eventId])
   @@index([eventId, proofStatus])
   @@index([eventId, finishTimeSeconds])
   @@index([status])
   @@index([registeredAt])
+  @@index([shippingPhone])
 }
 
 model Payment {
@@ -101,6 +109,11 @@ model Payment {
   paidAt            DateTime?
   createdAt         DateTime      @default(now())
   registration      Registration  @relation(fields: [registrationId], references: [id])
+
+  @@index([status])
+  @@index([paidAt])
+  @@index([createdAt])
+  @@index([razorpayPaymentId])
 }
 
 model ProofUpload {

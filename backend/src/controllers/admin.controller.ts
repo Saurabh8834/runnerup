@@ -646,8 +646,11 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
     const map = new Map(fetched.map((f) => [f.id, f]));
     items = idRows.map((r) => map.get(r.id)).filter(Boolean) as typeof fetched;
   } else {
-    const searchItems = await prisma.registration.findMany({
+    items = await prisma.registration.findMany({
       where,
+      orderBy: { registeredAt: "desc" },
+      skip,
+      take: pageSize,
       include: {
         user: { select: { id: true, name: true, email: true, phone: true, clerkId: true } },
         event: { select: { id: true, title: true, slug: true, priceInPaise: true } },
@@ -657,14 +660,6 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
         medalDelivery: true,
       },
     });
-
-    searchItems.sort((a, b) => {
-      const timeA = (a.payment?.paidAt ?? a.registeredAt).getTime();
-      const timeB = (b.payment?.paidAt ?? b.registeredAt).getTime();
-      return timeB - timeA;
-    });
-
-    items = searchItems.slice(skip, skip + pageSize);
   }
 
   response.json({
@@ -1172,8 +1167,11 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
     const map = new Map(fetched.map((f) => [f.id, f]));
     items = idRows.map((r) => map.get(r.id)).filter(Boolean) as typeof fetched;
   } else {
-    const searchItems = await prisma.payment.findMany({
+    items = await prisma.payment.findMany({
       where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
       include: {
         registration: {
           include: {
@@ -1183,14 +1181,6 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
         },
       },
     });
-
-    searchItems.sort((a, b) => {
-      const timeA = (a.paidAt ?? a.createdAt).getTime();
-      const timeB = (b.paidAt ?? b.createdAt).getTime();
-      return timeB - timeA;
-    });
-
-    items = searchItems.slice(skip, skip + pageSize);
   }
 
   response.json({
@@ -1348,12 +1338,12 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       skip,
       take: pageSize,
       include: {
-        _count: { select: { registrations: true } },
         registrations: {
           select: {
             id: true,
             status: true,
             shippingPhone: true,
+            distance: true,
             payment: { select: { status: true, amountInPaise: true } },
           },
         },
@@ -1373,15 +1363,17 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
         },
       },
     }),
-    prisma.registration.count({
-      where: {
-        OR: [
-          { payment: { status: "PAID" } },
-          { status: "CONFIRMED" },
-          { status: "COMPLETED" },
-        ],
-      },
-    }),
+    search
+      ? Promise.resolve(0)
+      : prisma.registration.count({
+          where: {
+            OR: [
+              { payment: { status: "PAID" } },
+              { status: "CONFIRMED" },
+              { status: "COMPLETED" },
+            ],
+          },
+        }),
   ]);
 
   const formatted = items.map((u) => {
@@ -1395,6 +1387,15 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       u.registrations.find((r) => r.shippingPhone && r.shippingPhone.trim().length > 3)?.shippingPhone ||
       null;
 
+    const paidDistances = paidRegs
+      .map((r) => r.distance)
+      .filter((d): d is string => Boolean(d && d.trim()));
+    const allDistances = u.registrations
+      .map((r) => r.distance)
+      .filter((d): d is string => Boolean(d && d.trim()));
+    const distances = Array.from(new Set(paidDistances.length > 0 ? paidDistances : allDistances));
+    const distanceDisplay = distances.length > 0 ? distances.join(", ") : "—";
+
     return {
       id: u.id,
       name: u.name,
@@ -1404,9 +1405,11 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       clerkId: u.clerkId,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,
-      _count: u._count,
+      _count: { registrations: paidRegs.length },
       hasPaid,
       paidCount: paidRegs.length,
+      distances,
+      distanceDisplay,
       totalPaidInPaise,
       totalPaidInr: Math.round(totalPaidInPaise / 100),
     };
@@ -1497,9 +1500,9 @@ export async function adminExportUsersCsv(
     "phone",
     "role",
     "paymentStatus",
+    "km",
     "paidRegistrationsCount",
     "totalSpentInr",
-    "totalRegistrations",
     "latestEvent",
     "latestBibNumber",
     "joinedAt",
@@ -1530,6 +1533,15 @@ export async function adminExportUsersCsv(
         regWithPhone?.shippingPhone?.trim() ||
         "";
 
+      const paidDistances = paidRegs
+        .map((r) => r.distance)
+        .filter((d): d is string => Boolean(d && d.trim()));
+      const allDistances = u.registrations
+        .map((r) => r.distance)
+        .filter((d): d is string => Boolean(d && d.trim()));
+      const uniqueDistances = Array.from(new Set(paidDistances.length > 0 ? paidDistances : allDistances));
+      const distanceDisplay = uniqueDistances.length > 0 ? uniqueDistances.join("; ") : "";
+
       const latestReg = u.registrations[0];
       const latestEvent = latestReg?.event?.title ?? "";
       const latestBibNumber = latestReg?.bibNumber ?? "";
@@ -1540,9 +1552,9 @@ export async function adminExportUsersCsv(
         resolvedPhone,
         u.role,
         hasPaid ? "PAID" : "UNPAID",
+        distanceDisplay,
         paidRegs.length,
         Math.round(totalPaidInPaise / 100),
-        u._count.registrations,
         latestEvent,
         latestBibNumber,
         u.createdAt.toISOString(),

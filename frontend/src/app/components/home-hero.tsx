@@ -21,11 +21,16 @@ export function HomeHero() {
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {/* Full-opacity, bright, warm sunrise runner image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/images/hero-runner-sunrise.jpg"
-          alt="Runner chasing mountain sunrise"
-          className="absolute inset-0 h-full w-full object-cover object-[68%_12%] xs:object-[66%_16%] sm:object-[62%_25%] lg:object-[60%_center] opacity-100 brightness-[1.05] contrast-[1.06]"
-        />
+        <picture>
+          <source srcSet="/images/hero-runner-sunrise.webp" type="image/webp" />
+          <img
+            src="/images/hero-runner-sunrise.jpg"
+            alt="Runner chasing mountain sunrise"
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover object-[68%_12%] xs:object-[66%_16%] sm:object-[62%_25%] lg:object-[60%_center] opacity-100 brightness-[1.05] contrast-[1.06]"
+          />
+        </picture>
 
         {/* Focused left-side dark gradient overlay for crystal clear text readability */}
         <div className="absolute inset-y-0 left-0 w-[65%] xs:w-[62%] sm:w-[56%] lg:w-[50%] xl:w-[46%] bg-gradient-to-r from-[#14242a] via-[#14242a]/80 to-transparent pointer-events-none" />

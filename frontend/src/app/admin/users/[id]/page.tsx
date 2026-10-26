@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../../lib/admin-api";
-import { AdminBackLink, AdminEmpty, AdminPageHeader, AdminPanel } from "../../ui";
+import { AdminBackLink, AdminEmpty, AdminPageHeader, AdminPanel, CustomerStatusDot } from "../../ui";
 
 type UserDetail = {
   id: string;
@@ -145,28 +145,45 @@ export default function AdminUserDetailPage() {
           </div>
         </AdminPanel>
 
-        <AdminPanel fill title="Registrations" subtitle={`${data.registrations.length} total`}>
+        <AdminPanel
+          fill
+          title="Registrations"
+          subtitle={`${data.registrations.filter((r) => r.payment?.status === "PAID" || r.status === "CONFIRMED" || r.status === "COMPLETED").length} paid (${data.registrations.length} total entries)`}
+        >
           {data.registrations.length === 0 ? (
             <AdminEmpty>No registrations.</AdminEmpty>
           ) : (
             <div className="admin-list is-stretch">
-              {data.registrations.map((reg) => (
-                <Link className="admin-list-item" href={`/admin/registrations/${reg.id}`} key={reg.id}>
-                  <div>
-                    <div className="title">
-                      {reg.event.title} · {reg.distance}
+              {data.registrations.map((reg) => {
+                const isPaid =
+                  reg.payment?.status === "PAID" ||
+                  reg.status === "CONFIRMED" ||
+                  reg.status === "COMPLETED";
+
+                return (
+                  <Link className="admin-list-item" href={`/admin/registrations/${reg.id}`} key={reg.id}>
+                    <div>
+                      <div className="title flex items-center gap-2">
+                        <CustomerStatusDot isPaid={isPaid} />
+                        <span>{reg.event.title}</span>
+                        {reg.distance ? (
+                          <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                            {reg.distance}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="sub">
+                        {reg.bibNumber} · {reg.status} · proof {reg.proofStatus}
+                      </div>
                     </div>
-                    <div className="sub">
-                      {reg.bibNumber} · {reg.status} · proof {reg.proofStatus}
+                    <div className="right sub">
+                      {reg.payment
+                        ? `${reg.payment.status} · ${formatInrFromPaise(reg.payment.amountInPaise)}`
+                        : "No payment"}
                     </div>
-                  </div>
-                  <div className="right sub">
-                    {reg.payment
-                      ? `${reg.payment.status} · ${formatInrFromPaise(reg.payment.amountInPaise)}`
-                      : "No payment"}
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </AdminPanel>

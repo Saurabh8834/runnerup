@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { Check, Copy, FileSpreadsheet, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
@@ -44,12 +44,23 @@ export default function AdminPaymentsPage() {
     totalPages: 1,
   });
   const [status, setStatus] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
   const [copiedPhoneId, setCopiedPhoneId] = useState<string | null>(null);
+  const reqIdRef = useRef(0);
+
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQ(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const copyPhone = async (id: string, phone: string) => {
     try {
@@ -75,6 +86,7 @@ export default function AdminPaymentsPage() {
 
   const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
     setLoading(true);
+    const thisReqId = ++reqIdRef.current;
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
@@ -94,6 +106,9 @@ export default function AdminPaymentsPage() {
           totalPages?: number;
         };
       }>(`/api/admin/payments?${params}`, token);
+
+      if (thisReqId !== reqIdRef.current) return;
+
       setItems(json.data);
       const totalItems = json.meta?.total ?? json.data.length;
       const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / targetPageSize));
@@ -107,9 +122,13 @@ export default function AdminPaymentsPage() {
       });
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      if (thisReqId === reqIdRef.current) {
+        setError(err instanceof Error ? err.message : "Failed to load");
+      }
     } finally {
-      setLoading(false);
+      if (thisReqId === reqIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [getToken, page, pageSize, q, status]);
 
@@ -217,12 +236,9 @@ export default function AdminPaymentsPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search order id, email, bib"
-          value={q}
+          value={searchInput}
         />
         <select
           className="input"

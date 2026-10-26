@@ -128,19 +128,11 @@ export function CustomerStatusDot({
       className={`inline-flex items-center gap-1.5 align-middle ${className}`}
       title={isPaid ? "Payment Verified (Paid)" : "Payment Pending (Unpaid)"}
     >
-      <span className="relative flex h-2.5 w-2.5 shrink-0 items-center justify-center">
-        {isPaid ? (
-          <>
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.85)]" />
-          </>
-        ) : (
-          <>
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.85)]" />
-          </>
-        )}
-      </span>
+      <span
+        className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
+          isPaid ? "bg-emerald-500" : "bg-rose-500"
+        }`}
+      />
       {showLabel && (
         <span
           className={`text-[0.65rem] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wider ${

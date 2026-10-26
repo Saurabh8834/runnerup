@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { AlertTriangle, CheckCircle2, FileSpreadsheet, Trash2, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
@@ -41,11 +41,22 @@ export default function AdminRegistrationsPage() {
     pageSize: 50,
     totalPages: 1,
   });
+  const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const reqIdRef = useRef(0);
+
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQ(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Double-Confirmation Delete States (Ask Twice)
   const [deleteTarget, setDeleteTarget] = useState<Row | null>(null);
@@ -56,6 +67,7 @@ export default function AdminRegistrationsPage() {
 
   const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
     setLoading(true);
+    const thisReqId = ++reqIdRef.current;
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
@@ -75,6 +87,9 @@ export default function AdminRegistrationsPage() {
           totalPages?: number;
         };
       }>(`/api/admin/registrations?${params}`, token);
+
+      if (thisReqId !== reqIdRef.current) return;
+
       setItems(json.data);
       const totalCount = json.meta.total ?? json.data.length;
       const paid =
@@ -94,9 +109,13 @@ export default function AdminRegistrationsPage() {
       setTotal(totalCount);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      if (thisReqId === reqIdRef.current) {
+        setError(err instanceof Error ? err.message : "Failed to load");
+      }
     } finally {
-      setLoading(false);
+      if (thisReqId === reqIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [getToken, page, pageSize, q, status]);
 
@@ -203,12 +222,9 @@ export default function AdminRegistrationsPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Search name, email, bib, phone"
-          value={q}
+          value={searchInput}
         />
         <select
           className="input"

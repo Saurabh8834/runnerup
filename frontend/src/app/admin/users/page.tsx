@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { AlertTriangle, CheckCircle2, FileSpreadsheet, RefreshCw, Trash2, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 
@@ -19,6 +19,8 @@ type UserRow = {
   hasPaid?: boolean;
   paidCount?: number;
   totalPaidInr?: number;
+  distances?: string[];
+  distanceDisplay?: string;
 };
 
 export default function AdminUsersPage() {
@@ -36,6 +38,7 @@ export default function AdminUsersPage() {
     totalUnpaidUsers: number;
     totalPaidRegistrations?: number;
   }>({ total: 0, page: 1, pageSize: 50, totalPages: 1, totalPaidUsers: 0, totalUnpaidUsers: 0 });
+  const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
@@ -43,6 +46,16 @@ export default function AdminUsersPage() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const reqIdRef = useRef(0);
+
+  // Debounce search input by 300ms so typing never spams the database
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQ(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Double-Confirmation Delete States
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
@@ -53,6 +66,7 @@ export default function AdminUsersPage() {
 
   const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
     setLoading(true);
+    const thisReqId = ++reqIdRef.current;
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
@@ -74,45 +88,13 @@ export default function AdminUsersPage() {
           totalPaidRegistrations?: number;
         };
       }>(`/api/admin/users?${params}`, token);
-      let userList = json.data;
-      let totalPaid = json.meta?.totalPaidUsers;
-      let totalUnpaid = json.meta?.totalUnpaidUsers;
 
-      // Bulletproof fallback: If backend response doesn't include hasPaid, cross-reference with registrations
-      if (totalPaid === undefined || userList.some((u) => u.hasPaid === undefined)) {
-        try {
-          const regJson = await adminFetch<{
-            data: Array<{
-              status: string;
-              user: { email: string };
-              payment?: { status: string } | null;
-            }>;
-          }>("/api/admin/registrations?pageSize=1000", token);
+      // Discard stale responses if a newer search/filter has already been dispatched
+      if (thisReqId !== reqIdRef.current) return;
 
-          const paidEmails = new Set(
-            (regJson.data || [])
-              .filter(
-                (r) =>
-                  r.payment?.status === "PAID" ||
-                  r.status === "CONFIRMED" ||
-                  r.status === "COMPLETED",
-              )
-              .map((r) => r.user?.email?.toLowerCase().trim())
-              .filter(Boolean),
-          );
-
-          userList = userList.map((u) => ({
-            ...u,
-            hasPaid: u.hasPaid ?? paidEmails.has(u.email.toLowerCase().trim()),
-          }));
-
-          const calculatedPaid = userList.filter((u) => u.hasPaid).length;
-          totalPaid = totalPaid ?? calculatedPaid;
-          totalUnpaid = totalUnpaid ?? Math.max(0, (json.meta?.total ?? userList.length) - calculatedPaid);
-        } catch {
-          // If fallback fails, keep original
-        }
-      }
+      const userList = json.data;
+      const totalPaid = json.meta?.totalPaidUsers;
+      const totalUnpaid = json.meta?.totalUnpaidUsers;
 
       setItems(userList);
 
@@ -134,9 +116,13 @@ export default function AdminUsersPage() {
       });
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      if (thisReqId === reqIdRef.current) {
+        setError(err instanceof Error ? err.message : "Failed to load");
+      }
     } finally {
-      setLoading(false);
+      if (thisReqId === reqIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [getToken, isSignedIn, page, pageSize, q, role, status]);
 
@@ -283,12 +269,9 @@ export default function AdminUsersPage() {
       <div className="admin-toolbar">
         <input
           className="input"
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Name, email, phone, clerk id"
-          value={q}
+          value={searchInput}
         />
         <select
           className="input"
@@ -347,7 +330,7 @@ export default function AdminUsersPage() {
         <table className="table-clean min-w-[800px]">
           <thead>
             <tr>
-              {["Customer / User", "Payment Status", "Role", "Phone", "Registrations", "Joined", "Actions"].map((h) => (
+              {["Customer / User", "Payment Status", "Role", "Phone", "KM / Distance", "Registrations", "Joined", "Actions"].map((h) => (
                 <th key={h || "a"}>{h}</th>
               ))}
             </tr>
@@ -356,6 +339,7 @@ export default function AdminUsersPage() {
             {items.map((user) => {
               const isPaid = Boolean(user.hasPaid ?? ((user.paidCount && user.paidCount > 0) || (user.totalPaidInr && user.totalPaidInr > 0)));
               const isProtected = user.email.toLowerCase() === "sourav06556@gmail.com" || user.email.toLowerCase() === "realblack009@gmail.com";
+              const paidRegsCount = user.paidCount ?? user._count?.registrations ?? 0;
 
               return (
                 <tr key={user.id}>
@@ -386,8 +370,17 @@ export default function AdminUsersPage() {
                   </td>
                   <td>{user.phone ?? "—"}</td>
                   <td>
+                    {user.distanceDisplay && user.distanceDisplay !== "—" ? (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">
+                        {user.distanceDisplay}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--muted)]">—</span>
+                    )}
+                  </td>
+                  <td>
                     <span className="text-xs font-mono font-medium">
-                      {user._count?.registrations ?? 0} {user._count?.registrations === 1 ? "reg" : "regs"}
+                      {paidRegsCount} {paidRegsCount === 1 ? "reg" : "regs"}
                     </span>
                   </td>
                   <td className="text-xs">{formatDateTime(user.createdAt)}</td>
