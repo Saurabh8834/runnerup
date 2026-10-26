@@ -38,6 +38,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "re
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
+import { EventNoticeCard } from "../components/event-notice-card";
 
 type Registration = {
   id: string;
@@ -47,7 +48,7 @@ type Registration = {
   proofStatus: string;
   finishTimeSeconds?: number | null;
   registeredAt: string;
-  event: { title: string; slug: string; benefits?: string[] };
+  event: { title: string; slug: string; benefits?: string[]; endsAt?: string };
   payment: { status: string; amountInPaise: number } | null;
   proofUpload?: {
     activityImageUrl: string;
@@ -506,7 +507,7 @@ export function DashboardClient() {
         throw new Error(await readApiError(res, "Proof submission failed. Please try again."));
       }
 
-      setProofMessage("Proof submitted successfully! You'll receive your e-certificate after verification.");
+      setProofMessage("Proof submitted successfully! It will be reviewed once the event concludes on 30 October 2026.");
       setProofRegId(null);
       setProofUrl("");
       setProofFileName(null);
@@ -937,7 +938,7 @@ export function DashboardClient() {
                               {isVerified
                                 ? "Proof Approved"
                                 : isProofSubmitted
-                                  ? "Under Review (24-48h)"
+                                  ? "Audited Post-Event (30 Oct)"
                                   : "Upload Activity"}
                             </p>
                           </div>
@@ -995,6 +996,16 @@ export function DashboardClient() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Live Event Notice for Submitted Proof */}
+                      {isProofSubmitted && !isVerified && (
+                        <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
+                          <EventNoticeCard
+                            eventTitle={reg.event.title}
+                            endsAt={reg.event.endsAt}
+                          />
+                        </div>
+                      )}
 
                       {/* Action Bar (Mobile Responsive) */}
                       <div className="p-3.5 sm:p-5 bg-white/[0.03] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1089,6 +1100,12 @@ export function DashboardClient() {
                                 {proofError}
                               </div>
                             )}
+
+                            {/* Informational notice before uploading */}
+                            <EventNoticeCard
+                              eventTitle={reg.event.title}
+                              endsAt={reg.event.endsAt}
+                            />
 
                             <label className="block">
                               <span className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">

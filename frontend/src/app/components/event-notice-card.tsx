@@ -3,14 +3,32 @@
 interface EventNoticeCardProps {
   eventTitle?: string;
   endDateFormatted?: string;
+  endsAt?: string | Date;
   className?: string;
 }
 
 export function EventNoticeCard({
   eventTitle = "INDIAN AIR FORCE DAY VIRTUAL CHALLENGE 2026",
-  endDateFormatted = "30 October 2026",
+  endDateFormatted,
+  endsAt,
   className = "",
 }: EventNoticeCardProps) {
+  let displayDate = endDateFormatted;
+  if (!displayDate && endsAt) {
+    try {
+      displayDate = new Date(endsAt).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      displayDate = "30 October 2026";
+    }
+  }
+  if (!displayDate) {
+    displayDate = "30 October 2026";
+  }
+
   return (
     <div
       className={`rounded-xl sm:rounded-2xl border border-white/10 bg-[#0d161d] p-3 sm:p-4 text-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all ${className}`}
@@ -34,7 +52,7 @@ export function EventNoticeCard({
           📢
         </span>
         Activity proofs will be reviewed after the event ends on{" "}
-        <strong className="text-white font-bold">{endDateFormatted}</strong> to ensure fair
+        <strong className="text-white font-bold">{displayDate}</strong> to ensure fair
         rankings and accurate results. Finisher kits, including medals, will be dispatched
         after successful verification. Thank you for your patience!
       </p>

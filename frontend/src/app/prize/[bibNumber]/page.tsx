@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../../lib/api";
 import { PageShell } from "../../components/app-shell";
+import { EventNoticeCard } from "../../components/event-notice-card";
 
 type PrizeStatus = "pending" | "processing" | "ready" | "sent" | "dispatched" | "delivered" | "not_eligible";
 
@@ -350,6 +351,12 @@ export default function PrizeBibPage() {
                   <div className="mt-6">
                     <Timeline stages={data.timeline} />
                   </div>
+
+                  {!data.timeline.find((t) => t.stage === "proof_approved")?.done && (
+                    <div className="mt-4">
+                      <EventNoticeCard eventTitle={data.event.title} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Prizes */}
