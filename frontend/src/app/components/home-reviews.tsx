@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, BadgeCheck, Quote, Star, Users, Award, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Star, Users, Award, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import type { HomeTestimonial } from "../../lib/events-api";
 import { HomeSectionHeader } from "./home-section-header";
@@ -92,10 +92,12 @@ function ReviewCard({ review }: { review: HomeTestimonial }) {
   return (
     <article className="group relative flex w-[285px] sm:w-[380px] shrink-0 flex-col justify-between rounded-2xl border border-[#90aead]/20 bg-[#172c34] p-5 sm:p-7 shadow-2xl transition-all duration-300 hover:-translate-y-1.5 hover:border-[#e64833]">
       {/* Quotation watermark */}
-      <Quote
+      <span
         aria-hidden="true"
-        className="absolute top-5 right-5 h-12 w-12 text-[#244855]/40 transition-colors duration-300 group-hover:text-[#e64833]/20"
-      />
+        className="pointer-events-none absolute top-1 right-5 font-serif text-6xl leading-none text-[#244855]/30 select-none transition-colors duration-300 group-hover:text-[#e64833]/20"
+      >
+        “
+      </span>
 
       <div>
         {/* Header Badge */}
@@ -105,13 +107,11 @@ function ReviewCard({ review }: { review: HomeTestimonial }) {
             {badge}
           </span>
 
-          <div className="flex items-center gap-1 text-[#fbe9d0] text-xs font-semibold">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-3.5 w-3.5 fill-[#fbe9d0] text-[#fbe9d0]" />
-              ))}
-            </div>
-            <span className="ml-1 text-[#fbe9d0] font-bold">{review.rating}.0</span>
+          <div className="flex items-center gap-1.5 text-[#fbe9d0] text-xs font-semibold">
+            <span aria-hidden="true" className="tracking-tight text-amber-200 select-none text-sm leading-none">
+              ★★★★★
+            </span>
+            <span className="text-[#fbe9d0] font-bold">{review.rating}.0</span>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkUserSync } from "../components/clerk-user-sync";
@@ -16,11 +17,13 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -213,7 +216,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
         <StructuredData />
         {/* Facebook / Meta Pixel Code */}
-        <script
+        <Script
+          id="meta-pixel-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js'); fbq('init', '3747848845367795'); fbq('track', 'PageView');`,
           }}
@@ -229,10 +234,10 @@ export default function RootLayout({
         </noscript>
       </head>
       <body className="relative min-h-full flex flex-col bg-[#14242a] text-[#fcf8f2] overflow-x-hidden">
-        {/* Global Runner Backdrop Image Overlay */}
+        {/* Global Runner Backdrop Image Overlay (hidden on mobile for 60fps smooth hardware scrolling) */}
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-0 z-[-1] select-none overflow-hidden"
+          className="pointer-events-none fixed inset-0 z-[-1] select-none overflow-hidden hidden md:block"
         >
           <img
             src="/runner-img.webp"

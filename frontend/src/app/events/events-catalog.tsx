@@ -150,7 +150,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
                 onError={() => {
-                  setImgSrc("/images/event-medal.png");
+                  setImgSrc("/images/event-medal.webp");
                 }}
               />
             </div>

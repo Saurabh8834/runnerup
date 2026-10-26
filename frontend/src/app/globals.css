@@ -1209,7 +1209,7 @@ html[data-theme="dark"] .badge-danger {
     transform: translateZ(0);
   }
 
-  /* Lightened backdrop filters on mobile for instant 60fps scrolling */
+  /* Hardware-accelerated smooth scrolling on mobile: eliminate GPU-heavy blur passes */
   .backdrop-blur-md,
   .backdrop-blur-lg,
   .backdrop-blur-xl,
@@ -1217,13 +1217,14 @@ html[data-theme="dark"] .badge-danger {
   .backdrop-blur-3xl,
   .glass-card-dark,
   .glass-card-accent {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   [data-floating-contact] {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #172c34 !important;
   }
 
   /* Sticky CTA bar on phones — solid backdrop prevents background bleed */
