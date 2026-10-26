@@ -1,7 +1,5 @@
 "use client";
 
-import { Info } from "lucide-react";
-
 interface EventNoticeCardProps {
   eventTitle?: string;
   endDateFormatted?: string;
@@ -9,62 +7,37 @@ interface EventNoticeCardProps {
 }
 
 export function EventNoticeCard({
-  eventTitle = "Indian Air Force Day Virtual Challenge 2026",
+  eventTitle = "INDIAN AIR FORCE DAY VIRTUAL CHALLENGE 2026",
   endDateFormatted = "30 October 2026",
   className = "",
 }: EventNoticeCardProps) {
   return (
     <div
-      className={`rounded-2xl sm:rounded-3xl border border-white/12 bg-[#1b2228] p-4.5 sm:p-6 text-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all ${className}`}
+      className={`rounded-xl sm:rounded-2xl border border-white/10 bg-[#0d161d] p-3 sm:p-4 text-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all ${className}`}
     >
-      {/* Header with Icon */}
-      <div className="flex items-center gap-3 sm:gap-3.5">
-        <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-white/10 border border-white/15 text-sky-400 shadow-sm">
-          <Info className="h-5 w-5 sm:h-5.5 sm:w-5.5" strokeWidth={2.2} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-sm sm:text-base font-bold text-sky-400 leading-snug">
-            Important Event Update
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-400 truncate mt-0.5">
-            {eventTitle}
-          </p>
-        </div>
+      {/* Top Header Row: LIVE UPDATE Badge + Event Title */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <span className="inline-flex items-center rounded-md bg-[#dc2626] px-2 py-0.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white shrink-0 shadow-sm">
+          LIVE UPDATE
+        </span>
+        <span className="text-amber-400 font-bold uppercase text-[11px] sm:text-xs tracking-wider min-w-0 truncate">
+          {eventTitle.toUpperCase()}
+        </span>
       </div>
 
-      {/* Subtle Divider */}
-      <div className="my-3.5 sm:my-4 border-t border-white/10" />
+      {/* Thin Horizontal Divider */}
+      <div className="my-2 sm:my-2.5 border-t border-white/10" />
 
-      {/* Body Content */}
-      <div className="space-y-3.5 sm:space-y-4 text-xs sm:text-sm">
-        {/* Section 1: Activity Proof Verification */}
-        <div>
-          <h4 className="font-semibold text-white text-xs sm:text-sm">
-            Activity Proof Verification
-          </h4>
-          <p className="mt-1 sm:mt-1.5 text-slate-300 leading-relaxed text-[0.8rem] sm:text-xs">
-            Your submitted activity proof will be verified after the event ends on{" "}
-            <strong className="text-white font-bold">{endDateFormatted}</strong>. Your
-            proof status may remain pending until then.
-          </p>
-        </div>
-
-        {/* Section 2: Finisher Kit Dispatch */}
-        <div>
-          <h4 className="font-semibold text-white text-xs sm:text-sm">
-            Finisher Kit Dispatch
-          </h4>
-          <p className="mt-1 sm:mt-1.5 text-slate-300 leading-relaxed text-[0.8rem] sm:text-xs">
-            Your finisher kit, including your medal, will be dispatched after the event
-            ends and your activity proof has been successfully verified.
-          </p>
-        </div>
-
-        {/* Closing Thank You */}
-        <p className="pt-1 text-[0.75rem] sm:text-xs text-slate-400 leading-relaxed">
-          Thank you for your patience and for being a part of RunnerUp!
-        </p>
-      </div>
+      {/* Body with Megaphone Emoji */}
+      <p className="text-[11.5px] sm:text-xs text-slate-200 leading-relaxed">
+        <span className="mr-1.5 inline-block text-xs" role="img" aria-label="announcement">
+          📢
+        </span>
+        Activity proofs will be reviewed after the event ends on{" "}
+        <strong className="text-white font-bold">{endDateFormatted}</strong> to ensure fair
+        rankings and accurate results. Finisher kits, including medals, will be dispatched
+        after successful verification. Thank you for your patience!
+      </p>
     </div>
   );
 }
