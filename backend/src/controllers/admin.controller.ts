@@ -1690,32 +1690,60 @@ export async function adminDeleteUser(
 
 export async function adminListProofs(request: AuthenticatedRequest, response: Response) {
   const { page, pageSize, skip } = parsePage(request);
-  const status = q(request, "status") ?? "SUBMITTED";
+  const statusParam = q(request, "status");
+  const search = q(request, "q")?.trim();
+
+  // If status is not provided, default to SUBMITTED. If status is "ALL", do not filter by proofStatus.
+  const filterStatus = statusParam === undefined ? "SUBMITTED" : statusParam === "ALL" ? null : statusParam;
 
   const where: Prisma.RegistrationWhereInput = {
-    proofStatus: status as never,
     proofUpload: { isNot: null },
+    ...(filterStatus ? { proofStatus: filterStatus as never } : {}),
+    ...(search
+      ? {
+          OR: [
+            { bibNumber: { contains: search, mode: "insensitive" } },
+            { shippingName: { contains: search, mode: "insensitive" } },
+            { shippingPhone: { contains: search, mode: "insensitive" } },
+            { user: { name: { contains: search, mode: "insensitive" } } },
+            { user: { email: { contains: search, mode: "insensitive" } } },
+            { user: { phone: { contains: search, mode: "insensitive" } } },
+            { adminNote: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
   };
 
-  const [total, items] = await Promise.all([
+  const [total, items, pendingCount, approvedCount, rejectedCount] = await Promise.all([
     prisma.registration.count({ where }),
     prisma.registration.findMany({
       where,
-      orderBy: { registeredAt: "asc" },
+      orderBy: [{ proofUpload: { submittedAt: "desc" } }, { registeredAt: "desc" }],
       skip,
       take: pageSize,
       include: {
-        user: { select: { name: true, email: true, phone: true } },
+        user: { select: { id: true, name: true, email: true, phone: true } },
         event: { select: { title: true, slug: true, distances: true } },
         proofUpload: true,
         payment: { select: { status: true } },
       },
     }),
+    prisma.registration.count({ where: { proofStatus: "SUBMITTED", proofUpload: { isNot: null } } }),
+    prisma.registration.count({ where: { proofStatus: "APPROVED", proofUpload: { isNot: null } } }),
+    prisma.registration.count({ where: { proofStatus: "REJECTED", proofUpload: { isNot: null } } }),
   ]);
 
   response.json({
     data: items,
-    meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
+    meta: {
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      pendingCount,
+      approvedCount,
+      rejectedCount,
+    },
   });
 }
 

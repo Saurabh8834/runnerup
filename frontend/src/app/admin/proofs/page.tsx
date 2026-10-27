@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
@@ -14,6 +14,12 @@ import {
   ZoomIn,
   Clock,
   MapPin,
+  Search,
+  Phone,
+  Mail,
+  RefreshCw,
+  FileCheck,
+  ShieldAlert,
 } from "lucide-react";
 
 /* ── Toast ──────────────────────────────────────────────── */
@@ -198,13 +204,39 @@ type ProofRow = {
   distance: string;
   finishTimeSeconds: number | null;
   registeredAt: string;
-  user: { name: string; email: string };
-  event: { title: string };
+  proofStatus?: string;
+  shippingName?: string;
+  shippingPhone?: string;
+  shippingCity?: string;
+  adminNote?: string | null;
+  user: {
+    id?: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
+  event: {
+    title: string;
+  };
   proofUpload: {
+    id?: string;
     activityImageUrl: string;
     sourceApp: string;
     submittedAt?: string;
+    reviewedAt?: string | null;
+    reviewerNote?: string | null;
+    status?: string;
   } | null;
+};
+
+type ProofMeta = {
+  total: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+  pendingCount?: number;
+  approvedCount?: number;
+  rejectedCount?: number;
 };
 
 function formatSecondsToHms(secs: number | null | undefined) {
@@ -228,9 +260,16 @@ export default function AdminProofsPage() {
   const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<ProofRow[]>([]);
   const [total, setTotal] = useState(0);
+  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, total: 0 });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const { toasts, dismiss, toast } = useToast();
+
+  // Search & Filters
+  const [searchInput, setSearchInput] = useState("");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "ALL">("SUBMITTED");
 
   // Custom verified times per proof id
   const [verifiedTimes, setVerifiedTimes] = useState<Record<string, { h: string; m: string; s: string }>>({});
@@ -242,15 +281,41 @@ export default function AdminProofsPage() {
   // Lightbox modal state
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQ(searchInput.trim());
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const load = useCallback(async () => {
+    setLoading(true);
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
-      const json = await adminFetch<{ data: ProofRow[]; meta: { total: number } }>(
-        "/api/admin/proofs?status=SUBMITTED&pageSize=50",
+      const params = new URLSearchParams({
+        pageSize: "100",
+        status: statusFilter,
+      });
+      if (q) {
+        params.set("q", q);
+      }
+
+      const json = await adminFetch<{ data: ProofRow[]; meta: ProofMeta }>(
+        `/api/admin/proofs?${params.toString()}`,
         token,
       );
       setItems(json.data);
       setTotal(json.meta.total);
+
+      if (json.meta.pendingCount !== undefined) {
+        setCounts({
+          pending: json.meta.pendingCount,
+          approved: json.meta.approvedCount ?? 0,
+          rejected: json.meta.rejectedCount ?? 0,
+          total: json.meta.total,
+        });
+      }
 
       // Initialize verifiedTimes map
       const initialMap: Record<string, { h: string; m: string; s: string }> = {};
@@ -261,13 +326,37 @@ export default function AdminProofsPage() {
       setVerifiedTimes(initialMap);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      setError(err instanceof Error ? err.message : "Failed to load proof submissions");
+    } finally {
+      setLoading(false);
     }
-  }, [getToken]);
+  }, [getToken, isSignedIn, statusFilter, q]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Client-side quick filter for instantaneous responsiveness
+  const filteredItems = useMemo(() => {
+    if (!q) return items;
+    const term = q.toLowerCase();
+    return items.filter((row) => {
+      const name = row.user?.name?.toLowerCase() || "";
+      const email = row.user?.email?.toLowerCase() || "";
+      const phone = row.user?.phone || row.shippingPhone || "";
+      const bib = row.bibNumber?.toLowerCase() || "";
+      const shippingName = row.shippingName?.toLowerCase() || "";
+      const city = row.shippingCity?.toLowerCase() || "";
+      return (
+        name.includes(term) ||
+        email.includes(term) ||
+        phone.includes(term) ||
+        bib.includes(term) ||
+        shippingName.includes(term) ||
+        city.includes(term)
+      );
+    });
+  }, [items, q]);
 
   function handleTimeChange(id: string, field: "h" | "m" | "s", val: string) {
     setVerifiedTimes((prev) => ({
@@ -351,32 +440,168 @@ export default function AdminProofsPage() {
       <div className="admin-stack">
         <AdminPageHeader
           kicker="Operations"
-          title="Proof queue"
-          description={`${total} submission${total === 1 ? "" : "s"} waiting for review.`}
+          title="Proof queue & verification"
+          description={`${counts.pending} pending review · ${counts.approved} approved · ${counts.rejected} rejected`}
           actions={
-            <button className="btn btn-secondary" onClick={() => void load()} type="button">
-              Refresh
+            <button
+              className="btn btn-secondary flex items-center gap-1.5"
+              onClick={() => void load()}
+              disabled={loading}
+              type="button"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
             </button>
           }
         />
+
+        {/* ── Toolbar: Search & Status Filter Tabs ── */}
+        <div className="space-y-3">
+          {/* Search Input Bar */}
+          <div className="relative flex items-center w-full">
+            <div className="absolute left-3.5 pointer-events-none text-[var(--muted)]">
+              <Search className="h-4 w-4" />
+            </div>
+            <input
+              type="text"
+              className="input pl-10 pr-10 w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
+              placeholder="Search proof by runner name, email, phone number, bib # (e.g. Vinay, IAFD-996424, 7676009168)..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput("")}
+                className="absolute right-3 p-1 rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--panel-soft)] transition-colors"
+                title="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Status Tabs & Active Search Pill */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="inline-flex rounded-xl bg-[var(--panel-soft)] p-1 border border-[var(--line)] text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setStatusFilter("SUBMITTED")}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  statusFilter === "SUBMITTED"
+                    ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                <span>Pending Review</span>
+                <span className="rounded-full bg-amber-500/20 text-amber-500 px-1.5 py-0.2 text-[0.68rem] font-bold">
+                  {counts.pending}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("APPROVED")}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  statusFilter === "APPROVED"
+                    ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                <span>Approved</span>
+                <span className="rounded-full bg-emerald-500/20 text-emerald-500 px-1.5 py-0.2 text-[0.68rem] font-bold">
+                  {counts.approved}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("REJECTED")}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  statusFilter === "REJECTED"
+                    ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                <span>Rejected</span>
+                <span className="rounded-full bg-rose-500/20 text-rose-500 px-1.5 py-0.2 text-[0.68rem] font-bold">
+                  {counts.rejected}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("ALL")}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  statusFilter === "ALL"
+                    ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                <span>All Proofs</span>
+              </button>
+            </div>
+
+            {/* Search result indicator */}
+            {q && (
+              <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                <span>
+                  Showing <strong>{filteredItems.length}</strong> {filteredItems.length === 1 ? "result" : "results"} for &ldquo;<strong>{q}</strong>&rdquo;
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSearchInput("")}
+                  className="text-xs text-[var(--sage)] hover:underline font-semibold"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {error ? (
           <p className="admin-muted" style={{ color: "var(--danger)" }}>{error}</p>
         ) : null}
 
+        {/* ── Proof Cards List ── */}
         <div className="admin-stack admin-fill">
-          {items.length === 0 ? (
-            <div className="admin-panel admin-panel-pad is-fill">
-              <AdminEmpty>Queue is empty.</AdminEmpty>
+          {filteredItems.length === 0 ? (
+            <div className="admin-panel admin-panel-pad is-fill text-center py-12">
+              <AdminEmpty>
+                {q ? (
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-[var(--foreground)]">
+                      No proofs found matching &ldquo;{q}&rdquo;
+                    </p>
+                    <p className="text-xs text-[var(--muted)]">
+                      Try searching by runner full name, email address, mobile phone, or bib number.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSearchInput("")}
+                      className="btn btn-secondary mt-3 inline-flex text-xs"
+                    >
+                      Clear Search Filter
+                    </button>
+                  </div>
+                ) : statusFilter === "SUBMITTED" ? (
+                  "Queue is empty. No pending proofs waiting for review."
+                ) : (
+                  `No proof submissions found in "${statusFilter}" status.`
+                )}
+              </AdminEmpty>
             </div>
           ) : (
-            items.map((row) => {
+            filteredItems.map((row) => {
               const timeObj = verifiedTimes[row.id] ?? { h: "00", m: "00", s: "00" };
               const claimedParsed = formatSecondsToHms(row.finishTimeSeconds);
+              const contactPhone = row.user.phone || row.shippingPhone;
+              const currentStatus = row.proofUpload?.status || row.proofStatus || "SUBMITTED";
 
               return (
                 <article
-                  className="admin-panel admin-panel-pad grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)] border rounded-2xl shadow-xs"
+                  className="admin-panel admin-panel-pad grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] border rounded-2xl shadow-xs transition-shadow hover:shadow-md"
                   key={row.id}
                 >
                   {/* Left Column: Participant Details & Verification Form */}
@@ -387,23 +612,86 @@ export default function AdminProofsPage() {
                         <h2 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
                           {row.user.name}
                         </h2>
-                        <span className="badge font-mono font-bold">Bib #{row.bibNumber}</span>
-                        <span className="badge badge-sage font-semibold">{row.distance}</span>
+                        <span className="badge font-mono font-bold bg-[var(--panel-soft)]">
+                          Bib #{row.bibNumber}
+                        </span>
+                        <span className="badge badge-sage font-bold">
+                          {row.distance}
+                        </span>
+
+                        {/* Status Badge */}
+                        {currentStatus === "APPROVED" ? (
+                          <span className="badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <FileCheck className="h-3 w-3" /> Approved
+                          </span>
+                        ) : currentStatus === "REJECTED" ? (
+                          <span className="badge bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1">
+                            <ShieldAlert className="h-3 w-3" /> Rejected
+                          </span>
+                        ) : (
+                          <span className="badge bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Pending Review
+                          </span>
+                        )}
                       </div>
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        {row.event.title} · <span className="font-mono text-xs">{row.user.email}</span>
-                      </p>
-                      <p className="mt-1 text-xs text-[var(--muted-soft)]">
-                        Registered {formatDateTime(row.registeredAt)}
+
+                      {/* Participant Contact Info Bar */}
+                      <div className="mt-2.5 flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-[var(--muted)]">
+                        <span className="flex items-center gap-1.5 text-[var(--foreground)] font-medium">
+                          <Mail className="h-3.5 w-3.5 text-[var(--muted)]" />
+                          <a
+                            href={`mailto:${row.user.email}`}
+                            className="hover:underline font-mono text-xs"
+                          >
+                            {row.user.email}
+                          </a>
+                        </span>
+
+                        {contactPhone && (
+                          <span className="flex items-center gap-1.5 text-[var(--foreground)] font-medium">
+                            <Phone className="h-3.5 w-3.5 text-[var(--muted)]" />
+                            <a
+                              href={`tel:${contactPhone}`}
+                              className="hover:underline font-mono text-xs"
+                            >
+                              {contactPhone}
+                            </a>
+                          </span>
+                        )}
+
+                        {row.shippingCity && (
+                          <span className="flex items-center gap-1.5">
+                            <MapPin className="h-3.5 w-3.5" />
+                            {row.shippingCity}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-1.5 text-xs text-[var(--muted-soft)]">
+                        {row.event.title} · Registered {formatDateTime(row.registeredAt)}
                         {row.proofUpload ? ` · App: ${row.proofUpload.sourceApp}` : ""}
                       </p>
+
+                      {/* Reviewer note / rejection reason if present */}
+                      {row.proofUpload?.reviewerNote && (
+                        <div className="mt-2.5 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                          <strong>Reviewer Note:</strong> {row.proofUpload.reviewerNote}
+                        </div>
+                      )}
+
+                      {/* Admin Note if present */}
+                      {row.adminNote && (
+                        <div className="mt-2 p-2 rounded-lg bg-[var(--panel-soft)] border border-[var(--line)] text-xs text-[var(--muted)]">
+                          <strong>Admin Note:</strong> {row.adminNote}
+                        </div>
+                      )}
                     </div>
 
                     {/* GPS Claimed Time vs Verified Time */}
                     <div className="rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-4 space-y-3">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-[var(--muted)] flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" /> Claimed Finish Time:
+                          <Clock className="h-3.5 w-3.5" /> Activity Finish Time:
                         </span>
                         <span className="font-mono font-bold text-[var(--foreground)]">
                           {claimedParsed.label}
@@ -460,16 +748,21 @@ export default function AdminProofsPage() {
                     {/* Review Actions */}
                     <div className="flex flex-wrap gap-3 pt-1">
                       <button
-                        className="btn btn-primary h-10 px-5 text-sm font-semibold shadow-xs"
+                        className="btn btn-primary h-10 px-5 text-sm font-semibold shadow-xs flex items-center gap-1.5"
                         disabled={busyId === row.id}
                         onClick={() => void approve(row.id)}
                         type="button"
                         style={{ background: "linear-gradient(135deg, #1a3a2e, #0d5c45)" }}
                       >
-                        {busyId === row.id ? "Approving…" : "✓ Approve & Queue Certificate"}
+                        {busyId === row.id
+                          ? "Approving…"
+                          : currentStatus === "APPROVED"
+                          ? "✓ Update Verified Time & Re-issue"
+                          : "✓ Approve & Queue Certificate"}
                       </button>
+
                       <button
-                        className="btn btn-secondary h-10 px-4 text-sm font-semibold"
+                        className="btn btn-secondary h-10 px-4 text-sm font-semibold text-rose-400 hover:text-rose-300 hover:border-rose-500/40"
                         disabled={busyId === row.id || rejectBusy}
                         onClick={() => setRejectTarget(row.id)}
                         type="button"
@@ -495,7 +788,7 @@ export default function AdminProofsPage() {
                       )}
                     </p>
                     {row.proofUpload ? (
-                      <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[160px] max-h-[220px]">
+                      <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[180px] max-h-[260px]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           alt="GPS proof screenshot"
@@ -512,7 +805,7 @@ export default function AdminProofsPage() {
                         </button>
                       </div>
                     ) : (
-                      <div className="grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-sm text-[var(--muted)] flex-1 min-h-[160px]">
+                      <div className="grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-sm text-[var(--muted)] flex-1 min-h-[180px]">
                         No image uploaded
                       </div>
                     )}
