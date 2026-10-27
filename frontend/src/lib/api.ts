@@ -39,7 +39,13 @@ export function getApiUrl(path = "") {
     return cleanPath;
   }
 
-  // In production browser, communicate directly with the live HTTPS backend
+  // In production browser on runnerup.in, use relative path directly so Vercel proxies
+  // seamlessly without cross-origin CORS preflights, mobile carrier blocking, or SSL drops.
+  if (typeof window !== "undefined" && window.location.hostname.includes("runnerup.in")) {
+    return cleanPath;
+  }
+
+  // In external or preview environments, communicate directly with the live HTTPS backend
   return `${baseUrl}${cleanPath}`;
 }
 
@@ -52,45 +58,44 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
     // If tunnel down (530) or gateway error (502/503/504), attempt alternative backend
     if (res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
       if (typeof window !== "undefined") {
-        const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
+        // Try direct backend if primary was relative, or vice-versa
+        const fallbackUrl = primaryUrl.startsWith("http")
+          ? cleanPath
+          : `${CLOUD_BACKEND_URL}${cleanPath}`;
         try {
-          const fallbackUrl = `${altBackend}${cleanPath}`;
           const fallbackRes = await fetch(fallbackUrl, init);
-          if (fallbackRes.ok) {
+          if (fallbackRes.ok || fallbackRes.status < 500) {
             return fallbackRes;
           }
         } catch {
-          // ignore fallback error and attempt relative proxy
-        }
-
-        // Also try same-origin proxy (Next.js server-side rewrites)
-        try {
-          const proxyRes = await fetch(cleanPath, init);
-          if (proxyRes.ok) return proxyRes;
-        } catch {
-          // ignore proxy error
+          // ignore and continue
         }
       }
     }
     return res;
   } catch (err) {
-    // Network failure (e.g. DNS failure, connection refused, CORS failure on dead tunnel)
+    // Network failure (e.g. mobile DNS drop, preflight failure, connection timeout)
     if (typeof window !== "undefined") {
-      const altBackend = primaryUrl.includes(CLOUD_BACKEND_URL) ? RAILWAY_FALLBACK_URL : CLOUD_BACKEND_URL;
+      // First fallback: Try the alternative URL format (relative proxy or direct API)
+      const altUrl = primaryUrl.startsWith("http")
+        ? cleanPath
+        : `${CLOUD_BACKEND_URL}${cleanPath}`;
       try {
-        const fallbackUrl = `${altBackend}${cleanPath}`;
-        const fallbackRes = await fetch(fallbackUrl, init);
-        if (fallbackRes.ok) return fallbackRes;
+        const altRes = await fetch(altUrl, init);
+        return altRes;
       } catch {
-        // ignore fallback error
+        // ignore and try railway fallback
       }
 
-      // Final fallback: try same-origin relative URL (proxied by Next.js server rewrites)
+      // Second fallback: Try Railway backup server
       try {
-        const proxyRes = await fetch(cleanPath, init);
-        return proxyRes;
+        const railwayUrl = `${RAILWAY_FALLBACK_URL}${cleanPath}`;
+        const railwayRes = await fetch(railwayUrl, init);
+        if (railwayRes.ok || railwayRes.status < 500) {
+          return railwayRes;
+        }
       } catch {
-        // ignore proxy error
+        // ignore
       }
     }
     throw err;

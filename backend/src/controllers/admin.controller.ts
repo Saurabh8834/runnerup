@@ -1697,7 +1697,6 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   const filterStatus = statusParam === undefined ? "SUBMITTED" : statusParam === "ALL" ? null : statusParam;
 
   const where: Prisma.RegistrationWhereInput = {
-    proofUpload: { isNot: null },
     ...(filterStatus ? { proofStatus: filterStatus as never } : {}),
     ...(search
       ? {
@@ -1708,19 +1707,20 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
             { user: { name: { contains: search, mode: "insensitive" } } },
             { user: { email: { contains: search, mode: "insensitive" } } },
             { user: { phone: { contains: search, mode: "insensitive" } } },
-            { adminNote: { contains: search, mode: "insensitive" } },
           ],
         }
       : {}),
   };
 
-  const [total, items, pendingCount, approvedCount, rejectedCount] = await Promise.all([
+  const limit = Math.min(Math.max(1, pageSize || 25), 50);
+
+  const [total, items] = await Promise.all([
     prisma.registration.count({ where }),
     prisma.registration.findMany({
       where,
-      orderBy: [{ proofUpload: { submittedAt: "desc" } }, { registeredAt: "desc" }],
+      orderBy: { registeredAt: "desc" },
       skip,
-      take: pageSize,
+      take: limit,
       include: {
         user: { select: { id: true, name: true, email: true, phone: true } },
         event: { select: { title: true, slug: true, distances: true } },
@@ -1728,9 +1728,6 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
         payment: { select: { status: true } },
       },
     }),
-    prisma.registration.count({ where: { proofStatus: "SUBMITTED", proofUpload: { isNot: null } } }),
-    prisma.registration.count({ where: { proofStatus: "APPROVED", proofUpload: { isNot: null } } }),
-    prisma.registration.count({ where: { proofStatus: "REJECTED", proofUpload: { isNot: null } } }),
   ]);
 
   response.json({
@@ -1738,11 +1735,8 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     meta: {
       total,
       page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      pendingCount,
-      approvedCount,
-      rejectedCount,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
     },
   });
 }

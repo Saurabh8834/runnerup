@@ -260,6 +260,8 @@ export default function AdminProofsPage() {
   const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<ProofRow[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, total: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -285,16 +287,18 @@ export default function AdminProofsPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setQ(searchInput.trim());
+      setPage(1);
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (targetPage = page) => {
     setLoading(true);
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
       const params = new URLSearchParams({
-        pageSize: "100",
+        page: String(targetPage),
+        pageSize: "30",
         status: statusFilter,
       });
       if (q) {
@@ -307,6 +311,8 @@ export default function AdminProofsPage() {
       );
       setItems(json.data);
       setTotal(json.meta.total);
+      setTotalPages(json.meta.totalPages ?? Math.max(1, Math.ceil(json.meta.total / 30)));
+      setPage(targetPage);
 
       if (json.meta.pendingCount !== undefined) {
         setCounts({
@@ -330,11 +336,11 @@ export default function AdminProofsPage() {
     } finally {
       setLoading(false);
     }
-  }, [getToken, isSignedIn, statusFilter, q]);
+  }, [getToken, isSignedIn, statusFilter, q, page]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(1);
+  }, [statusFilter, q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Client-side quick filter for instantaneous responsiveness
   const filteredItems = useMemo(() => {
@@ -561,7 +567,19 @@ export default function AdminProofsPage() {
         </div>
 
         {error ? (
-          <p className="admin-muted" style={{ color: "var(--danger)" }}>{error}</p>
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300 text-sm flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+              <span>{error}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => void load(page)}
+              className="btn btn-secondary text-xs h-8 px-3"
+            >
+              Retry
+            </button>
+          </div>
         ) : null}
 
         {/* ── Proof Cards List ── */}
@@ -593,226 +611,258 @@ export default function AdminProofsPage() {
               </AdminEmpty>
             </div>
           ) : (
-            filteredItems.map((row) => {
-              const timeObj = verifiedTimes[row.id] ?? { h: "00", m: "00", s: "00" };
-              const claimedParsed = formatSecondsToHms(row.finishTimeSeconds);
-              const contactPhone = row.user.phone || row.shippingPhone;
-              const currentStatus = row.proofUpload?.status || row.proofStatus || "SUBMITTED";
+            <>
+              {filteredItems.map((row) => {
+                const timeObj = verifiedTimes[row.id] ?? { h: "00", m: "00", s: "00" };
+                const claimedParsed = formatSecondsToHms(row.finishTimeSeconds);
+                const contactPhone = row.user.phone || row.shippingPhone;
+                const currentStatus = row.proofUpload?.status || row.proofStatus || "SUBMITTED";
 
-              return (
-                <article
-                  className="admin-panel admin-panel-pad grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] border rounded-2xl shadow-xs transition-shadow hover:shadow-md"
-                  key={row.id}
-                >
-                  {/* Left Column: Participant Details & Verification Form */}
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <CustomerStatusDot isPaid={true} showLabel paidLabel="PAID" />
-                        <h2 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
-                          {row.user.name}
-                        </h2>
-                        <span className="badge font-mono font-bold bg-[var(--panel-soft)]">
-                          Bib #{row.bibNumber}
-                        </span>
-                        <span className="badge badge-sage font-bold">
-                          {row.distance}
-                        </span>
-
-                        {/* Status Badge */}
-                        {currentStatus === "APPROVED" ? (
-                          <span className="badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                            <FileCheck className="h-3 w-3" /> Approved
+                return (
+                  <article
+                    className="admin-panel admin-panel-pad grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] border rounded-2xl shadow-xs transition-shadow hover:shadow-md"
+                    key={row.id}
+                  >
+                    {/* Left Column: Participant Details & Verification Form */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <CustomerStatusDot isPaid={true} showLabel paidLabel="PAID" />
+                          <h2 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
+                            {row.user.name}
+                          </h2>
+                          <span className="badge font-mono font-bold bg-[var(--panel-soft)]">
+                            Bib #{row.bibNumber}
                           </span>
-                        ) : currentStatus === "REJECTED" ? (
-                          <span className="badge bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1">
-                            <ShieldAlert className="h-3 w-3" /> Rejected
+                          <span className="badge badge-sage font-bold">
+                            {row.distance}
                           </span>
-                        ) : (
-                          <span className="badge bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> Pending Review
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Participant Contact Info Bar */}
-                      <div className="mt-2.5 flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-[var(--muted)]">
-                        <span className="flex items-center gap-1.5 text-[var(--foreground)] font-medium">
-                          <Mail className="h-3.5 w-3.5 text-[var(--muted)]" />
-                          <a
-                            href={`mailto:${row.user.email}`}
-                            className="hover:underline font-mono text-xs"
-                          >
-                            {row.user.email}
-                          </a>
-                        </span>
+                          {/* Status Badge */}
+                          {currentStatus === "APPROVED" ? (
+                            <span className="badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                              <FileCheck className="h-3 w-3" /> Approved
+                            </span>
+                          ) : currentStatus === "REJECTED" ? (
+                            <span className="badge bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1">
+                              <ShieldAlert className="h-3 w-3" /> Rejected
+                            </span>
+                          ) : (
+                            <span className="badge bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> Pending Review
+                            </span>
+                          )}
+                        </div>
 
-                        {contactPhone && (
+                        {/* Participant Contact Info Bar */}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-[var(--muted)]">
                           <span className="flex items-center gap-1.5 text-[var(--foreground)] font-medium">
-                            <Phone className="h-3.5 w-3.5 text-[var(--muted)]" />
+                            <Mail className="h-3.5 w-3.5 text-[var(--muted)]" />
                             <a
-                              href={`tel:${contactPhone}`}
+                              href={`mailto:${row.user.email}`}
                               className="hover:underline font-mono text-xs"
                             >
-                              {contactPhone}
+                              {row.user.email}
                             </a>
                           </span>
-                        )}
 
-                        {row.shippingCity && (
-                          <span className="flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {row.shippingCity}
-                          </span>
-                        )}
-                      </div>
+                          {contactPhone && (
+                            <span className="flex items-center gap-1.5 text-[var(--foreground)] font-medium">
+                              <Phone className="h-3.5 w-3.5 text-[var(--muted)]" />
+                              <a
+                                href={`tel:${contactPhone}`}
+                                className="hover:underline font-mono text-xs"
+                              >
+                                {contactPhone}
+                              </a>
+                            </span>
+                          )}
 
-                      <p className="mt-1.5 text-xs text-[var(--muted-soft)]">
-                        {row.event.title} · Registered {formatDateTime(row.registeredAt)}
-                        {row.proofUpload ? ` · App: ${row.proofUpload.sourceApp}` : ""}
-                      </p>
-
-                      {/* Reviewer note / rejection reason if present */}
-                      {row.proofUpload?.reviewerNote && (
-                        <div className="mt-2.5 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-                          <strong>Reviewer Note:</strong> {row.proofUpload.reviewerNote}
+                          {row.shippingCity && (
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5" />
+                              {row.shippingCity}
+                            </span>
+                          )}
                         </div>
-                      )}
 
-                      {/* Admin Note if present */}
-                      {row.adminNote && (
-                        <div className="mt-2 p-2 rounded-lg bg-[var(--panel-soft)] border border-[var(--line)] text-xs text-[var(--muted)]">
-                          <strong>Admin Note:</strong> {row.adminNote}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* GPS Claimed Time vs Verified Time */}
-                    <div className="rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-4 space-y-3">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-[var(--muted)] flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5" /> Activity Finish Time:
-                        </span>
-                        <span className="font-mono font-bold text-[var(--foreground)]">
-                          {claimedParsed.label}
-                        </span>
-                      </div>
-
-                      {/* Verified Finish Time Inputs */}
-                      <div className="pt-2 border-t border-[var(--line)]">
-                        <p className="text-xs font-semibold text-[var(--foreground)] mb-1.5 flex items-center justify-between">
-                          <span>Verified Finish Time (for Certificate &amp; Leaderboard):</span>
-                          <span className="text-[0.65rem] text-[var(--muted)]">HH : MM : SS</span>
+                        <p className="mt-1.5 text-xs text-[var(--muted-soft)]">
+                          {row.event.title} · Registered {formatDateTime(row.registeredAt)}
+                          {row.proofUpload ? ` · App: ${row.proofUpload.sourceApp}` : ""}
                         </p>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div>
-                            <input
-                              type="number"
-                              min="0"
-                              max="23"
-                              className="input text-center text-sm font-mono h-9"
-                              value={timeObj.h}
-                              onChange={(e) => handleTimeChange(row.id, "h", e.target.value)}
-                              placeholder="00"
-                            />
-                            <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Hours</span>
+
+                        {/* Reviewer note / rejection reason if present */}
+                        {row.proofUpload?.reviewerNote && (
+                          <div className="mt-2.5 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                            <strong>Reviewer Note:</strong> {row.proofUpload.reviewerNote}
                           </div>
-                          <div>
-                            <input
-                              type="number"
-                              min="0"
-                              max="59"
-                              className="input text-center text-sm font-mono h-9"
-                              value={timeObj.m}
-                              onChange={(e) => handleTimeChange(row.id, "m", e.target.value)}
-                              placeholder="45"
-                            />
-                            <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Mins</span>
+                        )}
+
+                        {/* Admin Note if present */}
+                        {row.adminNote && (
+                          <div className="mt-2 p-2 rounded-lg bg-[var(--panel-soft)] border border-[var(--line)] text-xs text-[var(--muted)]">
+                            <strong>Admin Note:</strong> {row.adminNote}
                           </div>
-                          <div>
-                            <input
-                              type="number"
-                              min="0"
-                              max="59"
-                              className="input text-center text-sm font-mono h-9"
-                              value={timeObj.s}
-                              onChange={(e) => handleTimeChange(row.id, "s", e.target.value)}
-                              placeholder="00"
-                            />
-                            <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Secs</span>
+                        )}
+                      </div>
+
+                      {/* GPS Claimed Time vs Verified Time */}
+                      <div className="rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-4 space-y-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-[var(--muted)] flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5" /> Activity Finish Time:
+                          </span>
+                          <span className="font-mono font-bold text-[var(--foreground)]">
+                            {claimedParsed.label}
+                          </span>
+                        </div>
+
+                        {/* Verified Finish Time Inputs */}
+                        <div className="pt-2 border-t border-[var(--line)]">
+                          <p className="text-xs font-semibold text-[var(--foreground)] mb-1.5 flex items-center justify-between">
+                            <span>Verified Finish Time (for Certificate &amp; Leaderboard):</span>
+                            <span className="text-[0.65rem] text-[var(--muted)]">HH : MM : SS</span>
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div>
+                              <input
+                                type="number"
+                                min="0"
+                                max="23"
+                                className="input text-center text-sm font-mono h-9"
+                                value={timeObj.h}
+                                onChange={(e) => handleTimeChange(row.id, "h", e.target.value)}
+                                placeholder="00"
+                              />
+                              <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Hours</span>
+                            </div>
+                            <div>
+                              <input
+                                type="number"
+                                min="0"
+                                max="59"
+                                className="input text-center text-sm font-mono h-9"
+                                value={timeObj.m}
+                                onChange={(e) => handleTimeChange(row.id, "m", e.target.value)}
+                                placeholder="45"
+                              />
+                              <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Mins</span>
+                            </div>
+                            <div>
+                              <input
+                                type="number"
+                                min="0"
+                                max="59"
+                                className="input text-center text-sm font-mono h-9"
+                                value={timeObj.s}
+                                onChange={(e) => handleTimeChange(row.id, "s", e.target.value)}
+                                placeholder="00"
+                              />
+                              <span className="text-[0.65rem] text-[var(--muted)] block text-center mt-0.5">Secs</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Review Actions */}
-                    <div className="flex flex-wrap gap-3 pt-1">
-                      <button
-                        className="btn btn-primary h-10 px-5 text-sm font-semibold shadow-xs flex items-center gap-1.5"
-                        disabled={busyId === row.id}
-                        onClick={() => void approve(row.id)}
-                        type="button"
-                        style={{ background: "linear-gradient(135deg, #1a3a2e, #0d5c45)" }}
-                      >
-                        {busyId === row.id
-                          ? "Approving…"
-                          : currentStatus === "APPROVED"
-                          ? "✓ Update Verified Time & Re-issue"
-                          : "✓ Approve & Queue Certificate"}
-                      </button>
-
-                      <button
-                        className="btn btn-secondary h-10 px-4 text-sm font-semibold text-rose-400 hover:text-rose-300 hover:border-rose-500/40"
-                        disabled={busyId === row.id || rejectBusy}
-                        onClick={() => setRejectTarget(row.id)}
-                        type="button"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Right Column: GPS Screenshot Preview with Zoom & Open */}
-                  <div className="flex flex-col">
-                    <p className="text-xs font-semibold text-[var(--muted)] mb-2 flex items-center justify-between">
-                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> GPS Activity Screenshot</span>
-                      {row.proofUpload && (
-                        <a
-                          href={row.proofUpload.activityImageUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5"
-                        >
-                          Full size <ExternalLink className="h-2.5 w-2.5" />
-                        </a>
-                      )}
-                    </p>
-                    {row.proofUpload ? (
-                      <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[180px] max-h-[260px]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          alt="GPS proof screenshot"
-                          className="h-full w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
-                          src={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl, 600)}
-                          onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
-                        />
+                      {/* Review Actions */}
+                      <div className="flex flex-wrap gap-3 pt-1">
                         <button
+                          className="btn btn-primary h-10 px-5 text-sm font-semibold shadow-xs flex items-center gap-1.5"
+                          disabled={busyId === row.id}
+                          onClick={() => void approve(row.id)}
                           type="button"
-                          onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
-                          className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold gap-1.5"
+                          style={{ background: "linear-gradient(135deg, #1a3a2e, #0d5c45)" }}
                         >
-                          <ZoomIn className="h-4 w-4" /> Click to Zoom
+                          {busyId === row.id
+                            ? "Approving…"
+                            : currentStatus === "APPROVED"
+                            ? "✓ Update Verified Time & Re-issue"
+                            : "✓ Approve & Queue Certificate"}
+                        </button>
+
+                        <button
+                          className="btn btn-secondary h-10 px-4 text-sm font-semibold text-rose-400 hover:text-rose-300 hover:border-rose-500/40"
+                          disabled={busyId === row.id || rejectBusy}
+                          onClick={() => setRejectTarget(row.id)}
+                          type="button"
+                        >
+                          Reject
                         </button>
                       </div>
-                    ) : (
-                      <div className="grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-sm text-[var(--muted)] flex-1 min-h-[180px]">
-                        No image uploaded
-                      </div>
-                    )}
+                    </div>
+
+                    {/* Right Column: GPS Screenshot Preview with Zoom & Open */}
+                    <div className="flex flex-col">
+                      <p className="text-xs font-semibold text-[var(--muted)] mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> GPS Activity Screenshot</span>
+                        {row.proofUpload && (
+                          <a
+                            href={row.proofUpload.activityImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5"
+                          >
+                            Full size <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        )}
+                      </p>
+                      {row.proofUpload ? (
+                        <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[180px] max-h-[260px]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            alt="GPS proof screenshot"
+                            className="h-full w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
+                            src={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl, 600)}
+                            onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
+                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold gap-1.5"
+                          >
+                            <ZoomIn className="h-4 w-4" /> Click to Zoom
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-sm text-[var(--muted)] flex-1 min-h-[180px]">
+                          No image uploaded
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between p-4 rounded-xl border border-[var(--line)] bg-[var(--panel)] text-sm mt-2">
+                  <span className="text-xs text-[var(--muted)]">
+                    Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({total} total submissions)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={page <= 1 || loading}
+                      onClick={() => void load(page - 1)}
+                      className="btn btn-secondary text-xs h-8 px-3"
+                    >
+                      Previous
+                    </button>
+                    <span className="text-xs font-mono font-bold px-2 text-[var(--foreground)]">
+                      {page} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={page >= totalPages || loading}
+                      onClick={() => void load(page + 1)}
+                      className="btn btn-secondary text-xs h-8 px-3"
+                    >
+                      Next
+                    </button>
                   </div>
-                </article>
-              );
-            })
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
