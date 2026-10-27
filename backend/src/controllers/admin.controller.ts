@@ -579,6 +579,7 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
     ...(search
       ? {
         OR: [
+          { id: search },
           { bibNumber: { contains: search, mode: "insensitive" } },
           { shippingName: { contains: search, mode: "insensitive" } },
           { shippingPhone: { contains: search, mode: "insensitive" } },
@@ -677,8 +678,13 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
 
 export async function adminGetRegistration(request: AuthenticatedRequest, response: Response) {
   const id = routeParam(request, "id");
-  const registration = await prisma.registration.findUnique({
-    where: { id },
+  const registration = await prisma.registration.findFirst({
+    where: {
+      OR: [
+        { id },
+        { bibNumber: id },
+      ],
+    },
     include: {
       user: true,
       event: true,
@@ -700,8 +706,21 @@ export async function adminUpdateRegistration(request: AuthenticatedRequest, res
   const id = routeParam(request, "id");
   const payload = validateBody(adminRegistrationUpdateSchema, request);
 
+  const target = await prisma.registration.findFirst({
+    where: {
+      OR: [
+        { id },
+        { bibNumber: id },
+      ],
+    },
+  });
+
+  if (!target) {
+    throw new ApiError(404, "Registration not found");
+  }
+
   const registration = await prisma.registration.update({
-    where: { id },
+    where: { id: target.id },
     data: payload,
     include: {
       user: true,
@@ -716,7 +735,7 @@ export async function adminUpdateRegistration(request: AuthenticatedRequest, res
   await writeAdminAudit(request, {
     action: "registration.update",
     entityType: "Registration",
-    entityId: id,
+    entityId: target.id,
     summary: `Updated registration ${registration.bibNumber}`,
   });
 
@@ -730,8 +749,13 @@ export async function adminMarkRegistrationPaid(
   const id = routeParam(request, "id");
   const payload = validateBody(adminMarkPaidSchema, request);
 
-  const existing = await prisma.registration.findUnique({
-    where: { id },
+  const existing = await prisma.registration.findFirst({
+    where: {
+      OR: [
+        { id },
+        { bibNumber: id },
+      ],
+    },
     include: { event: true, payment: true },
   });
   if (!existing) {
@@ -739,12 +763,12 @@ export async function adminMarkRegistrationPaid(
   }
 
   const amount = payload.amountInPaise ?? existing.event.priceInPaise;
-  const orderId = existing.payment?.razorpayOrderId ?? `manual_${id}_${Date.now()}`;
+  const orderId = existing.payment?.razorpayOrderId ?? `manual_${existing.id}_${Date.now()}`;
 
   const payment = await prisma.payment.upsert({
-    where: { registrationId: id },
+    where: { registrationId: existing.id },
     create: {
-      registrationId: id,
+      registrationId: existing.id,
       razorpayOrderId: orderId,
       razorpayPaymentId: `manual_${Date.now()}`,
       amountInPaise: amount,
@@ -808,8 +832,13 @@ export async function adminDeleteRegistration(
   response: Response,
 ) {
   const id = routeParam(request, "id");
-  const reg = await prisma.registration.findUnique({
-    where: { id },
+  const reg = await prisma.registration.findFirst({
+    where: {
+      OR: [
+        { id },
+        { bibNumber: id },
+      ],
+    },
     select: { id: true, bibNumber: true, shippingName: true, userId: true },
   });
 
@@ -818,17 +847,17 @@ export async function adminDeleteRegistration(
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.certificate.deleteMany({ where: { registrationId: id } });
-    await tx.medalDelivery.deleteMany({ where: { registrationId: id } });
-    await tx.proofUpload.deleteMany({ where: { registrationId: id } });
-    await tx.payment.deleteMany({ where: { registrationId: id } });
-    await tx.registration.delete({ where: { id } });
+    await tx.certificate.deleteMany({ where: { registrationId: reg.id } });
+    await tx.medalDelivery.deleteMany({ where: { registrationId: reg.id } });
+    await tx.proofUpload.deleteMany({ where: { registrationId: reg.id } });
+    await tx.payment.deleteMany({ where: { registrationId: reg.id } });
+    await tx.registration.delete({ where: { id: reg.id } });
   });
 
   await writeAdminAudit(request, {
     action: "registration.delete",
     entityType: "Registration",
-    entityId: id,
+    entityId: reg.id,
     summary: `Deleted registration ${reg.bibNumber} for ${reg.shippingName}`,
   });
 

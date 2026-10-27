@@ -73,6 +73,37 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
     throw new ApiError(404, "User not found in database");
   }
 
+  // Auto-relink orphaned registrations if user logged in via different account/phone
+  if (user.email || user.phone) {
+    const cleanPhone = user.phone?.replace(/\D/g, "");
+    const unlinked = await prisma.registration.findMany({
+      where: {
+        userId: { not: user.id },
+        OR: [
+          ...(user.email ? [{ user: { email: { equals: user.email, mode: "insensitive" as const } } }] : []),
+          ...(cleanPhone && cleanPhone.length >= 8
+            ? [
+                { user: { phone: { contains: cleanPhone.slice(-10) } } },
+                { shippingPhone: { contains: cleanPhone.slice(-10) } },
+              ]
+            : []),
+        ],
+      },
+      select: { id: true },
+    });
+
+    if (unlinked.length > 0) {
+      await prisma.registration.updateMany({
+        where: { id: { in: unlinked.map((r) => r.id) } },
+        data: { userId: user.id },
+      });
+      user = await prisma.user.findFirst({
+        where: { id: user.id },
+        include: { registrations: registrationInclude },
+      });
+    }
+  }
+
   response.json({ data: user });
 }
 

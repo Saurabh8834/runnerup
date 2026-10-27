@@ -114,20 +114,25 @@ function buildPrizeItems(
 export async function lookupPrizeByBib(request: AuthenticatedRequest, response: Response) {
   const query = routeParam(request, "bibNumber").trim();
   const cleanDigits = query.replace(/\D/g, "");
+  const alphanumeric = query.replace(/[^a-zA-Z0-9]/g, "");
 
   const registration = await prisma.registration.findFirst({
     where: {
       OR: [
+        { id: query },
         { bibNumber: { equals: query, mode: "insensitive" } },
+        { bibNumber: { contains: query, mode: "insensitive" } },
+        ...(alphanumeric.length >= 4 ? [{ bibNumber: { contains: alphanumeric, mode: "insensitive" as const } }] : []),
+        ...(cleanDigits.length >= 4 ? [{ bibNumber: { contains: cleanDigits, mode: "insensitive" as const } }] : []),
         { user: { email: { equals: query, mode: "insensitive" } } },
-        ...(query.includes("@")
-          ? []
-          : cleanDigits.length >= 8
-            ? [
-                { shippingPhone: { contains: cleanDigits.slice(-10) } },
-                { user: { phone: { contains: cleanDigits.slice(-10) } } },
-              ]
-            : []),
+        { user: { name: { contains: query, mode: "insensitive" } } },
+        { shippingName: { contains: query, mode: "insensitive" } },
+        ...(cleanDigits.length >= 8
+          ? [
+              { shippingPhone: { contains: cleanDigits.slice(-10) } },
+              { user: { phone: { contains: cleanDigits.slice(-10) } } },
+            ]
+          : []),
       ],
     },
     orderBy: { registeredAt: "desc" },

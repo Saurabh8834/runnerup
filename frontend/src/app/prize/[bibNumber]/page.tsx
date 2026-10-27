@@ -246,7 +246,8 @@ export default function PrizeBibPage() {
         return;
       }
 
-      const res = await resilientFetch(`/api/registrations/${encodeURIComponent(bibNumber)}/proof`, {
+      const targetBib = data?.runner?.bibNumber || bibNumber;
+      const res = await resilientFetch(`/api/registrations/${encodeURIComponent(targetBib)}/proof`, {
         method: "POST",
         headers: authHeaders(token),
         body: JSON.stringify({

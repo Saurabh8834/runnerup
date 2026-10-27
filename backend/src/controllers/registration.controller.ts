@@ -353,11 +353,20 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
   const payload = validateBody(submitProofSchema, request);
   const identifier = routeParam(request, "id");
 
+  const cleanIdDigits = identifier.replace(/\D/g, "");
   const existing = await prisma.registration.findFirst({
     where: {
       OR: [
         { id: identifier },
-        { bibNumber: identifier },
+        { bibNumber: { equals: identifier, mode: "insensitive" } },
+        { bibNumber: { contains: identifier, mode: "insensitive" } },
+        { user: { email: { equals: identifier, mode: "insensitive" } } },
+        ...(cleanIdDigits.length >= 8
+          ? [
+              { user: { phone: { contains: cleanIdDigits.slice(-10) } } },
+              { shippingPhone: { contains: cleanIdDigits.slice(-10) } },
+            ]
+          : []),
       ],
     },
     include: {
