@@ -233,8 +233,8 @@ export default function AdminRegistrationDetailPage() {
               <>
                 <p className="admin-muted">Source: {data.proofUpload.sourceApp}</p>
                 <a
-                  className="mt-1 block overflow-hidden rounded-xl border border-[var(--line)]"
-                  href={data.proofUpload.activityImageUrl}
+                  className="mt-1 block overflow-hidden rounded-xl border border-[var(--line)] bg-zinc-950/70"
+                  href={optimizeCloudinaryUrl(data.proofUpload.activityImageUrl)}
                   rel="noreferrer"
                   target="_blank"
                 >

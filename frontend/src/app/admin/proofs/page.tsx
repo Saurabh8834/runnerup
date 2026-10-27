@@ -867,7 +867,7 @@ export default function AdminProofsPage() {
                           </label>
                           {row.proofUpload && (
                             <a
-                              href={row.proofUpload.activityImageUrl}
+                              href={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5"
@@ -878,13 +878,14 @@ export default function AdminProofsPage() {
                         </div>
                       </p>
                       {row.proofUpload ? (
-                        <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[180px] max-h-[260px]">
+                        <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-zinc-950/70 flex-1 min-h-[180px] max-h-[260px] flex items-center justify-center">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             alt="GPS proof screenshot"
-                            className="h-full w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
+                            className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
                             src={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl, 600)}
                             onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
+                            loading="lazy"
                           />
                           <button
                             type="button"

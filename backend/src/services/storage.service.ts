@@ -23,11 +23,8 @@ export function getPublicUploadsBaseUrl(): string {
   if (process.env.API_PUBLIC_URL) {
     return process.env.API_PUBLIC_URL.replace(/\/+$/, "");
   }
-  // In production, Cloudflare tunnel forwards api.runnerup.in directly to the API
-  if (env.nodeEnv === "production" || process.env.TUNNEL_ACTIVE === "true") {
-    return "https://api.runnerup.in";
-  }
-  return `http://127.0.0.1:${env.port}`;
+  // Cloudflare tunnel forwards https://api.runnerup.in directly to the API
+  return "https://api.runnerup.in";
 }
 
 export interface StoredImageResult {

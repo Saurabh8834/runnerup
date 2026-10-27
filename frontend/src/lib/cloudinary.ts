@@ -97,10 +97,14 @@ export function validateImageFile(file: File): { valid: boolean; error?: string 
  */
 export function optimizeCloudinaryUrl(url?: string | null, maxWidth = 800): string {
   if (!url) return "";
-  if (!url.includes("res.cloudinary.com") || url.includes("/f_auto")) {
-    return url;
+  let normalized = url;
+  if (normalized.includes("127.0.0.1:4000") || normalized.includes("localhost:4000")) {
+    normalized = normalized.replace(/^http:\/\/(127\.0\.0\.1|localhost):4000/, "https://api.runnerup.in");
   }
-  return url.replace(
+  if (!normalized.includes("res.cloudinary.com") || normalized.includes("/f_auto")) {
+    return normalized;
+  }
+  return normalized.replace(
     "/image/upload/",
     `/image/upload/f_auto,q_auto,w_${maxWidth},c_limit/`
   );
