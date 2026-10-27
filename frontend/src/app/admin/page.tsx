@@ -98,10 +98,12 @@ const TIME_RANGES = [
   { key: "all", label: "All Time" },
 ] as const;
 
+let cachedOverviewData: Overview | null = null;
+
 export default function AdminOverviewPage() {
   const { getToken, isSignedIn } = useAuth();
-  const [data, setData] = useState<Overview | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Overview | null>(() => cachedOverviewData);
+  const [loading, setLoading] = useState(!cachedOverviewData);
   const [error, setError] = useState<string | null>(null);
 
   // Default to 30d (This Month) so all active revenue, registrations, and metrics show immediately
@@ -112,7 +114,9 @@ export default function AdminOverviewPage() {
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!cachedOverviewData) {
+      setLoading(true);
+    }
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
       const queryParams = new URLSearchParams();
@@ -122,6 +126,7 @@ export default function AdminOverviewPage() {
       }
 
       const json = await adminFetch<{ data: Overview }>(`/api/admin/overview?${queryParams.toString()}`, token);
+      cachedOverviewData = json.data;
       setData(json.data);
       setError(null);
     } catch (err) {

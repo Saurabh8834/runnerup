@@ -21,6 +21,8 @@ import {
   FileCheck,
   ShieldAlert,
   UploadCloud,
+  Calendar,
+  Loader2,
 } from "lucide-react";
 
 /* ── Toast ──────────────────────────────────────────────── */
@@ -146,6 +148,82 @@ function ProofThumbnail({
       >
         <ZoomIn className="h-4 w-4" /> Click to Zoom
       </button>
+    </div>
+  );
+}
+
+/* ── Decoupled Search Input (Prevents re-rendering 30+ DOM cards on every keystroke) ── */
+function ProofSearchInput({
+  initialValue,
+  onSearch,
+  loading,
+}: {
+  initialValue: string;
+  onSearch: (query: string) => void;
+  loading: boolean;
+}) {
+  const [val, setVal] = useState(initialValue);
+
+  useEffect(() => {
+    setVal(initialValue);
+  }, [initialValue]);
+
+  // Debounce internal typing by 350ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (val !== initialValue) {
+        onSearch(val.trim());
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [val, initialValue, onSearch]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onSearch(val.trim());
+    }
+  };
+
+  return (
+    <div className="relative flex items-center w-full">
+      <div className="absolute left-3.5 pointer-events-none text-[var(--muted)] flex items-center">
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin text-[var(--sage)]" />
+        ) : (
+          <Search className="h-4 w-4" />
+        )}
+      </div>
+      <input
+        type="text"
+        className="input pl-10 pr-28 w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
+        placeholder="Search proof by runner name, email, phone number, bib # (e.g. Vinay, IAFD-996424, 7676009168)..."
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
+      <div className="absolute right-2.5 flex items-center gap-1.5">
+        {val && (
+          <button
+            type="button"
+            onClick={() => {
+              setVal("");
+              onSearch("");
+            }}
+            className="p-1 rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--panel-soft)] transition-colors"
+            title="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => onSearch(val.trim())}
+          className="btn btn-secondary text-xs h-7 px-2.5 font-medium border border-[var(--line)] hover:border-[var(--sage)]"
+        >
+          {loading ? "Searching…" : "Search"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -337,14 +415,21 @@ export default function AdminProofsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, notSubmitted: 0, total: 0 });
+  const [counts, setCounts] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("runnerup_admin_proof_counts");
+        if (stored) return JSON.parse(stored);
+      } catch {}
+    }
+    return { pending: 121, approved: 0, rejected: 0, notSubmitted: 466, total: 587 };
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const { toasts, dismiss, toast } = useToast();
 
   // Search & Filters
-  const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED" | "ALL">("SUBMITTED");
 
@@ -357,15 +442,6 @@ export default function AdminProofsPage() {
 
   // Lightbox modal state
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
-
-  // Debounce search input by 300ms
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setQ(searchInput.trim());
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
 
   // Ensure canonical domain www.runnerup.in on browser
   useEffect(() => {
@@ -574,29 +650,15 @@ export default function AdminProofsPage() {
 
         {/* ── Toolbar: Search & Status Filter Tabs ── */}
         <div className="space-y-3">
-          {/* Search Input Bar */}
-          <div className="relative flex items-center w-full">
-            <div className="absolute left-3.5 pointer-events-none text-[var(--muted)]">
-              <Search className="h-4 w-4" />
-            </div>
-            <input
-              type="text"
-              className="input pl-10 pr-10 w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
-              placeholder="Search proof by runner name, email, phone number, bib # (e.g. Vinay, IAFD-996424, 7676009168)..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => setSearchInput("")}
-                className="absolute right-3 p-1 rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--panel-soft)] transition-colors"
-                title="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          {/* Search Input Bar with Debounce & Enter key trigger */}
+          <ProofSearchInput
+            initialValue={q}
+            onSearch={(newQ) => {
+              setQ(newQ);
+              setPage(1);
+            }}
+            loading={loading}
+          />
 
           {/* Status Tabs & Active Search Pill */}
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -682,7 +744,7 @@ export default function AdminProofsPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setSearchInput("")}
+                  onClick={() => setQ("")}
                   className="text-xs text-[var(--sage)] hover:underline font-semibold"
                 >
                   Clear search
@@ -710,7 +772,20 @@ export default function AdminProofsPage() {
 
         {/* ── Proof Cards List ── */}
         <div className="admin-stack admin-fill">
-          {filteredItems.length === 0 ? (
+          {loading && items.length === 0 ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((n) => (
+                <div
+                  key={n}
+                  className="admin-panel admin-panel-pad rounded-2xl animate-pulse min-h-[140px] flex flex-col justify-center gap-3 border border-[var(--line)]"
+                >
+                  <div className="h-4 w-52 bg-[var(--line)] rounded" />
+                  <div className="h-3 w-80 bg-[var(--line)]/50 rounded" />
+                  <div className="h-8 w-36 bg-[var(--line)]/30 rounded mt-1" />
+                </div>
+              ))}
+            </div>
+          ) : filteredItems.length === 0 ? (
             <div className="admin-panel admin-panel-pad is-fill text-center py-12">
               <AdminEmpty>
                 {q ? (
@@ -723,7 +798,7 @@ export default function AdminProofsPage() {
                     </p>
                     <button
                       type="button"
-                      onClick={() => setSearchInput("")}
+                      onClick={() => setQ("")}
                       className="btn btn-secondary mt-3 inline-flex text-xs"
                     >
                       Clear Search Filter
@@ -816,10 +891,32 @@ export default function AdminProofsPage() {
                           )}
                         </div>
 
-                        <p className="mt-1.5 text-xs text-[var(--muted-soft)]">
-                          {row.event.title} · Registered {formatDateTime(row.registeredAt)}
-                          {row.proofUpload ? ` · App: ${row.proofUpload.sourceApp}` : ""}
-                        </p>
+                        {/* Event Name, Registered Timestamp & Explicit Proof Submission Time */}
+                        <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+                          <span className="text-[var(--foreground)] font-semibold">
+                            {row.event.title}
+                          </span>
+                          <span className="text-[var(--muted)] flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5 text-[var(--muted)]" />
+                            Registered: <strong className="text-[var(--foreground)] font-mono">{formatDateTime(row.registeredAt)}</strong>
+                          </span>
+                          {row.proofUpload?.submittedAt ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30">
+                              <Clock className="h-3.5 w-3.5 text-amber-400" />
+                              Proof Submitted: <span className="font-mono">{formatDateTime(row.proofUpload.submittedAt)}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-zinc-800/80 text-zinc-400 text-xs border border-zinc-700">
+                              <Clock className="h-3.5 w-3.5 text-zinc-400" />
+                              Proof Not Submitted
+                            </span>
+                          )}
+                          {row.proofUpload?.sourceApp && (
+                            <span className="text-[var(--muted)] font-mono text-[11px] bg-[var(--panel-soft)] px-2 py-0.5 rounded border border-[var(--line)]">
+                              App: {row.proofUpload.sourceApp}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Reviewer note / rejection reason if present */}
                         {row.proofUpload?.reviewerNote && (

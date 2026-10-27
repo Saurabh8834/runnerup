@@ -11,6 +11,7 @@ import { ensureDefaultEvents, isRegistrationOpen } from "../services/event.servi
 import { createRazorpayOrder } from "../services/razorpay.service.js";
 import { upsertUserFromClerk } from "../services/user.service.js";
 import { resolveCouponDiscount } from "./payment.controller.js";
+import { invalidateProofCountsCache, invalidateAdminOverviewCache } from "./admin.controller.js";
 import { ApiError } from "../utils/api-error.js";
 import { logger } from "../utils/logger.js";
 import { routeParam } from "../utils/params.js";
@@ -487,6 +488,9 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     },
     include: { proofUpload: true, event: true },
   });
+
+  invalidateProofCountsCache();
+  invalidateAdminOverviewCache();
 
   response.json({
     data: registration,

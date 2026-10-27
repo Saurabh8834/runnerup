@@ -126,11 +126,28 @@ export async function adminMe(request: AuthenticatedRequest, response: Response)
   });
 }
 
-export async function adminOverview(request: AuthenticatedRequest, response: Response) {
-  await ensureDefaultEvents();
+type CachedOverview = {
+  data: unknown;
+  expiresAt: number;
+};
+const overviewCache = new Map<string, CachedOverview>();
 
+export function invalidateAdminOverviewCache() {
+  overviewCache.clear();
+}
+
+export async function adminOverview(request: AuthenticatedRequest, response: Response) {
   const timeRange = (typeof request.query.range === "string" ? request.query.range.toLowerCase().trim() : "all") as "today" | "3d" | "7d" | "30d" | "all";
   const eventFilter = q(request, "eventId");
+
+  // Fast cache check (20s TTL) for instantaneous overview dashboard loads
+  const cacheKey = `${timeRange}:${eventFilter ?? "all"}`;
+  const cached = overviewCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return response.json(cached.data);
+  }
+
+  await ensureDefaultEvents();
 
   // India Standard Time (IST = UTC + 5:30)
   const IST_OFFSET_MS = 5.5 * 3600 * 1000;
@@ -362,7 +379,7 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     revenueInr: Math.round(d.revenuePaise / 100),
   }));
 
-  response.json({
+  const payload = {
     data: {
       timeRange,
       eventId: eventFilter ?? null,
@@ -388,7 +405,10 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
       recentRegistrations: recentRegs,
       recentPayments,
     },
-  });
+  };
+
+  overviewCache.set(cacheKey, { data: payload, expiresAt: Date.now() + 20_000 });
+  response.json(payload);
 }
 
 // ── Events ─────────────────────────────────────────────────────
@@ -1717,6 +1737,63 @@ export async function adminDeleteUser(
 
 // ── Proofs ─────────────────────────────────────────────────────
 
+type CachedProofCounts = {
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  notSubmittedCount: number;
+  allCount: number;
+  expiresAt: number;
+};
+
+let cachedProofCounts: CachedProofCounts | null = null;
+
+export function invalidateProofCountsCache() {
+  cachedProofCounts = null;
+}
+
+async function getProofCounts(): Promise<CachedProofCounts> {
+  if (cachedProofCounts && cachedProofCounts.expiresAt > Date.now()) {
+    return cachedProofCounts;
+  }
+  try {
+    const countsRows = await prisma.$queryRaw<Array<{ proofStatus: string; count: number }>>`
+      SELECT "proofStatus", COUNT(*)::int as count 
+      FROM "Registration" 
+      GROUP BY "proofStatus"
+    `;
+    const countsMap: Record<string, number> = {};
+    for (const row of countsRows) {
+      countsMap[row.proofStatus] = row.count;
+    }
+    const pendingCount = countsMap[ProofStatus.SUBMITTED] ?? 0;
+    const approvedCount = countsMap[ProofStatus.APPROVED] ?? 0;
+    const rejectedCount = countsMap[ProofStatus.REJECTED] ?? 0;
+    const notSubmittedCount = countsMap[ProofStatus.NOT_SUBMITTED] ?? 0;
+    const allCount = pendingCount + approvedCount + rejectedCount + notSubmittedCount;
+    cachedProofCounts = {
+      pendingCount,
+      approvedCount,
+      rejectedCount,
+      notSubmittedCount,
+      allCount,
+      expiresAt: Date.now() + 30_000, // 30s TTL
+    };
+    return cachedProofCounts;
+  } catch {
+    return (
+      cachedProofCounts ?? {
+        pendingCount: 0,
+        approvedCount: 0,
+        rejectedCount: 0,
+        notSubmittedCount: 0,
+        allCount: 0,
+        expiresAt: 0,
+      }
+    );
+  }
+}
+
 export async function adminListProofs(request: AuthenticatedRequest, response: Response) {
   const { page, pageSize, skip } = parsePage(request);
   const rawStatus = q(request, "status")?.trim().toUpperCase();
@@ -1740,33 +1817,46 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     filterStatus = null;
   }
 
+  // Targeted search query builder for indexed performance
+  let searchOrConditions: Prisma.RegistrationWhereInput[] = [];
+  if (search) {
+    const isDigitsOnly = /^[0-9+ ]+$/.test(search) && search.replace(/\D/g, "").length >= 4;
+    const isBib = /^IAFD-?[0-9]+/i.test(search);
+    const isEmail = search.includes("@");
+
+    if (isEmail) {
+      searchOrConditions = [{ user: { email: { contains: search, mode: "insensitive" } } }];
+    } else if (isBib) {
+      searchOrConditions = [{ bibNumber: { contains: search, mode: "insensitive" } }];
+    } else if (isDigitsOnly) {
+      const cleanDigits = search.replace(/\D/g, "");
+      searchOrConditions = [
+        { shippingPhone: { contains: cleanDigits } },
+        { user: { phone: { contains: cleanDigits } } },
+        { bibNumber: { contains: search, mode: "insensitive" } },
+      ];
+    } else {
+      searchOrConditions = [
+        { bibNumber: { contains: search, mode: "insensitive" } },
+        { shippingName: { contains: search, mode: "insensitive" } },
+        { user: { name: { contains: search, mode: "insensitive" } } },
+        { user: { email: { contains: search, mode: "insensitive" } } },
+        { shippingPhone: { contains: search, mode: "insensitive" } },
+        { shippingCity: { contains: search, mode: "insensitive" } },
+      ];
+    }
+  }
+
   const where: Prisma.RegistrationWhereInput = {
     ...(filterStatus ? { proofStatus: filterStatus } : {}),
-    ...(search
-      ? {
-          OR: [
-            { bibNumber: { contains: search, mode: "insensitive" } },
-            { shippingName: { contains: search, mode: "insensitive" } },
-            { shippingPhone: { contains: search, mode: "insensitive" } },
-            { shippingCity: { contains: search, mode: "insensitive" } },
-            { user: { name: { contains: search, mode: "insensitive" } } },
-            { user: { email: { contains: search, mode: "insensitive" } } },
-            { user: { phone: { contains: search, mode: "insensitive" } } },
-          ],
-        }
-      : {}),
+    ...(searchOrConditions.length > 0 ? { OR: searchOrConditions } : {}),
   };
 
   const limit = Math.min(Math.max(1, pageSize || 25), 50);
 
-  // Fast single GROUP BY for tab counts + paginated items
-  const [countsRows, totalForSearch, items] = await Promise.all([
-    prisma.$queryRaw<Array<{ proofStatus: string; count: number }>>`
-      SELECT "proofStatus", COUNT(*)::int as count 
-      FROM "Registration" 
-      GROUP BY "proofStatus"
-    `.catch(() => [] as Array<{ proofStatus: string; count: number }>),
-    search ? prisma.registration.count({ where }) : Promise.resolve(null),
+  // Parallel fetch: cached/fast counts and paginated items
+  const [countsData, items] = await Promise.all([
+    getProofCounts(),
     prisma.registration.findMany({
       where,
       orderBy: { registeredAt: "desc" },
@@ -1781,28 +1871,25 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     }),
   ]);
 
-  const countsMap: Record<string, number> = {};
-  for (const row of countsRows) {
-    countsMap[row.proofStatus] = row.count;
+  let total = 0;
+  if (search) {
+    if (skip === 0 && items.length < limit) {
+      total = items.length;
+    } else {
+      total = await prisma.registration.count({ where });
+    }
+  } else {
+    total =
+      filterStatus === ProofStatus.SUBMITTED
+        ? countsData.pendingCount
+        : filterStatus === ProofStatus.APPROVED
+        ? countsData.approvedCount
+        : filterStatus === ProofStatus.REJECTED
+        ? countsData.rejectedCount
+        : filterStatus === ProofStatus.NOT_SUBMITTED
+        ? countsData.notSubmittedCount
+        : countsData.allCount;
   }
-  const pendingCount = countsMap[ProofStatus.SUBMITTED] ?? 0;
-  const approvedCount = countsMap[ProofStatus.APPROVED] ?? 0;
-  const rejectedCount = countsMap[ProofStatus.REJECTED] ?? 0;
-  const notSubmittedCount = countsMap[ProofStatus.NOT_SUBMITTED] ?? 0;
-  const allCount = pendingCount + approvedCount + rejectedCount + notSubmittedCount;
-
-  const total =
-    totalForSearch !== null
-      ? totalForSearch
-      : filterStatus === ProofStatus.SUBMITTED
-      ? pendingCount
-      : filterStatus === ProofStatus.APPROVED
-      ? approvedCount
-      : filterStatus === ProofStatus.REJECTED
-      ? rejectedCount
-      : filterStatus === ProofStatus.NOT_SUBMITTED
-      ? notSubmittedCount
-      : allCount;
 
   response.json({
     data: items,
@@ -1811,10 +1898,10 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       page,
       pageSize: limit,
       totalPages: Math.ceil(total / limit) || 1,
-      pendingCount,
-      approvedCount,
-      rejectedCount,
-      notSubmittedCount,
+      pendingCount: countsData.pendingCount,
+      approvedCount: countsData.approvedCount,
+      rejectedCount: countsData.rejectedCount,
+      notSubmittedCount: countsData.notSubmittedCount,
     },
   });
 }
@@ -1894,6 +1981,9 @@ export async function adminReviewProof(request: AuthenticatedRequest, response: 
       medalDelivery: true,
     },
   });
+
+  invalidateProofCountsCache();
+  invalidateAdminOverviewCache();
 
   response.json({
     data: refreshed ?? registration,
