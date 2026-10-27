@@ -67,7 +67,7 @@ app.use("/api/payments/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ limit: "15mb", extended: true }));
 
-app.get("/health", (_request, response) => {
+app.get(["/health", "/api/health"], (_request, response) => {
   response.json({ status: "ok", service: "runnerup-api" });
 });
 

@@ -292,6 +292,13 @@ export default function AdminProofsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Ensure canonical domain www.runnerup.in on browser
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname === "runnerup.in") {
+      window.location.replace(`https://www.runnerup.in${window.location.pathname}${window.location.search}`);
+    }
+  }, []);
+
   const load = useCallback(async (targetPage = page) => {
     setLoading(true);
     try {

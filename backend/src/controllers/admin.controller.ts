@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { Prisma } from "@prisma/client";
+import { Prisma, ProofStatus } from "@prisma/client";
 import { z } from "zod";
 import { createClerkClient } from "@clerk/backend";
 import { env } from "../config/env.js";
@@ -1690,20 +1690,34 @@ export async function adminDeleteUser(
 
 export async function adminListProofs(request: AuthenticatedRequest, response: Response) {
   const { page, pageSize, skip } = parsePage(request);
-  const statusParam = q(request, "status");
+  const rawStatus = q(request, "status")?.trim().toUpperCase();
   const search = q(request, "q")?.trim();
 
-  // If status is not provided, default to SUBMITTED. If status is "ALL", do not filter by proofStatus.
-  const filterStatus = statusParam === undefined ? "SUBMITTED" : statusParam === "ALL" ? null : statusParam;
+  let filterStatus: ProofStatus | null = null;
+  if (!rawStatus || rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
+    filterStatus = ProofStatus.SUBMITTED;
+  } else if (rawStatus === "APPROVED") {
+    filterStatus = ProofStatus.APPROVED;
+  } else if (rawStatus === "REJECTED") {
+    filterStatus = ProofStatus.REJECTED;
+  } else if (rawStatus === "NOT_SUBMITTED") {
+    filterStatus = ProofStatus.NOT_SUBMITTED;
+  } else if (rawStatus === "ALL") {
+    filterStatus = null;
+  } else {
+    // If unknown status was passed, default gracefully to SUBMITTED
+    filterStatus = ProofStatus.SUBMITTED;
+  }
 
   const where: Prisma.RegistrationWhereInput = {
-    ...(filterStatus ? { proofStatus: filterStatus as never } : {}),
+    ...(filterStatus ? { proofStatus: filterStatus } : {}),
     ...(search
       ? {
           OR: [
             { bibNumber: { contains: search, mode: "insensitive" } },
             { shippingName: { contains: search, mode: "insensitive" } },
             { shippingPhone: { contains: search, mode: "insensitive" } },
+            { shippingCity: { contains: search, mode: "insensitive" } },
             { user: { name: { contains: search, mode: "insensitive" } } },
             { user: { email: { contains: search, mode: "insensitive" } } },
             { user: { phone: { contains: search, mode: "insensitive" } } },
@@ -1714,8 +1728,14 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
 
   const limit = Math.min(Math.max(1, pageSize || 25), 50);
 
-  const [total, items] = await Promise.all([
-    prisma.registration.count({ where }),
+  // Fast single GROUP BY for tab counts + paginated items
+  const [countsRows, totalForSearch, items] = await Promise.all([
+    prisma.$queryRaw<Array<{ proofStatus: string; count: number }>>`
+      SELECT "proofStatus", COUNT(*)::int as count 
+      FROM "Registration" 
+      GROUP BY "proofStatus"
+    `.catch(() => [] as Array<{ proofStatus: string; count: number }>),
+    search ? prisma.registration.count({ where }) : Promise.resolve(null),
     prisma.registration.findMany({
       where,
       orderBy: { registeredAt: "desc" },
@@ -1730,13 +1750,37 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     }),
   ]);
 
+  const countsMap: Record<string, number> = {};
+  for (const row of countsRows) {
+    countsMap[row.proofStatus] = row.count;
+  }
+  const pendingCount = countsMap[ProofStatus.SUBMITTED] ?? 0;
+  const approvedCount = countsMap[ProofStatus.APPROVED] ?? 0;
+  const rejectedCount = countsMap[ProofStatus.REJECTED] ?? 0;
+  const notSubmittedCount = countsMap[ProofStatus.NOT_SUBMITTED] ?? 0;
+  const allCount = pendingCount + approvedCount + rejectedCount + notSubmittedCount;
+
+  const total =
+    totalForSearch !== null
+      ? totalForSearch
+      : filterStatus === ProofStatus.SUBMITTED
+      ? pendingCount
+      : filterStatus === ProofStatus.APPROVED
+      ? approvedCount
+      : filterStatus === ProofStatus.REJECTED
+      ? rejectedCount
+      : allCount;
+
   response.json({
     data: items,
     meta: {
       total,
       page,
       pageSize: limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limit) || 1,
+      pendingCount,
+      approvedCount,
+      rejectedCount,
     },
   });
 }

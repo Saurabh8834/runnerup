@@ -39,10 +39,17 @@ export function getApiUrl(path = "") {
     return cleanPath;
   }
 
-  // In production browser on runnerup.in, use relative path directly so Vercel proxies
-  // seamlessly without cross-origin CORS preflights, mobile carrier blocking, or SSL drops.
-  if (typeof window !== "undefined" && window.location.hostname.includes("runnerup.in")) {
-    return cleanPath;
+  // In production browser:
+  if (typeof window !== "undefined") {
+    // If the browser is on apex runnerup.in, explicitly target www.runnerup.in
+    // to eliminate Vercel's 308 Permanent Redirect (which strips auth headers and drops CORS on mobile)
+    if (window.location.hostname === "runnerup.in") {
+      return `https://www.runnerup.in${cleanPath}`;
+    }
+    // If on www.runnerup.in, relative path is same-origin
+    if (window.location.hostname === "www.runnerup.in") {
+      return cleanPath;
+    }
   }
 
   // In external or preview environments, communicate directly with the live HTTPS backend
@@ -53,59 +60,69 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
   const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
   const primaryUrl = getApiUrl(cleanPath);
 
-  try {
-    const res = await fetch(primaryUrl, init);
-    // If tunnel down (530) or gateway error (502/503/504), attempt alternative backend
-    if (res.status === 530 || res.status === 502 || res.status === 503 || res.status === 504) {
-      if (typeof window !== "undefined") {
-        // Try direct backend if primary was relative, or vice-versa
-        const fallbackUrl = primaryUrl.startsWith("http")
-          ? cleanPath
-          : `${CLOUD_BACKEND_URL}${cleanPath}`;
-        try {
-          const fallbackRes = await fetch(fallbackUrl, init);
-          if (fallbackRes.ok || fallbackRes.status < 500) {
-            return fallbackRes;
-          }
-        } catch {
-          // ignore and continue
-        }
+  const isBrowser = typeof window !== "undefined";
+  const isProduction = !isDev && isBrowser && window.location.hostname.includes("runnerup.in");
+
+  // Multi-tier redundancy:
+  // 1) Primary (same-origin / configured)
+  // 2) Canonical Vercel Proxy (https://www.runnerup.in/api/...)
+  // 3) Cloudflare Tunnel (https://api.runnerup.in/api/...)
+  // 4) Railway 24/7 Backup (https://runnerup-production.up.railway.app/api/...)
+  const candidates: string[] = [primaryUrl];
+  if (isProduction) {
+    const list = [
+      `https://www.runnerup.in${cleanPath}`,
+      `${CLOUD_BACKEND_URL}${cleanPath}`,
+      `${RAILWAY_FALLBACK_URL}${cleanPath}`,
+    ];
+    for (const url of list) {
+      if (!candidates.includes(url)) {
+        candidates.push(url);
       }
     }
-    return res;
-  } catch (err) {
-    // Network failure (e.g. mobile DNS drop, preflight failure, connection timeout)
-    if (typeof window !== "undefined") {
-      // First fallback: Try the alternative URL format (relative proxy or direct API)
-      const altUrl = primaryUrl.startsWith("http")
-        ? cleanPath
-        : `${CLOUD_BACKEND_URL}${cleanPath}`;
-      try {
-        const altRes = await fetch(altUrl, init);
-        return altRes;
-      } catch {
-        // ignore and try railway fallback
+  }
+
+  let lastError: unknown = null;
+  let lastResponse: Response | null = null;
+
+  for (let i = 0; i < candidates.length; i++) {
+    const candidateUrl = candidates[i];
+    try {
+      // 10s timeout per candidate to prevent mobile hanging
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(candidateUrl, {
+        ...init,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+
+      // Success or valid client response (200 - 499)
+      if (res.ok || (res.status >= 200 && res.status < 500)) {
+        return res;
       }
 
-      // Second fallback: Try Railway backup server
-      try {
-        const railwayUrl = `${RAILWAY_FALLBACK_URL}${cleanPath}`;
-        const railwayRes = await fetch(railwayUrl, init);
-        if (railwayRes.ok || railwayRes.status < 500) {
-          return railwayRes;
-        }
-      } catch {
-        // ignore
-      }
+      // 5xx error (500, 502, 503, 504, 521, 530) -> record and try next candidate
+      lastResponse = res;
+    } catch (err) {
+      lastError = err;
+      // Continue to next candidate
     }
-    throw err;
   }
+
+  if (lastResponse) {
+    return lastResponse;
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Failed to fetch");
 }
 
 export function authHeaders(token: string | null | undefined, init: HeadersInit = {}): HeadersInit {
   return {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? { "x-admin-emergency-token": token } : {}),
     ...init,
   };
 }
