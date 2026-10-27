@@ -543,10 +543,16 @@ export default function AdminCertificatesPage() {
         <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-[var(--line)] bg-[var(--panel)]">
           {/* Search Box */}
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)] pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)] pointer-events-none z-10" />
             <input
               type="text"
-              className="input pl-9 pr-8 w-full text-sm h-10"
+              className="input has-left-icon w-full text-sm h-10"
+              style={{
+                paddingLeft: "2.5rem",
+                paddingInlineStart: "2.5rem",
+                paddingRight: "2.5rem",
+                paddingInlineEnd: "2.5rem",
+              }}
               placeholder="Search runner name, email, bib #, cert #..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}

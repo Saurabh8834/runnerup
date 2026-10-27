@@ -704,6 +704,14 @@
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
+.admin-app .input.has-left-icon,
+.admin-app .input.pl-9,
+.admin-app .input.pl-10,
+.admin-app .input.pl-11 {
+  padding-left: 2.85rem !important;
+  padding-inline-start: 2.85rem !important;
+}
+
 .admin-app .input::placeholder { color: var(--muted-soft); }
 
 .admin-app .input:focus {

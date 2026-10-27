@@ -187,7 +187,7 @@ function ProofSearchInput({
 
   return (
     <div className="relative flex items-center w-full">
-      <div className="absolute left-3.5 pointer-events-none text-[var(--muted)] flex items-center">
+      <div className="absolute left-3.5 pointer-events-none text-[var(--muted)] flex items-center z-10">
         {loading ? (
           <Loader2 className="h-4 w-4 animate-spin text-[var(--sage)]" />
         ) : (
@@ -196,8 +196,14 @@ function ProofSearchInput({
       </div>
       <input
         type="text"
-        className="input pl-10 pr-28 w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
-        placeholder="Search..."
+        className="input has-left-icon w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
+        style={{
+          paddingLeft: "2.85rem",
+          paddingInlineStart: "2.85rem",
+          paddingRight: "7.25rem",
+          paddingInlineEnd: "7.25rem",
+        }}
+        placeholder="Search"
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={handleKeyDown}
