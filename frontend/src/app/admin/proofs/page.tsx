@@ -197,7 +197,7 @@ function ProofSearchInput({
       <input
         type="text"
         className="input pl-10 pr-28 w-full h-11 text-sm bg-[var(--panel)] border-[var(--line)] shadow-xs rounded-xl focus:border-[var(--sage)] focus:ring-1 focus:ring-[var(--sage)]"
-        placeholder="Search proof by runner name, email, phone number, bib # (e.g. Vinay, IAFD-996424, 7676009168)..."
+        placeholder="Search..."
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={handleKeyDown}

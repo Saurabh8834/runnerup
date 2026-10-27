@@ -19,6 +19,63 @@ type Row = {
   payment?: { status: string; amountInPaise: number; paidAt?: string | null } | null;
 };
 
+function RegistrationStatusBadge({ status }: { status: string }) {
+  if (status === "CONFIRMED" || status === "COMPLETED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-xs">
+        ● {status}
+      </span>
+    );
+  }
+  if (status === "PENDING_PAYMENT") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 shadow-xs">
+        ● {status}
+      </span>
+    );
+  }
+  if (status === "CANCELLED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 shadow-xs">
+        ● {status}
+      </span>
+    );
+  }
+  return <span className="badge">{status}</span>;
+}
+
+function ProofStatusBadge({ status }: { status: string }) {
+  if (status === "APPROVED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-xs">
+        ● APPROVED
+      </span>
+    );
+  }
+  if (status === "SUBMITTED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-xs">
+        ● SUBMITTED
+      </span>
+    );
+  }
+  if (status === "NOT_SUBMITTED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 shadow-xs">
+        ● NOT_SUBMITTED
+      </span>
+    );
+  }
+  if (status === "REJECTED") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-xs">
+        ● REJECTED
+      </span>
+    );
+  }
+  return <span className="badge">{status}</span>;
+}
+
 export default function AdminRegistrationsPage() {
   const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<Row[]>([]);
@@ -298,10 +355,10 @@ export default function AdminRegistrationsPage() {
                   <td>{row.event.title}</td>
                   <td>{row.distance}</td>
                   <td>
-                    <span className="badge">{row.status}</span>
+                    <RegistrationStatusBadge status={row.status} />
                   </td>
                   <td>
-                    <span className="badge">{row.proofStatus}</span>
+                    <ProofStatusBadge status={row.proofStatus} />
                   </td>
                   <td>
                     <div className="flex items-center gap-2">

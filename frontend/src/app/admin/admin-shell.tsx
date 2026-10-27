@@ -4,7 +4,7 @@ import { useAuth, useClerk, useUser } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   adminFetch,
   AdminApiError,
@@ -748,6 +748,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const meLoadedRef = useRef(false);
 
   useEffect(() => {
     setEmergencyTokenState(getEmergencyAdminToken());
@@ -757,6 +758,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     clearEmergencyAdminSession();
     setEmergencyTokenState(null);
     setMe(null);
+    meLoadedRef.current = false;
     if (isSignedIn) {
       void signOut({ redirectUrl: "/sign-in?redirect_url=/admin" });
     } else {
@@ -767,7 +769,9 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
   const effectiveSignedIn = isSignedIn || Boolean(emergencyToken);
 
   const loadMe = useCallback(async () => {
-    setLoading(true);
+    if (!meLoadedRef.current) {
+      setLoading(true);
+    }
     setError(null);
     setErrorStatus(null);
     try {
@@ -778,6 +782,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       token = token || getEmergencyAdminToken();
       const json = await adminFetch<{ data: AdminMe }>("/api/admin/me", token);
       setMe(json.data);
+      meLoadedRef.current = true;
     } catch (err) {
       // Auto-fallback: If signed into Clerk with admin email, auto-acquire authenticated admin session
       const userEmails = [
@@ -807,13 +812,13 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
             setEmergencyTokenState(json.data.token);
             const retryJson = await adminFetch<{ data: AdminMe }>("/api/admin/me", json.data.token);
             setMe(retryJson.data);
+            meLoadedRef.current = true;
             return;
           }
         } catch (autoErr) {
           console.error("Auto admin elevation failed:", autoErr);
         }
       }
-
 
       setMe(null);
       if (err instanceof AdminApiError) {
@@ -826,7 +831,7 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [getToken, isSignedIn, user]);
+  }, [getToken, isSignedIn, user?.id, user?.primaryEmailAddress?.emailAddress]);
 
   useEffect(() => {
     if (!isLoaded && !emergencyToken) return;
@@ -835,10 +840,12 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
       setMe(null);
       setError(null);
       setErrorStatus(null);
+      meLoadedRef.current = false;
       return;
     }
+    if (meLoadedRef.current && me) return;
     void loadMe();
-  }, [isLoaded, effectiveSignedIn, loadMe, emergencyToken]);
+  }, [isLoaded, effectiveSignedIn, emergencyToken, loadMe, me]);
 
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);

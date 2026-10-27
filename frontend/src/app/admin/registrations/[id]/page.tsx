@@ -223,8 +223,25 @@ export default function AdminRegistrationDetailPage() {
 
         <AdminPanel title="Proof">
           <div className="space-y-2 text-sm">
-            <p>
-              Status: <span className="badge">{data.proofStatus}</span>
+            <p className="flex items-center gap-2">
+              <span>Status:</span>
+              {data.proofStatus === "APPROVED" ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  ● APPROVED
+                </span>
+              ) : data.proofStatus === "SUBMITTED" ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  ● SUBMITTED
+                </span>
+              ) : data.proofStatus === "NOT_SUBMITTED" ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                  ● NOT_SUBMITTED
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40">
+                  ● {data.proofStatus}
+                </span>
+              )}
             </p>
             {data.finishTimeSeconds != null ? (
               <p className="admin-muted">Finish seconds: {data.finishTimeSeconds}</p>
