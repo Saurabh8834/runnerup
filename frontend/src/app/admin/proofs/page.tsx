@@ -20,6 +20,7 @@ import {
   RefreshCw,
   FileCheck,
   ShieldAlert,
+  UploadCloud,
 } from "lucide-react";
 
 /* ── Toast ──────────────────────────────────────────────── */
@@ -237,6 +238,7 @@ type ProofMeta = {
   pendingCount?: number;
   approvedCount?: number;
   rejectedCount?: number;
+  notSubmittedCount?: number;
 };
 
 function formatSecondsToHms(secs: number | null | undefined) {
@@ -262,7 +264,7 @@ export default function AdminProofsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, total: 0 });
+  const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0, notSubmitted: 0, total: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -271,7 +273,7 @@ export default function AdminProofsPage() {
   // Search & Filters
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "ALL">("SUBMITTED");
+  const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED" | "ALL">("SUBMITTED");
 
   // Custom verified times per proof id
   const [verifiedTimes, setVerifiedTimes] = useState<Record<string, { h: string; m: string; s: string }>>({});
@@ -326,6 +328,7 @@ export default function AdminProofsPage() {
           pending: json.meta.pendingCount,
           approved: json.meta.approvedCount ?? 0,
           rejected: json.meta.rejectedCount ?? 0,
+          notSubmitted: json.meta.notSubmittedCount ?? 0,
           total: json.meta.total,
         });
       }
@@ -434,6 +437,34 @@ export default function AdminProofsPage() {
     }
   }
 
+  async function handleAdminUpload(regId: string, file: File) {
+    if (!file) return;
+    try {
+      toast("info", "Uploading activity proof screenshot…");
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const dataUrl = reader.result as string;
+          const token = await getFastAdminToken(getToken, isSignedIn);
+          await adminFetch(`/api/registrations/${regId}/proof`, token, {
+            method: "POST",
+            body: JSON.stringify({
+              activityImageUrl: dataUrl,
+              sourceApp: "Admin Upload",
+            }),
+          });
+          toast("success", "Proof uploaded successfully!");
+          await load();
+        } catch (err) {
+          toast("error", err instanceof Error ? err.message : "Failed to upload proof");
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      toast("error", "Could not process image file");
+    }
+  }
+
   return (
     <>
       <ToastContainer toasts={toasts} dismiss={dismiss} />
@@ -454,7 +485,7 @@ export default function AdminProofsPage() {
         <AdminPageHeader
           kicker="Operations"
           title="Proof queue & verification"
-          description={`${counts.pending} pending review · ${counts.approved} approved · ${counts.rejected} rejected`}
+          description={`${counts.pending} pending review · ${counts.approved} approved · ${counts.rejected} rejected · ${counts.notSubmitted} not submitted`}
           actions={
             <button
               className="btn btn-secondary flex items-center gap-1.5"
@@ -539,6 +570,21 @@ export default function AdminProofsPage() {
                 <span>Rejected</span>
                 <span className="rounded-full bg-rose-500/20 text-rose-500 px-1.5 py-0.2 text-[0.68rem] font-bold">
                   {counts.rejected}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("NOT_SUBMITTED")}
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
+                  statusFilter === "NOT_SUBMITTED"
+                    ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                <span>Not Submitted</span>
+                <span className="rounded-full bg-slate-500/20 text-slate-400 px-1.5 py-0.2 text-[0.68rem] font-bold">
+                  {counts.notSubmitted}
                 </span>
               </button>
 
@@ -653,6 +699,10 @@ export default function AdminProofsPage() {
                           ) : currentStatus === "REJECTED" ? (
                             <span className="badge bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1">
                               <ShieldAlert className="h-3 w-3" /> Rejected
+                            </span>
+                          ) : currentStatus === "NOT_SUBMITTED" ? (
+                            <span className="badge bg-slate-500/15 text-slate-400 border border-slate-500/30 flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> Not Submitted
                             </span>
                           ) : (
                             <span className="badge bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1">
@@ -802,16 +852,30 @@ export default function AdminProofsPage() {
                     <div className="flex flex-col">
                       <p className="text-xs font-semibold text-[var(--muted)] mb-2 flex items-center justify-between">
                         <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> GPS Activity Screenshot</span>
-                        {row.proofUpload && (
-                          <a
-                            href={row.proofUpload.activityImageUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5"
-                          >
-                            Full size <ExternalLink className="h-2.5 w-2.5" />
-                          </a>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <label className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5 cursor-pointer">
+                            <UploadCloud className="h-2.5 w-2.5" /> {row.proofUpload ? "Replace" : "Upload"}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) void handleAdminUpload(row.id, file);
+                              }}
+                            />
+                          </label>
+                          {row.proofUpload && (
+                            <a
+                              href={row.proofUpload.activityImageUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[0.7rem] text-[var(--sage)] hover:underline flex items-center gap-0.5"
+                            >
+                              Full size <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          )}
+                        </div>
                       </p>
                       {row.proofUpload ? (
                         <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-black/5 flex-1 min-h-[180px] max-h-[260px]">
@@ -831,8 +895,21 @@ export default function AdminProofsPage() {
                           </button>
                         </div>
                       ) : (
-                        <div className="grid place-items-center rounded-xl border border-dashed border-[var(--line)] text-sm text-[var(--muted)] flex-1 min-h-[180px]">
-                          No image uploaded
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--line)] p-4 text-center flex-1 min-h-[180px] gap-2">
+                          <p className="text-xs text-[var(--muted)]">No GPS screenshot uploaded by runner yet.</p>
+                          <label className="btn btn-secondary text-xs h-8 px-3 cursor-pointer inline-flex items-center gap-1.5 hover:border-[var(--sage)]">
+                            <UploadCloud className="h-3.5 w-3.5" />
+                            <span>Upload Proof for Runner</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) void handleAdminUpload(row.id, file);
+                              }}
+                            />
+                          </label>
                         </div>
                       )}
                     </div>

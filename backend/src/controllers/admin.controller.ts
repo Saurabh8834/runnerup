@@ -1694,7 +1694,10 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   const search = q(request, "q")?.trim();
 
   let filterStatus: ProofStatus | null = null;
-  if (!rawStatus || rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
+  // If an active search term is provided, search across all statuses unless an explicit filter was chosen
+  if (search && (!rawStatus || rawStatus === "ALL" || rawStatus === "SUBMITTED" || rawStatus === "PENDING")) {
+    filterStatus = null;
+  } else if (!rawStatus || rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
     filterStatus = ProofStatus.SUBMITTED;
   } else if (rawStatus === "APPROVED") {
     filterStatus = ProofStatus.APPROVED;
@@ -1705,8 +1708,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   } else if (rawStatus === "ALL") {
     filterStatus = null;
   } else {
-    // If unknown status was passed, default gracefully to SUBMITTED
-    filterStatus = ProofStatus.SUBMITTED;
+    filterStatus = null;
   }
 
   const where: Prisma.RegistrationWhereInput = {
@@ -1769,6 +1771,8 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       ? approvedCount
       : filterStatus === ProofStatus.REJECTED
       ? rejectedCount
+      : filterStatus === ProofStatus.NOT_SUBMITTED
+      ? notSubmittedCount
       : allCount;
 
   response.json({
@@ -1781,6 +1785,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       pendingCount,
       approvedCount,
       rejectedCount,
+      notSubmittedCount,
     },
   });
 }

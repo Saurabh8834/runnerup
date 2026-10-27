@@ -54,5 +54,6 @@ scratch/
 backend_log.txt
 backend/uploads/*
 !backend/uploads/.gitkeep
+backend/scripts/
 
 

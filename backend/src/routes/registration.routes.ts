@@ -11,7 +11,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 export const registrationRouter = Router();
 
 registrationRouter.post("/", optionalClerkAuth, asyncHandler(createRegistration));
-registrationRouter.post("/:id/proof", requireClerkAuth, asyncHandler(submitProof));
+registrationRouter.post("/:id/proof", optionalClerkAuth, asyncHandler(submitProof));
 registrationRouter.post(
   "/:id/review",
   requireClerkAuth,

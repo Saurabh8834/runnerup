@@ -167,6 +167,8 @@ export const submitProofSchema = z.object({
     ),
   sourceApp: z.string().min(2, "Source app is required"),
   finishTimeSeconds: z.number().int().positive().nullable().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
 });
 
 export const reviewProofSchema = z.object({
