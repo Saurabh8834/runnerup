@@ -77,6 +77,79 @@ function useToast() {
   return { toasts, dismiss, toast };
 }
 
+/* ── Proof Thumbnail with Resilient Error State ──────────────── */
+function ProofThumbnail({
+  url,
+  onZoom,
+  onUpload,
+}: {
+  url: string;
+  onZoom: (url: string) => void;
+  onUpload: (file: File) => void;
+}) {
+  const [loadFailed, setLoadFailed] = useState(false);
+  const optimizedUrl = optimizeCloudinaryUrl(url, 600);
+  const fullUrl = optimizeCloudinaryUrl(url, 1600);
+
+  if (loadFailed) {
+    return (
+      <div className="flex flex-col items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center flex-1 min-h-[180px] gap-2.5">
+        <AlertCircle className="h-6 w-6 text-amber-400" />
+        <div>
+          <p className="text-xs font-semibold text-amber-300">Screenshot Link Expired</p>
+          <p className="text-[11px] text-[var(--muted)] mt-0.5">
+            Original image link is unavailable on the server.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <label className="btn btn-secondary text-xs h-7 px-3 cursor-pointer inline-flex items-center gap-1 hover:border-[var(--sage)]">
+            <UploadCloud className="h-3 w-3" />
+            <span>Re-upload File</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onUpload(f);
+              }}
+            />
+          </label>
+          <a
+            href={fullUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-[var(--sage)] hover:underline flex items-center gap-0.5"
+          >
+            Direct Link <ExternalLink className="h-2.5 w-2.5" />
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-zinc-950/70 flex-1 min-h-[180px] max-h-[260px] flex items-center justify-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        alt="GPS proof screenshot"
+        className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
+        src={optimizedUrl}
+        onClick={() => onZoom(fullUrl)}
+        onError={() => setLoadFailed(true)}
+        loading="lazy"
+      />
+      <button
+        type="button"
+        onClick={() => onZoom(fullUrl)}
+        className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold gap-1.5"
+      >
+        <ZoomIn className="h-4 w-4" /> Click to Zoom
+      </button>
+    </div>
+  );
+}
+
 /* ── Reject Modal ───────────────────────────────────────── */
 function RejectModal({
   open,
@@ -878,23 +951,11 @@ export default function AdminProofsPage() {
                         </div>
                       </p>
                       {row.proofUpload ? (
-                        <div className="relative group rounded-xl overflow-hidden border border-[var(--line)] bg-zinc-950/70 flex-1 min-h-[180px] max-h-[260px] flex items-center justify-center">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            alt="GPS proof screenshot"
-                            className="max-h-full max-w-full object-contain cursor-pointer transition-transform duration-200 group-hover:scale-105"
-                            src={optimizeCloudinaryUrl(row.proofUpload.activityImageUrl, 600)}
-                            onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
-                            loading="lazy"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setLightboxUrl(optimizeCloudinaryUrl(row.proofUpload?.activityImageUrl, 1600))}
-                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-semibold gap-1.5"
-                          >
-                            <ZoomIn className="h-4 w-4" /> Click to Zoom
-                          </button>
-                        </div>
+                        <ProofThumbnail
+                          url={row.proofUpload.activityImageUrl}
+                          onZoom={(zoomUrl) => setLightboxUrl(zoomUrl)}
+                          onUpload={(file) => void handleAdminUpload(row.id, file)}
+                        />
                       ) : (
                         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--line)] p-4 text-center flex-1 min-h-[180px] gap-2">
                           <p className="text-xs text-[var(--muted)]">No GPS screenshot uploaded by runner yet.</p>

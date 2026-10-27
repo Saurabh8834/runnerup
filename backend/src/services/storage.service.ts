@@ -90,9 +90,8 @@ export async function processAndStoreImage(
     };
   }
 
-  // If Cloudinary is explicitly forced via env var, try it with safe fallback
-  const forceCloudinary = process.env.FORCE_CLOUDINARY_UPLOAD === "true";
-  if (forceCloudinary && isCloudinaryConfigured()) {
+  // 1. Prioritize Cloudinary so uploads persist permanently across all server redeploys and restarts
+  if (isCloudinaryConfigured()) {
     try {
       const uploaded = await uploadImageToCloudinary(filePayload, `runnerup/${subfolder}`);
       return {
