@@ -21,6 +21,7 @@ export type DefaultEvent = {
   verifiedResults?: number;
   cities?: number;
   resultNote?: string;
+  activityTypes?: string[];
 };
 
 export const defaultEvents: DefaultEvent[] = [
@@ -38,6 +39,7 @@ export const defaultEvents: DefaultEvent[] = [
     city: "Virtual (All India)",
     featured: true,
     medalIncluded: true,
+    activityTypes: ["running", "cycling", "walking"],
     bannerImageUrl: "/images/event-medal.webp",
     medalImageUrl: "/images/event-medal.webp",
     banner: "Air Force Day Virtual Challenge",

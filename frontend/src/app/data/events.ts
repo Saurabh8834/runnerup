@@ -56,6 +56,7 @@ export const allPublicEvents: PublicEvent[] = [
     reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
+    activityTypes: ["running", "cycling", "walking"],
     startsAt: "2026-10-25T00:00:00.000Z",
     endsAt: "2026-10-30T23:59:59.000Z",
     benefits: [

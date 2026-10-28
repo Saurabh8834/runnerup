@@ -37,6 +37,12 @@ function formatPrice(price: string) {
   return price.replace(/^Rs\.\s*/, "₹");
 }
 
+const activityKeyMap: Record<string, string> = {
+  run: "running",
+  walk: "walking",
+  cycle: "cycling",
+};
+
 export function EventSelect({ event }: { event: PublicEvent }) {
   const [activity, setActivity] = useState(activities[0].key);
   const distances = event.distance.split(" / ");
@@ -177,6 +183,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                     signedInLabel="Register now"
                     signedOutLabel={`Register now - ${amount}`}
                     slug={event.slug}
+                    activity={activityKeyMap[activity] || "running"}
                   />
                   <Link
                     className="btn btn-secondary btn-full gap-2 text-sm"
@@ -240,7 +247,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                   return (
                     <Link
                       key={distance}
-                      href={`/register?event=${encodeURIComponent(event.slug)}&distance=${encodeURIComponent(distance)}`}
+                      href={`/register?event=${encodeURIComponent(event.slug)}&distance=${encodeURIComponent(distance)}&activity=${encodeURIComponent(activityKeyMap[activity] || "running")}`}
                       className={`group relative flex flex-col justify-between rounded-2xl border bg-(--panel) p-3.5 sm:p-4 transition-all duration-200 hover:-translate-y-1 hover:border-amber-400/50 hover:shadow-lg active:scale-95 ${t.chip}`}
                     >
                       {isPopular && (

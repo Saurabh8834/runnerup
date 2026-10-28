@@ -130,7 +130,8 @@ export function mapApiEventToPublic(
       (isPast ? "Medal + certificate" : "Register now"),
     couponCode: event.couponCode ?? undefined,
     showCouponOnCard: event.showCouponOnCard ?? undefined,
-    activityTypes: event.activityTypes ?? ["running"],
+    activityTypes:
+      event.activityTypes?.length ? event.activityTypes : staticMatch?.activityTypes ?? ["running", "cycling", "walking"],
     benefits: event.benefits ?? staticMatch?.benefits ?? [],
     status: isPast ? "past" : "upcoming",
     startsAt: event.startsAt ?? undefined,

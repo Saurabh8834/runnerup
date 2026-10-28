@@ -228,6 +228,15 @@ function ConfettiOverlay() {
 
 
 
+function normalizeActivityType(val?: string | null): string {
+  if (!val) return "running";
+  const lower = val.toLowerCase().trim();
+  if (lower.startsWith("cycl") || lower === "ride" || lower === "bike") return "cycling";
+  if (lower.startsWith("walk")) return "walking";
+  if (lower.startsWith("run")) return "running";
+  return lower;
+}
+
 function PaymentRegistrationFormInner() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
@@ -235,6 +244,11 @@ function PaymentRegistrationFormInner() {
   const searchParams = useSearchParams();
   const eventFromQuery = searchParams.get("event")?.trim() ?? "";
   const distanceFromQuery = searchParams.get("distance")?.trim() ?? "";
+  const rawActivityQuery =
+    searchParams.get("activity")?.trim() ||
+    searchParams.get("activityType")?.trim() ||
+    "";
+  const activityFromQuery = normalizeActivityType(rawActivityQuery);
 
   const [status, setStatus] = useState<"idle" | "creating" | "paying" | "paid" | "error">("idle");
   const [message, setMessage] = useState("Complete the form and continue to secure checkout.");
@@ -247,7 +261,9 @@ function PaymentRegistrationFormInner() {
     eventFromQuery || fallbackEvents[0].value,
   );
   const [selectedDistance, setSelectedDistance] = useState(distanceFromQuery || "");
-  const [selectedActivity, setSelectedActivity] = useState("running");
+  const [selectedActivity, setSelectedActivity] = useState(
+    rawActivityQuery ? activityFromQuery : "running",
+  );
   const [selectedTshirt, setSelectedTshirt] = useState("L");
   const [runnerName, setRunnerName] = useState("");
   const [runnerEmail, setRunnerEmail] = useState("");
@@ -389,15 +405,26 @@ function PaymentRegistrationFormInner() {
 
         const open = rows
           .filter((row) => row.registrationOpen !== false)
-          .map((row) => ({
-            label: row.title,
-            value: row.slug,
-            amount: `₹${Math.round(row.priceInPaise / 100)}`,
-            priceInPaise: row.priceInPaise,
-            couponCode: row.couponCode ?? null,
-            distances: row.distances?.length ? row.distances : ["5 km"],
-            activityTypes: (row as { activityTypes?: string[] }).activityTypes ?? ["running"],
-          }));
+          .map((row) => {
+            const rawActs = (row as { activityTypes?: string[] }).activityTypes;
+            const actSet = new Set(
+              Array.isArray(rawActs) && rawActs.length > 0
+                ? rawActs
+                : ["running", "cycling", "walking"],
+            );
+            actSet.add("running");
+            actSet.add("cycling");
+            actSet.add("walking");
+            return {
+              label: row.title,
+              value: row.slug,
+              amount: `₹${Math.round(row.priceInPaise / 100)}`,
+              priceInPaise: row.priceInPaise,
+              couponCode: row.couponCode ?? null,
+              distances: row.distances?.length ? row.distances : ["5 km"],
+              activityTypes: Array.from(actSet),
+            };
+          });
 
         if (cancelled || open.length === 0) return;
         setEvents(open);
@@ -479,7 +506,8 @@ function PaymentRegistrationFormInner() {
   );
 
   const distanceOptions = activeEvent?.distances ?? ["5 km"];
-  const activityOptions = activeEvent?.activityTypes ?? ["running"];
+  const activityOptions =
+    activeEvent?.activityTypes?.length ? activeEvent.activityTypes : ["running", "cycling", "walking"];
 
   useEffect(() => {
     if (distanceFromQuery && distanceOptions.includes(distanceFromQuery)) {
@@ -489,10 +517,17 @@ function PaymentRegistrationFormInner() {
     if (!distanceOptions.includes(selectedDistance)) {
       setSelectedDistance(distanceOptions[0] ?? "");
     }
+  }, [distanceOptions, distanceFromQuery, selectedDistance]);
+
+  useEffect(() => {
+    if (rawActivityQuery && activityOptions.includes(activityFromQuery)) {
+      setSelectedActivity(activityFromQuery);
+      return;
+    }
     if (!activityOptions.includes(selectedActivity)) {
       setSelectedActivity(activityOptions[0] ?? "running");
     }
-  }, [distanceOptions, distanceFromQuery, selectedDistance, activityOptions, selectedActivity]);
+  }, [activityOptions, activityFromQuery, rawActivityQuery, selectedActivity]);
 
   // Pincode auto-lookup handler
   async function handlePincodeChange(code: string) {
@@ -1232,7 +1267,13 @@ function PaymentRegistrationFormInner() {
                     >
                       {activityOptions.map((act) => (
                         <option key={act} value={act}>
-                          {act.charAt(0).toUpperCase() + act.slice(1)}
+                          {act === "running"
+                            ? "Running"
+                            : act === "cycling"
+                              ? "Cycling"
+                              : act === "walking"
+                                ? "Walking"
+                                : act.charAt(0).toUpperCase() + act.slice(1)}
                         </option>
                       ))}
                     </select>

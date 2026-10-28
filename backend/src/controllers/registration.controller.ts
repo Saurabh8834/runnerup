@@ -91,7 +91,8 @@ export async function createRegistration(request: AuthenticatedRequest, response
     throw new ApiError(422, "Selected distance is not available for this event");
   }
 
-  const availableTypes = event.activityTypes.length > 0 ? event.activityTypes : ["running"];
+  const rawTypes = event.activityTypes.length > 0 ? event.activityTypes : ["running", "cycling", "walking"];
+  const availableTypes = Array.from(new Set([...rawTypes, "running", "cycling", "walking"]));
   const selectedType = payload.activityType ?? "running";
   if (!availableTypes.includes(selectedType)) {
     throw new ApiError(422, "Selected activity type is not available for this event");

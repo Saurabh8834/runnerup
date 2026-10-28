@@ -59,6 +59,7 @@ export async function ensureDefaultEvents() {
       await prisma.event.create({
         data: {
           ...event,
+          activityTypes: event.activityTypes ?? ["running", "cycling", "walking"],
           medalIncluded: event.medalIncluded ?? true,
           benefits: event.benefits ?? [],
         },

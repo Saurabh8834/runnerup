@@ -32,7 +32,7 @@
     "resend": "^6.17.2",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.0.17"
-  },
-  "devDependencies": {}
+  }
 }
