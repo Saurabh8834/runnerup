@@ -44,11 +44,20 @@ export const prisma = basePrisma.$extends({
           try {
             return await query(args);
           } catch (error) {
-            if (isTransientDbError(error) && attempt < delays.length) {
+            const isPoolTimeout =
+              error &&
+              typeof error === "object" &&
+              (String((error as any).message || "").includes("Timed out fetching a new connection") ||
+                (error as any).code === "P2024");
+
+            // Avoid compounding pool queue delays by limiting pool timeout retries to 1 attempt
+            const maxAttempts = isPoolTimeout ? 1 : delays.length;
+
+            if (isTransientDbError(error) && attempt < maxAttempts) {
               const delay = delays[attempt];
               attempt++;
               logger.warn(
-                `[Prisma] Transient DB issue on ${model}.${operation} (attempt ${attempt}/${delays.length}). Reconnecting in ${delay}ms...`,
+                `[Prisma] Transient DB issue on ${model}.${operation} (attempt ${attempt}/${maxAttempts}). Reconnecting in ${delay}ms...`,
               );
               try {
                 await basePrisma.$connect().catch(() => {});

@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma.js";
 import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
+import { memoryCache } from "../utils/cache.js";
 
 type PrizeStatus = "pending" | "processing" | "ready" | "sent" | "dispatched" | "delivered" | "not_eligible";
 
@@ -116,25 +117,47 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
   const cleanDigits = query.replace(/\D/g, "");
   const alphanumeric = query.replace(/[^a-zA-Z0-9]/g, "");
 
-  const registration = await prisma.registration.findFirst({
-    where: {
+  const cacheKey = `prize:${query.toLowerCase()}`;
+  const cached = memoryCache.get<any>(cacheKey);
+  if (cached) {
+    return response.json(cached);
+  }
+
+  // Fast-path indexed lookups based on query pattern to prevent 3-second full table scans
+  let whereClause: any;
+
+  if (query.includes("@")) {
+    whereClause = {
+      user: { email: query.toLowerCase() },
+    };
+  } else if (/^MR-[A-Z0-9.]+-\d+$/i.test(query) || (alphanumeric.length === query.length && query.toUpperCase().startsWith("MR"))) {
+    whereClause = {
+      bibNumber: { equals: query, mode: "insensitive" },
+    };
+  } else if (cleanDigits.length >= 10) {
+    const tenDigits = cleanDigits.slice(-10);
+    whereClause = {
+      OR: [
+        { shippingPhone: { contains: tenDigits } },
+        { user: { phone: { contains: tenDigits } } },
+      ],
+    };
+  } else {
+    whereClause = {
       OR: [
         { id: query },
         { bibNumber: { equals: query, mode: "insensitive" } },
         { bibNumber: { contains: query, mode: "insensitive" } },
         ...(alphanumeric.length >= 4 ? [{ bibNumber: { contains: alphanumeric, mode: "insensitive" as const } }] : []),
-        ...(cleanDigits.length >= 4 ? [{ bibNumber: { contains: cleanDigits, mode: "insensitive" as const } }] : []),
-        { user: { email: { equals: query, mode: "insensitive" } } },
+        { user: { email: query.toLowerCase() } },
         { user: { name: { contains: query, mode: "insensitive" } } },
         { shippingName: { contains: query, mode: "insensitive" } },
-        ...(cleanDigits.length >= 8
-          ? [
-              { shippingPhone: { contains: cleanDigits.slice(-10) } },
-              { user: { phone: { contains: cleanDigits.slice(-10) } } },
-            ]
-          : []),
       ],
-    },
+    };
+  }
+
+  const registration = await prisma.registration.findFirst({
+    where: whereClause,
     orderBy: { registeredAt: "desc" },
     include: {
       user: { select: { name: true, email: true } },
@@ -168,7 +191,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     hasPrizes,
   );
 
-  response.json({
+  const payload = {
     data: {
       runner: {
         name: registration.user.name,
@@ -182,7 +205,10 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
       timeline,
       prizes,
     },
-  });
+  };
+
+  memoryCache.set(cacheKey, payload, 60);
+  response.json(payload);
 }
 
 export async function myPrizes(request: AuthenticatedRequest, response: Response) {

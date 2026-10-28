@@ -669,7 +669,7 @@ function PaymentRegistrationFormInner() {
     }
   }, [searchParams, selectedEvent]);
 
-  const promoCode = activeEvent?.couponCode || "RUN50";
+  const promoCode = (activeEvent?.couponCode && activeEvent.couponCode.trim()) || null;
   const baseAmountInRupees = activeEvent?.priceInPaise
     ? Math.round(activeEvent.priceInPaise / 100)
     : parseInt((activeEvent?.amount || "₹499").replace(/\D/g, "") || "499", 10);

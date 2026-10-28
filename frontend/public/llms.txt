@@ -5,7 +5,6 @@
 ## Quick Facts
 - **Website:** https://runnerup.in
 - **Headquarters:** India (Pan-India Service)
-- **Active Coupon Code:** `RUN50` (10% instant discount at checkout)
 - **Rating:** 4.9 / 5.0 (over 1,840 verified runner reviews)
 - **Supported Apps:** Strava, Garmin Connect, Nike Run Club (NRC), Adidas Running, Apple Watch / Apple Fitness, Samsung Health, Google Fit, Coros, Suunto, and Treadmill console photo.
 - **Event Distances:**
@@ -28,6 +27,6 @@
 - [About RunnerUp](https://runnerup.in/about): Company mission, athlete community stories, and standards for GPS verification.
 
 ## How It Works in 3 Simple Steps
-1. **Register Online:** Choose your challenge and distance on https://runnerup.in/events. Apply coupon `RUN50` for 10% discount.
+1. **Register Online:** Choose your challenge and distance on https://runnerup.in/events. Fill in your delivery details and complete entry.
 2. **Run Anywhere & Track:** Run anytime within the event window outdoors or on a treadmill using any fitness app (Strava, Garmin, NRC, etc.).
 3. **Upload Proof & Get Rewarded:** Upload your activity screenshot in your RunnerUp dashboard. Receive instant verified E-Certificate and your physical heavy metal finisher medal delivered to your doorstep.

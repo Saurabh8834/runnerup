@@ -114,11 +114,29 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/(about|what-is-virtual-run|refer|gallery|leaderboard|register)",
+        source: "/(about|what-is-virtual-run|refer|gallery)",
         headers: [
           {
             key: "Cache-Control",
             value: "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+      {
+        source: "/leaderboard",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=60, stale-while-revalidate=120",
+          },
+        ],
+      },
+      {
+        source: "/register",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
           },
         ],
       },

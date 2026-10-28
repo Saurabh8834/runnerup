@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export const syncUserSchema = z.object({
   clerkId: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-  name: z.string().min(1).max(200).optional(),
-  username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_]+$/).optional().nullable(),
-  phone: z.string().max(20).optional().nullable(),
-  avatarUrl: z.string().url().max(500).optional().nullable(),
+  email: z.string().email().optional().nullable().or(z.literal("")),
+  name: z.string().max(200).optional().nullable(),
+  username: z.string().max(100).optional().nullable(),
+  phone: z.string().max(30).optional().nullable(),
+  avatarUrl: z.string().max(1000).optional().nullable(),
 });
 
 export const checkReferralCodeSchema = z.object({
