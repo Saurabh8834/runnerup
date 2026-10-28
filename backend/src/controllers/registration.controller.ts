@@ -403,7 +403,12 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
   }
 
   if (!isAdmin) {
-    const isOwner = Boolean(clerkId && existing.user.clerkId && existing.user.clerkId === clerkId);
+    const userFromClerk = clerkId ? await prisma.user.findFirst({ where: { clerkId } }) : null;
+    const isOwner = Boolean(
+      (clerkId && existing.user.clerkId && existing.user.clerkId === clerkId) ||
+      (userFromClerk && existing.userId === userFromClerk.id) ||
+      (userFromClerk && userFromClerk.email && existing.user.email.toLowerCase() === userFromClerk.email.toLowerCase())
+    );
 
     const payloadPhone = payload.phone?.trim()?.replace(/[^0-9]/g, "");
     const payloadEmail = payload.email?.trim()?.toLowerCase();

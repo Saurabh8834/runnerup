@@ -5,6 +5,7 @@ import { ApiError } from "../utils/api-error.js";
 import { validateBody } from "../utils/validate.js";
 import { syncUserSchema } from "../validators/common.validator.js";
 import { prisma } from "../lib/prisma.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Sync the signed-in Clerk user into Postgres.
@@ -75,32 +76,115 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
 
   // Auto-relink orphaned registrations if user logged in via different account/phone
   if (user.email || user.phone) {
-    const cleanPhone = user.phone?.replace(/\D/g, "");
-    const unlinked = await prisma.registration.findMany({
-      where: {
-        userId: { not: user.id },
-        OR: [
-          ...(user.email ? [{ user: { email: { equals: user.email, mode: "insensitive" as const } } }] : []),
-          ...(cleanPhone && cleanPhone.length >= 8
-            ? [
-                { user: { phone: { contains: cleanPhone.slice(-10) } } },
-                { shippingPhone: { contains: cleanPhone.slice(-10) } },
-              ]
-            : []),
-        ],
-      },
-      select: { id: true },
-    });
+    try {
+      const cleanPhone = user.phone?.replace(/\D/g, "");
+      const unlinked = await prisma.registration.findMany({
+        where: {
+          userId: { not: user.id },
+          OR: [
+            ...(user.email ? [{ user: { email: { equals: user.email, mode: "insensitive" as const } } }] : []),
+            ...(cleanPhone && cleanPhone.length >= 8
+              ? [
+                  { user: { phone: { contains: cleanPhone.slice(-10) } } },
+                  { shippingPhone: { contains: cleanPhone.slice(-10) } },
+                ]
+              : []),
+          ],
+        },
+        select: {
+          id: true,
+          eventId: true,
+          distance: true,
+          status: true,
+          payment: { select: { status: true } },
+        },
+      });
 
-    if (unlinked.length > 0) {
-      await prisma.registration.updateMany({
-        where: { id: { in: unlinked.map((r) => r.id) } },
-        data: { userId: user.id },
-      });
-      user = await prisma.user.findFirst({
-        where: { id: user.id },
-        include: { registrations: registrationInclude },
-      });
+      if (unlinked.length > 0) {
+        // Fetch all registrations currently owned by this user
+        const existingUserRegs = await prisma.registration.findMany({
+          where: { userId: user.id },
+          select: {
+            id: true,
+            eventId: true,
+            distance: true,
+            status: true,
+            payment: { select: { status: true } },
+          },
+        });
+
+        const userKeySet = new Set(
+          existingUserRegs.map((r) => `${r.eventId}__${r.distance}`),
+        );
+
+        let didUpdate = false;
+        for (const orphan of unlinked) {
+          const key = `${orphan.eventId}__${orphan.distance}`;
+          if (userKeySet.has(key)) {
+            // Conflict: user already has this event + distance registered
+            const existingSame = existingUserRegs.find(
+              (r) => `${r.eventId}__${r.distance}` === key,
+            );
+            const existingIsPaid =
+              existingSame?.status === "CONFIRMED" ||
+              existingSame?.status === "COMPLETED" ||
+              existingSame?.payment?.status === "PAID";
+            const orphanIsPaid =
+              orphan.status === "CONFIRMED" ||
+              orphan.status === "COMPLETED" ||
+              orphan.payment?.status === "PAID";
+
+            if (!existingIsPaid && orphanIsPaid) {
+              // Existing is unpaid draft, but orphan is PAID. Safely remove unpaid & link the paid one
+              try {
+                await prisma.registration.delete({ where: { id: existingSame!.id } });
+                await prisma.registration.update({
+                  where: { id: orphan.id },
+                  data: { userId: user.id },
+                });
+                didUpdate = true;
+              } catch (relinkErr) {
+                logger.warn("[User] Error replacing unpaid with paid orphan", { error: String(relinkErr) });
+              }
+            } else if (!orphanIsPaid) {
+              // Orphan is an abandoned unpaid registration. Mark cancelled to avoid clashing.
+              try {
+                await prisma.registration.update({
+                  where: { id: orphan.id },
+                  data: { status: "CANCELLED" },
+                });
+              } catch {
+                // Ignore cleanup error
+              }
+            }
+            continue;
+          }
+
+          // No conflict: safe to relink
+          try {
+            await prisma.registration.update({
+              where: { id: orphan.id },
+              data: { userId: user.id },
+            });
+            userKeySet.add(key);
+            didUpdate = true;
+          } catch (relinkErr) {
+            logger.warn(`[User] Error relinking orphan ${orphan.id}`, { error: String(relinkErr) });
+          }
+        }
+
+        if (didUpdate) {
+          const refreshedUser = await prisma.user.findFirst({
+            where: { id: user.id },
+            include: { registrations: registrationInclude },
+          });
+          if (refreshedUser) {
+            user = refreshedUser;
+          }
+        }
+      }
+    } catch (autoRelinkErr) {
+      logger.error("[User] Error during auto-relink:", autoRelinkErr);
     }
   }
 

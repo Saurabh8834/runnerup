@@ -37,7 +37,8 @@ export interface StoredImageResult {
  * Save a data:image/...;base64 URL safely to local disk and return the public URL.
  */
 export function saveBase64ImageLocally(dataUrl: string, subfolder = "proofs"): StoredImageResult {
-  const match = dataUrl.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
+  const cleanDataUrl = dataUrl.trim();
+  const match = cleanDataUrl.match(/^data:image\/([a-zA-Z0-9+.-]+)(?:;[a-zA-Z0-9=+.-]+)*;base64,([\s\S]+)$/);
   if (!match) {
     throw new Error("Invalid base64 image data URL format");
   }
