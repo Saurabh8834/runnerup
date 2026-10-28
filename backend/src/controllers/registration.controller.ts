@@ -13,6 +13,7 @@ import { upsertUserFromClerk } from "../services/user.service.js";
 import { resolveCouponDiscount } from "./payment.controller.js";
 import { invalidateProofCountsCache, invalidateAdminOverviewCache } from "./admin.controller.js";
 import { ApiError } from "../utils/api-error.js";
+import { memoryCache } from "../utils/cache.js";
 import { logger } from "../utils/logger.js";
 import { routeParam } from "../utils/params.js";
 import { validateBody } from "../utils/validate.js";
@@ -680,6 +681,59 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       ? request.query.distance.trim().slice(0, 50)
       : undefined;
 
+  const clerkUserId = request.auth?.userId;
+  const cacheKey = `lb:${eventKey}:${distanceQuery || "all"}`;
+
+  type CachedLeaderboard = {
+    data: any[];
+    participants: any[];
+    meta: any;
+    eventId: string;
+  };
+
+  const cached = memoryCache.get<CachedLeaderboard>(cacheKey);
+  if (cached) {
+    let userRegistrations: Array<{
+      id: string;
+      distance: string;
+      bibNumber: string;
+      proofStatus: string;
+      status: string;
+      finishTimeSeconds: number | null;
+    }> = [];
+
+    if (clerkUserId) {
+      const foundUser = await prisma.user.findUnique({
+        where: { clerkId: clerkUserId },
+        include: {
+          registrations: {
+            where: { eventId: cached.eventId },
+          },
+        },
+      });
+      if (foundUser?.registrations) {
+        userRegistrations = foundUser.registrations.map((r) => ({
+          id: r.id,
+          distance: r.distance,
+          bibNumber: r.bibNumber,
+          proofStatus: r.proofStatus,
+          status: r.status,
+          finishTimeSeconds: r.finishTimeSeconds,
+        }));
+      }
+      response.setHeader("Cache-Control", "private, no-cache");
+    } else {
+      response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+    }
+
+    return response.json({
+      data: cached.data,
+      participants: cached.participants,
+      userRegistrations,
+      meta: cached.meta,
+    });
+  }
+
   await ensureDefaultEvents();
 
   // Accept either event id, exact slug, case-insensitive slug, or title
@@ -756,7 +810,6 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   });
 
   // Check if current authenticated user has registration(s) in this event
-  const clerkUserId = request.auth?.userId;
   let userRegistrations: Array<{
     id: string;
     distance: string;
@@ -862,8 +915,29 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     clerkId: p.user.clerkId,
   }));
 
+  const meta = {
+    eventId: event.id,
+    eventSlug: event.slug,
+    eventTitle: event.title,
+    availableDistances,
+    selectedDistance: activeDistance,
+    totalVerified: rankedLeaderboard.length,
+    totalParticipants: participantRoster.length,
+  };
+
+  memoryCache.set(
+    cacheKey,
+    {
+      data: rankedLeaderboard,
+      participants: participantRoster,
+      meta,
+      eventId: event.id,
+    },
+    60,
+  );
+
   if (!clerkUserId) {
-    response.setHeader("Cache-Control", "public, max-age=30, s-maxage=120, stale-while-revalidate=300");
+    response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
   } else {
     response.setHeader("Cache-Control", "private, no-cache");
   }
@@ -872,14 +946,6 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     data: rankedLeaderboard,
     participants: participantRoster,
     userRegistrations,
-    meta: {
-      eventId: event.id,
-      eventSlug: event.slug,
-      eventTitle: event.title,
-      availableDistances,
-      selectedDistance: activeDistance,
-      totalVerified: rankedLeaderboard.length,
-      totalParticipants: participantRoster.length,
-    },
+    meta,
   });
 }

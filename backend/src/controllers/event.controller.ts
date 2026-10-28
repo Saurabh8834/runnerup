@@ -7,6 +7,7 @@ import {
   withEventMeta,
 } from "../services/event.service.js";
 import { ApiError } from "../utils/api-error.js";
+import { memoryCache } from "../utils/cache.js";
 import { routeParam } from "../utils/params.js";
 import { validateBody } from "../utils/validate.js";
 import { createEventSchema, updateEventSchema } from "../validators/event.validator.js";
@@ -20,10 +21,17 @@ const eventInclude = {
 } as const;
 
 export async function listEvents(request: Request, response: Response) {
-  await ensureDefaultEvents();
-
   const scope = typeof request.query.scope === "string" ? request.query.scope : "all";
   const group = request.query.group === "1" || request.query.group === "true";
+  const cacheKey = `events:list:${scope}:${group}`;
+
+  const cached = memoryCache.get<any>(cacheKey);
+  if (cached) {
+    response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+    return response.json(cached);
+  }
+
+  await ensureDefaultEvents();
 
   const events = await prisma.event.findMany({
     where: scopeWhere(scope),
@@ -58,15 +66,16 @@ export async function listEvents(request: Request, response: Response) {
       .filter((event) => event.phase === "past")
       .sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime());
 
-    response.json({
+    const groupResult = {
       data: { upcoming, past },
       meta: {
         upcomingCount: upcoming.length,
         pastCount: past.length,
         total: dedupedEnriched.length,
       },
-    });
-    return;
+    };
+    memoryCache.set(cacheKey, groupResult, 60);
+    return response.json(groupResult);
   }
 
   // For open/upcoming lists, show soonest first
@@ -74,7 +83,7 @@ export async function listEvents(request: Request, response: Response) {
     dedupedEnriched.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
   }
 
-  response.json({
+  const listResult = {
     data: dedupedEnriched,
     meta: {
       scope,
@@ -82,13 +91,23 @@ export async function listEvents(request: Request, response: Response) {
       upcomingCount: dedupedEnriched.filter((e) => e.phase === "upcoming" || e.phase === "live").length,
       pastCount: dedupedEnriched.filter((e) => e.phase === "past").length,
     },
-  });
+  };
+  memoryCache.set(cacheKey, listResult, 60);
+  response.json(listResult);
 }
 
 export async function getEvent(request: Request, response: Response) {
+  const key = routeParam(request, "slug");
+  const cacheKey = `events:slug:${key}`;
+
+  const cached = memoryCache.get<any>(cacheKey);
+  if (cached) {
+    response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+    return response.json(cached);
+  }
+
   await ensureDefaultEvents();
 
-  const key = routeParam(request, "slug");
   const event = await prisma.event.findFirst({
     where: {
       OR: [{ slug: key }, { id: key }],
@@ -108,8 +127,7 @@ export async function getEvent(request: Request, response: Response) {
     },
   });
 
-  response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
-  response.json({
+  const eventResult = {
     data: {
       ...withEventMeta(event),
       stats: {
@@ -118,10 +136,15 @@ export async function getEvent(request: Request, response: Response) {
         finishers: verifiedResults,
       },
     },
-  });
+  };
+
+  memoryCache.set(cacheKey, eventResult, 60);
+  response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+  response.json(eventResult);
 }
 
 export async function createEvent(request: Request, response: Response) {
+  memoryCache.clearPrefix("events:");
   const payload = validateBody(createEventSchema, request);
 
   // Auto-generate slug from title if not provided
@@ -150,6 +173,7 @@ export async function createEvent(request: Request, response: Response) {
 }
 
 export async function updateEvent(request: Request, response: Response) {
+  memoryCache.clearPrefix("events:");
   const payload = validateBody(updateEventSchema, request);
 
   // Auto-generate slug from title if slug is being cleared/not provided but title is changing
@@ -167,6 +191,7 @@ export async function updateEvent(request: Request, response: Response) {
 }
 
 export async function deleteEvent(request: Request, response: Response) {
+  memoryCache.clearPrefix("events:");
   await prisma.event.delete({
     where: { id: routeParam(request, "id") },
   });

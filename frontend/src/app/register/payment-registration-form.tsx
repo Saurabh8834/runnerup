@@ -934,15 +934,15 @@ function PaymentRegistrationFormInner() {
       let pollCount = 0;
       pollIntervalRef.current = setInterval(() => {
         pollCount++;
-        // Limit to 90 polls (~3 minutes) so abandoned tabs don't exhaust server compute
-        if (pollCount > 90) {
+        // Limit to 50 polls (~3 minutes) so abandoned tabs don't exhaust server compute
+        if (pollCount > 50) {
           stopPolling();
           return;
         }
         // Don't poll while tab is minimized/hidden — visibility listener fires on return
         if (typeof document !== "undefined" && document.hidden) return;
         void checkLivePaymentStatus(order.orderId, registrationId);
-      }, 2000);
+      }, 3500);
 
       const cleanContact = phoneVal.replace(/\D/g, "").slice(-10) || phoneVal;
 

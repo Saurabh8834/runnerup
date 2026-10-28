@@ -6,6 +6,7 @@ import { ensureDefaultSiteContent } from "../services/content.service.js";
 import { isCloudinaryConfigured, uploadImageToCloudinary } from "../services/cloudinary.service.js";
 import { processAndStoreImage } from "../services/storage.service.js";
 import { ApiError } from "../utils/api-error.js";
+import { memoryCache } from "../utils/cache.js";
 import { routeParam } from "../utils/params.js";
 import { validateBody } from "../utils/validate.js";
 import {
@@ -19,6 +20,12 @@ import {
 
 /** Public: homepage moments + reviews (+ note that events use /api/events). */
 export async function getHomeContent(_request: Request, response: Response) {
+  const cached = memoryCache.get<any>("content:home");
+  if (cached) {
+    response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
+    return response.json(cached);
+  }
+
   await ensureDefaultSiteContent();
 
   const [moments, testimonials] = await Promise.all([
@@ -34,8 +41,7 @@ export async function getHomeContent(_request: Request, response: Response) {
     }),
   ]);
 
-  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
-  response.json({
+  const homeResult = {
     data: {
       moments: moments.map((m) => ({
         id: m.id,
@@ -55,14 +61,26 @@ export async function getHomeContent(_request: Request, response: Response) {
         rating: t.rating,
       })),
     },
-  });
+  };
+
+  memoryCache.set("content:home", homeResult, 300);
+  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
+  response.json(homeResult);
 }
 
 /** Public: gallery grid items. */
 export async function getGalleryContent(request: Request, response: Response) {
-  await ensureDefaultSiteContent();
   const category =
     typeof request.query.category === "string" ? request.query.category.trim() : "";
+  const cacheKey = `content:gallery:${category || "all"}`;
+
+  const cached = memoryCache.get<any>(cacheKey);
+  if (cached) {
+    response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
+    return response.json(cached);
+  }
+
+  await ensureDefaultSiteContent();
 
   const items = await prisma.siteMedia.findMany({
     where: {
@@ -73,8 +91,7 @@ export async function getGalleryContent(request: Request, response: Response) {
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
 
-  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
-  response.json({
+  const galleryResult = {
     data: items.map((m) => ({
       id: m.id,
       title: m.title,
@@ -85,7 +102,11 @@ export async function getGalleryContent(request: Request, response: Response) {
       image: m.imageUrl,
       meta: m.meta,
     })),
-  });
+  };
+
+  memoryCache.set(cacheKey, galleryResult, 300);
+  response.setHeader("Cache-Control", "public, max-age=120, s-maxage=600, stale-while-revalidate=1200");
+  response.json(galleryResult);
 }
 
 /** Public: submit a photo for the gallery (pending moderation). */

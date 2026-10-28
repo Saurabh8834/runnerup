@@ -13,6 +13,7 @@ import {
   verifyWebhookSignature,
 } from "../services/razorpay.service.js";
 import { ApiError } from "../utils/api-error.js";
+import { memoryCache } from "../utils/cache.js";
 import { logger } from "../utils/logger.js";
 import { validateBody } from "../utils/validate.js";
 import {
@@ -471,6 +472,12 @@ export async function getPaymentStatus(request: Request, response: Response) {
     throw new ApiError(400, "Missing orderId or registrationId parameter");
   }
 
+  const cacheKey = `pay:status:${orderId || ""}:${registrationId || ""}`;
+  const cached = memoryCache.get<any>(cacheKey);
+  if (cached) {
+    return response.json(cached);
+  }
+
   const payment = await prisma.payment.findFirst({
     where: {
       OR: [
@@ -492,7 +499,7 @@ export async function getPaymentStatus(request: Request, response: Response) {
 
   // Already marked PAID in DB
   if (payment.status === "PAID") {
-    return response.json({
+    const paidResult = {
       data: {
         paid: true,
         status: "PAID",
@@ -501,7 +508,9 @@ export async function getPaymentStatus(request: Request, response: Response) {
         bibNumber: payment.registration?.bibNumber,
         registrationId: payment.registrationId,
       },
-    });
+    };
+    memoryCache.set(cacheKey, paidResult, 120);
+    return response.json(paidResult);
   }
 
   // If still CREATED in DB, verify live with Razorpay API (handles UPI intent app-switch delay)
