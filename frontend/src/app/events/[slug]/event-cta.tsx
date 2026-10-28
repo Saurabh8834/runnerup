@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
-import { Medal3D, Medal3DViewer } from "./medal";
+import { Medal3D, MedalShowcase } from "./medal";
 import { EventCountdown } from "./countdown";
 import { Reveal } from "./reveal";
 
@@ -27,7 +27,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
           <div className="event-classic-cta-card relative overflow-hidden border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 via-(--panel) to-(--panel) px-6 py-12 text-center shadow-premium sm:px-12 sm:py-16">
             <div
               aria-hidden
-              className="sun-pulse pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl"
+              className="sun-pulse pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-2xl"
               style={{
                 background:
                   "radial-gradient(circle, rgba(230,72,51,0.4) 0%, rgba(135,79,65,0.16) 45%, transparent 70%)",
@@ -35,17 +35,16 @@ export function EventCta({ event }: { event: PublicEvent }) {
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-(--sage) opacity-[0.07] blur-3xl"
+              className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-(--sage) opacity-[0.07] blur-2xl"
             />
 
             <div className="relative mx-auto flex max-w-2xl flex-col items-center">
               <div className="w-36 sm:w-48 mb-2">
-                <Medal3DViewer
+                <MedalShowcase
                   slug={event.slug}
                   eventName={event.name}
                   size="compact"
                   showBadges={false}
-                  isPast={event.status === "past"}
                 />
               </div>
 

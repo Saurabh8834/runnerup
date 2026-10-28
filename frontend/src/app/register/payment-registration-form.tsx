@@ -117,10 +117,20 @@ const fallbackEvents: RegisterEventOption[] = [
 ];
 
 async function loadRazorpayScript() {
+  if (typeof window === "undefined") return false;
   if (window.Razorpay) return true;
+  const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
+  if (existing) {
+    for (let i = 0; i < 20; i++) {
+      if (window.Razorpay) return true;
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    if (window.Razorpay) return true;
+  }
   return new Promise<boolean>((resolve) => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
@@ -899,6 +909,8 @@ function PaymentRegistrationFormInner() {
         void checkLivePaymentStatus(order.orderId, registrationId);
       }, 2000);
 
+      const cleanContact = phoneVal.replace(/\D/g, "").slice(-10) || phoneVal;
+
       const checkout = new window.Razorpay!({
         key: order?.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_live_TjmOBLaIqe8Kz0",
         amount: order?.amountInPaise ?? order?.amount,
@@ -910,7 +922,7 @@ function PaymentRegistrationFormInner() {
         prefill: {
           name: fullName,
           email: emailVal,
-          contact: phoneVal,
+          contact: cleanContact,
         },
         theme: { color: "#e64833" },
         timeout: 600,

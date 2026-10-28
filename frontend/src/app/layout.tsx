@@ -278,6 +278,10 @@ export default function RootLayout({
         </ThemeProvider>
         <Analytics />
         <MetaPixel />
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

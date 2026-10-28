@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, FileBadge, Medal, Shirt, Sparkles, Ticket, Trophy, Truck } from "lucide-react";
 import { getEventMedalImage, type PublicEvent } from "../../data/events";
-import { Medal3D, Medal3DViewer } from "./medal";
+import { Medal3D, MedalShowcase } from "./medal";
 import { Reveal, SectionHeader } from "./reveal";
 
 const items = [
@@ -101,12 +101,11 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
               />
 
               <div className="relative flex items-center justify-center px-4 pt-8 pb-1">
-                <Medal3DViewer
+                <MedalShowcase
                   slug={event?.slug || ""}
                   eventName={event?.name}
                   size="rewards"
                   showBadges={false}
-                  isPast={event?.status === "past"}
                 />
               </div>
 

@@ -52,14 +52,21 @@ export function Medal3DViewer({
       ? isPast
       : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || !isAirForce);
 
-  // Preload images - only preload back face if active event
+  // Preload images once per session to prevent repeated decodes
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const img1 = new Image();
-      img1.src = images.front;
+      const preload = (src: string) => {
+        if (!src) return;
+        const w = window as unknown as { _ruPreloaded?: Set<string> };
+        if (!w._ruPreloaded) w._ruPreloaded = new Set();
+        if (w._ruPreloaded.has(src)) return;
+        w._ruPreloaded.add(src);
+        const img = new Image();
+        img.src = src;
+      };
+      preload(images.front);
       if (!isPastEvent && images.back && images.back !== images.front) {
-        const img2 = new Image();
-        img2.src = images.back;
+        preload(images.back);
       }
     }
   }, [images.front, images.back, isPastEvent]);
@@ -157,7 +164,7 @@ export function Medal3DViewer({
         {/* ── Ambient Radial Atmosphere Halo Behind Medal ── */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
           <div
-            className={`${sizeConfig.haloSize} rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#e64833]/15 to-[#874f41]/10 blur-[75px] transition-all duration-700 ${
+            className={`${sizeConfig.haloSize} rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#e64833]/15 to-[#874f41]/10 blur-2xl transition-all duration-700 ${
               isHovered ? "scale-110 opacity-100" : "scale-100 opacity-80"
             }`}
           />
@@ -181,8 +188,10 @@ export function Medal3DViewer({
             alt={`${eventName} - Official Finisher Medal`}
             fetchPriority="high"
             decoding="async"
-            className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.92)] filter brightness-105 contrast-[1.03] transition-transform duration-300 group-hover:scale-105`}
+            className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.65)] filter brightness-105 contrast-[1.03] transition-transform duration-300 group-hover:scale-105`}
           />
+          {/* Hardware-safe ground shadow */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
 
           {/* Dynamic Metallic Specular Glare Overlay */}
           <div
@@ -231,7 +240,7 @@ export function Medal3DViewer({
         {/* ── Ambient Radial Atmosphere Halo Behind Medal ── */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
           <div
-            className={`${sizeConfig.haloSize} rounded-full bg-gradient-to-tr from-[#f59e0b]/25 via-[#e64833]/15 to-[#874f41]/10 blur-[75px] transition-all duration-700 ${
+            className={`${sizeConfig.haloSize} rounded-full bg-gradient-to-tr from-[#f59e0b]/25 via-[#e64833]/15 to-[#874f41]/10 blur-2xl transition-all duration-700 ${
               isHovered ? "scale-110 opacity-100" : "scale-100 opacity-80"
             }`}
           />
@@ -332,8 +341,10 @@ export function Medal3DViewer({
                 alt={`${eventName} - Front Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] filter brightness-105 contrast-[1.03] transition-all`}
+                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
+              {/* Ground Shadow */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
 
               {/* Dynamic Metallic Specular Glare Overlay */}
               <div
@@ -364,8 +375,10 @@ export function Medal3DViewer({
                 alt={`${eventName} - Back Crest Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_25px_60px_rgba(0,0,0,0.95)] filter brightness-105 contrast-[1.03] transition-all`}
+                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
+              {/* Ground Shadow */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
 
               {/* Dynamic Metallic Specular Glare Overlay on Back */}
               <div
@@ -587,5 +600,59 @@ export function Medal3D({ className }: { className?: string }) {
         fill="#fbe9d0"
       />
     </svg>
+  );
+}
+
+// Lightweight, GPU-safe medal graphic presentation for non-hero sections (Rewards, CTA)
+export function MedalShowcase({
+  slug,
+  eventName = "Official Finisher Medal",
+  size = "rewards",
+  className = "",
+  showBadges = false,
+}: {
+  slug: string;
+  eventName?: string;
+  size?: "mobile" | "desktop" | "rewards" | "compact";
+  className?: string;
+  showBadges?: boolean;
+}) {
+  const images = getEventMedalImages(slug);
+  const sizeConfig = {
+    mobile: { maxH: "max-h-[260px]", containerMaxW: "max-w-[260px]" },
+    desktop: { maxH: "max-h-[400px]", containerMaxW: "max-w-[360px]" },
+    rewards: { maxH: "max-h-[290px] sm:max-h-[340px]", containerMaxW: "max-w-[260px] sm:max-w-[300px]" },
+    compact: { maxH: "max-h-[180px]", containerMaxW: "max-w-[180px]" },
+  }[size];
+
+  return (
+    <div className={`relative flex flex-col items-center justify-center select-none ${className}`}>
+      {/* Soft atmospheric halo */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+        <div className="h-44 w-44 rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#e64833]/15 to-transparent blur-2xl opacity-75" />
+      </div>
+
+      <div className={`relative w-full ${sizeConfig.containerMaxW} flex items-center justify-center group`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={images.front}
+          alt={`${eventName} - Official Finisher Medal`}
+          loading="lazy"
+          decoding="async"
+          className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-transform duration-300 group-hover:scale-105`}
+        />
+        {/* Hardware-safe ground shadow */}
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
+      </div>
+
+      {showBadges && (
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 max-w-md px-1">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md">
+            <Award className="h-3 w-3 text-amber-400 shrink-0" />
+            <span>Solid Metal Finisher Medal</span>
+          </span>
+        </div>
+      )}
+    </div>
   );
 }

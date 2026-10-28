@@ -212,7 +212,14 @@ export async function createRegistration(request: AuthenticatedRequest, response
 
       let order = null;
       if (!freeEntry) {
-        order = await generateFreshOrderForRegistration(updated.id, updated.bibNumber, event.priceInPaise);
+        let chargedAmount = event.priceInPaise;
+        if (payload.couponCode) {
+          const couponResult = await resolveCouponDiscount(payload.couponCode, event);
+          if (couponResult.valid) {
+            chargedAmount = Math.max(100, event.priceInPaise - couponResult.discountPaise);
+          }
+        }
+        order = await generateFreshOrderForRegistration(updated.id, updated.bibNumber, chargedAmount);
       }
 
       response.status(200).json({

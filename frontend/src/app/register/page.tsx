@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { PageShell } from "../components/app-shell";
 import { PaymentRegistrationForm } from "./payment-registration-form";
 
@@ -50,6 +51,10 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <PageShell>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+      />
       <section className="relative overflow-hidden border-b border-(--line)">
         <div
           aria-hidden

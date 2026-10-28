@@ -77,6 +77,16 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     });
   }, [event.name, event.distance, numericPrice]);
 
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const registerHref = `/register?event=${encodeURIComponent(
     event.slug
   )}&distance=${encodeURIComponent(selectedDistance)}`;
@@ -103,9 +113,9 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
       {/* ─── Ambient Atmospheric Lighting ─── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         {/* Soft golden spotlight directly centered on the medal on right */}
-        <div className="absolute top-1/2 right-[10%] lg:right-[15%] -translate-y-1/2 -z-10 h-[380px] w-[380px] sm:h-[500px] sm:w-[500px] rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#b45309]/10 to-transparent blur-[100px]" />
+        <div className="absolute top-1/2 right-[10%] lg:right-[15%] -translate-y-1/2 -z-10 h-[380px] w-[380px] sm:h-[500px] sm:w-[500px] rounded-full bg-gradient-to-tr from-[#f59e0b]/20 via-[#b45309]/10 to-transparent blur-3xl" />
         {/* Top-left subtle ambient tone */}
-        <div className="absolute top-1/4 left-1/4 -z-10 h-[300px] w-[300px] sm:h-[450px] sm:w-[450px] -translate-x-1/2 rounded-full bg-[#f59e0b]/5 blur-[120px]" />
+        <div className="absolute top-1/4 left-1/4 -z-10 h-[300px] w-[300px] sm:h-[450px] sm:w-[450px] -translate-x-1/2 rounded-full bg-[#f59e0b]/5 blur-3xl" />
       </div>
 
       <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full my-auto">
@@ -185,21 +195,23 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
             </motion.div>
 
             {/* ── MOBILE-FIRST 3D MEDAL FLIP SHOWCASE ── */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.22 }}
-              className="lg:hidden my-5 w-full flex flex-col items-center justify-center relative"
-            >
-              <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" isPast={isPast} />
+            {!isDesktop && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.22 }}
+                className="lg:hidden my-5 w-full flex flex-col items-center justify-center relative"
+              >
+                <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" isPast={isPast} />
 
-              {/* Live Mobile Social Proof Counter */}
-              <div className="mt-2.5 inline-flex items-center gap-1.5 text-[0.72rem] text-zinc-400 font-semibold">
-                <span className="text-amber-400 font-bold">🔥 1,420+ Runners Joined</span>
-                <span>·</span>
-                <span className="text-emerald-400 font-bold">98% 5-Star Rating ⭐</span>
-              </div>
-            </motion.div>
+                {/* Live Mobile Social Proof Counter */}
+                <div className="mt-2.5 inline-flex items-center gap-1.5 text-[0.72rem] text-zinc-400 font-semibold">
+                  <span className="text-amber-400 font-bold">🔥 1,420+ Runners Joined</span>
+                  <span>·</span>
+                  <span className="text-emerald-400 font-bold">98% 5-Star Rating ⭐</span>
+                </div>
+              </motion.div>
+            )}
 
             {/* Distance Selector */}
             <motion.div
@@ -354,7 +366,9 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               RIGHT COLUMN: INTERACTIVE 3D MEDAL PREVIEW (Desktop)
              ══════════════════════════════════════════════════════ */}
           <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-center">
-            <Medal3DViewer slug={event.slug} eventName={event.name} size="desktop" isPast={isPast} />
+            {isDesktop && (
+              <Medal3DViewer slug={event.slug} eventName={event.name} size="desktop" isPast={isPast} />
+            )}
           </div>
 
         </div>
