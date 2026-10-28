@@ -441,7 +441,7 @@ export function DashboardClient() {
 
   async function submitProof(e: FormEvent) {
     e.preventDefault();
-    if (!proofRegId) return;
+    if (!proofRegId || proofBusy) return;
     setProofBusy(true);
     setProofMessage(null);
     setProofError(null);
@@ -516,7 +516,14 @@ export function DashboardClient() {
       setFinishSeconds("");
       await load();
     } catch (err) {
-      setProofError(err instanceof Error ? err.message : "Proof submit failed");
+      const msg = err instanceof Error ? err.message : "Proof submit failed";
+      if (msg.toLowerCase().includes("already submitted")) {
+        setProofMessage("Your activity proof has already been submitted and is waiting for post-event review!");
+        setProofRegId(null);
+        await load();
+      } else {
+        setProofError(msg);
+      }
     } finally {
       setProofBusy(false);
     }
