@@ -57,6 +57,23 @@ function q(request: AuthenticatedRequest, key: string) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function getSearchVariants(search: string): string[] {
+  const trimmed = search.trim();
+  const set = new Set<string>();
+  set.add(trimmed);
+
+  // Common visual confusion in payment IDs, order IDs, and bibs (I vs l, 0 vs O)
+  if (trimmed.includes("I") || trimmed.includes("l")) {
+    set.add(trimmed.replace(/I/g, "l"));
+    set.add(trimmed.replace(/l/g, "I"));
+  }
+  if (trimmed.includes("0") || trimmed.includes("O") || trimmed.includes("o")) {
+    set.add(trimmed.replace(/0/g, "o"));
+    set.add(trimmed.replace(/o/g, "0"));
+  }
+  return Array.from(set);
+}
+
 // ── Me / overview ──────────────────────────────────────────────
 
 export async function adminMe(request: AuthenticatedRequest, response: Response) {
@@ -591,6 +608,7 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
   const proofStatus = q(request, "proofStatus");
   const eventId = q(request, "eventId");
   const search = q(request, "q");
+  const searchVariants = search ? getSearchVariants(search) : [];
 
   const where: Prisma.RegistrationWhereInput = {
     ...(status ? { status: status as never } : {}),
@@ -599,15 +617,15 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
     ...(search
       ? {
         OR: [
-          { id: search },
-          { bibNumber: { contains: search, mode: "insensitive" } },
+          ...searchVariants.map((v) => ({ id: v })),
+          ...searchVariants.map((v) => ({ bibNumber: { contains: v, mode: "insensitive" as const } })),
           { shippingName: { contains: search, mode: "insensitive" } },
           { shippingPhone: { contains: search, mode: "insensitive" } },
           { user: { email: { contains: search, mode: "insensitive" } } },
           { user: { name: { contains: search, mode: "insensitive" } } },
           { user: { phone: { contains: search, mode: "insensitive" } } },
-          { payment: { razorpayOrderId: { contains: search, mode: "insensitive" } } },
-          { payment: { razorpayPaymentId: { contains: search, mode: "insensitive" } } },
+          ...searchVariants.map((v) => ({ payment: { razorpayOrderId: { contains: v, mode: "insensitive" as const } } })),
+          ...searchVariants.map((v) => ({ payment: { razorpayPaymentId: { contains: v, mode: "insensitive" as const } } })),
         ],
       }
       : {}),
@@ -894,6 +912,7 @@ export async function adminExportRegistrationsCsv(
   const eventId = q(request, "eventId");
   const status = q(request, "status");
   const search = q(request, "q") || q(request, "search");
+  const searchVariants = search ? getSearchVariants(search) : [];
 
   const where: Prisma.RegistrationWhereInput = {
     ...(eventId ? { eventId } : {}),
@@ -915,14 +934,14 @@ export async function adminExportRegistrationsCsv(
     ...(search
       ? {
           OR: [
-            { bibNumber: { contains: search, mode: "insensitive" } },
+            ...searchVariants.map((v) => ({ bibNumber: { contains: v, mode: "insensitive" as const } })),
             { shippingName: { contains: search, mode: "insensitive" } },
             { shippingPhone: { contains: search, mode: "insensitive" } },
             { user: { email: { contains: search, mode: "insensitive" } } },
             { user: { name: { contains: search, mode: "insensitive" } } },
             { user: { phone: { contains: search, mode: "insensitive" } } },
-            { payment: { razorpayPaymentId: { contains: search, mode: "insensitive" } } },
-            { payment: { razorpayOrderId: { contains: search, mode: "insensitive" } } },
+            ...searchVariants.map((v) => ({ payment: { razorpayPaymentId: { contains: v, mode: "insensitive" as const } } })),
+            ...searchVariants.map((v) => ({ payment: { razorpayOrderId: { contains: v, mode: "insensitive" as const } } })),
           ],
         }
       : {}),
@@ -1026,6 +1045,7 @@ export async function adminExportPaymentsCsv(
   const status = q(request, "status");
   const eventId = q(request, "eventId");
   const search = q(request, "q") || q(request, "search");
+  const searchVariants = search ? getSearchVariants(search) : [];
 
   const where: Prisma.PaymentWhereInput = {
     ...(status ? { status: status as never } : {}),
@@ -1033,9 +1053,9 @@ export async function adminExportPaymentsCsv(
     ...(search
       ? {
           OR: [
-            { razorpayOrderId: { contains: search, mode: "insensitive" } },
-            { razorpayPaymentId: { contains: search, mode: "insensitive" } },
-            { registration: { bibNumber: { contains: search, mode: "insensitive" } } },
+            ...searchVariants.map((v) => ({ razorpayOrderId: { contains: v, mode: "insensitive" as const } })),
+            ...searchVariants.map((v) => ({ razorpayPaymentId: { contains: v, mode: "insensitive" as const } })),
+            ...searchVariants.map((v) => ({ registration: { bibNumber: { contains: v, mode: "insensitive" as const } } })),
             { registration: { shippingName: { contains: search, mode: "insensitive" } } },
             { registration: { shippingPhone: { contains: search, mode: "insensitive" } } },
             { registration: { user: { name: { contains: search, mode: "insensitive" } } } },
@@ -1134,14 +1154,15 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
   const { page, pageSize, skip } = parsePage(request);
   const status = q(request, "status");
   const search = q(request, "q");
+  const searchVariants = search ? getSearchVariants(search) : [];
 
   const where: Prisma.PaymentWhereInput = {
     ...(status ? { status: status as never } : {}),
     ...(search
       ? {
         OR: [
-          { razorpayOrderId: { contains: search, mode: "insensitive" } },
-          { razorpayPaymentId: { contains: search, mode: "insensitive" } },
+          ...searchVariants.map((v) => ({ razorpayOrderId: { contains: v, mode: "insensitive" as const } })),
+          ...searchVariants.map((v) => ({ razorpayPaymentId: { contains: v, mode: "insensitive" as const } })),
           {
             registration: {
               user: {
@@ -1158,11 +1179,11 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
               shippingPhone: { contains: search, mode: "insensitive" },
             },
           },
-          {
+          ...searchVariants.map((v) => ({
             registration: {
-              bibNumber: { contains: search, mode: "insensitive" },
+              bibNumber: { contains: v, mode: "insensitive" as const },
             },
-          },
+          })),
         ],
       }
       : {}),
