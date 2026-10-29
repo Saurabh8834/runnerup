@@ -82,9 +82,18 @@ app.get("/", (_request, response) => {
 
 // Ensure local storage directory exists for user proof and activity uploads
 const uploadsRoot = path.join(process.cwd(), "uploads");
-const proofsDir = path.join(uploadsRoot, "proofs");
-if (!fs.existsSync(proofsDir)) {
-  fs.mkdirSync(proofsDir, { recursive: true });
+const backendUploadsRoot = path.join(process.cwd(), "backend", "uploads");
+const distUploadsRoot = path.resolve(__dirname, "..", "uploads");
+
+for (const dir of [uploadsRoot, backendUploadsRoot, distUploadsRoot]) {
+  const pDir = path.join(dir, "proofs");
+  if (!fs.existsSync(pDir)) {
+    try {
+      fs.mkdirSync(pDir, { recursive: true });
+    } catch {
+      // ignore
+    }
+  }
 }
 
 // Serve /uploads static assets with 30-day edge cache (cached globally by Cloudflare tunnel CDN)
@@ -96,7 +105,9 @@ app.use(
     res.setHeader("Cache-Control", "public, max-age=2592000, immutable");
     next();
   },
-  express.static(uploadsRoot)
+  express.static(uploadsRoot),
+  express.static(backendUploadsRoot),
+  express.static(distUploadsRoot)
 );
 
 

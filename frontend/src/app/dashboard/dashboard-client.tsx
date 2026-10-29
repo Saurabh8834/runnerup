@@ -833,6 +833,7 @@ export function DashboardClient() {
                   const isPaid = reg.payment?.status === "PAID" || reg.status === "CONFIRMED";
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
+                  const isProofRejected = reg.proofStatus === "REJECTED";
                   const isCertReady = Boolean(reg.certificate && reg.certificate.status !== "QUEUED");
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
@@ -924,7 +925,9 @@ export function DashboardClient() {
                                 ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
                                 : isProofSubmitted
                                   ? "border-amber-500/40 bg-amber-500/15 text-amber-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
-                                  : "border-white/10 bg-white/[0.04] text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
+                                  : isProofRejected
+                                    ? "border-red-500/40 bg-red-500/15 text-red-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
+                                    : "border-white/10 bg-white/[0.04] text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
                             }`}
                           >
                             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -934,7 +937,9 @@ export function DashboardClient() {
                                     ? "bg-emerald-500 text-slate-950"
                                     : isProofSubmitted
                                       ? "bg-amber-500 text-slate-950"
-                                      : "bg-white/10 text-slate-300"
+                                      : isProofRejected
+                                        ? "bg-red-500 text-white"
+                                        : "bg-white/10 text-slate-300"
                                 }`}
                               >
                                 2
@@ -946,7 +951,9 @@ export function DashboardClient() {
                                 ? "Proof Approved"
                                 : isProofSubmitted
                                   ? "Audited Post-Event (30 Oct)"
-                                  : "Upload Activity"}
+                                  : isProofRejected
+                                    ? "Re-upload Required"
+                                    : "Upload Activity"}
                             </p>
                           </div>
 
@@ -1011,6 +1018,21 @@ export function DashboardClient() {
                             eventTitle={reg.event.title}
                             endsAt={reg.event.endsAt}
                           />
+                        </div>
+                      )}
+
+                      {/* Notice for Rejected / Needs Re-upload Proof */}
+                      {isProofRejected && (
+                        <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
+                          <div className="rounded-2xl border border-red-500/40 bg-red-950/40 p-4 text-xs text-red-200 backdrop-blur-xl flex items-start gap-3 shadow-[0_0_15px_rgba(239,68,68,0.15)]">
+                            <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="font-bold text-red-300 text-sm">Action Required: Re-upload GPS Run Proof</p>
+                              <p className="text-slate-300">
+                                {reg.proofUpload?.reviewerNote || "Your previously uploaded activity screenshot could not be loaded. Please click 'Upload GPS Run Proof' below to upload your screenshot again."}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       )}
 
