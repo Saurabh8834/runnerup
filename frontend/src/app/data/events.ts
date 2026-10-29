@@ -54,6 +54,7 @@ export const allPublicEvents: PublicEvent[] = [
     bannerImageUrl: "/images/iaf-medal-front.webp",
     medalImageUrl: "/images/iaf-medal-front.webp",
     reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
+    couponCode: "LAST50",
     status: "upcoming",
     compareAtPrice: "Rs. 549",
     activityTypes: ["running", "cycling", "walking"],

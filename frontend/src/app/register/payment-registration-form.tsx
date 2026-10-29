@@ -1420,7 +1420,7 @@ function PaymentRegistrationFormInner() {
                       >
                         <Tag className="h-3 w-3 text-emerald-400 group-hover:rotate-12 transition-transform" />
                         <span className="font-bold tracking-wider">{promoCode}</span>
-                        <span className="text-[10.5px] font-sans text-emerald-400/90 font-semibold">FLAT ₹50 OFF</span>
+                        <span className="text-[10.5px] font-sans text-emerald-400/90 font-semibold">10% OFF (₹50)</span>
                         <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-emerald-500/25 px-1.5 py-0.5 text-[10px] font-sans font-bold text-emerald-200">
                           {copiedCoupon ? "Applied!" : "Apply"}
                         </span>
