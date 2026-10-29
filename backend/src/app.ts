@@ -3,6 +3,7 @@ import express, { type NextFunction, type Request, type Response } from "express
 import helmet from "helmet";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { env } from "./config/env.js";
 import { requestTraceMiddleware } from "./middleware/request-trace.js";
 import { adminRouter } from "./routes/admin.routes.js";
@@ -81,6 +82,7 @@ app.get("/", (_request, response) => {
 });
 
 // Ensure local storage directory exists for user proof and activity uploads
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsRoot = path.join(process.cwd(), "uploads");
 const backendUploadsRoot = path.join(process.cwd(), "backend", "uploads");
 const distUploadsRoot = path.resolve(__dirname, "..", "uploads");
