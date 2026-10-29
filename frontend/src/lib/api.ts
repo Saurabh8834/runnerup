@@ -56,7 +56,11 @@ export function getApiUrl(path = "") {
   return `${baseUrl}${cleanPath}`;
 }
 
-export async function resilientFetch(path: string, init: RequestInit = {}): Promise<Response> {
+export type ResilientFetchOptions = RequestInit & {
+  timeoutMs?: number;
+};
+
+export async function resilientFetch(path: string, init: ResilientFetchOptions = {}): Promise<Response> {
   const cleanPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
   const primaryUrl = getApiUrl(cleanPath);
 
@@ -64,14 +68,12 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
   const isProduction = !isDev && isBrowser && window.location.hostname.includes("runnerup.in");
 
   // Multi-tier redundancy:
-  // 1) Primary (same-origin / configured)
-  // 2) Canonical Vercel Proxy (https://www.runnerup.in/api/...)
-  // 3) Cloudflare Tunnel (https://api.runnerup.in/api/...)
-  // 4) Railway 24/7 Backup (https://runnerup-production.up.railway.app/api/...)
+  // 1) Primary (same-origin / configured Vercel proxy)
+  // 2) Cloudflare Tunnel Direct (https://api.runnerup.in/api/...)
+  // 3) Railway 24/7 Backup (https://runnerup-production.up.railway.app/api/...)
   const candidates: string[] = [primaryUrl];
   if (isProduction) {
     const list = [
-      `https://www.runnerup.in${cleanPath}`,
       `${CLOUD_BACKEND_URL}${cleanPath}`,
       `${RAILWAY_FALLBACK_URL}${cleanPath}`,
     ];
@@ -82,21 +84,33 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
     }
   }
 
+  const perCandidateTimeoutMs = init.timeoutMs ?? 25000;
   let lastError: unknown = null;
   let lastResponse: Response | null = null;
 
   for (let i = 0; i < candidates.length; i++) {
     const candidateUrl = candidates[i];
-    try {
-      // 10s timeout per candidate to prevent mobile hanging
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
+    const controller = new AbortController();
+    let callerAbortListener: (() => void) | null = null;
 
+    if (init.signal) {
+      if (init.signal.aborted) {
+        controller.abort();
+      } else {
+        callerAbortListener = () => controller.abort();
+        init.signal.addEventListener("abort", callerAbortListener, { once: true });
+      }
+    }
+
+    const timer = setTimeout(() => {
+      controller.abort();
+    }, perCandidateTimeoutMs);
+
+    try {
       const res = await fetch(candidateUrl, {
         ...init,
         signal: controller.signal,
       });
-      clearTimeout(timer);
 
       // Success or valid client response (200 - 499)
       if (res.ok || (res.status >= 200 && res.status < 500)) {
@@ -108,11 +122,21 @@ export async function resilientFetch(path: string, init: RequestInit = {}): Prom
     } catch (err) {
       lastError = err;
       // Continue to next candidate
+    } finally {
+      clearTimeout(timer);
+      if (callerAbortListener && init.signal) {
+        init.signal.removeEventListener("abort", callerAbortListener);
+      }
     }
   }
 
   if (lastResponse) {
     return lastResponse;
+  }
+
+  const rawMsg = lastError instanceof Error ? lastError.message : String(lastError || "");
+  if (rawMsg.includes("NetworkError") || rawMsg.includes("aborted") || rawMsg.includes("abort")) {
+    throw new Error("Connection timed out or lost. Please retry.");
   }
 
   throw lastError instanceof Error ? lastError : new Error("Failed to fetch");

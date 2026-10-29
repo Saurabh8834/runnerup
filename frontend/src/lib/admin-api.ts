@@ -1,4 +1,4 @@
-import { authHeaders, getApiUrl, readApiError, resilientFetch } from "./api";
+import { authHeaders, getApiUrl, readApiError, resilientFetch, ResilientFetchOptions } from "./api";
 
 export class AdminApiError extends Error {
   status: number;
@@ -79,6 +79,7 @@ export async function downloadAdminExport(
   try {
     response = await resilientFetch(urlPath, {
       method: "GET",
+      timeoutMs: 60000, // 60s for exports
       headers: {
         ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {}),
         ...(effectiveToken ? { "x-admin-emergency-token": effectiveToken } : {}),
@@ -108,17 +109,22 @@ export async function downloadAdminExport(
 export async function adminFetch<T = unknown>(
   path: string,
   token: string | null | undefined,
-  init: RequestInit = {},
+  init: ResilientFetchOptions = {},
 ): Promise<T> {
   const effectiveToken = token || getEmergencyAdminToken();
   let response: Response;
   try {
     response = await resilientFetch(path, {
+      timeoutMs: 35000,
       ...init,
       headers: authHeaders(effectiveToken, init.headers),
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed to connect to backend server";
+    const rawMsg = err instanceof Error ? err.message : "Failed to connect to backend server";
+    const msg =
+      rawMsg.includes("NetworkError") || rawMsg.includes("aborted") || rawMsg.includes("abort")
+        ? "Connection timed out or lost. Please retry."
+        : rawMsg;
     throw new AdminApiError(msg, 0);
   }
 

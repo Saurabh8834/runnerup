@@ -64,7 +64,7 @@ export default function AdminUsersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+  const load = useCallback(async (targetPage: number, targetPageSize: number) => {
     setLoading(true);
     const thisReqId = ++reqIdRef.current;
     try {
@@ -124,17 +124,15 @@ export default function AdminUsersPage() {
         setLoading(false);
       }
     }
-  }, [getToken, isSignedIn, page, pageSize, q, role, status]);
+  }, [getToken, isSignedIn, q, role, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    void load(newPage, pageSize);
   };
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setPage(1);
-    void load(1, newSize);
   };
 
   useEffect(() => {
@@ -204,7 +202,7 @@ export default function AdminUsersPage() {
       }));
       setSuccessMsg(`User ${targetName} (${targetEmail}) and all test data were permanently deleted.`);
       closeDeleteModal();
-      await load();
+      await load(page, pageSize);
       setTimeout(() => setSuccessMsg(null), 5000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to delete user";
@@ -225,7 +223,7 @@ export default function AdminUsersPage() {
         data: { message: string };
       }>("/api/admin/users/sync", token, { method: "POST" });
       setSuccessMsg(json.data.message);
-      await load();
+      await load(page, pageSize);
       setTimeout(() => setSuccessMsg(null), 7000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync failed");

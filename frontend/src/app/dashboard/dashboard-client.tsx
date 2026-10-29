@@ -468,6 +468,7 @@ export function DashboardClient() {
           try {
             const up = await resilientFetch("/api/uploads/image", {
               method: "POST",
+              timeoutMs: 40000,
               headers: authHeaders(token),
               body: JSON.stringify({ file: url, folder: "runnerup/proofs" }),
             });
@@ -495,6 +496,7 @@ export function DashboardClient() {
 
       const res = await resilientFetch(`/api/registrations/${proofRegId}/proof`, {
         method: "POST",
+        timeoutMs: 40000,
         headers: authHeaders(token),
         body: JSON.stringify({
           activityImageUrl: url,

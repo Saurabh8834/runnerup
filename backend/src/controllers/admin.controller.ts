@@ -149,8 +149,151 @@ type CachedOverview = {
 };
 const overviewCache = new Map<string, CachedOverview>();
 
+type CachedPaymentStats = {
+  paidCount: number;
+  paidRevenueInPaise: number;
+  expiresAt: number;
+};
+let cachedPaymentStats: CachedPaymentStats | null = null;
+export function invalidatePaymentStatsCache() {
+  cachedPaymentStats = null;
+}
+
+type CachedRegistrationStats = {
+  total: number;
+  paidCount: number;
+  unpaidCount: number;
+  expiresAt: number;
+};
+let cachedRegistrationStats: CachedRegistrationStats | null = null;
+export function invalidateRegistrationStatsCache() {
+  cachedRegistrationStats = null;
+}
+
+type CachedUserStats = {
+  totalPaidUsers: number;
+  totalPaidRegistrations: number;
+  expiresAt: number;
+};
+let cachedUserStats: CachedUserStats | null = null;
+export function invalidateUserStatsCache() {
+  cachedUserStats = null;
+}
+
 export function invalidateAdminOverviewCache() {
   overviewCache.clear();
+  cachedPaymentStats = null;
+  cachedRegistrationStats = null;
+  cachedUserStats = null;
+}
+
+async function getPaymentStats(): Promise<CachedPaymentStats> {
+  if (cachedPaymentStats && cachedPaymentStats.expiresAt > Date.now()) {
+    return cachedPaymentStats;
+  }
+  try {
+    const paidOnly = await prisma.payment.aggregate({
+      where: { status: "PAID" },
+      _sum: { amountInPaise: true },
+      _count: true,
+    });
+    cachedPaymentStats = {
+      paidCount: paidOnly._count,
+      paidRevenueInPaise: paidOnly._sum.amountInPaise ?? 0,
+      expiresAt: Date.now() + 30_000, // 30s TTL
+    };
+    return cachedPaymentStats;
+  } catch {
+    return (
+      cachedPaymentStats ?? {
+        paidCount: 0,
+        paidRevenueInPaise: 0,
+        expiresAt: 0,
+      }
+    );
+  }
+}
+
+async function getRegistrationStats(): Promise<CachedRegistrationStats> {
+  if (cachedRegistrationStats && cachedRegistrationStats.expiresAt > Date.now()) {
+    return cachedRegistrationStats;
+  }
+  try {
+    const [total, paidCount] = await Promise.all([
+      prisma.registration.count(),
+      prisma.registration.count({
+        where: {
+          OR: [
+            { payment: { status: "PAID" } },
+            { status: "CONFIRMED" },
+            { status: "COMPLETED" },
+          ],
+        },
+      }),
+    ]);
+    cachedRegistrationStats = {
+      total,
+      paidCount,
+      unpaidCount: Math.max(0, total - paidCount),
+      expiresAt: Date.now() + 30_000, // 30s TTL
+    };
+    return cachedRegistrationStats;
+  } catch {
+    return (
+      cachedRegistrationStats ?? {
+        total: 0,
+        paidCount: 0,
+        unpaidCount: 0,
+        expiresAt: 0,
+      }
+    );
+  }
+}
+
+async function getUserStats(): Promise<CachedUserStats> {
+  if (cachedUserStats && cachedUserStats.expiresAt > Date.now()) {
+    return cachedUserStats;
+  }
+  try {
+    const [totalPaidUsers, totalPaidRegistrations] = await Promise.all([
+      prisma.user.count({
+        where: {
+          registrations: {
+            some: {
+              OR: [
+                { payment: { status: "PAID" } },
+                { status: "CONFIRMED" },
+                { status: "COMPLETED" },
+              ],
+            },
+          },
+        },
+      }),
+      prisma.registration.count({
+        where: {
+          OR: [
+            { payment: { status: "PAID" } },
+            { status: "CONFIRMED" },
+            { status: "COMPLETED" },
+          ],
+        },
+      }),
+    ]);
+    cachedUserStats = {
+      totalPaidUsers,
+      totalPaidRegistrations,
+      expiresAt: Date.now() + 30_000, // 30s TTL
+    };
+    return cachedUserStats;
+  } catch {
+    return (
+      cachedUserStats ?? {
+        totalPaidUsers: 0,
+        totalPaidRegistrations: 0,
+        expiresAt: 0,
+      }
+    );
+  }
 }
 
 export async function adminOverview(request: AuthenticatedRequest, response: Response) {
@@ -631,61 +774,29 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
       : {}),
   };
 
-  const [total, paidCount] = await Promise.all([
-    prisma.registration.count({ where }),
-    prisma.registration.count({
-      where: {
-        ...where,
-        OR: [
-          { payment: { status: "PAID" } },
-          { status: "CONFIRMED" },
-          { status: "COMPLETED" },
-        ],
-      },
-    }),
-  ]);
-  const unpaidCount = Math.max(0, total - paidCount);
+  const isFiltered = Boolean(status || proofStatus || eventId || search);
 
-  let items: Array<Prisma.RegistrationGetPayload<{
-    include: {
-      user: { select: { id: true; name: true; email: true; phone: true; clerkId: true } };
-      event: { select: { id: true; title: true; slug: true; priceInPaise: true } };
-      payment: true;
-      proofUpload: true;
-      certificate: true;
-      medalDelivery: true;
-    };
-  }>>;
-
-  if (!search) {
-    const idRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT r.id
-      FROM "Registration" r
-      LEFT JOIN "Payment" p ON p."registrationId" = r.id
-      WHERE 1=1
-        ${status ? Prisma.sql`AND r.status = ${status}::"RegistrationStatus"` : Prisma.empty}
-        ${proofStatus ? Prisma.sql`AND r."proofStatus" = ${proofStatus}::"ProofStatus"` : Prisma.empty}
-        ${eventId ? Prisma.sql`AND r."eventId" = ${eventId}` : Prisma.empty}
-      ORDER BY COALESCE(p."paidAt", r."registeredAt") DESC
-      LIMIT ${pageSize} OFFSET ${skip}
-    `;
-
-    const fetched = await prisma.registration.findMany({
-      where: { id: { in: idRows.map((r) => r.id) } },
-      include: {
-        user: { select: { id: true, name: true, email: true, phone: true, clerkId: true } },
-        event: { select: { id: true, title: true, slug: true, priceInPaise: true } },
-        payment: true,
-        proofUpload: true,
-        certificate: true,
-        medalDelivery: true,
-      },
-    });
-
-    const map = new Map(fetched.map((f) => [f.id, f]));
-    items = idRows.map((r) => map.get(r.id)).filter(Boolean) as typeof fetched;
-  } else {
-    items = await prisma.registration.findMany({
+  const [stats, items] = await Promise.all([
+    isFiltered
+      ? Promise.all([
+          prisma.registration.count({ where }),
+          prisma.registration.count({
+            where: {
+              ...where,
+              OR: [
+                { payment: { status: "PAID" } },
+                { status: "CONFIRMED" },
+                { status: "COMPLETED" },
+              ],
+            },
+          }),
+        ]).then(([total, paidCount]) => ({
+          total,
+          paidCount,
+          unpaidCount: Math.max(0, total - paidCount),
+        }))
+      : getRegistrationStats(),
+    prisma.registration.findMany({
       where,
       orderBy: { registeredAt: "desc" },
       skip,
@@ -698,18 +809,18 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
         certificate: true,
         medalDelivery: true,
       },
-    });
-  }
+    }),
+  ]);
 
   response.json({
     data: items,
     meta: {
-      total,
-      paidCount,
-      unpaidCount,
+      total: stats.total,
+      paidCount: stats.paidCount,
+      unpaidCount: stats.unpaidCount,
       page,
       pageSize,
-      totalPages: Math.ceil(total / pageSize),
+      totalPages: Math.max(1, Math.ceil(stats.total / pageSize)),
     },
   });
 }
@@ -1189,55 +1300,9 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
       : {}),
   };
 
-  const [total, paidOnly, paidAgg] = await Promise.all([
+  const [total, items, paymentStats] = await Promise.all([
     prisma.payment.count({ where }),
-    prisma.payment.aggregate({
-      where: { status: "PAID" },
-      _sum: { amountInPaise: true },
-      _count: true,
-    }),
-    prisma.payment.aggregate({
-      where: { status: "PAID", ...(status === "PAID" || !status ? {} : { id: "none" }) },
-      _sum: { amountInPaise: true },
-      _count: true,
-    }),
-  ]);
-
-  let items: Array<Prisma.PaymentGetPayload<{
-    include: {
-      registration: {
-        include: {
-          user: { select: { name: true; email: true; phone: true } };
-          event: { select: { title: true; slug: true } };
-        };
-      };
-    };
-  }>>;
-
-  if (!search) {
-    const idRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id FROM "Payment"
-      ${status ? Prisma.sql`WHERE status = ${status}::"PaymentStatus"` : Prisma.empty}
-      ORDER BY COALESCE("paidAt", "createdAt") DESC
-      LIMIT ${pageSize} OFFSET ${skip}
-    `;
-
-    const fetched = await prisma.payment.findMany({
-      where: { id: { in: idRows.map((r) => r.id) } },
-      include: {
-        registration: {
-          include: {
-            user: { select: { name: true, email: true, phone: true } },
-            event: { select: { title: true, slug: true } },
-          },
-        },
-      },
-    });
-
-    const map = new Map(fetched.map((f) => [f.id, f]));
-    items = idRows.map((r) => map.get(r.id)).filter(Boolean) as typeof fetched;
-  } else {
-    items = await prisma.payment.findMany({
+    prisma.payment.findMany({
       where,
       orderBy: { createdAt: "desc" },
       skip,
@@ -1250,8 +1315,9 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
           },
         },
       },
-    });
-  }
+    }),
+    getPaymentStats(),
+  ]);
 
   response.json({
     data: items,
@@ -1259,11 +1325,10 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
       total,
       page,
       pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      paidCount: paidOnly._count,
-      unpaidCount: Math.max(0, total - paidOnly._count),
-      paidRevenueInPaise: paidOnly._sum.amountInPaise ?? 0,
-      paidAgg,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+      paidCount: paymentStats.paidCount,
+      unpaidCount: Math.max(0, total - paymentStats.paidCount),
+      paidRevenueInPaise: paymentStats.paidRevenueInPaise,
     },
   });
 }
@@ -1321,6 +1386,8 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
     summary: `Payment status → ${payload.status}`,
   });
 
+  invalidateAdminOverviewCache();
+
   response.json({ data: payment });
 }
 
@@ -1328,6 +1395,8 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
 
 export async function adminSyncPayments(request: AuthenticatedRequest, response: Response) {
   const result = await syncUserAndPaymentData();
+
+  invalidateAdminOverviewCache();
 
   await writeAdminAudit(request, {
     action: "data.sync",
@@ -1400,7 +1469,9 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
       : {}),
   };
 
-  const [total, items, totalPaidUsers, totalPaidRegistrations] = await Promise.all([
+  const isFiltered = Boolean(role || status || search);
+
+  const [total, items, stats] = await Promise.all([
     prisma.user.count({ where }),
     prisma.user.findMany({
       where,
@@ -1419,32 +1490,42 @@ export async function adminListUsers(request: AuthenticatedRequest, response: Re
         },
       },
     }),
-    prisma.user.count({
-      where: {
-        ...where,
-        registrations: {
-          some: {
-            OR: [
-              { payment: { status: "PAID" } },
-              { status: "CONFIRMED" },
-              { status: "COMPLETED" },
-            ],
-          },
-        },
-      },
-    }),
-    search
-      ? Promise.resolve(0)
-      : prisma.registration.count({
-          where: {
-            OR: [
-              { payment: { status: "PAID" } },
-              { status: "CONFIRMED" },
-              { status: "COMPLETED" },
-            ],
-          },
-        }),
+    isFiltered
+      ? Promise.all([
+          prisma.user.count({
+            where: {
+              ...where,
+              registrations: {
+                some: {
+                  OR: [
+                    { payment: { status: "PAID" } },
+                    { status: "CONFIRMED" },
+                    { status: "COMPLETED" },
+                  ],
+                },
+              },
+            },
+          }),
+          search
+            ? Promise.resolve(0)
+            : prisma.registration.count({
+                where: {
+                  OR: [
+                    { payment: { status: "PAID" } },
+                    { status: "CONFIRMED" },
+                    { status: "COMPLETED" },
+                  ],
+                },
+              }),
+        ]).then(([paidUsers, paidRegs]) => ({
+          totalPaidUsers: paidUsers,
+          totalPaidRegistrations: paidRegs,
+        }))
+      : getUserStats(),
   ]);
+
+  const totalPaidUsers = stats.totalPaidUsers;
+  const totalPaidRegistrations = stats.totalPaidRegistrations;
 
   const formatted = items.map((u) => {
     const paidRegs = u.registrations.filter(

@@ -84,7 +84,7 @@ export default function AdminPaymentsPage() {
     }
   };
 
-  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+  const load = useCallback(async (targetPage: number, targetPageSize: number) => {
     setLoading(true);
     const thisReqId = ++reqIdRef.current;
     try {
@@ -130,17 +130,15 @@ export default function AdminPaymentsPage() {
         setLoading(false);
       }
     }
-  }, [getToken, page, pageSize, q, status]);
+  }, [getToken, isSignedIn, q, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    void load(newPage, pageSize);
   };
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setPage(1);
-    void load(1, newSize);
   };
 
   useEffect(() => {
@@ -154,7 +152,7 @@ export default function AdminPaymentsPage() {
         method: "PATCH",
         body: JSON.stringify({ status: next }),
       });
-      await load();
+      await load(page, pageSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed");
     }
@@ -173,7 +171,7 @@ export default function AdminPaymentsPage() {
       if (json.data.errors?.length) {
         setError(`${json.data.errors.length} error(s). Check server logs.`);
       }
-      await load();
+      await load(page, pageSize);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sync failed");
     } finally {

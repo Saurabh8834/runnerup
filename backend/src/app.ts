@@ -121,6 +121,7 @@ app.use("/api/payments", paymentRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/certificates", certificateRouter);
 app.use("/api/uploads", uploadRouter);
+app.use("/api/upload", uploadRouter);
 app.use("/api/prizes", prizeRouter);
 app.use("/api/referrals", referralRouter);
 app.use("/api/subscribers", subscriberRouter);

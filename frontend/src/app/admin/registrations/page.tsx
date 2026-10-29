@@ -122,7 +122,7 @@ export default function AdminRegistrationsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const load = useCallback(async (targetPage = page, targetPageSize = pageSize) => {
+  const load = useCallback(async (targetPage: number, targetPageSize: number) => {
     setLoading(true);
     const thisReqId = ++reqIdRef.current;
     try {
@@ -174,17 +174,15 @@ export default function AdminRegistrationsPage() {
         setLoading(false);
       }
     }
-  }, [getToken, page, pageSize, q, status]);
+  }, [getToken, isSignedIn, q, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    void load(newPage, pageSize);
   };
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
     setPage(1);
-    void load(1, newSize);
   };
 
   useEffect(() => {
@@ -245,7 +243,7 @@ export default function AdminRegistrationsPage() {
       setTotal((prev) => Math.max(0, prev - 1));
       setSuccessMsg(`Registration ${bib} (${userName}) deleted successfully.`);
       closeDeleteModal();
-      await load();
+      await load(page, pageSize);
       setTimeout(() => setSuccessMsg(null), 5000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to delete registration";

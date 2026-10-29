@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { syncUserAndPaymentData } from "../services/data-sync.service.js";
 import { sendRegistrationConfirmationEmail } from "../services/email.service.js";
 import { ensureClerkAccountForDbUser } from "../services/user.service.js";
+import { invalidateAdminOverviewCache } from "./admin.controller.js";
 import {
   createRazorpayOrder,
   fetchPaymentsForOrder,
@@ -398,6 +399,8 @@ export async function verifyPayment(request: Request, response: Response) {
     registrationId: payment.registrationId,
   });
 
+  invalidateAdminOverviewCache();
+
   // Return response IMMEDIATELY (<100ms) so user gets instant confirmation without waiting on external email service!
   response.json({
     data: {
@@ -666,6 +669,8 @@ export async function handleRazorpayWebhook(request: Request, response: Response
           paidAt: new Date(),
         },
       });
+
+      invalidateAdminOverviewCache();
 
       try {
         const registration = await prisma.registration.update({
