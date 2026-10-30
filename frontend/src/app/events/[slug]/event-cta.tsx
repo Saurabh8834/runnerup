@@ -2,20 +2,16 @@ import Link from "next/link";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
+import { LiveChatButton } from "../../components/live-chat-button";
 import { Medal3D, MedalShowcase } from "./medal";
 import { EventCountdown } from "./countdown";
 import { Reveal } from "./reveal";
-
-const WHATSAPP_URL = "https://wa.me/918287831071";
 
 function formatPrice(price: string) {
   return price.replace(/^Rs\.\s*/, "₹");
 }
 
 export function EventCta({ event }: { event: PublicEvent }) {
-  const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(
-    `Hi! I'm interested in ${event.name}. Can you help me with registration?`,
-  )}`;
   const priceLabel = event.price.toLowerCase().includes("free")
     ? "Register now"
     : `Register now - ${formatPrice(event.price)}`;
@@ -70,14 +66,9 @@ export function EventCta({ event }: { event: PublicEvent }) {
                   signedOutLabel={priceLabel}
                   slug={event.slug}
                 />
-                <Link
-                  className="btn btn-secondary gap-2 text-sm"
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <LiveChatButton className="btn btn-secondary gap-2 text-sm">
                   Ask a question
-                </Link>
+                </LiveChatButton>
               </div>
 
               <p className="mt-6 flex items-center gap-1.5 text-xs text-(--muted-soft)">

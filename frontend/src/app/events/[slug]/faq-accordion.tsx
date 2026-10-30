@@ -27,11 +27,11 @@ const faqs = [
   },
   {
     q: "Can I get a refund if I change my mind?",
-    a: "Entry fees are non-refundable once registration is confirmed, but you can message us on WhatsApp and we'll try our best to help. Contact support and we'll assist with any issue.",
+    a: "Entry fees are non-refundable once registration is confirmed, but you can message us on live chat and we'll try our best to help. Contact support and we'll assist with any issue.",
   },
   {
     q: "What if I need help during the event?",
-    a: "Our team is available on WhatsApp and email throughout the event window. We're happy to help with registration, proof uploads or anything else.",
+    a: "Our team is available on 24/7 live chat and email throughout the event window. We're happy to help with registration, proof uploads or anything else.",
   },
 ];
 

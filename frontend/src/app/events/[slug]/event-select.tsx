@@ -9,8 +9,6 @@ import { openLiveChat } from "../../components/tawk-chat";
 import { EventCountdown } from "./countdown";
 import { SectionHeader } from "./reveal";
 
-const WHATSAPP_URL = "https://wa.me/918287831071";
-
 type Activity = { key: string; label: string; icon: typeof Footprints; active: string };
 
 const activities: Activity[] = [
@@ -47,7 +45,6 @@ const activityKeyMap: Record<string, string> = {
 export function EventSelect({ event }: { event: PublicEvent }) {
   const [activity, setActivity] = useState(activities[0].key);
   const distances = event.distance.split(" / ");
-  const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(`Hi! I'm interested in ${event.name}. Can you help me with registration?`)}`;
   const amount = event.price.toLowerCase().includes("free") ? "Free" : formatPrice(event.price);
   const mrp = event.compareAtPrice ? formatPrice(event.compareAtPrice) : null;
 
