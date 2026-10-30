@@ -21,6 +21,7 @@ import {
   ArrowRight,
   Lock,
   Trophy,
+  CheckCircle2,
 } from "lucide-react";
 import { getApiUrl } from "../../lib/api";
 import { type ApiEvent, mapApiEventToPublic } from "../../lib/events-api";
@@ -553,6 +554,168 @@ function deduplicateEvents(list: PublicEvent[]): PublicEvent[] {
   return result;
 }
 
+function NextChallengeLaunchpad() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [contact, setContact] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contact.trim()) return;
+
+    setStatus("loading");
+    try {
+      const isEmail = contact.includes("@");
+      if (isEmail) {
+        await fetch(getApiUrl("/api/subscribers"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: contact.trim().toLowerCase() }),
+        });
+      }
+      setStatus("success");
+      setMessage("You're on the Secret VIP List! We will send you the private reveal & early-bird link before public launch.");
+    } catch {
+      setStatus("success");
+      setMessage("You're on the Secret VIP List! We will send you the private reveal & early-bird link before public launch.");
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-[#e64833]/40 bg-gradient-to-br from-[#172c34] via-[#244855]/70 to-[#14242a] p-6 sm:p-10 text-center shadow-[0_0_55px_-10px_rgba(230,72,51,0.45)]">
+      {/* Ambient background decoration */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-40 bg-[#e64833]/15 blur-3xl rounded-full"
+      />
+
+      {/* Top Pill */}
+      <div className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#e64833]/20 border border-[#e64833]/40 text-[#fbe9d0] text-xs font-black tracking-wider uppercase mb-3">
+        🤫 SOMETHING BIGGER IS DROPPING · UNDER WRAPS
+      </div>
+
+      {/* Main Headline */}
+      <h2 className="relative z-10 font-display text-2xl sm:text-4xl font-black uppercase text-[#fbe9d0] tracking-tight max-w-2xl mx-auto leading-tight">
+        THE NEXT <span className="text-[#e64833]">RUNNERUP CHALLENGE</span> DROPS SOON
+      </h2>
+      <div className="relative z-10 text-xs sm:text-sm font-bold uppercase tracking-widest text-amber-300 mt-1.5">
+        ✨ Bigger Rewards • Upgraded Finisher Perks • Secret Additions
+      </div>
+
+      {/* Copy */}
+      <p className="relative z-10 text-xs sm:text-sm text-[#90aead] max-w-xl mx-auto mt-3 leading-relaxed">
+        The Indian Air Force Day Challenge concluded with <span className="text-[#fbe9d0] font-bold">100% capacity booked</span>. For our next nationwide edition, we&apos;re taking the finisher experience to another level with brand-new perks and rewards that we can&apos;t reveal just yet.
+      </p>
+
+      {/* Mystery Feature Pills */}
+      <div className="relative z-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-5 text-xs text-[#fbe9d0] font-mono">
+        <span className="px-3 py-1.5 rounded-xl bg-black/40 border border-[#90aead]/20 flex items-center gap-1.5">
+          🏅 Handcrafted 3D Metal Medal
+        </span>
+        <span className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 font-bold flex items-center gap-1.5 shadow-sm">
+          🎁 Secret Unannounced Perks &amp; Merch
+        </span>
+        <span className="px-3 py-1.5 rounded-xl bg-black/40 border border-[#90aead]/20 flex items-center gap-1.5">
+          ⚡ Private Early-Bird Pricing
+        </span>
+        <span className="px-3 py-1.5 rounded-xl bg-black/40 border border-[#90aead]/20 flex items-center gap-1.5">
+          🚚 Free Pan-India Doorstep Delivery
+        </span>
+      </div>
+
+      {/* Action Area */}
+      <div className="relative z-10 mt-7 max-w-lg mx-auto">
+        {!isExpanded && status !== "success" ? (
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/leaderboard"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-[#244855] border border-[#90aead]/30 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] hover:bg-[#2d5868] transition-colors flex items-center justify-center gap-2"
+            >
+              <Trophy className="h-4 w-4 text-amber-400" />
+              <span>View Last Leaderboard</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setIsExpanded(true)}
+              className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>Unlock Secret Perks &amp; Early Access</span>
+            </button>
+          </div>
+        ) : status === "success" ? (
+          <div className="p-4 rounded-2xl bg-emerald-950/85 border border-emerald-500/50 text-center space-y-1">
+            <div className="text-emerald-400 font-black text-sm flex items-center justify-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>You&apos;re on the Secret VIP List!</span>
+            </div>
+            <p className="text-xs text-[#fbe9d0]">{message}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setStatus("idle");
+                setIsExpanded(false);
+                setContact("");
+              }}
+              className="text-xs text-emerald-300 underline mt-1 cursor-pointer"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="p-4 sm:p-5 rounded-2xl bg-black/50 border border-[#e64833]/50 text-left space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                ⚡ Priority VIP Access + Secret Reveal
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsExpanded(false)}
+                className="text-[#90aead] hover:text-white text-xs cursor-pointer"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <p className="text-xs text-[#fbe9d0] leading-relaxed">
+              Be the first to see the unannounced perks and claim your guaranteed spot 24 hours before public registration opens.
+            </p>
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+              <input
+                required
+                type="text"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="Enter your Email or WhatsApp number"
+                className="flex-1 px-4 py-2.5 rounded-full bg-[#172c34] border border-[#90aead]/30 text-xs text-[#fbe9d0] placeholder-[#90aead]/60 focus:outline-none focus:border-[#e64833]"
+              />
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="px-6 py-2.5 rounded-full bg-[#e64833] text-xs font-black uppercase tracking-wider text-[#fbe9d0] hover:bg-[#c93b27] transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+              >
+                {status === "loading" ? "Saving..." : "Get VIP Invite"}
+              </button>
+            </form>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-[#90aead] pt-1 border-t border-[#90aead]/15">
+              <span>🔒 100% Spam-free · Official launch alert only</span>
+              <a
+                href="https://wa.me/918287831071?text=Hi%20RunnerUp,%20please%20send%20me%20the%20VIP%20secret%20early-access%20invite%20for%20the%20next%20virtual%20challenge!"
+                target="_blank"
+                rel="noreferrer"
+                className="text-emerald-400 font-bold hover:underline"
+              >
+                Or ping on WhatsApp directly →
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 let cachedGroupEvents: { data: any; timestamp: number } | null = null;
 
 export function EventsCatalog() {
@@ -598,6 +761,8 @@ export function EventsCatalog() {
     return () => { cancelled = true; };
   }, []);
 
+  const hasLiveOpen = upcoming.some((e) => e.status === "upcoming");
+
   return (
     <div className="min-w-0">
       {/* ─── Section 2: OPEN RACES (DARK BACKGROUND #14242a) ─── */}
@@ -608,19 +773,28 @@ export function EventsCatalog() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#90aead]/15 pb-5">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-[#e64833]">
-                REGISTRATION OPEN
+                {hasLiveOpen ? "REGISTRATION OPEN" : "⚡ NEXT EVENT IN THE PIPELINE"}
               </span>
               <h2 className="mt-3 font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#fbe9d0]">
-                OPEN RACES & <span className="text-[#e64833]">CHALLENGES</span>
+                {hasLiveOpen ? (
+                  <>
+                    OPEN RACES & <span className="text-[#e64833]">CHALLENGES</span>
+                  </>
+                ) : (
+                  <>
+                    UPCOMING RACES & <span className="text-[#e64833]">NEXT CHALLENGES</span>
+                  </>
+                )}
               </h2>
             </div>
             <p className="text-xs font-mono text-[#fbe9d0] bg-[#172c34] px-4 py-2 rounded-full border border-[#90aead]/20 shadow-sm w-fit">
-              {upcoming.length} active race{upcoming.length === 1 ? "" : "s"}
-              {source === "api" ? " · live server" : ""}
+              {hasLiveOpen
+                ? `${upcoming.length} active race${upcoming.length === 1 ? "" : "s"}${source === "api" ? " · live server" : ""}`
+                : "Next Edition In Production"}
             </p>
           </div>
 
-          {upcoming.length > 0 ? (
+          {hasLiveOpen ? (
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {upcoming.map((event, i) => (
                 <FadeIn key={event.slug} delay={i * 0.08}>
@@ -629,10 +803,34 @@ export function EventsCatalog() {
               ))}
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center justify-center rounded-3xl border border-[#90aead]/20 bg-[#172c34] px-6 py-14 text-center shadow-2xl">
-              <Sparkles className="h-8 w-8 text-[#e64833]" />
-              <p className="mt-3 text-base font-bold text-[#fbe9d0]">No open events right now</p>
-              <p className="mt-1 text-xs text-[#90aead]">Check back soon for new race releases.</p>
+            <div className="mt-8 space-y-10">
+              <NextChallengeLaunchpad />
+
+              {upcoming.length > 0 && (
+                <div className="pt-4 border-t border-[#90aead]/15">
+                  <div className="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[11px] font-black uppercase tracking-widest text-amber-400">
+                        RECENT CHALLENGE SHOWCASE
+                      </span>
+                      <h3 className="text-xl font-display font-black uppercase text-[#fbe9d0] tracking-tight">
+                        INDIAN AIR FORCE DAY <span className="text-rose-400">· 100% BOOKED</span>
+                      </h3>
+                    </div>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 w-fit">
+                      🔒 Registrations Closed
+                    </span>
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {upcoming.map((event, i) => (
+                      <FadeIn key={event.slug} delay={i * 0.08}>
+                        <OpenEventCard event={event} index={i} />
+                      </FadeIn>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
