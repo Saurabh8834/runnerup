@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { openLiveChat } from "../components/tawk-chat";
 import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Field, inputClass } from "../components/app-shell";
 import { PhoneInput } from "../components/phone-input";
@@ -1597,14 +1598,13 @@ function PaymentRegistrationFormInner() {
                     <p className="text-[11px] text-[#90aead] leading-relaxed">
                       Our support team is here for you at every step.
                     </p>
-                    <a
-                      href="https://wa.me/918287831071"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => openLiveChat()}
                       className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
                     >
-                      Chat on WhatsApp (+91 8287831071) →
-                    </a>
+                      Chat with Live Support Desk →
+                    </button>
                   </div>
                 </div>
               </div>

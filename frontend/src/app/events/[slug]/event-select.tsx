@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bike, FileBadge, Footprints, IndianRupee, Medal, Route, Shirt, Sparkles, Ticket, Timer, Trophy, Truck } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
+import { openLiveChat } from "../../components/tawk-chat";
 import { EventCountdown } from "./countdown";
 import { SectionHeader } from "./reveal";
 
@@ -185,14 +186,13 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                     slug={event.slug}
                     activity={activityKeyMap[activity] || "running"}
                   />
-                  <Link
+                  <button
+                    type="button"
+                    onClick={() => openLiveChat()}
                     className="btn btn-secondary btn-full gap-2 text-sm"
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    Have questions? Ask on WhatsApp
-                  </Link>
+                    Have questions? Chat Live with Us
+                  </button>
                 </div>
 
                 <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[0.7rem] font-medium text-(--muted-soft)">
