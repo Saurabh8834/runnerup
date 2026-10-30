@@ -3,7 +3,8 @@ import { PageShell } from "../components/app-shell";
 import { EventsCatalog } from "./events-catalog";
 import { publicEvents } from "../data/events";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
