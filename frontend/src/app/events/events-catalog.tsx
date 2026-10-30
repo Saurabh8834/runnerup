@@ -698,16 +698,8 @@ function NextChallengeLaunchpad() {
                 {status === "loading" ? "Saving..." : "Get VIP Invite"}
               </button>
             </form>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-[#90aead] pt-1 border-t border-[#90aead]/15">
+            <div className="text-[11px] text-[#90aead] pt-1 border-t border-[#90aead]/15 text-center">
               <span>🔒 100% Spam-free · Official launch alert only</span>
-              <a
-                href="https://wa.me/918287831071?text=Hi%20RunnerUp,%20please%20send%20me%20the%20VIP%20secret%20early-access%20invite%20for%20the%20next%20virtual%20challenge!"
-                target="_blank"
-                rel="noreferrer"
-                className="text-emerald-400 font-bold hover:underline"
-              >
-                Or ping on WhatsApp directly →
-              </a>
             </div>
           </div>
         )}
