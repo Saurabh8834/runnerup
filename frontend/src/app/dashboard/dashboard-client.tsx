@@ -39,7 +39,6 @@ import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/
 import { cn } from "../../lib/cn";
 import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
 import { EventNoticeCard } from "../components/event-notice-card";
-import { openLiveChat } from "../components/tawk-chat";
 
 type Registration = {
   id: string;
@@ -1434,14 +1433,15 @@ export function DashboardClient() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 w-full md:w-auto">
-              <button
-                type="button"
-                onClick={() => openLiveChat()}
+              <a
+                href="https://wa.me/918287831071"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="neon-btn-blue justify-center rounded-full px-5 sm:px-6 py-2.5 sm:py-3 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center gap-2"
               >
-                <span>Live Chat Runner Desk</span>
+                <span>WhatsApp Runner Desk</span>
                 <ArrowRight className="h-4 w-4" />
-              </button>
+              </a>
               <Link
                 href="/leaderboard"
                 className="justify-center rounded-full border border-[#90aead]/30 bg-[#244855]/50 px-5 sm:px-6 py-2.5 sm:py-3 text-xs font-black uppercase tracking-wider text-[#fbe9d0] backdrop-blur-xl hover:bg-[#244855] transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] flex items-center"

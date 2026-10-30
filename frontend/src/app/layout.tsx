@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkUserSync } from "../components/clerk-user-sync";
 import { ThemeProvider } from "./components/theme-provider";
-import { TawkChat } from "./components/tawk-chat";
+import { FloatingContact } from "./components/floating-contact";
 import { PersistentRegisterCta } from "./components/persistent-register-cta";
 // Vercel Web Analytics
 import { Analytics } from "@vercel/analytics/next";
@@ -272,7 +272,7 @@ export default function RootLayout({
           >
             <ClerkUserSync />
             {children}
-            <TawkChat />
+            <FloatingContact />
             <PersistentRegisterCta />
           </ClerkProvider>
         </ThemeProvider>

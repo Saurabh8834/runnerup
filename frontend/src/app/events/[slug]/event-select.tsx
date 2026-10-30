@@ -5,9 +5,10 @@ import Link from "next/link";
 import { Bike, FileBadge, Footprints, IndianRupee, Medal, Route, Shirt, Sparkles, Ticket, Timer, Trophy, Truck } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
-import { openLiveChat } from "../../components/tawk-chat";
 import { EventCountdown } from "./countdown";
 import { SectionHeader } from "./reveal";
+
+const WHATSAPP_URL = "https://wa.me/918287831071";
 
 type Activity = { key: string; label: string; icon: typeof Footprints; active: string };
 
@@ -45,6 +46,7 @@ const activityKeyMap: Record<string, string> = {
 export function EventSelect({ event }: { event: PublicEvent }) {
   const [activity, setActivity] = useState(activities[0].key);
   const distances = event.distance.split(" / ");
+  const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(`Hi! I'm interested in ${event.name}. Can you help me with registration?`)}`;
   const amount = event.price.toLowerCase().includes("free") ? "Free" : formatPrice(event.price);
   const mrp = event.compareAtPrice ? formatPrice(event.compareAtPrice) : null;
 
@@ -183,13 +185,14 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                     slug={event.slug}
                     activity={activityKeyMap[activity] || "running"}
                   />
-                  <button
-                    type="button"
-                    onClick={() => openLiveChat()}
+                  <Link
                     className="btn btn-secondary btn-full gap-2 text-sm"
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    Have questions? Chat Live with Us
-                  </button>
+                    Have questions? Ask on WhatsApp
+                  </Link>
                 </div>
 
                 <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[0.7rem] font-medium text-(--muted-soft)">

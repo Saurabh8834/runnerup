@@ -40,6 +40,7 @@ const organizationSchema = {
   ],
   sameAs: [
     'https://instagram.com/runnerup.in',
+    'https://wa.me/918287831071',
   ],
   address: {
     '@type': 'PostalAddress',
@@ -89,6 +90,7 @@ const organizationSchema = {
     '@type': 'ContactPoint',
     contactType: 'customer support',
     email: 'runnerupofficials@gmail.com',
+    telephone: '+91-8287831071',
     areaServed: 'IN',
     availableLanguage: ['English', 'Hindi'],
   },

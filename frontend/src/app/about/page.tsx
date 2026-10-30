@@ -132,7 +132,7 @@ export default function AboutPage() {
     {
       icon: HeartHandshake,
       title: "Dedicated Runner Support",
-      desc: "Our support team is available on 24/7 live chat and email to assist you with registration, activity uploads, kit delivery status, and certificate generation.",
+      desc: "Our support team is one WhatsApp tap away to assist you with registration, activity uploads, kit delivery status, and certificate generation.",
     },
   ];
 
