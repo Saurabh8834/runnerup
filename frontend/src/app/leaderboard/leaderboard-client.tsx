@@ -25,6 +25,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getApiUrl } from "../../lib/api";
 import { publicEvents } from "../data/events";
+import { LeaderboardCountdown, LEADERBOARD_REVEAL_TIMESTAMP } from "./leaderboard-countdown";
 
 export type LeaderboardEntry = {
   rank: number;
@@ -327,6 +328,23 @@ export function LeaderboardClient() {
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Leaderboard disclosure countdown status (Reveals 31 Oct, 12:00 PM IST)
+  const [isRevealed, setIsRevealed] = useState(() => Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP);
+
+  useEffect(() => {
+    if (Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP) {
+      setIsRevealed(true);
+      return;
+    }
+    const checkTimer = setInterval(() => {
+      if (Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP) {
+        setIsRevealed(true);
+        clearInterval(checkTimer);
+      }
+    }, 1000);
+    return () => clearInterval(checkTimer);
+  }, []);
 
   // Sync available distances when event changes
   const distanceOptions = useMemo(() => {
@@ -665,8 +683,8 @@ export function LeaderboardClient() {
             </div>
           </div>
 
-          {/* User's Personal Recognition Banner */}
-          {isLoaded && isSignedIn && !loading && (
+          {/* User's Personal Recognition Banner (Shown after reveal) */}
+          {isLoaded && isSignedIn && !loading && isRevealed && (
             <div className="mt-6">
               {userStanding?.rankedEntry ? (
                 <motion.div
@@ -735,7 +753,28 @@ export function LeaderboardClient() {
               {/* ── TAB 1: VERIFIED LEADERBOARD ─────────────────────── */}
               {activeTab === "verified" && (
                 <div className="mt-8 space-y-10">
-                  {/* Top 3 3D Stepped Podium */}
+                  {!isRevealed ? (
+                    <div className="space-y-8">
+                      <LeaderboardCountdown
+                        userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
+                        onTimerComplete={() => setIsRevealed(true)}
+                      />
+
+                      <div className="rounded-3xl border border-[#90aead]/20 bg-[#172c34] p-8 sm:p-12 text-center shadow-xl">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-4 shadow">
+                          <Trophy className="h-7 w-7" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white">
+                          Leaderboard Standings Under Seal
+                        </h3>
+                        <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
+                          All activity proofs uploaded before tonight&apos;s 11:59 PM cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock tomorrow at 12:00 PM IST!
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Top 3 3D Stepped Podium */}
                   {!searchQuery && entries.length >= 3 && (
                     <div>
                       <div className="mb-4 text-center">
@@ -943,6 +982,8 @@ export function LeaderboardClient() {
                       </div>
                     )}
                   </div>
+                    </>
+                  )}
                 </div>
               )}
 
