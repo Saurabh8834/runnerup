@@ -133,7 +133,12 @@ export function mapApiEventToPublic(
     activityTypes:
       event.activityTypes?.length ? event.activityTypes : staticMatch?.activityTypes ?? ["running", "cycling", "walking"],
     benefits: event.benefits ?? staticMatch?.benefits ?? [],
-    status: isPast ? "past" : "upcoming",
+    status:
+      event.status === "CLOSED" || event.status === "closed"
+        ? "closed"
+        : isPast
+        ? "past"
+        : "upcoming",
     startsAt: event.startsAt ?? undefined,
     endsAt: event.endsAt ?? undefined,
     registrations: event.stats?.registrations ?? event._count?.registrations ?? undefined,
@@ -216,7 +221,9 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
     // fallback
   }
 
-  const fallback = deduplicateOpenEvents(allPublicEvents.filter((event) => event.status === "upcoming"));
+  const fallback = deduplicateOpenEvents(
+    allPublicEvents.filter((event) => event.status === "upcoming" || event.status === "closed"),
+  );
   return limit != null ? fallback.slice(0, limit) : fallback;
 });
 

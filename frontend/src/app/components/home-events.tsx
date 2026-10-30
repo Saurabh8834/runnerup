@@ -7,10 +7,12 @@ import {
   ArrowUpRight,
   FileBadge,
   Flame,
+  Lock,
   Medal,
   Sparkles,
   Ticket,
   Timer,
+  Trophy,
   Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -18,7 +20,10 @@ import type { PublicEvent } from "../data/events";
 import { publicEvents as staticUpcoming } from "../data/events";
 
 // Deterministic realistic slot scarcity calculation based on event slug & date
-function getEventScarcity(slug: string) {
+function getEventScarcity(slug: string, isClosed?: boolean) {
+  if (isClosed) {
+    return { percent: 100, bibsLeft: 0 };
+  }
   let hash = 0;
   for (let i = 0; i < slug.length; i++) {
     hash = (hash << 5) - hash + slug.charCodeAt(i);
@@ -46,7 +51,8 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
-  const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
+  const isClosed = event.status === "closed" || event.status === "past" || isAirForce;
+  const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
 
   useEffect(() => {
     setImgSrc(resolvePoster(event.slug, event.bannerImageUrl));
@@ -153,13 +159,20 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          {isClosed ? (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              <span>Closed</span>
             </span>
-            <span>Open</span>
-          </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span>Open</span>
+            </span>
+          )}
         </div>
 
         {/* Reward / Medal Highlight Strip (Only for non-medal cards so medals are never obscured) */}
@@ -201,7 +214,15 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-[#e64833] flex items-center gap-1">
-              <Zap className="h-3.5 w-3.5 fill-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
+              {isClosed ? (
+                <>
+                  <Lock className="h-3.5 w-3.5 text-[#e64833]" /> Registrations Closed
+                </>
+              ) : (
+                <>
+                  <Zap className="h-3.5 w-3.5 fill-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
+                </>
+              )}
             </span>
             <span className="text-[#90aead] font-mono text-[0.72rem]">
               {scarcity.percent}% filled
@@ -242,13 +263,23 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Countdown & Price Footer */}
         <div className="mt-5 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2 text-[#90aead]">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <Timer className="h-4 w-4 shrink-0 text-[#e64833]" />
-            <span>Closes in:</span>
-            <span className="font-mono font-bold text-[#fbe9d0]">
-              {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
-            </span>
-          </div>
+          {isClosed ? (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+              <Timer className="h-4 w-4 shrink-0 text-rose-400" />
+              <span>Status:</span>
+              <span className="font-bold text-[#fbe9d0]">
+                Closed
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs font-medium">
+              <Timer className="h-4 w-4 shrink-0 text-[#e64833]" />
+              <span>Closes in:</span>
+              <span className="font-mono font-bold text-[#fbe9d0]">
+                {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
+              </span>
+            </div>
+          )}
 
           <div className="flex items-baseline gap-2 text-right">
             <span className="text-xs line-through font-mono text-[#90aead]/60">
@@ -261,16 +292,29 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         </div>
 
         {/* Primary CTA */}
-        <Link
-          prefetch={false}
-          className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
-          href={`/events/${event.slug}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Sparkles className="h-4 w-4" />
-          <span>Claim Your Kit</span>
-          <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-        </Link>
+        {isClosed ? (
+          <Link
+            prefetch={false}
+            className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
+            href="/leaderboard"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Trophy className="h-4 w-4 text-amber-300" />
+            <span>View Leaderboard</span>
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
+        ) : (
+          <Link
+            prefetch={false}
+            className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] text-[#fbe9d0] shadow-[0_0_20px_rgba(230,72,51,0.4)] border border-[#fbe9d0]/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(230,72,51,0.7)]"
+            href={`/events/${event.slug}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>Claim Your Kit</span>
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
+        )}
       </div>
     </article>
   );
@@ -279,7 +323,9 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
   const combined = useMemo(() => {
     const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [...staticUpcoming];
-    const upcomingList = list.filter((ev) => ev.status === "upcoming");
+    const upcomingList = list.filter(
+      (ev) => ev.status === "upcoming" || ev.status === "closed" || ev.slug.includes("air-force")
+    );
 
     // Deduplicate permanently by slug, canonical IAF event key, and normalized name
     const seenKeys = new Set<string>();

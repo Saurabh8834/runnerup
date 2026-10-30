@@ -35,7 +35,7 @@ export const defaultEvents: DefaultEvent[] = [
     proofClosesAt: new Date("2026-11-05T23:59:59.000Z"),
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     priceInPaise: 49900, // Rs. 499
-    status: "OPEN",
+    status: "CLOSED",
     city: "Virtual (All India)",
     featured: true,
     medalIncluded: true,

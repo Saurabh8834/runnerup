@@ -60,10 +60,10 @@ export async function listEvents(request: Request, response: Response) {
 
   if (group) {
     const upcoming = dedupedEnriched
-      .filter((event) => event.phase === "upcoming" || event.phase === "live")
+      .filter((event) => event.phase === "upcoming" || event.phase === "live" || event.status === "CLOSED")
       .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
     const past = dedupedEnriched
-      .filter((event) => event.phase === "past")
+      .filter((event) => event.phase === "past" && event.status !== "CLOSED")
       .sort((a, b) => b.endsAt.getTime() - a.endsAt.getTime());
 
     const groupResult = {

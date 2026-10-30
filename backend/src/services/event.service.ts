@@ -75,8 +75,10 @@ export function scopeWhere(scope?: string) {
 
   if (normalized === "upcoming" || normalized === "open") {
     return {
-      status: "OPEN" as EventStatus,
-      endsAt: { gte: now },
+      OR: [
+        { status: "OPEN" as EventStatus, endsAt: { gte: now } },
+        { status: "CLOSED" as EventStatus },
+      ],
     };
   }
 

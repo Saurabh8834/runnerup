@@ -21,7 +21,7 @@ export type PublicEvent = {
   bannerImageUrl?: string;
   medalImageUrl?: string;
   reward: string;
-  status: "upcoming" | "past";
+  status: "upcoming" | "past" | "closed";
   couponCode?: string;
   showCouponOnCard?: boolean;
   activityTypes?: string[];
@@ -55,7 +55,7 @@ export const allPublicEvents: PublicEvent[] = [
     medalImageUrl: "/images/iaf-medal-front.webp",
     reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
     couponCode: "LAST50",
-    status: "upcoming",
+    status: "closed",
     compareAtPrice: "Rs. 549",
     activityTypes: ["running", "cycling", "walking"],
     startsAt: "2026-10-25T00:00:00.000Z",
@@ -210,8 +210,8 @@ export const allPublicEvents: PublicEvent[] = [
   },
 ];
 
-/** Open / upcoming races (home, register flows). */
-export const publicEvents = allPublicEvents.filter((event) => event.status === "upcoming");
+/** Open / upcoming / closed active showcase races (home, events catalog). */
+export const publicEvents = allPublicEvents.filter((event) => event.status === "upcoming" || event.status === "closed");
 
 /** Completed races for the events archive section. */
 export const pastEvents = allPublicEvents.filter((event) => event.status === "past");

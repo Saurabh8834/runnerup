@@ -19,6 +19,8 @@ import {
   Zap,
   Timer,
   ArrowRight,
+  Lock,
+  Trophy,
 } from "lucide-react";
 import { getApiUrl } from "../../lib/api";
 import { type ApiEvent, mapApiEventToPublic } from "../../lib/events-api";
@@ -30,7 +32,10 @@ import {
 } from "../data/events";
 
 // Deterministic slot scarcity calculation
-function getEventScarcity(slug: string) {
+function getEventScarcity(slug: string, isClosed?: boolean) {
+  if (isClosed) {
+    return { percent: 100, bibsLeft: 0 };
+  }
   let hash = 0;
   for (let i = 0; i < slug.length; i++) {
     hash = (hash << 5) - hash + slug.charCodeAt(i);
@@ -87,7 +92,8 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
-  const scarcity = useMemo(() => getEventScarcity(event.slug), [event.slug]);
+  const isClosed = event.status === "closed" || event.status === "past" || isAirForce;
+  const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
 
   useEffect(() => {
     const nextPoster =
@@ -201,13 +207,20 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
             <span>{scarcity.percent}% Booked</span>
           </span>
 
-          <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          {isClosed ? (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+              <span className="h-2 w-2 rounded-full bg-rose-500" />
+              <span>Closed</span>
             </span>
-            <span>Open</span>
-          </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              </span>
+              <span>Open</span>
+            </span>
+          )}
         </div>
 
         {/* Reward / Medal Highlight Strip (Only for non-medal cards so medals are never obscured) */}
@@ -248,9 +261,15 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         {/* Scarcity Progress Bar */}
         <div className="mb-4 space-y-1.5">
           <div className="flex items-center justify-between text-[0.68rem]">
-            <span className="font-semibold text-[#e64833] flex items-center gap-1">
-              <Zap className="h-3 w-3 text-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
-            </span>
+            {isClosed ? (
+              <span className="font-semibold text-rose-400 flex items-center gap-1">
+                <Lock className="h-3 w-3 text-rose-400" /> Registrations Closed
+              </span>
+            ) : (
+              <span className="font-semibold text-[#e64833] flex items-center gap-1">
+                <Zap className="h-3 w-3 text-[#e64833]" /> Only {scarcity.bibsLeft} Bibs Remaining
+              </span>
+            )}
             <span className="text-[#90aead] font-mono font-medium">
               {scarcity.percent}% filled
             </span>
@@ -261,7 +280,11 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
               whileInView={{ width: `${scarcity.percent}%` }}
               viewport={{ once: true }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full rounded-full bg-gradient-to-r from-[#874f41] via-[#e64833] to-[#fbe9d0]"
+              className={
+                isClosed
+                  ? "h-full rounded-full bg-gradient-to-r from-rose-600 via-[#e64833] to-amber-300"
+                  : "h-full rounded-full bg-gradient-to-r from-[#874f41] via-[#e64833] to-[#fbe9d0]"
+              }
             />
           </div>
         </div>
@@ -290,13 +313,21 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
         {/* Countdown & Price Footer */}
         <div className="mt-4 pt-4 border-t border-[#90aead]/15 flex items-center justify-between gap-2 text-[#90aead]">
-          <div className="flex items-center gap-1.5 text-[0.72rem]">
-            <Timer className="h-3.5 w-3.5 shrink-0 text-[#e64833]" />
-            <span>Closes in:</span>
-            <span className="font-mono font-bold text-[#fbe9d0]">
-              {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
-            </span>
-          </div>
+          {isClosed ? (
+            <div className="flex items-center gap-1.5 text-[0.72rem] font-semibold text-rose-400">
+              <Timer className="h-3.5 w-3.5 shrink-0 text-rose-400" />
+              <span>Status:</span>
+              <span className="font-bold text-[#fbe9d0]">Closed</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-[0.72rem]">
+              <Timer className="h-3.5 w-3.5 shrink-0 text-[#e64833]" />
+              <span>Closes in:</span>
+              <span className="font-mono font-bold text-[#fbe9d0]">
+                {timeLeft.hours}h {String(timeLeft.minutes).padStart(2, "0")}m
+              </span>
+            </div>
+          )}
 
           <div className="text-right">
             <span className="text-lg sm:text-xl font-black font-mono flex items-center justify-end gap-0.5 text-[#fbe9d0]">
@@ -317,15 +348,28 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
             <ArrowUpRight className="h-3.5 w-3.5 text-[#90aead]" />
           </Link>
 
-          <Link
-            data-prevent-card-nav
-            className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
-            href={`/register?event=${encodeURIComponent(event.slug)}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span>Register</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          {isClosed ? (
+            <Link
+              data-prevent-card-nav
+              className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
+              href="/leaderboard"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Trophy className="h-3.5 w-3.5 text-amber-300" />
+              <span>Leaderboard</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <Link
+              data-prevent-card-nav
+              className="flex-1 h-10 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider shadow-lg transition-transform hover:scale-105 active:scale-95 bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0]"
+              href={`/register?event=${encodeURIComponent(event.slug)}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span>Register</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </div>
       </div>
     </article>

@@ -217,3 +217,4 @@ export function LeaderboardCountdown({ userReg, onTimerComplete }: LeaderboardCo
     </div>
   );
 }
+
