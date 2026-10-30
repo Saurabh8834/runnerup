@@ -583,7 +583,7 @@ function NextChallengeLaunchpad() {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[#e64833]/40 bg-gradient-to-br from-[#172c34] via-[#244855]/70 to-[#14242a] p-6 sm:p-10 text-center shadow-[0_0_55px_-10px_rgba(230,72,51,0.45)]">
+    <div id="next-challenge" className="relative overflow-hidden rounded-3xl border border-[#e64833]/40 bg-gradient-to-br from-[#172c34] via-[#244855]/70 to-[#14242a] p-6 sm:p-10 text-center shadow-[0_0_55px_-10px_rgba(230,72,51,0.45)]">
       {/* Ambient background decoration */}
       <div
         aria-hidden

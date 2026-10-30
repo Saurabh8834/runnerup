@@ -17,6 +17,7 @@ import {
   Award,
   User,
   Zap,
+  Sparkles,
   X,
   ArrowRight,
 } from "lucide-react";
@@ -439,10 +440,10 @@ export function AppHeader() {
                 <div className="flex items-center gap-2.5">
                   <Link
                     className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
-                    href="/register"
+                    href="/events"
                   >
-                    <Zap className="h-3.5 w-3.5 text-white fill-white" />
-                    <span>Register Now</span>
+                    <Sparkles className="h-3.5 w-3.5 text-white" />
+                    <span>Next Challenge</span>
                     <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5]" />
                   </Link>
                   <DashboardProfileDropdown />
@@ -555,19 +556,19 @@ export function AppHeader() {
                   </div>
                 ) : null}
 
-                {/* Featured Primary CTA: Register Now */}
+                {/* Featured Primary CTA: Next Challenge */}
                 <Link
-                  href="/register"
+                  href="/events"
                   onClick={() => setOpen(false)}
                   className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#e64833]/30 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/20 backdrop-blur-md">
-                      <Zap className="h-4.5 w-4.5 text-white fill-white" />
+                      <Sparkles className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
-                      <span className="block text-xs font-black uppercase tracking-wider text-white">Register Now</span>
-                      <span className="block text-[0.65rem] font-medium text-white/90 normal-case">Instant Entry · 1.5K, 5K, 10K & 21K</span>
+                      <span className="block text-xs font-black uppercase tracking-wider text-white">Next Challenge</span>
+                      <span className="block text-[0.65rem] font-medium text-white/90 normal-case">Secret Perks · Dropping Soon</span>
                     </div>
                   </div>
                   <ArrowRight className="h-4 w-4 text-white stroke-[2.5] transition-transform group-hover:translate-x-1" />
@@ -707,11 +708,11 @@ export function AppHeader() {
                       Sign In
                     </Link>
                     <Link
-                      href="/register"
+                      href="/events"
                       onClick={() => setOpen(false)}
                       className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#e64833]/30 border border-white/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#e64833]/45"
                     >
-                      <span className="relative z-10">Register</span>
+                      <span className="relative z-10">Next Challenge</span>
                       <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-white stroke-[2.5]" />
                     </Link>
                   </div>
