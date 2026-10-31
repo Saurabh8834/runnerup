@@ -123,6 +123,10 @@ function PrizeCard({ prize, index }: { prize: PrizeItem; index: number }) {
                 </a>
               ) : null}
             </div>
+          ) : prize.type === "medal" ? (
+            <div className="mt-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-200/90 leading-relaxed">
+              <span className="font-semibold text-amber-300">📦 Medal Dispatch Notice:</span> Your Finisher Medal is being prepared for dispatch. We have sent a shipping address verification email to your registered inbox. Once dispatched, your <strong>live courier tracking link will be delivered exclusively via Email</strong>.
+            </div>
           ) : null}
 
           {prize.action ? (

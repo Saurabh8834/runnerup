@@ -1088,6 +1088,21 @@ export function DashboardClient() {
                         </div>
                       )}
 
+                      {/* Notice for Verified Runners awaiting Medal Dispatch */}
+                      {isPaid && isVerified && !isMedalDispatched && (
+                        <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
+                          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200 backdrop-blur-xl flex items-start gap-3 shadow-[0_0_15px_rgba(245,158,11,0.08)]">
+                            <Truck className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div className="space-y-0.5">
+                              <p className="font-bold text-amber-300 text-xs sm:text-sm">Finisher Medal: Dispatching Soon</p>
+                              <p className="text-slate-300 text-[0.72rem] sm:text-xs leading-relaxed">
+                                Address verification details have been sent to your registered email. Once handed over to our express courier partner, your live tracking link will be delivered directly via Email.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Action Bar (Mobile Responsive) */}
                       <div className="p-3.5 sm:p-5 bg-white/[0.03] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -1410,9 +1425,13 @@ export function DashboardClient() {
                                 : "Dispatch Soon"}
                             </span>
                           </p>
-                            {reg.medalDelivery?.trackingNumber && (
+                            {reg.medalDelivery?.trackingNumber ? (
                               <p className="mt-1 text-slate-300 font-mono text-[0.7rem]">
                                 Courier: {reg.medalDelivery.courier || "SpeedPost"} · {reg.medalDelivery.trackingNumber}
+                              </p>
+                            ) : (
+                              <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
+                                ✉️ Address verification email has been sent to your inbox. Once dispatched, your live tracking link will be shared directly via Email.
                               </p>
                             )}
                           </div>
