@@ -690,6 +690,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
 
   const clerkUserId = request.auth?.userId;
   const cacheKey = `lb:${eventKey}:${distanceQuery || "all"}`;
+  const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
     data: any[];
@@ -698,7 +699,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     eventId: string;
   };
 
-  const cached = memoryCache.get<CachedLeaderboard>(cacheKey);
+  const cached = forceRefresh ? null : memoryCache.get<CachedLeaderboard>(cacheKey);
   if (cached) {
     let userRegistrations: Array<{
       id: string;
@@ -944,7 +945,9 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     60,
   );
 
-  if (!clerkUserId) {
+  if (forceRefresh) {
+    response.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+  } else if (!clerkUserId) {
     response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
   } else {
     response.setHeader("Cache-Control", "private, no-cache");

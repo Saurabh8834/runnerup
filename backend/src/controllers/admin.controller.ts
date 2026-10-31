@@ -1889,8 +1889,8 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   const search = q(request, "q")?.trim();
 
   let filterStatus: ProofStatus | null = null;
-  // If an active search term is provided, search across all statuses unless an explicit filter was chosen
-  if (search && (!rawStatus || rawStatus === "ALL" || rawStatus === "SUBMITTED" || rawStatus === "PENDING")) {
+  // If an active search term is provided, always search across all statuses so admins can instantly find any runner
+  if (search) {
     filterStatus = null;
   } else if (!rawStatus || rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
     filterStatus = ProofStatus.SUBMITTED;
