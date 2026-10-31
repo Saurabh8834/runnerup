@@ -23,3 +23,4 @@ export function sendDownloadTelemetry(type: "CERTIFICATE" | "BIB", identifier: s
     }
   } catch {}
 }
+
