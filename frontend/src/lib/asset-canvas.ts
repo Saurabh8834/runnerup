@@ -67,7 +67,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasElement> {
   await ensureCanvasFonts();
 
-  const baseImg = await loadImage("/iaf-bib-clean-base.jpg");
+  const baseImg = await loadImage("/iaf-bib-clean-base.jpg?v=20261031_v3");
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 682;
@@ -86,8 +86,8 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
   ctx.fillStyle = "#874f41";
   ctx.fillText(distStr, 512, 318);
 
-  // 2. Big Rank Position (e.g. "0002", "0010")
-  const posStr = data.positionStr || "0001";
+  // 2. Big Rank Position / Bib Number (e.g. "1242", "1001")
+  const posStr = data.positionStr || "1001";
   ctx.font = `900 170px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -104,7 +104,7 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#ffffff";
-  ctx.fillText(`— ${nameClean} —`, 512, 563);
+  ctx.fillText(`— ${nameClean} —`, 512, 560);
 
   return canvas;
 }
@@ -115,7 +115,7 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
 export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvasElement> {
   await ensureCanvasFonts();
 
-  const baseImg = await loadImage("/iaf-cert-clean-base.jpg");
+  const baseImg = await loadImage("/iaf-cert-clean-base.jpg?v=20261031_v3");
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 682;
