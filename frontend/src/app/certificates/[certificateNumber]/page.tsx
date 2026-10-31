@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageShell } from "../../components/app-shell";
 import { getApiUrl, readApiError } from "../../../lib/api";
-import { Trophy, ArrowLeft, Share2, CheckCircle2, Clock, Lock } from "lucide-react";
+import { Trophy, ArrowLeft, ShieldCheck, Clock, Lock, CheckCircle2 } from "lucide-react";
 
 type CertificateData = {
   certificateNumber: string;
@@ -16,7 +16,6 @@ type CertificateData = {
   bibNumber: string;
   finishTimeSeconds?: number | null;
   issuedAt: string | null;
-  pdfUrl?: string | null;
   verified?: boolean;
 };
 
@@ -26,11 +25,8 @@ export default function CertificateVerifyPage() {
   const certificateNumber = rawCert.trim();
 
   const [data, setData] = useState<CertificateData | null>(null);
-  const [certImageUrl, setCertImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [rendering, setRendering] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,111 +69,13 @@ export default function CertificateVerifyPage() {
     };
   }, [certificateNumber]);
 
-  // Render Official IAF Certificate Canvas (Delicate Pen Signature, Clean Sky, Metallic Gold)
-  useEffect(() => {
-    if (!data) return;
-
-    setRendering(true);
-    const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 682;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = "/iaf-cert-clean-base.jpg";
-
-    img.onload = () => {
-      // 1. Draw 100% Clean Official IAF Certificate Base (No Smudges)
-      ctx.drawImage(img, 0, 0, 1024, 682);
-
-      // 2. Runner Name in Metallic Gold with Dark Shadow (ALL CAPS)
-      const name = (data.runnerName || "RUNNER").toUpperCase().trim();
-      const nameLen = name.length;
-      let fontSize = 34;
-      if (nameLen > 22) fontSize = 24;
-      else if (nameLen > 16) fontSize = 28;
-
-      ctx.font = `bold ${fontSize}px 'Cinzel', 'Times New Roman', Georgia, serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // Shadow
-      ctx.fillStyle = "#050a14";
-      ctx.fillText(name, 513, 308);
-      // Gold
-      ctx.fillStyle = "#f6d791";
-      ctx.fillText(name, 512, 307);
-
-      // 3. Distance: clean digits (e.g. "5" or "10" or "21")
-      const distClean = (data.distance || "5").replace(/km/gi, "").trim();
-      ctx.font = "bold 22px 'Times New Roman', Georgia, serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-
-      ctx.fillStyle = "#050a14";
-      ctx.fillText(distClean, 331, 477);
-      ctx.fillStyle = "#f6d791";
-      ctx.fillText(distClean, 330, 476);
-
-      // 4. Date: "31  /  10  /  2026"
-      ctx.fillStyle = "#050a14";
-      ctx.fillText("31  /  10  /  2026", 523, 477);
-      ctx.fillStyle = "#f6d791";
-      ctx.fillText("31  /  10  /  2026", 522, 476);
-
-      // 5. Authentic Organizer Signature: Delicate cursive script, 24px (fits neatly without overflowing)
-      ctx.font = "italic 24px 'Alex Brush', 'Great Vibes', 'Brush Script MT', cursive";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "bottom";
-
-      ctx.fillStyle = "#050a14";
-      ctx.fillText("Runnerup", 696, 474);
-      ctx.fillStyle = "#f6d791";
-      ctx.fillText("Runnerup", 695, 473);
-
-      const generatedUrl = canvas.toDataURL("image/jpeg", 0.98);
-      setCertImageUrl(generatedUrl);
-      setRendering(false);
-    };
-
-    img.onerror = () => {
-      setRendering(false);
-    };
-  }, [data]);
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `My Official IAF Finisher Certificate: ${data?.runnerName}`,
-          text: `Check out my official finisher certificate for the Indian Air Force Day Challenge on RunnerUp!`,
-          url: window.location.href,
-        });
-      } catch {
-        // Fallback to copy
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
-
   return (
     <PageShell>
-      {/* Preload True Signature & Title Fonts */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@700;900&family=Great+Vibes&display=swap"
-      />
-
-      <section className="py-8 sm:py-14 bg-[#0d161a] text-[#fbe9d0] min-h-[85vh]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+      <section className="py-12 sm:py-20 bg-[#0d161a] text-[#fbe9d0] min-h-[85vh] flex items-center">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 w-full">
 
           {/* Navigation Bar */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
+          <div className="mb-6 flex items-center justify-between">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-colors"
@@ -185,31 +83,19 @@ export default function CertificateVerifyPage() {
               <ArrowLeft className="h-4 w-4" /> Back to Dashboard
             </Link>
 
-            {data && (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={handleShare}
-                  type="button"
-                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow cursor-pointer"
-                >
-                  <Share2 className="h-3.5 w-3.5" />
-                  {copied ? "Copied Link!" : "Share Certificate"}
-                </button>
-
-                {/* Requirement: Disable Download, Show Available Soon */}
-                <div className="rounded-full border border-amber-400/40 bg-amber-400/15 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-300 shadow-md inline-flex items-center gap-1.5 select-none">
-                  <Clock className="h-3.5 w-3.5 text-amber-400" />
-                  <span>Available Soon</span>
-                </div>
-              </div>
-            )}
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              <Trophy className="h-4 w-4" /> View Leaderboard
+            </Link>
           </div>
 
           {/* Loading */}
-          {(loading || rendering) && !certImageUrl && (
+          {loading && !data && (
             <div className="rounded-3xl border border-white/10 bg-black/40 p-16 text-center shadow-2xl">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-3 border-[#e64833] border-t-transparent mb-4" />
-              <p className="text-sm font-semibold text-slate-300">Generating your official IAF finisher certificate...</p>
+              <p className="text-sm font-semibold text-slate-300">Checking finisher verification records...</p>
             </div>
           )}
 
@@ -224,48 +110,86 @@ export default function CertificateVerifyPage() {
             </div>
           )}
 
-          {/* ══════ OFFICIAL IAF CERTIFICATE DISPLAY ══════ */}
-          {certImageUrl && data && (
-            <div className="space-y-6">
-              <div
-                id="cert-print-area"
-                className="relative overflow-hidden rounded-3xl border-2 border-amber-500/40 bg-[#001026] shadow-2xl transition-all"
-              >
-                <img
-                  src={certImageUrl}
-                  alt={`Official IAF Finisher Certificate - ${data.runnerName}`}
-                  className="w-full h-auto block select-none"
-                />
+          {/* ══════ LOCKED STATE: NO CERTIFICATE IMAGE DISPLAYED ══════ */}
+          {data && (
+            <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/30 bg-[#0b1722]/95 p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+              {/* Glow Accent */}
+              <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-72 rounded-full bg-amber-500/15 blur-[80px]" />
+
+              {/* Status Header */}
+              <div className="text-center relative z-10">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-400 shadow-lg">
+                  <Lock className="h-8 w-8" />
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-300 mb-3 shadow-xs">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Available Soon · System Under Final Verification</span>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                  Official Finisher Certificate
+                </h1>
+
+                <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                  Official IAF Day 2026 Finisher Certificates are undergoing final arbiter verification and ranking audit. Image preview and certificate download will be enabled shortly.
+                </p>
               </div>
 
-              {/* Status Ribbon below Certificate */}
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl print:hidden">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-400/40">
-                    <CheckCircle2 className="h-4 w-4" />
+              {/* Participant Details Card */}
+              <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5 relative z-10 space-y-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Participant</span>
+                  <span className="text-sm font-black text-amber-300 uppercase">{data.runnerName}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Event</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white">{data.event}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Distance Category</span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-white">{data.distance}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Certificate ID</span>
+                  <span className="text-xs font-mono font-bold text-slate-300">{data.certificateNumber}</span>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Verification Status</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> 100% Eligible &amp; Confirmed
                   </span>
-                  <div>
-                    <p className="text-xs font-bold text-white">Official IAF Finisher Certificate</p>
-                    <p className="text-[11px] text-slate-300 font-mono">
-                      Cert ID: {data.certificateNumber} · {data.distance} · {data.runnerName}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1.5 text-xs font-bold text-amber-300 inline-flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" />
-                    <span>Download Available Soon</span>
-                  </div>
-
-                  <Link
-                    href={`/leaderboard?distance=${encodeURIComponent(data.distance)}`}
-                    className="rounded-full border border-white/20 bg-white/[0.08] hover:bg-white/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-200 transition-all inline-flex items-center gap-1.5 shadow"
-                  >
-                    <Trophy className="h-3.5 w-3.5 text-amber-400" /> Leaderboard
-                  </Link>
                 </div>
               </div>
+
+              {/* Locked Notice Banner */}
+              <div className="mt-6 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-center relative z-10">
+                <p className="text-xs text-amber-200/90 font-medium">
+                  🔒 Asset downloads and preview images are temporarily locked for arbiter audit. Your participation record is secure.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition-all shadow"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Return to Dashboard
+                </Link>
+
+                <Link
+                  href="/leaderboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-amber-500/50 bg-amber-500/20 hover:bg-amber-500/30 px-6 py-3 text-xs font-black uppercase tracking-wider text-amber-300 transition-all shadow"
+                >
+                  <Trophy className="h-4 w-4" /> View Leaderboard Standings
+                </Link>
+              </div>
+
             </div>
           )}
 

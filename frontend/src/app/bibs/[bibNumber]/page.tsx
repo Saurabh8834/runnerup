@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageShell } from "../../components/app-shell";
 import { getApiUrl, readApiError } from "../../../lib/api";
-import { Award, Trophy, ArrowLeft, Share2, CheckCircle2, Clock } from "lucide-react";
+import { Trophy, ArrowLeft, Clock, Lock, CheckCircle2 } from "lucide-react";
 
 type BibData = {
   runnerName: string;
@@ -23,11 +23,8 @@ export default function DigitalBibPage() {
   const bibNumber = rawBib.trim();
 
   const [data, setData] = useState<BibData | null>(null);
-  const [bibImageUrl, setBibImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!bibNumber) return;
@@ -44,29 +41,17 @@ export default function DigitalBibPage() {
         const json = await res.json();
         const payload = json.data;
 
-        // Verify payment status: digital bib is strictly available only for paid users
         if (payload.isPaid === false) {
           throw new Error("Payment pending. Official digital race bib and finisher certificate are available exclusively for confirmed, paid participants.");
         }
 
-        // Determine certificate href/number
-        const certItem = payload.prizes?.find((p: any) => p.type === "certificate");
-        const certHref = certItem?.action?.href ?? "";
-        const certNum = certHref.startsWith("/certificates/")
-          ? certHref.replace("/certificates/", "")
-          : null;
+        const runnerNameUpper = (payload.runner?.name || "RUNNER").toUpperCase().trim();
 
-        // Distance: e.g. "5 KM"
         let distStr = (payload.event?.distance || "5 KM").toUpperCase().trim();
         if (!distStr.endsWith("KM") && !distStr.endsWith("K")) {
           distStr += " KM";
         }
 
-        const runnerNameUpper = (payload.runner?.name || "RUNNER").toUpperCase().trim();
-
-        // 4-Digit Position according to the LEADERBOARD result:
-        // Rank 1 -> 0001
-        // Anjali Singh, Arsalan Ahmad, Saurabh are rank #1
         let positionStr = payload.runner?.rankFormatted || (payload.runner?.rank ? String(payload.runner.rank).padStart(4, "0") : null);
         if (runnerNameUpper.includes("ANJALI") || runnerNameUpper.includes("ARSALAN") || runnerNameUpper.includes("SAURABH")) {
           positionStr = "0001";
@@ -90,9 +75,8 @@ export default function DigitalBibPage() {
           runnerName: runnerNameUpper,
           bibNumber: payload.runner?.bibNumber || bibNumber,
           distance: distStr,
-          eventTitle: payload.event?.title || "Indian Air Force Day Challenge",
+          eventTitle: payload.event?.title || "Indian Air Force Day Virtual Challenge 2026",
           rankNumber: positionStr,
-          certificateNumber: certNum || ("CERT-IAF26-" + (payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")),
         });
       } catch (err: any) {
         setError(err.message || "Failed to load bib.");
@@ -101,84 +85,16 @@ export default function DigitalBibPage() {
       }
     }
 
-    fetchBib();
+    void fetchBib();
   }, [bibNumber]);
-
-  // Render on Clean Base Template (No Overgrown Box, Crisp Native Design)
-  useEffect(() => {
-    if (!data) return;
-
-    setRendering(true);
-    const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 682;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = "/iaf-bib-clean-base.jpg";
-
-    img.onload = () => {
-      // 1. Draw Native Template (Crisp, No Overgrown Polygon)
-      ctx.drawImage(img, 0, 0, 1024, 682);
-
-      // 2. Category Header (e.g. "5 KM") inside white plate
-      ctx.fillStyle = "#874f41";
-      ctx.font = "900 28px 'Arial Black', Impact, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(data.distance, 512, 270);
-
-      // 3. 4-Digit Position Number from Leaderboard (e.g. "0001") in Navy
-      ctx.fillStyle = "#001834";
-      ctx.font = "900 185px 'Arial Black', Impact, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(data.rankNumber, 512, 420);
-
-      // 4. Runner Name on Bottom Navy Bar (e.g. "——  ANJALI SINGH  ——")
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "900 22px 'Arial Black', Arial, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(`——  ${data.runnerName}  ——`, 512, 658);
-
-      const generatedUrl = canvas.toDataURL("image/jpeg", 0.98);
-      setBibImageUrl(generatedUrl);
-      setRendering(false);
-    };
-
-    img.onerror = () => {
-      setRendering(false);
-    };
-  }, [data]);
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `My Official IAF Race Bib: #${data?.rankNumber}`,
-          text: `Check out my official race bib #${data?.rankNumber} (${data?.distance}) for the Indian Air Force Day Challenge on RunnerUp!`,
-          url: window.location.href,
-        });
-      } catch {
-        // Fallback to copy
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
-  };
 
   return (
     <PageShell>
-      <section className="py-8 sm:py-14 bg-[#0d161a] text-[#fbe9d0] min-h-[85vh]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+      <section className="py-12 sm:py-20 bg-[#0d161a] text-[#fbe9d0] min-h-[85vh] flex items-center">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 w-full">
 
           {/* Navigation Bar */}
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
+          <div className="mb-6 flex items-center justify-between">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-colors"
@@ -186,31 +102,19 @@ export default function DigitalBibPage() {
               <ArrowLeft className="h-4 w-4" /> Back to Dashboard
             </Link>
 
-            {data && (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={handleShare}
-                  type="button"
-                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow cursor-pointer"
-                >
-                  <Share2 className="h-3.5 w-3.5" />
-                  {copied ? "Copied Link!" : "Share Bib"}
-                </button>
-
-                {/* Requirement: Disable Download, Show Available Soon */}
-                <div className="rounded-full border border-amber-400/40 bg-amber-400/15 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-300 shadow-md inline-flex items-center gap-1.5 select-none">
-                  <Clock className="h-3.5 w-3.5 text-amber-400" />
-                  <span>Available Soon</span>
-                </div>
-              </div>
-            )}
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              <Trophy className="h-4 w-4" /> View Leaderboard
+            </Link>
           </div>
 
           {/* Loading */}
-          {(loading || rendering) && !bibImageUrl && (
+          {loading && !data && (
             <div className="rounded-3xl border border-white/10 bg-black/40 p-16 text-center shadow-2xl">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-3 border-[#e64833] border-t-transparent mb-4" />
-              <p className="text-sm font-semibold text-slate-300">Loading your official digital bib...</p>
+              <p className="text-sm font-semibold text-slate-300">Checking race bib records...</p>
             </div>
           )}
 
@@ -225,48 +129,86 @@ export default function DigitalBibPage() {
             </div>
           )}
 
-          {/* ══════ OFFICIAL IAF DIGITAL BIB PREVIEW (POSITION #0001) ══════ */}
-          {bibImageUrl && data && (
-            <div className="space-y-6">
-              <div
-                id="bib-print-area"
-                className="relative overflow-hidden rounded-3xl border-2 border-slate-700/60 bg-[#001026] shadow-2xl transition-all"
-              >
-                <img
-                  src={bibImageUrl}
-                  alt={`Official IAF Bib #${data.rankNumber} - ${data.runnerName}`}
-                  className="w-full h-auto block select-none"
-                />
+          {/* ══════ LOCKED STATE: NO BIB IMAGE DISPLAYED ══════ */}
+          {data && (
+            <div className="relative overflow-hidden rounded-3xl border-2 border-amber-500/30 bg-[#0b1722]/95 p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+              {/* Glow Accent */}
+              <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-72 rounded-full bg-amber-500/15 blur-[80px]" />
+
+              {/* Status Header */}
+              <div className="text-center relative z-10">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-400 shadow-lg">
+                  <Lock className="h-8 w-8" />
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-300 mb-3 shadow-xs">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Available Soon · System Under Final Verification</span>
+                </div>
+
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                  Official Digital Race Bib
+                </h1>
+
+                <p className="mx-auto mt-2 max-w-md text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                  Official IAF Day 2026 Digital Finisher Bibs are undergoing final ranking synchronization. Image preview and bib download will be enabled shortly.
+                </p>
               </div>
 
-              {/* Status Ribbon below Bib */}
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl print:hidden">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-400/40">
-                    <CheckCircle2 className="h-4 w-4" />
+              {/* Participant Details Card */}
+              <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5 relative z-10 space-y-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Participant</span>
+                  <span className="text-sm font-black text-amber-300 uppercase">{data.runnerName}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Event</span>
+                  <span className="text-xs sm:text-sm font-semibold text-white">{data.eventTitle}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Distance Category</span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-white">{data.distance}</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Leaderboard Position</span>
+                  <span className="text-xs sm:text-sm font-mono font-bold text-emerald-400">#{data.rankNumber}</span>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-xs uppercase tracking-wider font-bold text-slate-400">Registration Status</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> 100% Eligible &amp; Confirmed
                   </span>
-                  <div>
-                    <p className="text-xs font-bold text-white">Official IAF Digital Finisher Bib</p>
-                    <p className="text-[11px] text-slate-300 font-mono">
-                      Rank Position: #{data.rankNumber} · {data.distance} · {data.runnerName}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1.5 text-xs font-bold text-amber-300 inline-flex items-center gap-1.5">
-                    <Clock className="h-3 w-3" />
-                    <span>Download Available Soon</span>
-                  </div>
-
-                  <Link
-                    href={`/leaderboard?distance=${encodeURIComponent(data.distance)}`}
-                    className="rounded-full border border-white/20 bg-white/[0.08] hover:bg-white/15 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-200 transition-all inline-flex items-center gap-1.5 shadow"
-                  >
-                    <Trophy className="h-3.5 w-3.5 text-amber-400" /> Leaderboard
-                  </Link>
                 </div>
               </div>
+
+              {/* Locked Notice Banner */}
+              <div className="mt-6 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-center relative z-10">
+                <p className="text-xs text-amber-200/90 font-medium">
+                  🔒 Asset downloads and preview images are temporarily locked for arbiter audit. Your participation record is secure.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 hover:bg-white/20 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition-all shadow"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Return to Dashboard
+                </Link>
+
+                <Link
+                  href="/leaderboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-amber-500/50 bg-amber-500/20 hover:bg-amber-500/30 px-6 py-3 text-xs font-black uppercase tracking-wider text-amber-300 transition-all shadow"
+                >
+                  <Trophy className="h-4 w-4" /> View Leaderboard Standings
+                </Link>
+              </div>
+
             </div>
           )}
 

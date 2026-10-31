@@ -26,6 +26,7 @@ import {
   Award,
   Download,
   Trophy,
+  Lock,
 } from "lucide-react";
 
 /* ── Toast ──────────────────────────────────────────────── */
@@ -456,8 +457,7 @@ export default function AdminProofsPage() {
   }>(() => {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("runnerup_admin_proof_counts");
-        if (stored) return JSON.parse(stored);
+        localStorage.removeItem("runnerup_admin_proof_counts");
       } catch {}
     }
     return {
@@ -468,8 +468,8 @@ export default function AdminProofsPage() {
       total: 312,
       failedRate: 0,
       successRate: 100,
-      certDownloads: 219,
-      bibDownloads: 248,
+      certDownloads: 0,
+      bibDownloads: 0,
     };
   });
   const [downloadMaps, setDownloadMaps] = useState<{
@@ -532,8 +532,8 @@ export default function AdminProofsPage() {
         const tot = 312; // Strictly paid users only
         const fRate = 0;
         const sRate = 100;
-        const cDown = Math.min(json.meta.downloadsCount?.certificates ?? 219, 312);
-        const bDown = Math.min(json.meta.downloadsCount?.bibs ?? 248, 312);
+        const cDown = Number(json.meta.downloadsCount?.certificates || 0);
+        const bDown = Number(json.meta.downloadsCount?.bibs || 0);
 
         const updated = {
           pending: p,
@@ -710,7 +710,7 @@ export default function AdminProofsPage() {
         <AdminPageHeader
           kicker="Operations"
           title="Proof queue & verification"
-          description={`${counts.total} paid runners · ${counts.approved} approved (100%) · 0% fail rate · 📥 ${counts.certDownloads} certs downloaded · 📥 ${counts.bibDownloads} bibs downloaded`}
+          description={`${counts.total} paid runners · 100% eligible · Downloads Temporarily Locked 🔒 · System under final arbiter verification`}
           actions={
             <button
               className="btn btn-secondary flex items-center gap-1.5"
@@ -740,37 +740,37 @@ export default function AdminProofsPage() {
             </div>
           </div>
 
-          {/* Card 2: Certificates Ready & Downloaded */}
+          {/* Card 2: Certificates Ready (Downloads Locked) */}
           <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-blue-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Ready & Claimed</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Ready (Downloads Locked 🔒)</span>
               <Award className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <p className="text-2xl font-black text-blue-300 font-mono">{counts.approved}</p>
-              <span className="text-xs font-bold text-emerald-400">({counts.certDownloads} Claimed)</span>
+              <span className="text-xs font-bold text-amber-400">(0 Downloaded · Locked 🔒)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Downloaded ({Math.round((counts.certDownloads / (counts.approved || 312)) * 100)}%)</span>
+              <span className="font-bold text-amber-300">🔒 Downloads Disabled</span>
               <span>·</span>
-              <span>Instant Download</span>
+              <span>Under Verification</span>
             </div>
           </div>
 
-          {/* Card 3: Digital Race Bibs Active & Downloaded */}
+          {/* Card 3: Digital Race Bibs Active (Downloads Locked) */}
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-amber-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Active & Claimed</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Active (Downloads Locked 🔒)</span>
               <Trophy className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <p className="text-2xl font-black text-amber-300 font-mono">{counts.total}</p>
-              <span className="text-xs font-bold text-amber-400">({counts.bibDownloads} Claimed)</span>
+              <span className="text-xs font-bold text-amber-400">(0 Downloaded · Locked 🔒)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Downloaded ({Math.round((counts.bibDownloads / (counts.total || 312)) * 100)}%)</span>
+              <span className="font-bold text-amber-300">🔒 Downloads Disabled</span>
               <span>·</span>
-              <span>100% Assigned</span>
+              <span>Under Verification</span>
             </div>
           </div>
 
@@ -1119,22 +1119,14 @@ export default function AdminProofsPage() {
                                   {/* Digital Bib Status */}
                                   <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">
                                     🎽 Bib: Active (#{row.bibNumber})
-                                    {isBibDownloaded ? (
-                                      <span className="rounded bg-emerald-500/25 text-emerald-300 px-1.5 py-0.5 text-[10px] font-extrabold border border-emerald-400/40">📥 Downloaded</span>
-                                    ) : (
-                                      <span className="rounded bg-zinc-500/20 text-zinc-400 px-1.5 py-0.5 text-[10px]">⏳ Unclaimed</span>
-                                    )}
+                                    <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">🔒 Locked</span>
                                   </span>
 
                                   {/* Certificate Status */}
                                   {currentStatus === "APPROVED" ? (
                                     <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
                                       <Award className="h-3 w-3" /> Certificate: Ready
-                                      {isCertDownloaded ? (
-                                        <span className="rounded bg-emerald-500/25 text-emerald-200 px-1.5 py-0.5 text-[10px] font-extrabold border border-emerald-400/40">📥 Downloaded</span>
-                                      ) : (
-                                        <span className="rounded bg-blue-500/20 text-blue-300 px-1.5 py-0.5 text-[10px]">⏳ Ready to Download</span>
-                                      )}
+                                      <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">🔒 Locked</span>
                                     </span>
                                   ) : currentStatus === "NOT_SUBMITTED" ? (
                                     <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-300">
@@ -1149,27 +1141,9 @@ export default function AdminProofsPage() {
 
                                 {/* Instant Download / View Actions */}
                                 <div className="flex items-center gap-2">
-                                  <a
-                                    href={`/bibs/${encodeURIComponent(row.bibNumber)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-xs btn-secondary flex items-center gap-1 font-bold text-[11px] h-7 px-2.5 hover:shadow-xs"
-                                  >
-                                    <Download className="h-3 w-3" /> Download Bib
-                                    <ExternalLink className="h-2.5 w-2.5 text-[var(--muted)]" />
-                                  </a>
-
-                                  {currentStatus === "APPROVED" && (
-                                    <a
-                                      href={`/certificates/${encodeURIComponent(row.certificate?.certificateNumber || `CERT-IAF26-${row.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="btn btn-xs btn-primary flex items-center gap-1 font-bold text-[11px] h-7 px-2.5 shadow-xs"
-                                    >
-                                      <Award className="h-3 w-3" /> Download Cert
-                                      <ExternalLink className="h-2.5 w-2.5 opacity-80" />
-                                    </a>
-                                  )}
+                                  <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-[11px] font-bold text-amber-300 inline-flex items-center gap-1 select-none">
+                                    <Lock className="h-3 w-3" /> Available Soon (Locked 🔒)
+                                  </span>
                                 </div>
                               </div>
                             );
