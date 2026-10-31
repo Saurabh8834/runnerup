@@ -16,6 +16,7 @@ import {
   Award,
 } from "lucide-react";
 import { renderBibCanvas, triggerCanvasDownload } from "../../../lib/asset-canvas";
+import { sendDownloadTelemetry } from "../../../lib/track-download";
 
 type BibData = {
   runnerName: string;
@@ -169,6 +170,7 @@ export default function DigitalBibPage() {
       const safeName = data.runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       const filename = `RunnerUp_Bib_${safeName}_${data.bibNumber}.jpg`;
       await triggerCanvasDownload(canvas, filename);
+      sendDownloadTelemetry("BIB", data.bibNumber);
     } catch {
       alert("Failed to download digital bib. Please try again.");
     } finally {

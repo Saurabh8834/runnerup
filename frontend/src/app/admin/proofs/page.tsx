@@ -712,7 +712,7 @@ export default function AdminProofsPage() {
         <AdminPageHeader
           kicker="Operations"
           title="Proof queue & verification"
-          description={`${counts.total} paid runners · 100% eligible · Downloads Temporarily Locked 🔒 · System under final arbiter verification`}
+          description={`${counts.total} paid runners · 100% eligible · Real-Time Download Telemetry Active 🟢`}
           actions={
             <button
               className="btn btn-secondary flex items-center gap-1.5"
@@ -742,37 +742,41 @@ export default function AdminProofsPage() {
             </div>
           </div>
 
-          {/* Card 2: Certificates Ready (Live 📥) */}
+          {/* Card 2: Certificates Downloaded (Live 📥) */}
           <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-blue-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Ready (Live 📥)</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Claimed (Live 📥)</span>
               <Award className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <p className="text-2xl font-black text-blue-300 font-mono">{counts.approved}</p>
-              <span className="text-xs font-bold text-emerald-400">(100% Eligible · Live)</span>
+              <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
+              <span className="text-xs font-bold text-blue-300/80">
+                / {counts.approved} ({Math.round((counts.certDownloads / (counts.approved || 312)) * 100)}%)
+              </span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-              <span className="font-bold text-emerald-300">✓ Instant Download</span>
+              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Downloaded</span>
               <span>·</span>
-              <span>312 Paid Verified</span>
+              <span>{Math.max(0, (counts.approved || 312) - counts.certDownloads)} Pending</span>
             </div>
           </div>
 
-          {/* Card 3: Digital Race Bibs Active (Live 📥) */}
+          {/* Card 3: Digital Bibs Downloaded (Live 📥) */}
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-amber-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Active (Live 📥)</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Claimed (Live 📥)</span>
               <Trophy className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <p className="text-2xl font-black text-amber-300 font-mono">{counts.approved}</p>
-              <span className="text-xs font-bold text-emerald-400">(Format: 1001..1312)</span>
+              <p className="text-2xl font-black text-amber-300 font-mono">{counts.bibDownloads}</p>
+              <span className="text-xs font-bold text-amber-300/80">
+                / {counts.approved} ({Math.round((counts.bibDownloads / (counts.approved || 312)) * 100)}%)
+              </span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span className="font-bold text-emerald-300">✓ 1-Click HD Download</span>
+              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Downloaded</span>
               <span>·</span>
-              <span>100% Assigned</span>
+              <span>{Math.max(0, (counts.approved || 312) - counts.bibDownloads)} Pending</span>
             </div>
           </div>
 
@@ -900,7 +904,7 @@ export default function AdminProofsPage() {
 
               <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
                 <Award className="h-3.5 w-3.5 text-emerald-400" />
-                Certificates: <strong>{counts.approved} Ready</strong>
+                Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
               </span>
             </div>
 
@@ -1119,16 +1123,36 @@ export default function AdminProofsPage() {
                               <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--panel-soft)]/70 p-3 flex flex-wrap items-center justify-between gap-2.5">
                                 <div className="flex flex-wrap items-center gap-2 text-xs">
                                   {/* Digital Bib Status */}
-                                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-bold text-amber-300">
-                                    🎽 Bib: Active (#{row.bibNumber})
-                                    <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">🔒 Locked</span>
+                                  <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${
+                                    isBibDownloaded
+                                      ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+                                      : "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                                  }`}>
+                                    🎽 Bib: #{row.bibNumber}
+                                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                                      isBibDownloaded
+                                        ? "bg-emerald-500/30 text-emerald-200"
+                                        : "bg-amber-500/20 text-amber-300"
+                                    }`}>
+                                      {isBibDownloaded ? "📥 Downloaded" : "⏳ Not Downloaded"}
+                                    </span>
                                   </span>
 
                                   {/* Certificate Status */}
                                   {currentStatus === "APPROVED" ? (
-                                    <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
-                                      <Award className="h-3 w-3" /> Certificate: Ready
-                                      <span className="rounded bg-amber-500/20 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">🔒 Locked</span>
+                                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${
+                                      isCertDownloaded
+                                        ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+                                        : "border-sky-500/30 bg-sky-500/10 text-sky-300"
+                                    }`}>
+                                      <Award className="h-3 w-3" /> Certificate
+                                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                                        isCertDownloaded
+                                          ? "bg-emerald-500/30 text-emerald-200"
+                                          : "bg-sky-500/20 text-sky-300"
+                                      }`}>
+                                        {isCertDownloaded ? "📥 Downloaded" : "⏳ Ready"}
+                                      </span>
                                     </span>
                                   ) : currentStatus === "NOT_SUBMITTED" ? (
                                     <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-bold text-rose-300">

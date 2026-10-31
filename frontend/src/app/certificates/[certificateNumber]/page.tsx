@@ -16,6 +16,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { renderCertCanvas, triggerCanvasDownload } from "../../../lib/asset-canvas";
+import { sendDownloadTelemetry } from "../../../lib/track-download";
 
 type CertificateData = {
   certificateNumber: string;
@@ -136,6 +137,8 @@ export default function CertificateVerifyPage() {
       const safeName = data.runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       const filename = `RunnerUp_Certificate_${safeName}_${data.bibNumber || "IAF"}.jpg`;
       await triggerCanvasDownload(canvas, filename);
+      sendDownloadTelemetry("CERTIFICATE", data.certificateNumber);
+      if (data.bibNumber) sendDownloadTelemetry("CERTIFICATE", data.bibNumber);
     } catch (err: any) {
       alert("Failed to download certificate. Please try again.");
     } finally {

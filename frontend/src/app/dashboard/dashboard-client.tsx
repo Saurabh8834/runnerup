@@ -43,6 +43,7 @@ import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
 import { EventNoticeCard } from "../components/event-notice-card";
 import { renderBibCanvas, renderCertCanvas, triggerCanvasDownload } from "../../lib/asset-canvas";
 import { getVerifiedRunnerByBib } from "../../lib/official-runners-map";
+import { sendDownloadTelemetry } from "../../lib/track-download";
 
 type Registration = {
   id: string;
@@ -247,6 +248,7 @@ export function DashboardClient() {
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       await triggerCanvasDownload(canvas, `RunnerUp_Bib_${safeName}_${reg.bibNumber}.jpg`);
+      sendDownloadTelemetry("BIB", reg.bibNumber);
     } catch (e) {
       console.error("Failed to download bib", e);
       alert("Could not download bib. Please try again.");
@@ -269,6 +271,7 @@ export function DashboardClient() {
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       await triggerCanvasDownload(canvas, `RunnerUp_Certificate_${safeName}.jpg`);
+      sendDownloadTelemetry("CERTIFICATE", reg.certificate?.certificateNumber || reg.bibNumber);
     } catch (e) {
       console.error("Failed to download certificate", e);
       alert("Could not download certificate. Please try again.");

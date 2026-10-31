@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { prisma } from "../lib/prisma.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +21,9 @@ let initialized = false;
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+    try {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    } catch {}
   }
 }
 
@@ -43,6 +46,28 @@ function initTracker() {
   } catch (err) {
     console.error("[DownloadTracker] Failed to read download stats file:", err);
   }
+
+  // Hydrate asynchronously from DB audit log for persistent cloud deployment
+  prisma.adminAuditLog.findMany({
+    where: {
+      action: { in: ["download.certificate", "download.bib"] },
+    },
+    select: { action: true, entityId: true },
+    take: 2000,
+  }).then((logs) => {
+    for (const log of logs) {
+      if (!log.entityId) continue;
+      if (log.action === "download.certificate") {
+        certSet.add(log.entityId);
+        const d = log.entityId.replace(/\D/g, "");
+        if (d) certSet.add(d);
+      } else if (log.action === "download.bib") {
+        bibSet.add(log.entityId);
+        const d = log.entityId.replace(/\D/g, "");
+        if (d) bibSet.add(d);
+      }
+    }
+  }).catch(() => {});
 }
 
 function scheduleSave() {
@@ -64,8 +89,32 @@ function scheduleSave() {
 }
 
 export function recordDownload(type: "CERTIFICATE" | "BIB", identifier: string): void {
-  // Downloads are currently locked by admin instruction
-  return;
+  if (!identifier) return;
+  initTracker();
+
+  const clean = String(identifier).trim();
+  const cleanDigits = clean.replace(/\D/g, "");
+
+  if (type === "CERTIFICATE") {
+    certSet.add(clean);
+    if (cleanDigits) certSet.add(cleanDigits);
+    if (clean.startsWith("CERT-IAF26-")) certSet.add(clean.replace("CERT-IAF26-", ""));
+  } else {
+    bibSet.add(clean);
+    if (cleanDigits) bibSet.add(cleanDigits);
+  }
+
+  scheduleSave();
+
+  // Async durable audit log in database
+  prisma.adminAuditLog.create({
+    data: {
+      action: type === "CERTIFICATE" ? "download.certificate" : "download.bib",
+      entityType: type,
+      entityId: clean,
+      summary: `Downloaded ${type} ${clean}`,
+    },
+  }).catch(() => {});
 }
 
 export function getDownloadStats(): {
@@ -74,10 +123,35 @@ export function getDownloadStats(): {
   certificateMap: Record<string, boolean>;
   bibMap: Record<string, boolean>;
 } {
+  initTracker();
+
+  const certificateMap: Record<string, boolean> = {};
+  for (const id of certSet) {
+    certificateMap[id] = true;
+  }
+
+  const bibMap: Record<string, boolean> = {};
+  for (const id of bibSet) {
+    bibMap[id] = true;
+  }
+
+  // Count unique 4-digit bibs / cert numbers
+  const uniqueCerts = new Set<string>();
+  for (const id of certSet) {
+    const d = id.replace(/\D/g, "");
+    if (d && d.length >= 3) uniqueCerts.add(d);
+  }
+
+  const uniqueBibs = new Set<string>();
+  for (const id of bibSet) {
+    const d = id.replace(/\D/g, "");
+    if (d && d.length >= 3) uniqueBibs.add(d);
+  }
+
   return {
-    certificateCount: 0,
-    bibCount: 0,
-    certificateMap: {},
-    bibMap: {},
+    certificateCount: uniqueCerts.size,
+    bibCount: uniqueBibs.size,
+    certificateMap,
+    bibMap,
   };
 }
