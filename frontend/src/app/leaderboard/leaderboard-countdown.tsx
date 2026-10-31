@@ -103,10 +103,10 @@ export function LeaderboardCountdown({ userReg, onTimerComplete }: LeaderboardCo
                 <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs sm:text-sm font-bold text-rose-300">
-                    Action Required: Submit Your Activity Proof Before 11:59 PM Tonight!
+                    Proof Submissions Closed (11:00 AM Deadline)
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
-                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — Upload your GPS screenshot to be included on the final leaderboard.
+                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — GPS proof submission closed at 11:00 AM. Arbiters are reviewing final times before the 12:00 PM reveal.
                   </p>
                 </div>
               </div>
@@ -114,7 +114,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete }: LeaderboardCo
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#e64833] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-[#c93b27] shrink-0"
               >
-                <span>Upload Now</span>
+                <span>View Dashboard</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>

@@ -28,9 +28,9 @@ import { ThemeToggle } from "./theme-toggle";
 const publicNav = [
   { label: "Home", href: "/", icon: Calendar },
   { label: "Events", href: "/events", icon: Calendar },
-  { label: "How It Works", href: "/#how-it-works", icon: Zap },
+  { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
   { label: "Medals", href: "/gallery", icon: Award },
-  { label: "About", href: "/about", icon: Trophy },
+  { label: "About", href: "/about", icon: Sparkles },
 ] as const;
 
 /* ─── Animated hamburger button ─── */
@@ -303,7 +303,6 @@ export function AppHeader() {
     email === "realblack009@gmail.com";
 
   const isActive = (href: string) => {
-    if (href === "/#how-it-works") return false;
     return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
   };
 

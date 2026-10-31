@@ -11,6 +11,7 @@ export async function verifyCertificate(request: Request, response: Response) {
         include: {
           user: true,
           event: true,
+          payment: true,
         },
       },
     },
@@ -25,11 +26,18 @@ export async function verifyCertificate(request: Request, response: Response) {
     throw new ApiError(404, "Certificate not found or not yet issued");
   }
 
+  // Enforce payment verification: only paid runners can access certificates
+  const reg = certificate.registration;
+  const isPaid = reg.payment?.status === "PAID" || reg.status === "CONFIRMED" || reg.status === "COMPLETED";
+  if (!isPaid) {
+    throw new ApiError(402, "Certificate locked. Official finisher certificates are available exclusively for paid participants.");
+  }
+
   response.json({
     data: {
       certificateNumber: certificate.certificateNumber,
       status: certificate.status,
-      runnerName: certificate.registration.user.name,
+      runnerName: (certificate.registration.shippingName || certificate.registration.user.name || "Finisher").toUpperCase(),
       event: certificate.registration.event.title,
       distance: certificate.registration.distance,
       bibNumber: certificate.registration.bibNumber,

@@ -1968,6 +1968,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
         user: { select: { id: true, name: true, email: true, phone: true } },
         event: { select: { title: true, slug: true, distances: true } },
         proofUpload: true,
+        certificate: { select: { id: true, certificateNumber: true, status: true, issuedAt: true, pdfUrl: true } },
         payment: { select: { status: true } },
       },
     }),
@@ -2004,6 +2005,21 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       approvedCount: countsData.approvedCount,
       rejectedCount: countsData.rejectedCount,
       notSubmittedCount: countsData.notSubmittedCount,
+      allCount: countsData.allCount,
+      certificatesCount: countsData.approvedCount,
+      failedRate:
+        countsData.allCount > 0
+          ? Number(
+              (
+                ((countsData.notSubmittedCount + countsData.rejectedCount) / countsData.allCount) *
+                100
+              ).toFixed(1),
+            )
+          : 0,
+      completionRate:
+        countsData.allCount > 0
+          ? Number(((countsData.approvedCount / countsData.allCount) * 100).toFixed(1))
+          : 0,
     },
   });
 }

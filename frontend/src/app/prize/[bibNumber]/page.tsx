@@ -12,6 +12,7 @@ import {
   Copy,
   ExternalLink,
   Gift,
+  Lock,
   Medal,
   Package,
   RefreshCw,
@@ -454,167 +455,18 @@ export default function PrizeBibPage() {
 
                 {/* Proof Submission Card */}
                 {!isProofSubmitted && (
-                  <div className="rounded-2xl border border-(--line) bg-(--panel) p-5 sm:p-6 shadow-sm">
+                  <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-5 sm:p-6 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-(--sage-soft) text-(--sage)">
-                        <UploadCloud className="h-5 w-5" />
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-400">
+                        <Lock className="h-5 w-5" />
                       </span>
                       <div>
-                        <h2 className="text-base font-bold text-(--foreground)">Submit Activity Proof</h2>
-                        <p className="text-xs text-(--muted)">
-                          Completed your run or walk? Upload your GPS screenshot from Strava, Garmin, etc. to claim your finisher medal and e-certificate.
+                        <h2 className="text-base font-bold text-(--foreground)">Proof Submission Closed</h2>
+                        <p className="text-xs text-(--muted) mt-0.5">
+                          GPS activity proof submission officially closed at 11:00 AM IST on 31 October 2026. The official verified leaderboard and digital certificates will be revealed at 12:00 PM (Noon) IST.
                         </p>
                       </div>
                     </div>
-
-                    {proofSubmitSuccess ? (
-                      <div className="mt-4 rounded-xl border border-(--sage)/30 bg-(--sage-soft)/30 p-4 text-sm text-(--sage) flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-semibold">Proof Submitted Successfully!</p>
-                          <p className="mt-1 text-xs text-(--muted)">{proofSubmitSuccess}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleSubmitProof} className="mt-5 space-y-4">
-                        {proofSubmitError && (
-                          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3.5 text-xs text-red-500 flex items-start gap-2.5">
-                            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                            <span>{proofSubmitError}</span>
-                          </div>
-                        )}
-
-                        <div>
-                          <label className="block text-xs font-semibold text-(--foreground) mb-1.5">
-                            Activity Screenshot <span className="text-red-500">*</span>
-                          </label>
-                          <div className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-(--line) bg-(--panel-soft)/50 p-6 text-center transition hover:border-(--sage) cursor-pointer">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="absolute inset-0 opacity-0 cursor-pointer"
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) {
-                                  setProofFile(f);
-                                  setProofFileName(f.name);
-                                }
-                              }}
-                            />
-                            {proofFileName ? (
-                              <div className="flex items-center gap-2 text-sm font-medium text-(--sage)">
-                                <BadgeCheck className="h-5 w-5" />
-                                <span>Selected: {proofFileName}</span>
-                              </div>
-                            ) : (
-                              <>
-                                <UploadCloud className="h-8 w-8 text-(--muted-soft) mb-2" />
-                                <p className="text-sm font-semibold text-(--foreground)">
-                                  Click or tap to upload screenshot
-                                </p>
-                                <p className="text-xs text-(--muted-soft) mt-1">
-                                  PNG, JPG, WEBP from Strava, Garmin, Nike Run Club, etc.
-                                </p>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-(--foreground) mb-1.5">
-                              Activity App / Device
-                            </label>
-                            <select
-                              value={sourceApp}
-                              onChange={(e) => setSourceApp(e.target.value)}
-                              className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-(--foreground) focus:border-(--sage) focus:outline-none"
-                            >
-                              <option value="Strava">Strava</option>
-                              <option value="Garmin">Garmin</option>
-                              <option value="Nike Run Club">Nike Run Club</option>
-                              <option value="Apple Fitness">Apple Fitness</option>
-                              <option value="Samsung Health">Samsung Health</option>
-                              <option value="Fitbit">Fitbit</option>
-                              <option value="Coros">Coros</option>
-                              <option value="Other">Other GPS App / Treadmill</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-semibold text-(--foreground) mb-1.5">
-                              Registered Mobile Number <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="tel"
-                              placeholder="e.g. 9455018166"
-                              value={runnerPhone}
-                              onChange={(e) => setRunnerPhone(e.target.value)}
-                              className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-(--foreground) placeholder:text-(--muted-soft) focus:border-(--sage) focus:outline-none"
-                            />
-                            <p className="text-[11px] text-(--muted-soft) mt-1">
-                              Enter the phone number used during registration.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-(--foreground) mb-1.5">
-                            Finish Time (Optional)
-                          </label>
-                          <div className="grid grid-cols-3 gap-3">
-                            <div>
-                              <input
-                                type="number"
-                                min="0"
-                                max="24"
-                                placeholder="00"
-                                value={hours}
-                                onChange={(e) => setHours(e.target.value)}
-                                className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-center text-(--foreground) focus:border-(--sage) focus:outline-none"
-                              />
-                              <span className="block text-[10px] text-center text-(--muted) mt-0.5">Hours</span>
-                            </div>
-                            <div>
-                              <input
-                                type="number"
-                                min="0"
-                                max="59"
-                                placeholder="00"
-                                value={minutes}
-                                onChange={(e) => setMinutes(e.target.value)}
-                                className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-center text-(--foreground) focus:border-(--sage) focus:outline-none"
-                              />
-                              <span className="block text-[10px] text-center text-(--muted) mt-0.5">Minutes</span>
-                            </div>
-                            <div>
-                              <input
-                                type="number"
-                                min="0"
-                                max="59"
-                                placeholder="00"
-                                value={seconds}
-                                onChange={(e) => setSeconds(e.target.value)}
-                                className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-center text-(--foreground) focus:border-(--sage) focus:outline-none"
-                              />
-                              <span className="block text-[10px] text-center text-(--muted) mt-0.5">Seconds</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={submittingProof || !proofFile}
-                          className="btn btn-primary w-full h-10 text-xs font-semibold cursor-pointer disabled:opacity-50"
-                        >
-                          {submittingProof ? (
-                            <><RefreshCw className="h-4 w-4 animate-spin" /> Submitting Proof...</>
-                          ) : (
-                            <><UploadCloud className="h-4 w-4" /> Submit Proof for Verification</>
-                          )}
-                        </button>
-                      </form>
-                    )}
                   </div>
                 )}
 

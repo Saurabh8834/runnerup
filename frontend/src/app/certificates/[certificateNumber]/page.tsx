@@ -171,9 +171,15 @@ export default function CertificateVerifyPage() {
               <p className="lede text-xs sm:text-sm mt-1">Verified RunnerUp finisher credential.</p>
             </div>
             {data && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2 print:hidden">
+                <Link
+                  className="btn btn-secondary gap-2 shadow-md text-xs sm:text-sm font-bold"
+                  href={`/bibs/${encodeURIComponent(data.bibNumber)}`}
+                >
+                  🎽 Official Digital Bib
+                </Link>
                 <button
-                  className="btn btn-primary gap-2 shadow-lg"
+                  className="btn btn-primary gap-2 shadow-lg text-xs sm:text-sm font-bold"
                   onClick={() => window.print()}
                   type="button"
                 >
@@ -300,14 +306,14 @@ export default function CertificateVerifyPage() {
                       }}
                     >
                       <p
-                        className="text-4xl sm:text-5xl lg:text-6xl text-[#244855] font-bold"
+                        className="text-3xl sm:text-5xl lg:text-6xl text-[#244855] font-black uppercase tracking-wider"
                         style={{
-                          fontFamily: "'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive",
+                          fontFamily: "'Cinzel', 'Times New Roman', 'Georgia', serif",
                           lineHeight: 1.25,
                           textShadow: "0 1px 2px rgba(0,0,0,0.06)",
                         }}
                       >
-                        {data.runnerName}
+                        {data.runnerName?.toUpperCase()}
                       </p>
                     </div>
                   </div>

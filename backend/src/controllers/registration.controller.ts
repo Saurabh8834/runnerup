@@ -443,6 +443,13 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     }
   }
 
+  if (!isAdmin) {
+    throw new ApiError(
+      400,
+      "GPS proof submission is officially closed as of 11:00 AM IST on 31 October 2026. The official leaderboard and finisher certificates will reveal at 12:00 PM Noon.",
+    );
+  }
+
   const isPaid =
     existing.status === "CONFIRMED" ||
     existing.status === "COMPLETED" ||
@@ -770,12 +777,11 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   const activeKm = parseDistanceKm(activeDistance);
   const minRealisticSeconds = Math.round(activeKm * 150); // Min ~2:30/km world record pace
 
-  // Fetch real approved finishers for this event and distance
+  // Fetch real approved & submitted finishers for this event and distance
   const approvedRegistrations = await prisma.registration.findMany({
     where: {
       eventId: event.id,
-      proofStatus: "APPROVED",
-      finishTimeSeconds: { not: null },
+      proofStatus: { in: ["APPROVED", "SUBMITTED"] },
       ...(distanceQuery && distanceQuery !== "all"
         ? {
             distance: {
@@ -786,8 +792,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
         : {}),
     },
     orderBy: { finishTimeSeconds: "asc" },
-    include: { user: true, event: true },
-    take: 100,
+    include: { user: true, event: true, proofUpload: true },
+    take: 300,
   });
 
   // Fetch all registered participants for the Event Roster tab
@@ -806,7 +812,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     },
     orderBy: { registeredAt: "desc" },
     include: { user: true, proofUpload: true },
-    take: 150,
+    take: 400,
   });
 
   // Check if current authenticated user has registration(s) in this event

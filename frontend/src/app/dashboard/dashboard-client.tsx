@@ -17,6 +17,7 @@ import {
   Gift,
   HelpCircle,
   IndianRupee,
+  Lock,
   MapPin,
   Medal,
   Plus,
@@ -126,10 +127,8 @@ function isEligible(reg: Registration) {
 }
 
 function canUpload(reg: Registration) {
-  return (
-    isEligible(reg) &&
-    (reg.proofStatus === "NOT_SUBMITTED" || reg.proofStatus === "REJECTED")
-  );
+  // Officially closed as of 11:00 AM IST on 31 October 2026
+  return false;
 }
 
 function dedupe(rows: Registration[]) {
@@ -317,7 +316,7 @@ export function DashboardClient() {
       if (!res.ok) throw new Error(await readApiError(res, "Could not load dashboard"));
       const json = await res.json();
       if (seq.current === id) setDbUser(json.data as DbUser);
-    } catch (err) {
+    } catch (err: any) {
       if (seq.current === id) setError(err instanceof Error ? err.message : "Failed to load");
     } finally {
       if (seq.current === id) setLoading(false);
@@ -432,7 +431,7 @@ export function DashboardClient() {
       setProofBusy(true);
       setProofUrl(await fileToPayload(file));
       setProofFileName(file.name);
-    } catch (err) {
+    } catch (err: any) {
       setProofError(err instanceof Error ? err.message : "Could not read image");
     } finally {
       setProofBusy(false);
@@ -441,10 +440,8 @@ export function DashboardClient() {
 
   async function submitProof(e: FormEvent) {
     e.preventDefault();
-    if (!proofRegId || proofBusy) return;
-    setProofBusy(true);
-    setProofMessage(null);
-    setProofError(null);
+    setProofError("GPS proof submission is officially closed as of 11:00 AM IST on 31 October 2026. Official leaderboard reveals at 12:00 PM Noon.");
+    return;
     try {
       const token = await getToken();
       if (!token) throw new Error("Please sign in again to submit proof.");
@@ -517,7 +514,7 @@ export function DashboardClient() {
       setFinishMinutes("");
       setFinishSeconds("");
       await load();
-    } catch (err) {
+    } catch (err: any) {
       const msg = err instanceof Error ? err.message : "Proof submit failed";
       if (msg.toLowerCase().includes("already submitted")) {
         setProofMessage("Your activity proof has already been submitted and is waiting for post-event review!");
@@ -1064,6 +1061,15 @@ export function DashboardClient() {
                             </Link>
                           )}
 
+                          {isPaid && (
+                            <Link
+                              className="rounded-full border border-white/20 bg-white/[0.08] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] hover:bg-white/15 backdrop-blur-xl transition-all inline-flex items-center gap-1 shadow-md"
+                              href={`/bibs/${encodeURIComponent(reg.bibNumber)}`}
+                            >
+                              🎽 Digital Bib
+                            </Link>
+                          )}
+
                           {reg.medalDelivery?.trackingNumber && (
                             <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[0.7rem] text-slate-300 backdrop-blur-xl">
                               <Truck className="h-3 w-3 text-[#e64833]" />
@@ -1336,19 +1342,25 @@ export function DashboardClient() {
                         )}
                       </div>
 
-                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex items-center gap-2">
+                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 grid grid-cols-2 gap-2">
                         {reg.certificate && reg.certificate.status !== "QUEUED" ? (
                           <Link
-                            className="neon-btn-blue rounded-full h-10 w-full text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-2"
+                            className="neon-btn-blue rounded-full h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-1.5"
                             href={`/certificates/${reg.certificate.certificateNumber}`}
                           >
-                            <Award className="h-4 w-4" /> Download Certificate
+                            <Award className="h-3.5 w-3.5" /> Certificate
                           </Link>
                         ) : (
-                          <span className="text-xs text-slate-400 text-center w-full font-medium">
-                            Certificate generating upon verification...
+                          <span className="text-[0.7rem] text-slate-400 text-center flex items-center justify-center font-medium">
+                            Pending cert...
                           </span>
                         )}
+                        <Link
+                          className="rounded-full border border-white/20 bg-white/[0.08] hover:bg-white/15 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-1.5 backdrop-blur-xl transition-all"
+                          href={`/bibs/${encodeURIComponent(reg.bibNumber)}`}
+                        >
+                          🎽 Digital Bib
+                        </Link>
                       </div>
                     </div>
                   ))}

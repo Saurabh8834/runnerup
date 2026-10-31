@@ -172,15 +172,26 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     throw new ApiError(404, "No registration found for this bib number, email, or phone");
   }
 
-  const prizes = buildPrizeItems(
-    registration.event.benefits,
-    registration.medalDelivery?.status ?? null,
-    registration.certificate?.status ?? null,
-    registration.medalDelivery
-      ? { courier: registration.medalDelivery.courier, trackingNumber: registration.medalDelivery.trackingNumber, trackingUrl: registration.medalDelivery.trackingUrl }
-      : null,
-    registration.certificate?.certificateNumber ?? null,
-  );
+  const isPaid =
+    registration.payment?.status === "PAID" ||
+    registration.status === "CONFIRMED" ||
+    registration.status === "COMPLETED";
+
+  const prizes = isPaid
+    ? buildPrizeItems(
+        registration.event.benefits,
+        registration.medalDelivery?.status ?? null,
+        registration.certificate?.status ?? null,
+        registration.medalDelivery
+          ? {
+              courier: registration.medalDelivery.courier,
+              trackingNumber: registration.medalDelivery.trackingNumber,
+              trackingUrl: registration.medalDelivery.trackingUrl,
+            }
+          : null,
+        registration.certificate?.certificateNumber ?? null,
+      )
+    : [];
 
   const hasPrizes = prizes.some((p) => p.status !== "pending" && p.status !== "not_eligible");
 
@@ -193,6 +204,8 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
 
   const payload = {
     data: {
+      isPaid,
+      paymentStatus: registration.payment?.status ?? "PENDING",
       runner: {
         name: registration.user.name,
         bibNumber: registration.bibNumber,
