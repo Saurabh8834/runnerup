@@ -12,7 +12,7 @@ type BibData = {
   bibNumber: string;
   distance: string;
   eventTitle: string;
-  rankNumber?: string;
+  rankNumber: string;
   certificateNumber?: string | null;
   status?: string;
 };
@@ -23,10 +23,11 @@ export default function DigitalBibPage() {
   const bibNumber = rawBib.trim();
 
   const [data, setData] = useState<BibData | null>(null);
+  const [bibImageUrl, setBibImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     if (!bibNumber) return;
@@ -48,17 +49,20 @@ export default function DigitalBibPage() {
           throw new Error("Payment pending. Official digital race bib and finisher certificate are available exclusively for confirmed, paid participants.");
         }
 
-        // Determine 4-digit rank or bib number (e.g. 0001)
+        // Determine certificate href/number
         const certItem = payload.prizes?.find((p: any) => p.type === "certificate");
         const certHref = certItem?.action?.href ?? "";
         const certNum = certHref.startsWith("/certificates/")
           ? certHref.replace("/certificates/", "")
           : null;
 
-        // Normalize distance: e.g. "5 km" -> "5 KM"
-        const distStr = (payload.event?.distance || "5 KM").toUpperCase();
+        // Distance: e.g. "5 KM"
+        let distStr = (payload.event?.distance || "5 KM").toUpperCase().trim();
+        if (!distStr.endsWith("KM") && !distStr.endsWith("K")) {
+          distStr += " KM";
+        }
 
-        // 4-digit display number: if user is #1 or has bib like 10001, map cleanly
+        // 4-digit display number: rank #1 or 10001 -> 0001
         let fourDigit = "0001";
         const cleanDigits = (payload.runner?.bibNumber || bibNumber).replace(/\D/g, "");
         if (cleanDigits) {
@@ -72,13 +76,15 @@ export default function DigitalBibPage() {
           }
         }
 
+        const runnerNameUpper = (payload.runner?.name || "RUNNER").toUpperCase().trim();
+
         setData({
-          runnerName: (payload.runner?.name || "RUNNER").toUpperCase(),
+          runnerName: runnerNameUpper,
           bibNumber: payload.runner?.bibNumber || bibNumber,
           distance: distStr,
           eventTitle: payload.event?.title || "Indian Air Force Day Challenge",
           rankNumber: fourDigit,
-          certificateNumber: certNum,
+          certificateNumber: certNum || ("CERT-IAF26-" + (payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")),
         });
 
         // Non-blocking telemetry
@@ -100,74 +106,73 @@ export default function DigitalBibPage() {
     fetchBib();
   }, [bibNumber]);
 
-  // High-Resolution Canvas Renderer & Downloader
-  const handleDownloadImage = () => {
+  // Generate 100% Pixel-Perfect Clean Canvas Image when data arrives
+  useEffect(() => {
     if (!data) return;
 
+    setRendering(true);
     const canvas = document.createElement("canvas");
-    canvas.width = 1200;
-    canvas.height = 675;
+    canvas.width = 1024;
+    canvas.height = 682;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.src = "/iaf-bib-base.jpg";
+    img.src = "/iaf-bib-clean-base.jpg";
 
     img.onload = () => {
-      // 1. Draw base image
-      ctx.drawImage(img, 0, 0, 1200, 675);
+      // 1. Draw 100% Clean Base Template
+      ctx.drawImage(img, 0, 0, 1024, 682);
 
-      // 2. Clean slanted bib center polygon (x: 140..1120, y: 175..365)
-      ctx.fillStyle = "#fdfdfd";
-      ctx.beginPath();
-      ctx.moveTo(140, 175);
-      ctx.lineTo(1120, 175);
-      ctx.lineTo(1060, 365);
-      ctx.lineTo(50, 365);
-      ctx.closePath();
-      ctx.fill();
-
-      // 3. Category header (e.g. 5 KM)
+      // 2. Category Header (e.g. "5 KM")
       ctx.fillStyle = "#874f41";
-      ctx.font = "900 32px 'Arial Black', Arial, sans-serif";
+      ctx.font = "900 28px 'Arial Black', Impact, sans-serif";
       ctx.textAlign = "center";
-      ctx.letterSpacing = "6px";
-      ctx.fillText(data.distance, 600, 215);
+      ctx.textBaseline = "middle";
+      ctx.fillText(data.distance, 512, 270);
 
-      // 4. 4-digit number (e.g. 0001) in Arial Black
+      // 3. 4-Digit Bib Number (e.g. "0001" or "0377") in Navy
       ctx.fillStyle = "#001834";
-      ctx.font = "900 135px 'Arial Black', Impact, sans-serif";
+      ctx.font = "900 185px 'Arial Black', Impact, sans-serif";
       ctx.textAlign = "center";
-      ctx.letterSpacing = "10px";
-      ctx.fillText(data.rankNumber || "0001", 600, 340);
+      ctx.textBaseline = "middle";
+      ctx.fillText(data.rankNumber, 512, 420);
 
-      // 5. Clean runner ribbon (x: 230..970, y: 395..465)
-      ctx.fillStyle = "#001026";
-      ctx.fillRect(230, 395, 740, 70);
-
-      // 6. Runner Name in ALL CAPS
+      // 4. Runner Name on Bottom Navy Bar (e.g. "——  VIRENDRASINH  ——")
       ctx.fillStyle = "#ffffff";
-      ctx.font = "900 38px 'Arial Black', Arial, sans-serif";
+      ctx.font = "900 22px 'Arial Black', Arial, sans-serif";
       ctx.textAlign = "center";
-      ctx.letterSpacing = "6px";
-      ctx.fillText(data.runnerName, 600, 446);
+      ctx.textBaseline = "middle";
+      ctx.fillText(`——  ${data.runnerName}  ——`, 512, 658);
 
-      // 7. Trigger instant download
-      const a = document.createElement("a");
-      a.download = `IAF_Bib_${data.bibNumber}_${data.runnerName.replace(/\s+/g, "_")}.jpg`;
-      a.href = canvas.toDataURL("image/jpeg", 0.95);
-      a.click();
-
-      try {
-        fetch(getApiUrl("/api/track/download"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "BIB", identifier: data.bibNumber }),
-          keepalive: true,
-        }).catch(() => {});
-      } catch {}
+      const generatedUrl = canvas.toDataURL("image/jpeg", 0.98);
+      setBibImageUrl(generatedUrl);
+      setRendering(false);
     };
+
+    img.onerror = () => {
+      setRendering(false);
+    };
+  }, [data]);
+
+  // Instant High-Resolution Download
+  const handleDownload = () => {
+    if (!bibImageUrl || !data) return;
+
+    const a = document.createElement("a");
+    a.download = `IAF_Bib_${data.rankNumber}_${data.runnerName.replace(/\s+/g, "_")}.jpg`;
+    a.href = bibImageUrl;
+    a.click();
+
+    try {
+      fetch(getApiUrl("/api/track/download"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "BIB", identifier: data.bibNumber }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
   };
 
   const handleShare = async () => {
@@ -207,7 +212,7 @@ export default function DigitalBibPage() {
                 <button
                   onClick={handleShare}
                   type="button"
-                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow"
+                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow cursor-pointer"
                 >
                   <Share2 className="h-3.5 w-3.5" />
                   {copied ? "Copied Link!" : "Share Bib"}
@@ -216,15 +221,16 @@ export default function DigitalBibPage() {
                 <button
                   onClick={() => window.print()}
                   type="button"
-                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow"
+                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow cursor-pointer"
                 >
                   <Printer className="h-3.5 w-3.5" /> Print
                 </button>
 
                 <button
-                  onClick={handleDownloadImage}
+                  onClick={handleDownload}
+                  disabled={!bibImageUrl}
                   type="button"
-                  className="neon-btn-blue rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg inline-flex items-center gap-1.5 cursor-pointer"
+                  className="neon-btn-blue rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
                   <Download className="h-4 w-4" /> Download Bib (HD)
                 </button>
@@ -233,7 +239,7 @@ export default function DigitalBibPage() {
           </div>
 
           {/* Loading */}
-          {loading && (
+          {(loading || rendering) && !bibImageUrl && (
             <div className="rounded-3xl border border-white/10 bg-black/40 p-16 text-center shadow-2xl">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-3 border-[#e64833] border-t-transparent mb-4" />
               <p className="text-sm font-semibold text-slate-300">Generating your official digital bib...</p>
@@ -251,65 +257,18 @@ export default function DigitalBibPage() {
             </div>
           )}
 
-          {/* ══════ LIVE DIGITAL BIB DISPLAY ══════ */}
-          {data && (
+          {/* ══════ LIVE DIGITAL BIB DISPLAY (PIXEL PERFECT HD IMAGE) ══════ */}
+          {bibImageUrl && data && (
             <div className="space-y-6">
-              {/* Outer Bib Container with Realistic Border and Shadows */}
               <div
                 id="bib-print-area"
                 className="relative overflow-hidden rounded-3xl border-2 border-slate-700/60 bg-[#001026] shadow-2xl transition-all"
-                style={{ aspectRatio: "16 / 9" }}
               >
-                {/* Background Base Template */}
                 <img
-                  src="/iaf-bib-base.jpg"
-                  alt="Official Indian Air Force Day Bib"
-                  className="absolute inset-0 h-full w-full object-cover"
+                  src={bibImageUrl}
+                  alt={`Official IAF Bib #${data.rankNumber} - ${data.runnerName}`}
+                  className="w-full h-auto block select-none"
                 />
-
-                {/* Overlaid Slanted Clean White Center Plate */}
-                <div
-                  className="absolute left-[5%] right-[5%] top-[25%] bottom-[43%] bg-[#fdfdfd] shadow-inner flex flex-col items-center justify-center"
-                  style={{
-                    clipPath: "polygon(7% 0%, 100% 0%, 93% 100%, 0% 100%)",
-                  }}
-                >
-                  {/* Category Pill / Header */}
-                  <div className="mb-0.5 sm:mb-1">
-                    <span className="font-mono font-black text-[0.65rem] sm:text-base lg:text-xl uppercase tracking-[0.25em] text-[#874f41]">
-                      {data.distance}
-                    </span>
-                  </div>
-
-                  {/* 4-Digit Bib / Position Number */}
-                  <p
-                    className="font-black text-4xl sm:text-7xl lg:text-9xl text-[#001834] tracking-[0.06em] leading-none select-none"
-                    style={{
-                      fontFamily: "'Arial Black', Impact, sans-serif",
-                    }}
-                  >
-                    {data.rankNumber || "0001"}
-                  </p>
-                </div>
-
-                {/* Bottom Navy Ribbon: Runner Name in ALL CAPS */}
-                <div
-                  className="absolute left-[18%] right-[18%] bottom-[16%] h-[12%] sm:h-[13%] bg-[#001026] flex items-center justify-center shadow-lg"
-                  style={{
-                    clipPath: "polygon(4% 0%, 96% 0%, 100% 100%, 0% 100%)",
-                    borderTop: "1px solid rgba(255,255,255,0.15)",
-                  }}
-                >
-                  <p
-                    className="font-black text-xs sm:text-xl lg:text-2xl text-white tracking-[0.2em] uppercase truncate px-4"
-                    style={{
-                      fontFamily: "'Arial Black', Arial, sans-serif",
-                      textShadow: "0 2px 4px rgba(0,0,0,0.8)",
-                    }}
-                  >
-                    {data.runnerName}
-                  </p>
-                </div>
               </div>
 
               {/* Action Ribbon below Bib */}
@@ -320,7 +279,7 @@ export default function DigitalBibPage() {
                   </span>
                   <div>
                     <p className="text-xs font-bold text-white">Official IAF Digital Finisher Bib</p>
-                    <p className="text-[11px] text-slate-300 font-mono">Bib #{data.bibNumber} · {data.distance}</p>
+                    <p className="text-[11px] text-slate-300 font-mono">Bib #{data.rankNumber} · {data.distance} · {data.runnerName}</p>
                   </div>
                 </div>
 

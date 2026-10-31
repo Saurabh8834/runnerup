@@ -22,17 +22,14 @@ export async function verifyCertificate(request: Request, response: Response) {
     throw new ApiError(404, "Certificate not found");
   }
 
-  // Only expose issued certificates publicly (GENERATED / SENT)
-  if (certificate.status === "QUEUED") {
-    throw new ApiError(404, "Certificate not found or not yet issued");
-  }
-
   // Enforce payment verification: only paid runners can access certificates
   const reg = certificate.registration;
   const isPaid = reg.payment?.status === "PAID" || reg.status === "CONFIRMED" || reg.status === "COMPLETED";
   if (!isPaid) {
     throw new ApiError(402, "Certificate locked. Official finisher certificates are available exclusively for paid participants.");
   }
+
+  // All paid users are 100% eligible for certificates, whether proof was submitted or not
 
   // Non-blocking download/view telemetry
   try {

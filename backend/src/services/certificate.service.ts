@@ -87,7 +87,7 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your RunnerUp Certificate of Achievement</title>
   <style type="text/css">
-    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Outfit:wght@400;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@400;600;700;800;900&display=swap');
     
     * { box-sizing: border-box; }
     body { margin: 0; padding: 0; background-color: #ede9df; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -198,10 +198,10 @@ export function buildCertificateEmailHtml(data: CertificateRenderData) {
                 THIS CERTIFICATE IS PROUDLY PRESENTED TO
               </p>
 
-              <!-- Participant Name in Cursive Script -->
-              <div style="margin:8px auto 12px;display:inline-block;padding:8px 24px;border-top:2px solid #c9a227;border-bottom:2px solid #c9a227;">
-                <p class="runner-name" style="margin:0;font-size:42px;font-family:'Dancing Script', 'Brush Script MT', 'Segoe Script', cursive;color:${DARK_GREEN};font-weight:700;line-height:1.2;">
-                  ${escapeHtml(data.runnerName)}
+              <!-- Participant Name in Elegant High-Contrast ALL CAPS Serif -->
+              <div style="margin:8px auto 12px;display:inline-block;padding:8px 28px;border-top:2.5px solid #c9a227;border-bottom:2.5px solid #c9a227;">
+                <p class="runner-name" style="margin:0;font-size:36px;font-family:'Cinzel', 'Times New Roman', Georgia, serif;color:${DARK_GREEN};font-weight:900;text-transform:uppercase;letter-spacing:0.06em;line-height:1.25;">
+                  ${escapeHtml(data.runnerName.toUpperCase())}
                 </p>
               </div>
 

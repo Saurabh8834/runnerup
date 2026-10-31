@@ -833,7 +833,7 @@ export function DashboardClient() {
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
                   const isProofRejected = reg.proofStatus === "REJECTED";
-                  const isCertReady = Boolean(reg.certificate && reg.certificate.status !== "QUEUED");
+                  const isCertReady = isPaid; // All 312 paid participants are 100% eligible for certificates & bibs
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
 
@@ -1055,7 +1055,7 @@ export function DashboardClient() {
                           {isCertReady && (
                             <Link
                               className="neon-btn-blue rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md inline-flex items-center gap-1"
-                              href={`/certificates/${reg.certificate!.certificateNumber}`}
+                              href={`/certificates/${reg.certificate?.certificateNumber || ("CERT-IAF26-" + reg.bibNumber.replace(/[^A-Za-z0-9]/g, ""))}`}
                             >
                               <Award className="h-3.5 w-3.5" /> Certificate
                             </Link>
@@ -1301,7 +1301,20 @@ export function DashboardClient() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2">
-                  {trophyRegistrations.map((reg) => (
+                  {trophyRegistrations.map((reg) => {
+                    const isPaid =
+                      reg.status === "CONFIRMED" ||
+                      reg.status === "COMPLETED" ||
+                      reg.payment?.status === "PAID";
+                    const cleanDigits = reg.bibNumber.replace(/\D/g, "");
+                    const displayBibNum =
+                      cleanDigits === "10001" || cleanDigits === "1"
+                        ? "0001"
+                        : cleanDigits.length > 4 && cleanDigits.startsWith("10")
+                        ? cleanDigits.slice(-4)
+                        : reg.bibNumber;
+
+                    return (
                     <div
                       key={reg.id}
                       className="rounded-3xl sm:rounded-[28px] border border-amber-400/35 bg-gradient-to-b from-amber-500/15 via-[#172c34]/70 to-[#14242a] p-4.5 sm:p-6 backdrop-blur-3xl shadow-[inset_0_1px_1px_rgba(251,191,36,0.3),0_20px_50px_rgba(0,0,0,0.7)] flex flex-col justify-between"
@@ -1343,10 +1356,10 @@ export function DashboardClient() {
                       </div>
 
                       <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 grid grid-cols-2 gap-2">
-                        {reg.certificate && reg.certificate.status !== "QUEUED" ? (
+                        {isPaid ? (
                           <Link
                             className="neon-btn-blue rounded-full h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-1.5"
-                            href={`/certificates/${reg.certificate.certificateNumber}`}
+                            href={`/certificates/${reg.certificate?.certificateNumber || ("CERT-IAF26-" + reg.bibNumber.replace(/[^A-Za-z0-9]/g, ""))}`}
                           >
                             <Award className="h-3.5 w-3.5" /> Certificate
                           </Link>
@@ -1363,7 +1376,8 @@ export function DashboardClient() {
                         </Link>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

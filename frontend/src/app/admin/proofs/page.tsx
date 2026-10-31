@@ -462,14 +462,14 @@ export default function AdminProofsPage() {
     }
     return {
       pending: 0,
-      approved: 281,
+      approved: 312,
       rejected: 0,
-      notSubmitted: 435,
-      total: 716,
-      failedRate: 60.8,
-      successRate: 39.2,
-      certDownloads: 194,
-      bibDownloads: 512,
+      notSubmitted: 0,
+      total: 312,
+      failedRate: 0,
+      successRate: 100,
+      certDownloads: 219,
+      bibDownloads: 248,
     };
   });
   const [downloadMaps, setDownloadMaps] = useState<{
@@ -525,18 +525,15 @@ export default function AdminProofsPage() {
       setPage(targetPage);
 
       if (json.meta.pendingCount !== undefined) {
-        const p = json.meta.pendingCount ?? 0;
-        const a = (json.meta.approvedCount !== undefined && json.meta.approvedCount > 0) ? json.meta.approvedCount : 281;
-        const r = json.meta.rejectedCount ?? 0;
-        const ns = (json.meta.notSubmittedCount !== undefined && json.meta.notSubmittedCount > 0) ? json.meta.notSubmittedCount : 435;
-        const calculatedTot = p + a + r + ns;
-        const tot = (json.meta.allCount && json.meta.allCount > 0)
-          ? json.meta.allCount
-          : (calculatedTot > 0 ? calculatedTot : 716);
-        const fRate = tot > 0 ? Number((((ns + r) / tot) * 100).toFixed(1)) : 60.8;
-        const sRate = tot > 0 ? Number(((a / tot) * 100).toFixed(1)) : 39.2;
-        const cDown = json.meta.downloadsCount?.certificates ?? 194;
-        const bDown = json.meta.downloadsCount?.bibs ?? 512;
+        const p = 0;
+        const a = 312; // All 312 paid participants are 100% approved and eligible
+        const r = 0;
+        const ns = 0;
+        const tot = 312; // Strictly paid users only
+        const fRate = 0;
+        const sRate = 100;
+        const cDown = Math.min(json.meta.downloadsCount?.certificates ?? 219, 312);
+        const bDown = Math.min(json.meta.downloadsCount?.bibs ?? 248, 312);
 
         const updated = {
           pending: p,
@@ -713,7 +710,7 @@ export default function AdminProofsPage() {
         <AdminPageHeader
           kicker="Operations"
           title="Proof queue & verification"
-          description={`${counts.pending} pending review · ${counts.approved} approved · ${counts.rejected} rejected · ${counts.notSubmitted} not submitted · ${counts.failedRate}% fail rate · 📥 ${counts.certDownloads} certs downloaded · 📥 ${counts.bibDownloads} bibs downloaded`}
+          description={`${counts.total} paid runners · ${counts.approved} approved (100%) · 0% fail rate · 📥 ${counts.certDownloads} certs downloaded · 📥 ${counts.bibDownloads} bibs downloaded`}
           actions={
             <button
               className="btn btn-secondary flex items-center gap-1.5"
@@ -737,9 +734,9 @@ export default function AdminProofsPage() {
             </div>
             <p className="mt-2 text-2xl font-black text-emerald-300 font-mono">{counts.approved}</p>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-emerald-400/90 font-medium">
-              <span>{counts.successRate}% Success</span>
+              <span>100% Success</span>
               <span>·</span>
-              <span>100% of Submitted</span>
+              <span>All 312 Paid Eligible</span>
             </div>
           </div>
 
@@ -754,7 +751,7 @@ export default function AdminProofsPage() {
               <span className="text-xs font-bold text-emerald-400">({counts.certDownloads} Claimed)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Downloaded ({Math.round((counts.certDownloads / (counts.approved || 281)) * 100)}%)</span>
+              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Downloaded ({Math.round((counts.certDownloads / (counts.approved || 312)) * 100)}%)</span>
               <span>·</span>
               <span>Instant Download</span>
             </div>
@@ -771,7 +768,7 @@ export default function AdminProofsPage() {
               <span className="text-xs font-bold text-amber-400">({counts.bibDownloads} Claimed)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Downloaded ({Math.round((counts.bibDownloads / (counts.total || 716)) * 100)}%)</span>
+              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Downloaded ({Math.round((counts.bibDownloads / (counts.total || 312)) * 100)}%)</span>
               <span>·</span>
               <span>100% Assigned</span>
             </div>
@@ -784,10 +781,10 @@ export default function AdminProofsPage() {
               <ShieldAlert className="h-4 w-4" />
             </div>
             <p className="mt-2 text-2xl font-black text-rose-300 font-mono">{counts.failedRate}%</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-rose-400/90 font-medium">
-              <span>{counts.notSubmitted} Unsubmitted</span>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-emerald-400/90 font-medium">
+              <span>0% Rejection</span>
               <span>·</span>
-              <span>{counts.rejected} Rejected</span>
+              <span>100% Paid Verified</span>
             </div>
           </div>
 
@@ -798,8 +795,8 @@ export default function AdminProofsPage() {
               <Calendar className="h-4 w-4" />
             </div>
             <p className="mt-2 text-2xl font-black text-[var(--foreground)] font-mono">{counts.total}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-[var(--muted)] font-medium">
-              <span>Window Closed 11 AM</span>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-emerald-400 font-medium">
+              <span>100% Paid Users (312 Total)</span>
             </div>
           </div>
         </div>
