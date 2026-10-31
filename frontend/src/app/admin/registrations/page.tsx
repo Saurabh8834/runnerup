@@ -101,6 +101,22 @@ export default function AdminRegistrationsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
+  const [events, setEvents] = useState<Array<{ id: string; title: string; slug: string; status: string }>>([]);
+  const [selectedEventId, setSelectedEventId] = useState("");
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const token = await getFastAdminToken(getToken, isSignedIn);
+        const res = await adminFetch<{ data: Array<{ id: string; title: string; slug: string; status: string }> }>(
+          "/api/admin/events?pageSize=100",
+          token
+        );
+        setEvents(res.data || []);
+      } catch {}
+    }
+    void loadEvents();
+  }, [getToken, isSignedIn]);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -133,6 +149,7 @@ export default function AdminRegistrationsPage() {
       });
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
+      if (selectedEventId) params.set("eventId", selectedEventId);
       const json = await adminFetch<{
         data: Row[];
         meta: {
@@ -281,6 +298,21 @@ export default function AdminRegistrationsPage() {
           placeholder="Search name, email, bib, phone"
           value={searchInput}
         />
+        <select
+          className="input text-xs font-semibold"
+          onChange={(e) => {
+            setSelectedEventId(e.target.value);
+            setPage(1);
+          }}
+          value={selectedEventId}
+        >
+          <option value="">All Events (Combined)</option>
+          {events.map((ev) => (
+            <option key={ev.id} value={ev.id}>
+              {ev.title} ({ev.status})
+            </option>
+          ))}
+        </select>
         <select
           className="input"
           onChange={(e) => {

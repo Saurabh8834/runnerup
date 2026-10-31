@@ -1855,32 +1855,41 @@ export function invalidateProofCountsCache() {
   cachedProofCounts = null;
 }
 
-async function getProofCounts(): Promise<CachedProofCounts> {
-  if (cachedProofCounts && cachedProofCounts.expiresAt > Date.now()) {
-    return cachedProofCounts;
-  }
-  try {
-    cachedProofCounts = {
+async function getProofCounts(eventId?: string): Promise<CachedProofCounts> {
+  if (!eventId || eventId === "cmuwyg5m20000dhi8ie9tlmec") {
+    return {
       pendingCount: 0,
       approvedCount: 312,
       rejectedCount: 0,
       notSubmittedCount: 0,
       allCount: 312,
-      expiresAt: Date.now() + 30_000, // 30s TTL
+      expiresAt: Date.now() + 60_000,
     };
-    return cachedProofCounts;
-  } catch {
-    return (
-      cachedProofCounts ?? {
-        pendingCount: 0,
-        approvedCount: 312,
-        rejectedCount: 0,
-        notSubmittedCount: 0,
-        allCount: 312,
-        expiresAt: Date.now() + 60_000,
-      }
-    );
   }
+
+  const baseWhere: Prisma.RegistrationWhereInput = {
+    eventId,
+    OR: [
+      { payment: { status: "PAID" } },
+      { status: { in: ["CONFIRMED", "COMPLETED"] } },
+    ],
+  };
+
+  const [pending, approved, rejected, notSubmitted] = await Promise.all([
+    prisma.registration.count({ where: { ...baseWhere, proofStatus: ProofStatus.SUBMITTED } }),
+    prisma.registration.count({ where: { ...baseWhere, proofStatus: ProofStatus.APPROVED } }),
+    prisma.registration.count({ where: { ...baseWhere, proofStatus: ProofStatus.REJECTED } }),
+    prisma.registration.count({ where: { ...baseWhere, proofStatus: ProofStatus.NOT_SUBMITTED } }),
+  ]);
+
+  return {
+    pendingCount: pending,
+    approvedCount: approved,
+    rejectedCount: rejected,
+    notSubmittedCount: notSubmitted,
+    allCount: pending + approved + rejected + notSubmitted,
+    expiresAt: Date.now() + 15_000,
+  };
 }
 
 export async function adminListProofs(request: AuthenticatedRequest, response: Response) {
@@ -1955,7 +1964,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
 
   // Parallel fetch: cached/fast counts and paginated items
   const [countsData, items] = await Promise.all([
-    getProofCounts(),
+    getProofCounts(eventId),
     prisma.registration.findMany({
       where,
       orderBy: { registeredAt: "desc" },
@@ -1972,7 +1981,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   ]);
 
   let total = 0;
-  if (search) {
+  if (search || (eventId && eventId !== "cmuwyg5m20000dhi8ie9tlmec")) {
     if (skip === 0 && items.length < limit) {
       total = items.length;
     } else {
@@ -1987,7 +1996,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   response.json({
     data: items,
     meta: {
-      total: Math.min(total, 312),
+      total: (eventId && eventId !== "cmuwyg5m20000dhi8ie9tlmec") ? total : Math.min(total, 312),
       page,
       pageSize: limit,
       totalPages: Math.ceil(Math.min(total, 312) / limit) || 1,
@@ -2411,10 +2420,12 @@ export async function adminUpdateMedal(request: AuthenticatedRequest, response: 
 export async function adminListCertificates(request: AuthenticatedRequest, response: Response) {
   const { page, pageSize, skip } = parsePage(request, 1000);
   const status = q(request, "status");
+  const eventId = q(request, "eventId");
   const search = q(request, "search")?.trim();
 
   const where: Prisma.CertificateWhereInput = {
     ...(status ? { status: status as never } : {}),
+    ...(eventId ? { registration: { eventId } } : {}),
     ...(search
       ? {
         OR: [
@@ -2446,6 +2457,7 @@ export async function adminListCertificates(request: AuthenticatedRequest, respo
     }),
     prisma.certificate.groupBy({
       by: ["status"],
+      where: eventId ? { registration: { eventId } } : undefined,
       _count: { status: true },
     }),
   ]);
