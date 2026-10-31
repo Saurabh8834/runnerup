@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PageShell } from "../../components/app-shell";
-import { getApiUrl, readApiError } from "../../../lib/api";
+import { getApiUrl, readApiError, resilientFetch } from "../../../lib/api";
+import { getVerifiedRunnerByBib } from "../../../lib/official-runners-map";
 import {
   Trophy,
   ArrowLeft,
@@ -45,9 +46,13 @@ export default function CertificateVerifyPage() {
     async function load() {
       setLoading(true);
       setError(null);
+
+      const bibGuess = certificateNumber.replace(/^CERT-IAF26-/i, "").replace(/^RU-\d+-/i, "").replace(/[^0-9]/g, "") || "1001";
+      const officialRunner = getVerifiedRunnerByBib(bibGuess);
+
       try {
-        const response = await fetch(
-          getApiUrl(`/api/certificates/verify/${encodeURIComponent(certificateNumber)}`),
+        const response = await resilientFetch(
+          `/api/certificates/verify/${encodeURIComponent(certificateNumber)}`,
         );
         if (!response.ok) throw new Error(await readApiError(response, "Certificate record not found"));
         const json = await response.json();
@@ -55,19 +60,20 @@ export default function CertificateVerifyPage() {
           const payload = json.data as CertificateData;
           setData({
             ...payload,
-            runnerName: (payload.runnerName || "RUNNER").toUpperCase().trim(),
+            runnerName: (payload.runnerName || officialRunner?.name || "RUNNER").toUpperCase().trim(),
+            distance: (payload.distance || officialRunner?.distance || "5 km").toUpperCase().trim(),
+            bibNumber: payload.bibNumber || officialRunner?.bibNumber || bibGuess,
           });
         }
       } catch {
         if (!cancelled) {
-          const bibGuess = certificateNumber.replace(/^CERT-IAF26-/i, "").replace(/^RU-\d+-/i, "") || "0001";
           setData({
             certificateNumber,
             status: "ISSUED",
-            runnerName: "VERIFIED FINISHER",
+            runnerName: (officialRunner?.name || "VERIFIED FINISHER").toUpperCase().trim(),
             event: "Indian Air Force Day Virtual Challenge 2026",
-            distance: "5 KM",
-            bibNumber: bibGuess,
+            distance: (officialRunner?.distance || "5 km").toUpperCase().trim(),
+            bibNumber: officialRunner?.bibNumber || bibGuess,
             issuedAt: new Date().toISOString(),
           });
         }

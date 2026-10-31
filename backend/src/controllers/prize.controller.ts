@@ -30,16 +30,15 @@ function getPrizeStatus(medalStatus: string | null, certificateStatus: string | 
     if (certificateStatus === "SENT") return { status: "sent", statusLabel: "Emailed" };
     if (certificateStatus === "GENERATED") return { status: "ready", statusLabel: "Ready" };
     if (certificateStatus === "QUEUED") return { status: "processing", statusLabel: "Processing" };
-    return { status: "pending", statusLabel: "After verification" };
+    return { status: "ready", statusLabel: "Ready" };
   }
   if (type === "medal") {
     if (medalStatus === "DELIVERED") return { status: "delivered", statusLabel: "Delivered" };
     if (medalStatus === "DISPATCHED") return { status: "dispatched", statusLabel: "On the way" };
-    if (medalStatus === "PENDING") return { status: "processing", statusLabel: "Preparing" };
     if (medalStatus === "NOT_ELIGIBLE") return { status: "not_eligible", statusLabel: "Not eligible" };
-    return { status: "pending", statusLabel: "After verification" };
+    return { status: "processing", statusLabel: "Dispatch Soon" };
   }
-  return { status: "pending", statusLabel: "Pending" };
+  return { status: "processing", statusLabel: "Dispatch Soon" };
 }
 
 function buildTimeline(
@@ -105,8 +104,8 @@ function buildPrizeItems(
       type: "tshirt",
       name: "Event T-Shirt",
       icon: "tshirt",
-      status: medalStatus === "DISPATCHED" || medalStatus === "DELIVERED" ? "processing" as PrizeStatus : "pending" as PrizeStatus,
-      statusLabel: medalStatus === "DISPATCHED" || medalStatus === "DELIVERED" ? "Preparing" : "After verification",
+      status: "processing" as PrizeStatus,
+      statusLabel: medalStatus === "DISPATCHED" ? "On the way" : medalStatus === "DELIVERED" ? "Delivered" : "Dispatch Soon",
     });
   }
 

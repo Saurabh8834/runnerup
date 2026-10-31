@@ -42,6 +42,7 @@ import { cn } from "../../lib/cn";
 import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
 import { EventNoticeCard } from "../components/event-notice-card";
 import { renderBibCanvas, renderCertCanvas, triggerCanvasDownload } from "../../lib/asset-canvas";
+import { getVerifiedRunnerByBib } from "../../lib/official-runners-map";
 
 type Registration = {
   id: string;
@@ -235,10 +236,13 @@ export function DashboardClient() {
   const handleDownloadBib = async (reg: Registration) => {
     setDownloadingBibId(reg.id);
     try {
-      const runnerName = dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
+      const official = getVerifiedRunnerByBib(cleanBib);
+      const runnerName = official?.name || dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const distance = official?.distance || reg.distance || "5 KM";
       const canvas = await renderBibCanvas({
         runnerName,
-        distance: reg.distance || "5 KM",
+        distance,
         positionStr: reg.bibNumber || "1001",
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -254,10 +258,13 @@ export function DashboardClient() {
   const handleDownloadCert = async (reg: Registration) => {
     setDownloadingCertId(reg.id);
     try {
-      const runnerName = dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
+      const official = getVerifiedRunnerByBib(cleanBib);
+      const runnerName = official?.name || dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const distance = official?.distance || reg.distance || "5 KM";
       const canvas = await renderCertCanvas({
         runnerName,
-        distance: reg.distance || "5 KM",
+        distance,
         dateStr: "31  /  10  /  2026",
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -1389,19 +1396,23 @@ export function DashboardClient() {
                         )}
 
                         {/* Medal Delivery Info */}
-                        {reg.medalDelivery && (
-                          <div className="mt-3.5 sm:mt-4 rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-xs backdrop-blur-xl">
-                            <p className="font-bold text-white flex items-center gap-1.5">
-                              <Medal className="h-3.5 w-3.5 text-amber-400 shrink-0" /> Medal Status:{" "}
-                              <span className="text-[#90aead] font-semibold">{reg.medalDelivery.status}</span>
-                            </p>
-                            {reg.medalDelivery.trackingNumber && (
+                        <div className="mt-3.5 sm:mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs backdrop-blur-xl">
+                          <p className="font-bold text-white flex items-center gap-1.5">
+                            <Medal className="h-3.5 w-3.5 text-emerald-400 shrink-0" /> Medal Status:{" "}
+                            <span className="text-emerald-300 font-black uppercase">
+                              {reg.medalDelivery?.status === "DELIVERED"
+                                ? "Delivered"
+                                : reg.medalDelivery?.status === "DISPATCHED"
+                                ? "On The Way"
+                                : "Dispatch Soon"}
+                            </span>
+                          </p>
+                            {reg.medalDelivery?.trackingNumber && (
                               <p className="mt-1 text-slate-300 font-mono text-[0.7rem]">
                                 Courier: {reg.medalDelivery.courier || "SpeedPost"} · {reg.medalDelivery.trackingNumber}
                               </p>
                             )}
                           </div>
-                        )}
                       </div>
 
                       <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">

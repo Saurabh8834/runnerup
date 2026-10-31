@@ -59,8 +59,8 @@ const statusColors: Record<PrizeStatus, { bg: string; text: string; icon: string
   sent: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
   ready: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
   delivered: { bg: "bg-(--sage-soft)", text: "text-(--sage)", icon: "#e64833" },
-  dispatched: { bg: "bg-[#874f41]/20", text: "text-[#fbe9d0]", icon: "#e64833" },
-  processing: { bg: "bg-[#874f41]/20", text: "text-[#fbe9d0]", icon: "#e64833" },
+  dispatched: { bg: "bg-amber-500/20", text: "text-amber-300", icon: "#f59e0b" },
+  processing: { bg: "bg-emerald-500/20", text: "text-emerald-300", icon: "#10b981" },
   pending: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#90aead" },
   not_eligible: { bg: "bg-(--panel-soft)", text: "text-(--muted-soft)", icon: "#90aead" },
 };

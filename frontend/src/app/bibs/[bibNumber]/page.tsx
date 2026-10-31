@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PageShell } from "../../components/app-shell";
-import { getApiUrl, readApiError } from "../../../lib/api";
+import { getApiUrl, readApiError, resilientFetch } from "../../../lib/api";
+import { getVerifiedRunnerByBib } from "../../../lib/official-runners-map";
 import {
   Trophy,
   ArrowLeft,
@@ -46,8 +47,11 @@ export default function DigitalBibPage() {
     async function fetchBib() {
       setLoading(true);
       setError(null);
+      const cleanBib = bibNumber.replace(/\D/g, "");
+      const officialRunner = getVerifiedRunnerByBib(cleanBib);
+
       try {
-        const res = await fetch(`${getApiUrl()}/api/prizes/${encodeURIComponent(bibNumber)}`);
+        const res = await resilientFetch(`/api/prizes/${encodeURIComponent(bibNumber)}`);
         if (!res.ok) {
           const errData = await readApiError(res, "Could not retrieve bib record.");
           throw new Error(errData);
@@ -59,9 +63,10 @@ export default function DigitalBibPage() {
           throw new Error("Payment pending. Official digital race bib and finisher certificate are available exclusively for confirmed, paid participants.");
         }
 
-        const runnerNameUpper = (payload.runner?.name || "RUNNER").toUpperCase().trim();
+        const runnerNameUpper = (payload.runner?.name || officialRunner?.name || "RUNNER").toUpperCase().trim();
 
-        let distStr = (payload.event?.distance || "5 KM").toUpperCase().trim();
+        let rawDist = payload.event?.distance || payload.runner?.distance || payload.distance || officialRunner?.distance || "5 KM";
+        let distStr = rawDist.toUpperCase().trim();
         if (!distStr.endsWith("KM") && !distStr.endsWith("K")) {
           distStr += " KM";
         }
