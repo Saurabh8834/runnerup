@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
+import { recordDownload } from "../services/download-tracker.service.js";
 
 export async function verifyCertificate(request: Request, response: Response) {
   const certificate = await prisma.certificate.findUnique({
@@ -32,6 +33,14 @@ export async function verifyCertificate(request: Request, response: Response) {
   if (!isPaid) {
     throw new ApiError(402, "Certificate locked. Official finisher certificates are available exclusively for paid participants.");
   }
+
+  // Non-blocking download/view telemetry
+  try {
+    recordDownload("CERTIFICATE", certificate.certificateNumber);
+    if (certificate.registration.bibNumber) {
+      recordDownload("BIB", certificate.registration.bibNumber);
+    }
+  } catch {}
 
   response.json({
     data: {

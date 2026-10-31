@@ -4,6 +4,7 @@ import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
 import { memoryCache } from "../utils/cache.js";
+import { recordDownload } from "../services/download-tracker.service.js";
 
 type PrizeStatus = "pending" | "processing" | "ready" | "sent" | "dispatched" | "delivered" | "not_eligible";
 
@@ -176,6 +177,12 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     registration.payment?.status === "PAID" ||
     registration.status === "CONFIRMED" ||
     registration.status === "COMPLETED";
+
+  if (isPaid) {
+    try {
+      recordDownload("BIB", registration.bibNumber);
+    } catch {}
+  }
 
   const prizes = isPaid
     ? buildPrizeItems(

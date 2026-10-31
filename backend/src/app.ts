@@ -16,6 +16,7 @@ import { prizeRouter } from "./routes/prize.routes.js";
 import { referralRouter } from "./routes/referral.routes.js";
 import { registrationRouter } from "./routes/registration.routes.js";
 import { subscriberRouter } from "./routes/subscriber.routes.js";
+import { recordDownload } from "./services/download-tracker.service.js";
 import { uploadRouter } from "./routes/upload.routes.js";
 import { userRouter } from "./routes/user.routes.js";
 import { ApiError } from "./utils/api-error.js";
@@ -127,6 +128,17 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/prizes", prizeRouter);
 app.use("/api/referrals", referralRouter);
 app.use("/api/subscribers", subscriberRouter);
+
+// Lightweight, non-blocking telemetry for certificate & digital bib downloads
+app.post("/api/track/download", (req, res) => {
+  try {
+    const { type, identifier } = req.body || {};
+    if (type && identifier) {
+      recordDownload(type === "CERTIFICATE" ? "CERTIFICATE" : "BIB", String(identifier));
+    }
+  } catch {}
+  res.json({ success: true });
+});
 
 app.use((_request, _response, next) => {
   next(new ApiError(404, "Route not found"));

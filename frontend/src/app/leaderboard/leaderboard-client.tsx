@@ -117,8 +117,8 @@ function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-// ── 3D Stepped Podium Component (Authentic Isometric Pillars & Avatar Crowns) ──
-function Podium3D({
+// ── Concept 1: Olympic Gold Glass Cards (Modern Floating Podium for Top 3 Champions) ──
+function PodiumOlympicGold({
   topThree,
   activeDistance,
 }: {
@@ -132,157 +132,142 @@ function Podium3D({
   if (!topThree.first) return null;
 
   return (
-    <div className="relative mx-auto w-full max-w-xl px-2 py-4">
-      {/* Radiant Glow behind Podium */}
-      <div className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 h-56 w-72 rounded-full bg-[#fbe9d0]/15 blur-[80px]" />
-      <div className="pointer-events-none absolute left-1/2 bottom-0 -translate-x-1/2 h-20 w-80 rounded-full bg-[#e64833]/20 blur-[60px]" />
+    <div className="relative mx-auto w-full max-w-4xl px-3 py-6">
+      {/* Radiant Background Glows */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-72 w-96 rounded-full bg-[#f6d58e]/10 blur-[100px]" />
+      <div className="pointer-events-none absolute left-1/2 bottom-0 -translate-x-1/2 h-28 w-80 rounded-full bg-[#e64833]/15 blur-[80px]" />
 
-      {/* 3D Pillars Grid: 2nd (Left), 1st (Center), 3rd (Right) */}
-      <div className="relative z-10 flex items-end justify-center gap-1.5 sm:gap-4 pt-12 pb-2">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 items-end">
 
-        {/* ═══ 2nd Place Pillar (Left) ═══ */}
+        {/* ═══ 2nd Place: Silver Runner-Up (Left on desktop, order-2 on mobile) ═══ */}
         {topThree.second ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-1 min-w-0 flex-col items-center max-w-[100px] sm:max-w-[170px]"
+            transition={{ duration: 0.45, delay: 0.1 }}
+            className="order-2 md:order-1 rounded-2xl border border-slate-300/30 bg-gradient-to-b from-[#162730]/90 to-[#0c161a]/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform"
           >
-            {/* Avatar */}
-            <div className="relative mb-1.5 sm:mb-2">
-              <div className="flex h-11 w-11 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-200 via-slate-400 to-slate-200 text-slate-950 font-black text-xs sm:text-base ring-2 sm:ring-3 ring-slate-300 shadow-[0_0_15px_rgba(203,213,225,0.4)]">
-                {getInitials(topThree.second.runnerName)}
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-slate-300 text-[0.55rem] sm:text-xs font-black text-slate-950 shadow">
+            {/* Metallic Silver Badge */}
+            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-200 via-slate-400 to-slate-100 text-slate-950 font-black text-2xl ring-4 ring-slate-300/60 shadow-[0_0_20px_rgba(203,213,225,0.4)]">
+              🥈
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-400 border-2 border-[#0c161a] text-xs font-black text-slate-950 shadow">
                 2
               </span>
             </div>
 
-            {/* Runner Name */}
-            <p className="w-full truncate text-center text-[11px] sm:text-sm font-bold text-slate-200">
+            {/* Runner Name in Bold Caps */}
+            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-white drop-shadow-sm">
               {topThree.second.runnerName}
+            </h3>
+
+            {/* Category / Rank Meta */}
+            <p className="mt-0.5 text-xs font-semibold text-slate-300 font-mono">
+              Rank #2 · Verified Finisher
             </p>
 
-            {/* Time / Pace Badge */}
-            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 sm:px-2.5 py-0.5 text-[0.55rem] sm:text-[0.68rem] font-bold text-slate-300 backdrop-blur-md shadow-sm whitespace-nowrap">
+            {/* Time Pill */}
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-300/30 bg-slate-900/60 px-3.5 py-1 text-xs font-mono font-bold text-slate-200 shadow-inner">
+              <Clock className="h-3.5 w-3.5 text-slate-300" />
               <span>{formatTime(topThree.second.finishTimeSeconds)}</span>
-              <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-400 fill-orange-400" />
             </div>
 
-            {/* 3D Pillar Box #2 */}
-            <div className="relative w-full">
-              {/* 3D Top Bevel Face */}
-              <div className="h-4 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-slate-400/50 via-slate-300/40 to-slate-500/50 border-t border-x border-white/30 shadow-inner" />
-              {/* Front Face */}
-              <div className="relative flex h-24 sm:h-36 md:h-40 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-700/80 via-slate-800/95 to-[#0b101c] border-x border-b border-white/15 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
-                <span className="font-display font-black text-3xl sm:text-6xl text-slate-400/60 select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                  2
-                </span>
-              </div>
-            </div>
+            {/* Pace Chip */}
+            <p className="mt-2 text-[11px] font-medium text-[#90aead]">
+              Pace: <span className="font-mono text-slate-200">{formatPace(topThree.second.finishTimeSeconds, activeDistance)}</span>
+            </p>
           </motion.div>
         ) : (
-          <div className="flex-1 min-w-0 max-w-[100px] sm:max-w-[170px]" />
+          <div className="order-2 md:order-1 hidden md:block" />
         )}
 
-        {/* ═══ 1st Place Pillar (Center - Tallest) ═══ */}
+        {/* ═══ 1st Place: Gold Champion (Center, Elevated & Crowned) ═══ */}
         {topThree.first && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-1 min-w-0 flex-col items-center max-w-[115px] sm:max-w-[190px] -mt-5 sm:-mt-6"
+            className="order-1 md:order-2 relative rounded-3xl border-2 border-[#f6d58e] bg-gradient-to-b from-[#1f3a46]/95 via-[#13262e]/98 to-[#0b1418] p-6 sm:p-7 text-center backdrop-blur-2xl shadow-[0_20px_50px_rgba(246,213,142,0.22),0_0_35px_rgba(230,72,51,0.18)] hover:-translate-y-1.5 transition-transform -mt-2 md:-mt-6"
           >
-            {/* Floating Crown / Trophy on Top */}
-            <div className="mb-1 flex items-center justify-center animate-pulse motion-reduce:animate-none">
-              <span className="text-xl sm:text-3xl drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">
-                🏆
-              </span>
+            {/* Floating Crown */}
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center filter drop-shadow-[0_4px_12px_rgba(246,213,142,0.7)] animate-bounce motion-reduce:animate-none">
+              <span className="text-3xl sm:text-4xl">👑</span>
             </div>
 
-            {/* Avatar */}
-            <div className="relative mb-1.5 sm:mb-2">
-              <div className="flex h-14 w-14 sm:h-20 sm:w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-500 text-slate-950 font-black text-sm sm:text-xl ring-3 sm:ring-4 ring-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.7)]">
-                {getInitials(topThree.first.runnerName)}
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 to-yellow-400 text-[0.65rem] sm:text-sm font-black text-slate-950 shadow-md">
+            {/* Metallic Gold Badge */}
+            <div className="relative mx-auto mt-2 mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-500 text-slate-950 font-black text-3xl ring-4 ring-[#f6d58e] shadow-[0_0_30px_rgba(246,213,142,0.7)]">
+              🥇
+              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 border-2 border-[#0b1418] text-xs font-black text-slate-950 shadow">
                 1
               </span>
             </div>
 
-            {/* Runner Name */}
-            <p className="w-full truncate text-center text-xs sm:text-sm font-black uppercase tracking-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+            {/* Runner Name in ALL CAPS Gold */}
+            <h3 className="truncate font-display font-black text-lg sm:text-xl uppercase tracking-wider text-[#f6d58e] drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
               {topThree.first.runnerName}
-            </p>
+            </h3>
 
-            {/* Time / Pace Badge */}
-            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-500/20 px-2 sm:px-3 py-0.5 text-[0.6rem] sm:text-xs font-black text-amber-300 backdrop-blur-md shadow-[0_0_10px_rgba(251,191,36,0.3)] whitespace-nowrap">
+            {/* National Champion Badge */}
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-[#FF9933]/20 via-white/10 to-[#138808]/20 border border-[#f6d58e]/40 px-3 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#f6d58e]">
+              <Trophy className="h-3 w-3 text-amber-400" />
+              <span>National Champion · {activeDistance}</span>
+            </div>
+
+            {/* Golden Time Pill */}
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full border border-[#f6d58e]/60 bg-gradient-to-r from-amber-500/25 to-yellow-500/20 px-5 py-1.5 text-sm font-mono font-black text-[#f6d58e] shadow-[0_0_15px_rgba(246,213,142,0.3)]">
+              <Flame className="h-4 w-4 text-orange-400 fill-orange-400" />
               <span>{formatTime(topThree.first.finishTimeSeconds)}</span>
-              <Flame className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400 fill-amber-400" />
+              <span className="text-[10px] font-sans uppercase font-extrabold text-amber-200">GOLD</span>
             </div>
 
-            {/* 3D Pillar Box #1 */}
-            <div className="relative w-full">
-              {/* 3D Top Bevel Face */}
-              <div className="h-5 sm:h-7 w-full rounded-t-xl bg-gradient-to-r from-amber-300/60 via-yellow-200/50 to-amber-400/60 border-t border-x border-amber-300/60 shadow-inner" />
-              {/* Front Face */}
-              <div className="relative flex h-32 sm:h-48 md:h-52 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-600/90 via-slate-800 to-[#14242a] border-x border-b border-amber-400/40 shadow-[0_20px_40px_rgba(0,0,0,0.8),0_0_20px_rgba(251,191,36,0.2)]">
-                <span className="font-display font-black text-4xl sm:text-7xl text-white/90 select-none drop-shadow-[0_0_20px_rgba(251,191,36,0.6)]">
-                  1
-                </span>
-              </div>
-            </div>
+            {/* Pace Chip */}
+            <p className="mt-2.5 text-xs font-semibold text-amber-200/90">
+              Pace: <span className="font-mono text-white font-bold">{formatPace(topThree.first.finishTimeSeconds, activeDistance)}</span> 🔥 (Speed Leader)
+            </p>
           </motion.div>
         )}
 
-        {/* ═══ 3rd Place Pillar (Right) ═══ */}
+        {/* ═══ 3rd Place: Bronze Runner-Up (Right on desktop, order-3 on mobile) ═══ */}
         {topThree.third ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-1 min-w-0 flex-col items-center max-w-[100px] sm:max-w-[170px]"
+            transition={{ duration: 0.45, delay: 0.2 }}
+            className="order-3 rounded-2xl border border-amber-600/30 bg-gradient-to-b from-[#162730]/90 to-[#0c161a]/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:-translate-y-1 transition-transform"
           >
-            {/* Avatar */}
-            <div className="relative mb-1.5 sm:mb-2">
-              <div className="flex h-11 w-11 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#874f41] via-[#a36152] to-[#874f41] text-[#fbe9d0] font-black text-xs sm:text-base ring-2 sm:ring-3 ring-[#874f41] shadow-[0_0_15px_rgba(135,79,65,0.4)]">
-                {getInitials(topThree.third.runnerName)}
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-[#874f41] text-[0.55rem] sm:text-xs font-black text-[#fbe9d0] shadow">
+            {/* Metallic Bronze Badge */}
+            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#874f41] via-[#d97757] to-[#874f41] text-[#fbe9d0] font-black text-2xl ring-4 ring-amber-600/50 shadow-[0_0_20px_rgba(217,119,87,0.35)]">
+              🥉
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-amber-700 border-2 border-[#0c161a] text-xs font-black text-[#fbe9d0] shadow">
                 3
               </span>
             </div>
 
-            {/* Runner Name */}
-            <p className="w-full truncate text-center text-[11px] sm:text-sm font-bold text-[#fbe9d0]">
+            {/* Runner Name in Bold Caps */}
+            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-white drop-shadow-sm">
               {topThree.third.runnerName}
+            </h3>
+
+            {/* Category / Rank Meta */}
+            <p className="mt-0.5 text-xs font-semibold text-slate-300 font-mono">
+              Rank #3 · Verified Finisher
             </p>
 
-            {/* Time / Pace Badge */}
-            <div className="mt-1 mb-2 inline-flex items-center gap-1 rounded-full border border-[#874f41]/40 bg-[#874f41]/20 px-2 sm:px-2.5 py-0.5 text-[0.55rem] sm:text-[0.68rem] font-bold text-[#fbe9d0] backdrop-blur-md shadow-sm whitespace-nowrap">
+            {/* Time Pill */}
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-amber-700/40 bg-slate-900/60 px-3.5 py-1 text-xs font-mono font-bold text-amber-200 shadow-inner">
+              <Clock className="h-3.5 w-3.5 text-amber-400" />
               <span>{formatTime(topThree.third.finishTimeSeconds)}</span>
-              <Flame className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#e64833] fill-[#e64833]" />
             </div>
 
-            {/* 3D Pillar Box #3 */}
-            <div className="relative w-full">
-              {/* 3D Top Bevel Face */}
-              <div className="h-4 sm:h-6 w-full rounded-t-xl bg-gradient-to-r from-[#874f41]/60 via-[#a36152]/50 to-[#874f41]/60 border-t border-x border-[#874f41]/40 shadow-inner" />
-              {/* Front Face */}
-              <div className="relative flex h-20 sm:h-28 md:h-32 w-full items-center justify-center rounded-b-2xl bg-gradient-to-b from-slate-800/80 via-slate-900/95 to-[#14242a] border-x border-b border-[#874f41]/30 shadow-[0_15px_30px_rgba(0,0,0,0.6)]">
-                <span className="font-display font-black text-2xl sm:text-5xl text-[#874f41] select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                  3
-                </span>
-              </div>
-            </div>
+            {/* Pace Chip */}
+            <p className="mt-2 text-[11px] font-medium text-[#90aead]">
+              Pace: <span className="font-mono text-slate-200">{formatPace(topThree.third.finishTimeSeconds, activeDistance)}</span>
+            </p>
           </motion.div>
         ) : (
-          <div className="flex-1 min-w-0 max-w-[100px] sm:max-w-[170px]" />
+          <div className="order-3 hidden md:block" />
         )}
-      </div>
 
-      {/* Base Podium Shadow */}
-      <div className="mx-auto h-3 w-4/5 rounded-full bg-black/60 blur-md -mt-1" />
+      </div>
     </div>
   );
 }
@@ -515,47 +500,72 @@ export function LeaderboardClient() {
   return (
     <div className="min-w-0">
 
-      {/* ── SECTION 1: HERO & CONTROLS (WARM IVORY #fbf6ee) ──────────── */}
-      <section className="relative overflow-hidden border-b border-[#90aead]/20 pt-24 pb-12 sm:pt-28 sm:pb-16 isolate text-[#14242a] bg-[#fbf6ee]">
-        <div aria-hidden className="pointer-events-none absolute top-1/3 left-1/2 -z-10 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[#90aead]/25 blur-[140px]" />
-        <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 -z-10 h-[250px] w-[250px] rounded-full bg-[#e64833]/15 blur-[100px]" />
+      {/* ── UNIFIED LEADERBOARD: CATEGORY SELECTION DIRECTLY ON TOP ──── */}
+      <section className="relative overflow-hidden pt-20 pb-16 sm:pt-24 sm:pb-20 isolate text-[#fbe9d0] bg-[#0c161a] border-b border-[#90aead]/15">
+        {/* Glow Effects */}
+        <div aria-hidden className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[380px] w-[650px] -translate-x-1/2 rounded-full bg-[#f6d58e]/10 blur-[130px]" />
+        <div aria-hidden className="pointer-events-none absolute top-1/2 right-10 -z-10 h-[300px] w-[300px] rounded-full bg-[#e64833]/15 blur-[120px]" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            className="mx-auto max-w-3xl text-center"
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#e64833] mb-4 shadow-sm">
-              <Trophy className="h-3.5 w-3.5" />
-              OFFICIAL NATIONAL LEADERBOARD
-            </span>
-            <h1 className="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight text-[#14242a]">
-              THE FINISHERS&apos;{" "}
-              <span className="text-[#e64833]">
-                BOARD
-              </span>
-            </h1>
-            <p className="mt-4 text-sm sm:text-base text-[#244855]/90 max-w-xl mx-auto font-medium leading-relaxed">
-              Explore real-time rankings across all distance categories. Every finish is verified with Strava & Garmin GPS tracking.
-            </p>
-          </motion.div>
 
-          {/* Filter Bar Box */}
-          <div className="mt-10 rounded-3xl border border-[#90aead]/20 bg-white p-5 sm:p-7 shadow-xl space-y-5">
-            {/* Event Selector & Search Input */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-              {/* Event Select */}
-              <div className="lg:col-span-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#244855] mb-2">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-[#e64833]" /> Select Event
-                  </span>
-                </label>
-                <div className="relative">
+          {/* Header Title Banner */}
+          <div className="mx-auto max-w-3xl text-center mb-6">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 mb-3 shadow-sm">
+              <Trophy className="h-3.5 w-3.5 text-amber-400" />
+              OFFICIAL NATIONAL LEADERBOARD · LIVE REVEAL
+            </span>
+            <h1 className="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white">
+              THE FINISHERS&apos; <span className="text-[#e64833]">BOARD</span>
+            </h1>
+            <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto font-medium">
+              Chip-verified results &amp; standings across all distance categories · Indian Air Force Day Challenge
+            </p>
+          </div>
+
+          {/* ═══ REQUIREMENT: CATEGORY SELECTION DIRECTLY ABOVE LEADERBOARD ═══ */}
+          <div className="mb-8 rounded-2xl border border-white/10 bg-[#12232a]/90 p-4 sm:p-5 backdrop-blur-xl shadow-2xl">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
+              {/* Category Selection Pills */}
+              <div className="flex-1">
+                <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-[#90aead] flex items-center gap-1.5">
+                  <Ruler className="h-3.5 w-3.5 text-[#e64833]" /> Choose Distance Category:
+                </p>
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  {distanceOptions.map((dist) => {
+                    const isSelected = selectedDistance.toLowerCase().trim() === dist.toLowerCase().trim();
+                    return (
+                      <button
+                        key={dist}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDistance(dist);
+                          setSearchQuery("");
+                        }}
+                        className={`group relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
+                          isSelected
+                            ? "bg-gradient-to-r from-[#e64833] to-[#c93b27] text-white shadow-lg shadow-[#e64833]/30 border border-[#e64833]"
+                            : "border border-white/10 bg-white/[0.05] text-slate-200 hover:border-white/20 hover:bg-white/[0.08]"
+                        }`}
+                      >
+                        <span>{dist}</span>
+                        {isSelected && (
+                          <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[0.6rem] font-mono font-bold">
+                            Active
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Event Select & Instant Search Input */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0 lg:border-l lg:border-white/10 lg:pl-5">
+                {/* Event Select */}
+                <div className="relative min-w-[160px] sm:min-w-[190px]">
                   <select
-                    className="w-full rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] px-4 py-3 text-sm font-bold text-[#14242a] outline-none transition focus:border-[#e64833] focus:ring-2 focus:ring-[#e64833]/20 cursor-pointer"
+                    className="w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-xs font-bold text-slate-200 outline-none transition focus:border-[#e64833] cursor-pointer"
                     value={selectedSlug}
                     onChange={(e) => {
                       setSelectedSlug(e.target.value);
@@ -563,88 +573,40 @@ export function LeaderboardClient() {
                     }}
                   >
                     {events.map((ev) => (
-                      <option key={ev.slug} value={ev.slug} className="bg-white text-[#14242a]">
+                      <option key={ev.slug} value={ev.slug} className="bg-[#12232a] text-white">
                         {ev.name}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
 
-              {/* Instant Search Bar */}
-              <div className="lg:col-span-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#244855] mb-2">
-                  <span className="flex items-center gap-1.5">
-                    <Search className="h-4 w-4 text-[#e64833]" /> Search Runner, City or Bib #
-                  </span>
-                </label>
-                <div className="relative flex items-center">
+                {/* Search Runner */}
+                <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
                   <Search
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#90aead]"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#90aead]"
                   />
                   <input
                     type="text"
-                    placeholder="Search runner name, city, or bib (e.g. MR-5K-101)..."
+                    placeholder="Search runner or bib..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-[#90aead]/20 bg-[#fbf6ee] pl-11 pr-10 py-3 text-sm text-[#14242a] placeholder-[#90aead]/60 outline-none transition focus:border-[#e64833] focus:ring-2 focus:ring-[#e64833]/20"
+                    className="w-full rounded-xl border border-white/15 bg-black/40 pl-9 pr-8 py-2 text-xs text-white placeholder-[#90aead]/70 outline-none transition focus:border-[#e64833]"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#90aead] hover:bg-slate-200 hover:text-[#14242a] cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#90aead] hover:text-white cursor-pointer"
                     >
-                      <X className="h-4 w-4" />
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
               </div>
-            </div>
 
-            {/* Distance Category Pills */}
-            <div className="pt-2 border-t border-[#90aead]/15">
-              <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#90aead]">
-                Choose Distance Category:
-              </p>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                {distanceOptions.map((dist) => {
-                  const isSelected = selectedDistance.toLowerCase().trim() === dist.toLowerCase().trim();
-                  return (
-                    <button
-                      key={dist}
-                      type="button"
-                      onClick={() => {
-                        setSelectedDistance(dist);
-                        setSearchQuery("");
-                      }}
-                      className={`group relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${isSelected
-                          ? "bg-gradient-to-r from-[#e64833] to-[#c93b27] text-[#fbe9d0] shadow-lg shadow-[#e64833]/30 border border-[#e64833]"
-                          : "border border-[#90aead]/20 bg-[#fbf6ee] text-[#244855] hover:border-[#90aead]/40 hover:bg-[#f5ecdd]"
-                        }`}
-                    >
-                      <Ruler className={`h-3.5 w-3.5 ${isSelected ? "text-[#fbe9d0]" : "text-[#90aead] group-hover:text-[#e64833]"}`} />
-                      <span>{dist}</span>
-                      {isSelected && (
-                        <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[0.6rem] font-mono font-bold">
-                          Active
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── SECTION 2: PODIUM & RANKINGS TABLE (DARK #14242a) ────────── */}
-      <section className="relative py-16 sm:py-20 bg-[#14242a] text-[#fbe9d0] border-b border-[#90aead]/15 overflow-hidden isolate">
-        <div aria-hidden className="pointer-events-none absolute top-1/2 left-10 -z-10 h-[350px] w-[350px] -translate-y-1/2 rounded-full bg-[#244855]/30 blur-[130px]" />
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 
           {/* Dual Tab Switcher & GPS Badge */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#90aead]/15 pb-5">
@@ -783,7 +745,7 @@ export function LeaderboardClient() {
                             </h2>
                           </div>
 
-                          <Podium3D
+                          <PodiumOlympicGold
                             topThree={topThree}
                             activeDistance={selectedDistance}
                           />

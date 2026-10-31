@@ -143,7 +143,19 @@ export default function CertificateVerifyPage() {
         );
         if (!response.ok) throw new Error(await readApiError(response, "Certificate not found"));
         const json = await response.json();
-        if (!cancelled) setData(json.data as CertificateData);
+        if (!cancelled) {
+          setData(json.data as CertificateData);
+          if (json.data?.certificateNumber) {
+            try {
+              fetch(getApiUrl("/api/track/download"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: "CERTIFICATE", identifier: json.data.certificateNumber }),
+                keepalive: true,
+              }).catch(() => {});
+            } catch {}
+          }
+        }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Could not verify certificate");
@@ -180,7 +192,17 @@ export default function CertificateVerifyPage() {
                 </Link>
                 <button
                   className="btn btn-primary gap-2 shadow-lg text-xs sm:text-sm font-bold"
-                  onClick={() => window.print()}
+                  onClick={() => {
+                    try {
+                      fetch(getApiUrl("/api/track/download"), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "CERTIFICATE", identifier: data.certificateNumber }),
+                        keepalive: true,
+                      }).catch(() => {});
+                    } catch {}
+                    window.print();
+                  }}
                   type="button"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9V2h12v7" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>

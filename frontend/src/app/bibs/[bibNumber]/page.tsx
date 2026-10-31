@@ -80,6 +80,16 @@ export default function DigitalBibPage() {
           rankNumber: fourDigit,
           certificateNumber: certNum,
         });
+
+        // Non-blocking telemetry
+        try {
+          fetch(getApiUrl("/api/track/download"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: "BIB", identifier: payload.runner?.bibNumber || bibNumber }),
+            keepalive: true,
+          }).catch(() => {});
+        } catch {}
       } catch (err: any) {
         setError(err.message || "Failed to load bib.");
       } finally {
@@ -148,6 +158,15 @@ export default function DigitalBibPage() {
       a.download = `IAF_Bib_${data.bibNumber}_${data.runnerName.replace(/\s+/g, "_")}.jpg`;
       a.href = canvas.toDataURL("image/jpeg", 0.95);
       a.click();
+
+      try {
+        fetch(getApiUrl("/api/track/download"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "BIB", identifier: data.bibNumber }),
+          keepalive: true,
+        }).catch(() => {});
+      } catch {}
     };
   };
 
