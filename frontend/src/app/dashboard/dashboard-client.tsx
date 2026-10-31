@@ -1052,22 +1052,10 @@ export function DashboardClient() {
                             Leaderboard <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                           </Link>
 
-                          {isCertReady && (
-                            <Link
-                              className="neon-btn-blue rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md inline-flex items-center gap-1"
-                              href={`/certificates/${reg.certificate?.certificateNumber || ("CERT-IAF26-" + reg.bibNumber.replace(/[^A-Za-z0-9]/g, ""))}`}
-                            >
-                              <Award className="h-3.5 w-3.5" /> Certificate
-                            </Link>
-                          )}
-
                           {isPaid && (
-                            <Link
-                              className="rounded-full border border-white/20 bg-white/[0.08] px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] hover:bg-white/15 backdrop-blur-xl transition-all inline-flex items-center gap-1 shadow-md"
-                              href={`/bibs/${encodeURIComponent(reg.bibNumber)}`}
-                            >
-                              🎽 Digital Bib
-                            </Link>
+                            <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm inline-flex items-center gap-1 select-none">
+                              ⏳ Certificate & Bib Available Soon
+                            </span>
                           )}
 
                           {reg.medalDelivery?.trackingNumber && (
@@ -1355,25 +1343,10 @@ export function DashboardClient() {
                         )}
                       </div>
 
-                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 grid grid-cols-2 gap-2">
-                        {isPaid ? (
-                          <Link
-                            className="neon-btn-blue rounded-full h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-1.5"
-                            href={`/certificates/${reg.certificate?.certificateNumber || ("CERT-IAF26-" + reg.bibNumber.replace(/[^A-Za-z0-9]/g, ""))}`}
-                          >
-                            <Award className="h-3.5 w-3.5" /> Certificate
-                          </Link>
-                        ) : (
-                          <span className="text-[0.7rem] text-slate-400 text-center flex items-center justify-center font-medium">
-                            Pending cert...
-                          </span>
-                        )}
-                        <Link
-                          className="rounded-full border border-white/20 bg-white/[0.08] hover:bg-white/15 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg flex items-center justify-center gap-1.5 backdrop-blur-xl transition-all"
-                          href={`/bibs/${encodeURIComponent(reg.bibNumber)}`}
-                        >
-                          🎽 Digital Bib
-                        </Link>
+                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10">
+                        <div className="rounded-full border border-amber-400/35 bg-amber-400/10 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-md flex items-center justify-center gap-1.5 select-none">
+                          ⏳ Certificate & Bib Available Soon
+                        </div>
                       </div>
                     </div>
                     );

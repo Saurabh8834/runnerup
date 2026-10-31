@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageShell } from "../../components/app-shell";
 import { getApiUrl, readApiError } from "../../../lib/api";
-import { Award, Download, Printer, Trophy, ArrowLeft, Share2, CheckCircle2 } from "lucide-react";
+import { Trophy, ArrowLeft, Share2, CheckCircle2, Clock, Lock } from "lucide-react";
 
 type CertificateData = {
   certificateNumber: string;
@@ -49,20 +49,9 @@ export default function CertificateVerifyPage() {
             ...payload,
             runnerName: (payload.runnerName || "RUNNER").toUpperCase().trim(),
           });
-
-          // Non-blocking telemetry
-          try {
-            fetch(getApiUrl("/api/track/download"), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ type: "CERTIFICATE", identifier: payload.certificateNumber }),
-              keepalive: true,
-            }).catch(() => {});
-          } catch {}
         }
       } catch (err) {
         if (!cancelled) {
-          // Fallback if certificate not yet generated in DB: decode bib from URL
           const bibGuess = certificateNumber.replace(/^CERT-IAF26-/i, "").replace(/^RU-\d+-/i, "") || "0001";
           setData({
             certificateNumber,
@@ -84,7 +73,7 @@ export default function CertificateVerifyPage() {
     };
   }, [certificateNumber]);
 
-  // Render Official IAF Certificate Canvas (100% Matching IAF Base Template)
+  // Render Official IAF Certificate Canvas (Delicate Pen Signature, Clean Sky, Metallic Gold)
   useEffect(() => {
     if (!data) return;
 
@@ -100,7 +89,7 @@ export default function CertificateVerifyPage() {
     img.src = "/iaf-cert-clean-base.jpg";
 
     img.onload = () => {
-      // 1. Draw 100% Clean Official IAF Certificate Base
+      // 1. Draw 100% Clean Official IAF Certificate Base (No Smudges)
       ctx.drawImage(img, 0, 0, 1024, 682);
 
       // 2. Runner Name in Metallic Gold with Dark Shadow (ALL CAPS)
@@ -138,12 +127,15 @@ export default function CertificateVerifyPage() {
       ctx.fillStyle = "#f6d791";
       ctx.fillText("31  /  10  /  2026", 522, 476);
 
-      // 5. Signature: "Runnerup" in Gold Script
-      ctx.font = "42px 'Great Vibes', 'Brush Script MT', cursive";
+      // 5. Authentic Organizer Signature: Delicate cursive script, 24px (fits neatly without overflowing)
+      ctx.font = "italic 24px 'Alex Brush', 'Great Vibes', 'Brush Script MT', cursive";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+
       ctx.fillStyle = "#050a14";
-      ctx.fillText("Runnerup", 696, 477);
+      ctx.fillText("Runnerup", 696, 474);
       ctx.fillStyle = "#f6d791";
-      ctx.fillText("Runnerup", 695, 476);
+      ctx.fillText("Runnerup", 695, 473);
 
       const generatedUrl = canvas.toDataURL("image/jpeg", 0.98);
       setCertImageUrl(generatedUrl);
@@ -154,25 +146,6 @@ export default function CertificateVerifyPage() {
       setRendering(false);
     };
   }, [data]);
-
-  // Instant High-Resolution Download
-  const handleDownload = () => {
-    if (!certImageUrl || !data) return;
-
-    const a = document.createElement("a");
-    a.download = `IAF_Certificate_${data.runnerName.replace(/\s+/g, "_")}.jpg`;
-    a.href = certImageUrl;
-    a.click();
-
-    try {
-      fetch(getApiUrl("/api/track/download"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "CERTIFICATE", identifier: data.certificateNumber }),
-        keepalive: true,
-      }).catch(() => {});
-    } catch {}
-  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -194,10 +167,10 @@ export default function CertificateVerifyPage() {
 
   return (
     <PageShell>
-      {/* Load Google Fonts for true Cinzel & Great Vibes rendering */}
+      {/* Preload True Signature & Title Fonts */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Great+Vibes&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@700;900&family=Great+Vibes&display=swap"
       />
 
       <section className="py-8 sm:py-14 bg-[#0d161a] text-[#fbe9d0] min-h-[85vh]">
@@ -223,22 +196,11 @@ export default function CertificateVerifyPage() {
                   {copied ? "Copied Link!" : "Share Certificate"}
                 </button>
 
-                <button
-                  onClick={() => window.print()}
-                  type="button"
-                  className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition-all inline-flex items-center gap-1.5 shadow cursor-pointer"
-                >
-                  <Printer className="h-3.5 w-3.5" /> Print
-                </button>
-
-                <button
-                  onClick={handleDownload}
-                  disabled={!certImageUrl}
-                  type="button"
-                  className="neon-btn-blue rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-lg inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  <Download className="h-4 w-4" /> Download Certificate (HD)
-                </button>
+                {/* Requirement: Disable Download, Show Available Soon */}
+                <div className="rounded-full border border-amber-400/40 bg-amber-400/15 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-300 shadow-md inline-flex items-center gap-1.5 select-none">
+                  <Clock className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Available Soon</span>
+                </div>
               </div>
             )}
           </div>
@@ -262,7 +224,7 @@ export default function CertificateVerifyPage() {
             </div>
           )}
 
-          {/* ══════ LIVE OFFICIAL IAF CERTIFICATE DISPLAY (HD IMAGE) ══════ */}
+          {/* ══════ OFFICIAL IAF CERTIFICATE DISPLAY ══════ */}
           {certImageUrl && data && (
             <div className="space-y-6">
               <div
@@ -276,7 +238,7 @@ export default function CertificateVerifyPage() {
                 />
               </div>
 
-              {/* Action Ribbon below Certificate */}
+              {/* Status Ribbon below Certificate */}
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-xl print:hidden">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-400/40">
@@ -291,12 +253,10 @@ export default function CertificateVerifyPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    href={`/bibs/${encodeURIComponent(data.bibNumber)}`}
-                    className="neon-btn-blue rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-md inline-flex items-center gap-1.5"
-                  >
-                    🎽 Digital Race Bib
-                  </Link>
+                  <div className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1.5 text-xs font-bold text-amber-300 inline-flex items-center gap-1.5">
+                    <Clock className="h-3 w-3" />
+                    <span>Download Available Soon</span>
+                  </div>
 
                   <Link
                     href={`/leaderboard?distance=${encodeURIComponent(data.distance)}`}
@@ -311,26 +271,6 @@ export default function CertificateVerifyPage() {
 
         </div>
       </section>
-
-      {/* Print Styles */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @media print {
-            body * { visibility: hidden !important; }
-            #cert-print-area, #cert-print-area * { visibility: visible !important; }
-            #cert-print-area {
-              position: fixed !important;
-              inset: 0 !important;
-              width: 100% !important;
-              height: auto !important;
-              box-shadow: none !important;
-              border-radius: 0 !important;
-              margin: auto !important;
-            }
-            header, footer, nav, .print\\:hidden { display: none !important; }
-          }
-        `,
-      }} />
     </PageShell>
   );
 }
