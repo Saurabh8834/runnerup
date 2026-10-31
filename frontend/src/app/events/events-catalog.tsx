@@ -567,11 +567,18 @@ function NextChallengeLaunchpad() {
     setStatus("loading");
     try {
       const isEmail = contact.includes("@");
-      if (isEmail) {
+      const cleanPhone = contact.replace(/\D/g, "");
+      const payloadEmail = isEmail
+        ? contact.trim().toLowerCase()
+        : cleanPhone.length >= 10
+          ? `${cleanPhone}@whatsapp.runnerup.in`
+          : null;
+
+      if (payloadEmail) {
         await fetch(getApiUrl("/api/subscribers"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: contact.trim().toLowerCase() }),
+          body: JSON.stringify({ email: payloadEmail }),
         });
       }
       setStatus("success");
