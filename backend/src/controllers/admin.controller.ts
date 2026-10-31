@@ -1887,6 +1887,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   const { page, pageSize, skip } = parsePage(request);
   const rawStatus = q(request, "status")?.trim().toUpperCase();
   const search = q(request, "q")?.trim();
+  const eventId = q(request, "eventId")?.trim();
 
   let filterStatus: ProofStatus | null = null;
   // If an active search term is provided, always search across all statuses so admins can instantly find any runner
@@ -1945,6 +1946,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
 
   const where: Prisma.RegistrationWhereInput = {
     ...paidCondition,
+    ...(eventId ? { eventId } : {}),
     ...(filterStatus ? { proofStatus: filterStatus } : {}),
     ...(searchOrConditions.length > 0 ? { AND: [{ OR: searchOrConditions }, paidCondition] } : {}),
   };
