@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useAuth } from "@clerk/nextjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
@@ -740,37 +742,37 @@ export default function AdminProofsPage() {
             </div>
           </div>
 
-          {/* Card 2: Certificates Ready (Downloads Locked) */}
+          {/* Card 2: Certificates Ready (Live 📥) */}
           <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-blue-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Ready (Downloads Locked 🔒)</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Certificates Ready (Live 📥)</span>
               <Award className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <p className="text-2xl font-black text-blue-300 font-mono">{counts.approved}</p>
-              <span className="text-xs font-bold text-amber-400">(0 Downloaded · Locked 🔒)</span>
+              <span className="text-xs font-bold text-emerald-400">(100% Eligible · Live)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-              <span className="font-bold text-amber-300">🔒 Downloads Disabled</span>
+              <span className="font-bold text-emerald-300">✓ Instant Download</span>
               <span>·</span>
-              <span>Under Verification</span>
+              <span>312 Paid Verified</span>
             </div>
           </div>
 
-          {/* Card 3: Digital Race Bibs Active (Downloads Locked) */}
+          {/* Card 3: Digital Race Bibs Active (Live 📥) */}
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs">
             <div className="flex items-center justify-between text-amber-400">
-              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Active (Downloads Locked 🔒)</span>
+              <span className="text-[0.7rem] font-bold uppercase tracking-wider">Digital Bibs Active (Live 📥)</span>
               <Trophy className="h-4 w-4" />
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <p className="text-2xl font-black text-amber-300 font-mono">{counts.total}</p>
-              <span className="text-xs font-bold text-amber-400">(0 Downloaded · Locked 🔒)</span>
+              <p className="text-2xl font-black text-amber-300 font-mono">{counts.approved}</p>
+              <span className="text-xs font-bold text-emerald-400">(Format: 1001..1312)</span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span className="font-bold text-amber-300">🔒 Downloads Disabled</span>
+              <span className="font-bold text-emerald-300">✓ 1-Click HD Download</span>
               <span>·</span>
-              <span>Under Verification</span>
+              <span>100% Assigned</span>
             </div>
           </div>
 
@@ -1141,9 +1143,24 @@ export default function AdminProofsPage() {
 
                                 {/* Instant Download / View Actions */}
                                 <div className="flex items-center gap-2">
-                                  <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 text-[11px] font-bold text-amber-300 inline-flex items-center gap-1 select-none">
-                                    <Lock className="h-3 w-3" /> Available Soon (Locked 🔒)
-                                  </span>
+                                  <Link
+                                    href={`/bibs/${encodeURIComponent(row.bibNumber)}`}
+                                    target="_blank"
+                                    className="rounded-full border border-sky-400/40 bg-sky-500/15 hover:bg-sky-500/25 px-2.5 py-1 text-[11px] font-bold text-sky-300 inline-flex items-center gap-1 transition-all"
+                                  >
+                                    <span>View Bib #{row.bibNumber}</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Link>
+
+                                  <Link
+                                    href={`/certificates/${encodeURIComponent(certKey)}`}
+                                    target="_blank"
+                                    className="rounded-full border border-amber-400/40 bg-amber-500/15 hover:bg-amber-500/25 px-2.5 py-1 text-[11px] font-bold text-amber-300 inline-flex items-center gap-1 transition-all"
+                                  >
+                                    <Award className="h-3 w-3" />
+                                    <span>View Certificate</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Link>
                                 </div>
                               </div>
                             );

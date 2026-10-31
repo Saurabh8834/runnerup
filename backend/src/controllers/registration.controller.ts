@@ -261,7 +261,7 @@ export async function createRegistration(request: AuthenticatedRequest, response
         shippingCity: payload.shippingCity,
         shippingState: payload.shippingState,
         shippingPincode: payload.shippingPincode,
-        bibNumber: createBibNumber(event.slug),
+        bibNumber: await createBibNumber(event.slug),
       },
       include: {
         event: true,
@@ -868,15 +868,6 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     }
 
     let displayBib = reg.bibNumber;
-    const digits = reg.bibNumber.replace(/\D/g, "");
-    if (digits) {
-      const num = parseInt(digits, 10);
-      if (num === 10001 || num === 1) {
-        displayBib = "IAFD-0001";
-      } else if (num > 10000 && num <= 10999) {
-        displayBib = `IAFD-${String(num - 10000).padStart(4, "0")}`;
-      }
-    }
 
     return {
       runnerName: reg.user.name,
@@ -915,24 +906,13 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
 
   // Transform participants list (strictly paid participants)
   const participantRoster = allParticipants.map((p, idx) => {
-    let displayBib = p.bibNumber;
-    const digits = p.bibNumber.replace(/\D/g, "");
-    if (digits) {
-      const num = parseInt(digits, 10);
-      if (num === 10001 || num === 1) {
-        displayBib = "IAFD-0001";
-      } else if (num > 10000 && num <= 10999) {
-        displayBib = `IAFD-${String(num - 10000).padStart(4, "0")}`;
-      }
-    }
-
     return {
       rosterNumber: idx + 1,
       runnerName: p.user.name,
       city: p.shippingCity || "India",
       state: p.shippingState || "",
       distance: p.distance,
-      bibNumber: displayBib,
+      bibNumber: p.bibNumber,
       status: "Verified Finisher" as const,
       proofStatus: "APPROVED" as const,
       registrationStatus: p.status,

@@ -33,6 +33,7 @@ import {
   X,
   LogOut,
   Settings,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -40,6 +41,7 @@ import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/
 import { cn } from "../../lib/cn";
 import { parseTimeToSeconds, validateProofForm } from "../../lib/validation";
 import { EventNoticeCard } from "../components/event-notice-card";
+import { renderBibCanvas, renderCertCanvas, triggerCanvasDownload } from "../../lib/asset-canvas";
 
 type Registration = {
   id: string;
@@ -227,6 +229,47 @@ export function DashboardClient() {
   const router = useRouter();
 
   const [dbUser, setDbUser] = useState<DbUser | null>(null);
+  const [downloadingBibId, setDownloadingBibId] = useState<string | null>(null);
+  const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
+
+  const handleDownloadBib = async (reg: Registration) => {
+    setDownloadingBibId(reg.id);
+    try {
+      const runnerName = dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const canvas = await renderBibCanvas({
+        runnerName,
+        distance: reg.distance || "5 KM",
+        positionStr: reg.bibNumber || "1001",
+      });
+      const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
+      await triggerCanvasDownload(canvas, `RunnerUp_Bib_${safeName}_${reg.bibNumber}.jpg`);
+    } catch (e) {
+      console.error("Failed to download bib", e);
+      alert("Could not download bib. Please try again.");
+    } finally {
+      setDownloadingBibId(null);
+    }
+  };
+
+  const handleDownloadCert = async (reg: Registration) => {
+    setDownloadingCertId(reg.id);
+    try {
+      const runnerName = dbUser?.name || user?.fullName || user?.firstName || "Runner";
+      const canvas = await renderCertCanvas({
+        runnerName,
+        distance: reg.distance || "5 KM",
+        dateStr: "31  /  10  /  2026",
+      });
+      const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
+      await triggerCanvasDownload(canvas, `RunnerUp_Certificate_${safeName}.jpg`);
+    } catch (e) {
+      console.error("Failed to download certificate", e);
+      alert("Could not download certificate. Please try again.");
+    } finally {
+      setDownloadingCertId(null);
+    }
+  };
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "trophies" | "refer">("active");
@@ -1053,9 +1096,27 @@ export function DashboardClient() {
                           </Link>
 
                           {isPaid && (
-                            <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3.5 sm:px-4 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm inline-flex items-center gap-1 select-none">
-                              ⏳ Certificate & Bib Available Soon
-                            </span>
+                            <div className="inline-flex items-center gap-1.5 sm:gap-2">
+                              <button
+                                onClick={() => handleDownloadBib(reg)}
+                                disabled={downloadingBibId === reg.id}
+                                className="rounded-full border border-sky-400/50 bg-sky-500/15 hover:bg-sky-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-sky-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
+                                title="Download Official Digital Race Bib (HD)"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>{downloadingBibId === reg.id ? "Bib..." : "Bib"}</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleDownloadCert(reg)}
+                                disabled={downloadingCertId === reg.id}
+                                className="rounded-full border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
+                                title="Download Official Finisher Certificate (HD)"
+                              >
+                                <Download className="h-3 w-3" />
+                                <span>{downloadingCertId === reg.id ? "Cert..." : "Certificate"}</span>
+                              </button>
+                            </div>
                           )}
 
                           {reg.medalDelivery?.trackingNumber && (
@@ -1343,10 +1404,24 @@ export function DashboardClient() {
                         )}
                       </div>
 
-                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10">
-                        <div className="rounded-full border border-amber-400/35 bg-amber-400/10 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-md flex items-center justify-center gap-1.5 select-none">
-                          ⏳ Certificate & Bib Available Soon
-                        </div>
+                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={() => handleDownloadCert(reg)}
+                          disabled={downloadingCertId === reg.id}
+                          className="flex-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-slate-950 shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          <span>{downloadingCertId === reg.id ? "Generating Certificate..." : "Download Certificate (HD)"}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDownloadBib(reg)}
+                          disabled={downloadingBibId === reg.id}
+                          className="flex-1 rounded-full bg-gradient-to-r from-[#e64833] to-amber-500 hover:from-[#d13a27] hover:to-amber-400 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          <span>{downloadingBibId === reg.id ? "Generating Bib..." : "Download Bib (HD)"}</span>
+                        </button>
                       </div>
                     </div>
                     );
