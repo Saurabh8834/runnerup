@@ -5,8 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   for (const event of defaultEvents) {
+    const { medalImageUrl, ...rest } = event;
     const data = {
-      ...event,
+      ...rest,
       benefits: event.benefits ?? [],
     };
     await prisma.event.upsert({

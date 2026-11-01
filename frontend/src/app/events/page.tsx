@@ -113,7 +113,7 @@ export default function EventsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
-      <div className="relative min-w-0 bg-[#14242a] pt-24 sm:pt-28">
+      <div className="relative min-w-0 bg-[#080c10] pt-24 sm:pt-28">
         <EventsCatalog />
       </div>
     </PageShell>

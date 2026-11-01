@@ -40,7 +40,37 @@ export type PublicEvent = {
   registrations?: number;
 };
 
+export const cancerAwarenessEvent: PublicEvent = {
+  name: "National Cancer Awareness Day Virtual Challenge 2026",
+  slug: "national-cancer-awareness-day-virtual-run-2026",
+  date: "7–15 November 2026",
+  distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
+  price: "Rs. 499",
+  description:
+    "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
+  highlight: "National Virtual Challenge · 7–15 Nov · Limited Edition 3D Metal Medal",
+  banner: "Cancer Awareness Challenge",
+  bannerImageUrl: "/images/cancer-awareness-medal-front-std.png",
+  medalImageUrl: "/images/cancer-awareness-medal-front-std.png",
+  reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
+  couponCode: "VIP100",
+  showCouponOnCard: false,
+  status: "upcoming",
+  compareAtPrice: "Rs. 799",
+  activityTypes: ["running", "walking", "cycling"],
+  startsAt: "2026-11-07T00:00:00.000Z",
+  endsAt: "2026-11-15T23:59:59.000Z",
+  benefits: [
+    "Die-Cast Solid Metal Finisher Ribbon Medal",
+    "Official Digital Race Bib with Unique Number",
+    "100% Free Doorstep Courier Delivery Across India",
+    "Works with Strava, Garmin, Apple & NRC",
+    "Official Verifiable E-Certificate",
+  ],
+};
+
 export const allPublicEvents: PublicEvent[] = [
+  cancerAwarenessEvent,
   {
     name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
@@ -235,6 +265,15 @@ export const upcomingEvents = publicEvents;
 
 export function getEventMedalImages(slug: string): { front: string; back: string } {
   if (
+    slug.includes("cancer") ||
+    slug.includes("national-cancer-awareness-day")
+  ) {
+    return {
+      front: "/images/cancer-awareness-medal-front-std.png",
+      back: "/images/cancer-awareness-medal-back-std.png",
+    };
+  }
+  if (
     slug.includes("air-force") ||
     slug.includes("airforce") ||
     slug === "iaf-2026" ||
@@ -242,8 +281,8 @@ export function getEventMedalImages(slug: string): { front: string; back: string
     slug === "indian-air-force-day-virtual-challenge"
   ) {
     return {
-      front: "/images/iaf-medal-front.webp",
-      back: "/images/iaf-medal-back.webp",
+      front: "/images/iaf-medal-front-std.png",
+      back: "/images/iaf-medal-back-std.png",
     };
   }
   const img = getEventMedalImage(slug);
@@ -252,13 +291,19 @@ export function getEventMedalImages(slug: string): { front: string; back: string
 
 export function getEventMedalImage(slug: string): string {
   if (
+    slug.includes("cancer") ||
+    slug.includes("national-cancer-awareness-day")
+  ) {
+    return "/images/cancer-awareness-medal-front-std.png";
+  }
+  if (
     slug.includes("air-force") ||
     slug.includes("airforce") ||
     slug === "iaf-2026" ||
     slug === "indian-air-force-day-2026" ||
     slug === "indian-air-force-day-virtual-challenge"
   ) {
-    return "/images/iaf-medal-front.webp";
+    return "/images/iaf-medal-front-std.png";
   }
   const medalMap: Record<string, string> = {
     "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.webp",
@@ -280,6 +325,12 @@ export function getEventBySlug(slug: string) {
     slug === "indian-air-force-day-2026"
   ) {
     return allPublicEvents.find((event) => event.slug === "indian-air-force-day-virtual-challenge");
+  }
+  if (
+    slug === "national-cancer-awareness-day-virtual-run-2026" ||
+    slug.includes("cancer")
+  ) {
+    return cancerAwarenessEvent;
   }
   return allPublicEvents.find((event) => event.slug === slug);
 }

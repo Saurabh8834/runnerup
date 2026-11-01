@@ -85,13 +85,13 @@ export function FloatingContact() {
       ref={containerRef}
       data-floating-contact="true"
       aria-label="Customer Support Chat"
-      className={`fixed z-50 right-3.5 sm:right-6 transition-all duration-200 ${
+      className={`fixed z-50 right-3.5 sm:right-6 ${
         isEventDetail
-          ? "bottom-[calc(5.5rem+env(safe-area-inset-bottom))] md:bottom-[5.85rem]"
-          : "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-[5.25rem]"
-      }`}
+          ? "hidden sm:flex sm:bottom-6"
+          : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] sm:bottom-6"
+      } transition-all duration-300 pointer-events-none bg-transparent border-none shadow-none`}
     >
-      {/* ─── Expandable Support / WhatsApp Popup (BeyondRun Reference) ─── */}
+      {/* ─── Expandable Support / WhatsApp Popup ─── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -99,21 +99,21 @@ export function FloatingContact() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.94 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-full mb-3 right-0 w-[290px] sm:w-[320px] origin-bottom-right"
+            className="absolute bottom-full mb-3 right-0 w-[290px] sm:w-[320px] origin-bottom-right pointer-events-auto"
           >
             {/* Context Card */}
-            <div className="overflow-hidden rounded-2xl bg-[#172c34] border border-[#90aead]/30 shadow-[0_20px_50px_rgba(0,0,0,0.65)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-2xl bg-[#0d141d]/98 border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.85)] backdrop-blur-xl">
               {/* Card Header */}
-              <div className="bg-[#14242a] px-4 py-3 border-b border-[#90aead]/20 flex items-center justify-between">
+              <div className="bg-[#080c10] px-4 py-3 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="relative">
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#e64833] to-[#c93b27] flex items-center justify-center text-white font-black text-xs shadow-md">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#ff4b26] to-[#e03a16] flex items-center justify-center text-white font-black text-xs shadow-md">
                       RU
                     </div>
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-[#14242a]" />
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-[#080c10]" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-[#fbe9d0]">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-white">
                       RunnerUp Support
                     </h4>
                     <p className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
@@ -126,7 +126,7 @@ export function FloatingContact() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="h-7 w-7 rounded-full flex items-center justify-center text-[#90aead] hover:text-[#fbe9d0] hover:bg-[#244855] transition-colors"
+                  className="h-7 w-7 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
                   aria-label="Close chat menu"
                 >
                   <X className="h-4 w-4" />
@@ -135,11 +135,11 @@ export function FloatingContact() {
 
               {/* Card Message Body */}
               <div className="p-4 space-y-3">
-                <div className="rounded-xl bg-[#244855]/60 border border-[#90aead]/20 p-3 text-xs leading-relaxed text-[#fbe9d0]">
+                <div className="rounded-xl bg-white/[0.04] border border-white/10 p-3 text-xs leading-relaxed text-slate-200">
                   Hi there! 👋 Need assistance with event registration, GPS tracking, or finisher medal delivery?
                 </div>
 
-                {/* ─── Exact BeyondRun WhatsApp Pill + Circle Row ─── */}
+                {/* ─── WhatsApp Pill + Circle Row ─── */}
                 <a
                   href={WHATSAPP_URL}
                   target="_blank"
@@ -163,26 +163,26 @@ export function FloatingContact() {
         )}
       </AnimatePresence>
 
-      {/* ─── Trigger Launcher Button (BeyondRun Orange Circular Icon) ─── */}
+      {/* ─── Trigger Launcher Button ─── */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-label={isOpen ? "Close support menu" : "Open support chat on WhatsApp"}
         aria-expanded={isOpen}
-        className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] via-[#ea5a47] to-[#ff5722] text-white shadow-[0_10px_32px_rgba(230,72,51,0.5)] border border-[#fbe9d0]/25 transition-all duration-300 hover:scale-108 hover:shadow-[0_14px_40px_rgba(230,72,51,0.7)] active:scale-95 focus:outline-none"
+        className="group relative flex h-11 w-11 sm:h-13 sm:w-13 items-center justify-center rounded-full bg-gradient-to-tr from-[#ff4b26] via-[#ff6536] to-[#ff7a45] text-white shadow-[0_8px_24px_rgba(255,75,38,0.45)] border border-white/20 transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none pointer-events-auto"
       >
         {/* Pulsing Green Online Status Badge (Top Right Corner) */}
-        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 pointer-events-none">
+        <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 pointer-events-none">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-4 w-4 bg-[#10b981] border-2 border-white shadow-sm" />
+          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#10b981] border-2 border-[#080c10] shadow-sm" />
         </span>
 
         {/* Morphing Icon: Chat Bubble <-> Close X */}
-        <div className="transition-transform duration-200 group-hover:scale-110">
+        <div className="transition-transform duration-200 group-hover:scale-105">
           {isOpen ? (
-            <X className="h-6 w-6 text-white stroke-[2.5]" />
+            <X className="h-5 w-5 text-white stroke-[2.5]" />
           ) : (
-            <ChatBubbleIcon className="h-6 w-6 text-white" />
+            <ChatBubbleIcon className="h-5 w-5 text-white" />
           )}
         </div>
       </button>

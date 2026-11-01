@@ -553,16 +553,15 @@ export default function AdminProofsPage() {
       setPage(targetPage);
 
       if (json.meta.pendingCount !== undefined) {
-        const isIAF = !selectedEventId || selectedEventId === "cmuwyg5m20000dhi8ie9tlmec";
-        const p = isIAF ? 0 : (json.meta.pendingCount ?? 0);
-        const a = isIAF ? 312 : (json.meta.approvedCount ?? 0);
-        const r = isIAF ? 0 : (json.meta.rejectedCount ?? 0);
-        const ns = isIAF ? 0 : (json.meta.notSubmittedCount ?? 0);
-        const tot = isIAF ? 312 : (p + a + r + ns);
-        const fRate = tot > 0 ? Math.round((ns / tot) * 100) : 0;
+        const p = json.meta.pendingCount ?? 0;
+        const a = json.meta.approvedCount ?? json.meta.total;
+        const r = json.meta.rejectedCount ?? 0;
+        const ns = json.meta.notSubmittedCount ?? 0;
+        const tot = json.meta.allCount ?? (p + a + r + ns);
+        const fRate = tot > 0 ? Math.round((r / tot) * 100) : 0;
         const sRate = tot > 0 ? Math.round((a / tot) * 100) : 100;
-        const cDown = isIAF ? Math.max(Number(json.meta.downloadsCount?.certificates || 0), 219) : Number(json.meta.downloadsCount?.certificates || 0);
-        const bDown = isIAF ? Math.max(Number(json.meta.downloadsCount?.bibs || 0), 248) : Number(json.meta.downloadsCount?.bibs || 0);
+        const cDown = Number(json.meta.downloadsCount?.certificates || 0);
+        const bDown = Number(json.meta.downloadsCount?.bibs || 0);
 
         const updated = {
           pending: p,
@@ -765,7 +764,7 @@ export default function AdminProofsPage() {
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-emerald-400/90 font-medium">
               <span>100% Success</span>
               <span>·</span>
-              <span>All 312 Paid Eligible</span>
+              <span>All {counts.total} Paid Eligible</span>
             </div>
           </div>
 
@@ -778,13 +777,13 @@ export default function AdminProofsPage() {
             <div className="mt-2 flex items-baseline gap-2">
               <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
               <span className="text-xs font-bold text-blue-300/80">
-                / {counts.approved} ({Math.round((counts.certDownloads / (counts.approved || 312)) * 100)}%)
+                / {counts.approved} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
               </span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
               <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Downloaded</span>
               <span>·</span>
-              <span>{Math.max(0, (counts.approved || 312) - counts.certDownloads)} Pending</span>
+              <span>{Math.max(0, counts.approved - counts.certDownloads)} Pending</span>
             </div>
           </div>
 
@@ -803,7 +802,7 @@ export default function AdminProofsPage() {
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
               <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Downloaded</span>
               <span>·</span>
-              <span>{Math.max(0, (counts.approved || 312) - counts.bibDownloads)} Pending</span>
+              <span>{Math.max(0, counts.approved - counts.bibDownloads)} Pending</span>
             </div>
           </div>
 

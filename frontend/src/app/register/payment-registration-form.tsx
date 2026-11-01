@@ -1,33 +1,37 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
+  Award,
   Check,
   CheckCircle2,
+  ChevronDown,
   ChevronLeft,
-  Copy,
+  ChevronUp,
   CreditCard,
   FileText,
   Headphones,
   Lock,
+  Mail,
   MapPin,
   RefreshCw,
   ShieldCheck,
   Shirt,
+  Smartphone,
   Sparkles,
   Tag,
   Truck,
+  User,
   X,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Field, inputClass } from "../components/app-shell";
-import { PhoneInput } from "../components/phone-input";
 import { SearchableSelect } from "../components/searchable-select";
-import { RazorpayTrustStrip } from "./payment-badges";
+import { PremiumTrustedBrandsCard } from "./payment-badges";
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { INDIAN_STATES, normalizeIndianState } from "../../lib/indian-states";
@@ -85,6 +89,15 @@ const TSHIRT_SIZES = [
 ];
 
 const fallbackEvents: RegisterEventOption[] = [
+  {
+    label: "National Cancer Awareness Day Virtual Challenge 2026",
+    value: "national-cancer-awareness-day-virtual-run-2026",
+    amount: "₹499",
+    priceInPaise: 49900,
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+    activityTypes: ["running", "cycling", "walking"],
+    couponCode: "VIP100",
+  },
   {
     label: "Indian Air Force Day Virtual Challenge 2026",
     value: "indian-air-force-day-virtual-challenge",
@@ -150,7 +163,7 @@ function getFriendlyErrorMessage(error: unknown) {
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>;
+  return <p className="mt-1 text-xs font-medium text-rose-400">{message}</p>;
 }
 
 function deriveUsername(input: {
@@ -183,90 +196,91 @@ function deriveUsername(input: {
       .slice(0, 18);
     if (base.length >= 3) return base;
   }
-  const suffix = (input.clerkId ?? "run").slice(-5);
-  return `pranav_singh`;
+  return "athlete_runner";
 }
 
 // Confetti Particle Explosion
 function ConfettiOverlay() {
-  const pieces = Array.from({ length: 45 }, (_, i) => ({
-    id: i,
-    x: (i * 2.2) % 100,
-    delay: (i % 8) * 0.1,
-    size: 6 + (i % 8),
-    color: ["#10b981", "#eab308", "#6366f1", "#ec4899", "#3b82f6"][i % 5],
-  }));
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 48 }, (_, i) => ({
+        id: i,
+        x: (Math.random() - 0.5) * 800,
+        y: -(Math.random() * 400 + 200),
+        r: Math.random() * 360,
+        scale: Math.random() * 0.8 + 0.4,
+        color: [
+          "#e64833",
+          "#f7b600",
+          "#10b981",
+          "#38bdf8",
+          "#a855f7",
+          "#f43f5e",
+        ][i % 6],
+        duration: Math.random() * 1.5 + 1.8,
+        delay: Math.random() * 0.2,
+      })),
+    [],
+  );
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {pieces.map((p) => (
+    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+      {particles.map((p) => (
         <motion.div
           key={p.id}
-          initial={{ y: -20, x: `${p.x}vw`, opacity: 1, rotate: 0 }}
+          initial={{ x: 0, y: 0, scale: p.scale, opacity: 1, rotate: 0 }}
           animate={{
-            y: "100vh",
+            x: p.x,
+            y: p.y + 700,
+            rotate: p.r + 720,
             opacity: [1, 1, 0],
-            rotate: 360 * (p.id % 2 === 0 ? 1 : -1),
           }}
           transition={{
-            duration: 3 + (p.id % 3),
+            duration: p.duration,
             delay: p.delay,
             ease: "easeOut",
           }}
-          style={{
-            position: "absolute",
-            width: `${p.size}px`,
-            height: `${p.size * 1.6}px`,
-            backgroundColor: p.color,
-            borderRadius: "2px",
-          }}
+          className="absolute left-1/2 top-1/3 h-3 w-3 rounded-sm shadow-md"
+          style={{ backgroundColor: p.color }}
         />
       ))}
     </div>
   );
 }
 
-
-
-function normalizeActivityType(val?: string | null): string {
-  if (!val) return "running";
-  const lower = val.toLowerCase().trim();
-  if (lower.startsWith("cycl") || lower === "ride" || lower === "bike") return "cycling";
-  if (lower.startsWith("walk")) return "walking";
-  if (lower.startsWith("run")) return "running";
-  return lower;
-}
-
 function PaymentRegistrationFormInner() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const router = useRouter();
+  const { getToken } = useAuth();
   const searchParams = useSearchParams();
+
   const eventFromQuery = searchParams.get("event")?.trim() ?? "";
   const distanceFromQuery = searchParams.get("distance")?.trim() ?? "";
-  const rawActivityQuery =
-    searchParams.get("activity")?.trim() ||
-    searchParams.get("activityType")?.trim() ||
-    "";
-  const activityFromQuery = normalizeActivityType(rawActivityQuery);
+  const rawActivityQuery = searchParams.get("activity")?.trim() ?? "";
+  const activityFromQuery = ["running", "cycling", "walking"].includes(rawActivityQuery)
+    ? rawActivityQuery
+    : "running";
+  const nameFromQuery = searchParams.get("name")?.trim() ?? "";
+  const phoneFromQuery = searchParams.get("phone")?.trim() ?? "";
+  const emailFromQuery = searchParams.get("email")?.trim() ?? "";
 
-  const [status, setStatus] = useState<"idle" | "creating" | "paying" | "paid" | "error">("idle");
-  const [message, setMessage] = useState("Complete the form and continue to secure checkout.");
-  const [runnerPhone, setRunnerPhone] = useState("");
-  const [countdown, setCountdown] = useState(0);
-  const paidRef = useRef(false);
-  const failedRef = useRef(false);
   const [events, setEvents] = useState<RegisterEventOption[]>(fallbackEvents);
   const [selectedEvent, setSelectedEvent] = useState(
     eventFromQuery || fallbackEvents[0].value,
   );
-  const [selectedDistance, setSelectedDistance] = useState(distanceFromQuery || "");
+  const [status, setStatus] = useState<"idle" | "creating" | "paying" | "paid" | "error">("idle");
+  const [message, setMessage] = useState("Complete the steps below to secure your official race bib & medal.");
+  const paidRef = useRef(false);
+  const failedRef = useRef(false);
+
+  const [selectedDistance, setSelectedDistance] = useState(distanceFromQuery || "5 km");
   const [selectedActivity, setSelectedActivity] = useState(
     rawActivityQuery ? activityFromQuery : "running",
   );
   const [selectedTshirt, setSelectedTshirt] = useState("L");
-  const [runnerName, setRunnerName] = useState("");
-  const [runnerEmail, setRunnerEmail] = useState("");
+  const [runnerName, setRunnerName] = useState(nameFromQuery);
+  const [runnerPhone, setRunnerPhone] = useState(phoneFromQuery);
+  const [runnerEmail, setRunnerEmail] = useState(emailFromQuery);
   const [customUsername, setCustomUsername] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [existingRegs, setExistingRegs] = useState<ExistingReg[]>([]);
@@ -285,6 +299,21 @@ function PaymentRegistrationFormInner() {
   const [streetAddress, setStreetAddress] = useState("");
   const [checkingStatus, setCheckingStatus] = useState(false);
 
+  // Mobile drawer summary toggle
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+
+  // Form & Section Refs
+  const formRef = useRef<HTMLFormElement>(null);
+  const step1Ref = useRef<HTMLDivElement>(null);
+  const step2Ref = useRef<HTMLDivElement>(null);
+  const step3Ref = useRef<HTMLDivElement>(null);
+
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const pincodeInputRef = useRef<HTMLInputElement>(null);
+  const streetInputRef = useRef<HTMLInputElement>(null);
+
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -295,14 +324,13 @@ function PaymentRegistrationFormInner() {
   } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
-  const [copiedCoupon, setCopiedCoupon] = useState(false);
 
   // Active tracking refs for high-speed live payment polling
   const activeOrderIdRef = useRef<string | null>(null);
   const activeRegIdRef = useRef<string | null>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Pre-load Razorpay checkout script on mount so it is ready instantly with zero button-click lag
+  // Pre-load Razorpay checkout script on mount
   useEffect(() => {
     void loadRazorpayScript();
   }, []);
@@ -314,8 +342,6 @@ function PaymentRegistrationFormInner() {
     }
   };
 
-  // High-speed live verification: queries server to see if payment was captured on Razorpay
-  // Completely unblocks mobile UPI users without waiting for slow iframe polling
   const checkLivePaymentStatus = async (orderId?: string | null, regId?: string | null) => {
     const oId = orderId || activeOrderIdRef.current;
     const rId = regId || activeRegIdRef.current;
@@ -358,7 +384,6 @@ function PaymentRegistrationFormInner() {
     return false;
   };
 
-  // Auto-detect payment completion when user switches back from UPI app (Google Pay / PhonePe)
   useEffect(() => {
     async function handleVisibility() {
       if (document.visibilityState === "visible" && !paidRef.current) {
@@ -426,13 +451,16 @@ function PaymentRegistrationFormInner() {
             };
           });
 
-        if (cancelled || open.length === 0) return;
-        setEvents(open);
+        if (cancelled) return;
+        const hasCancerEvent = open.some((e) => e.value.includes("cancer"));
+        const combined = hasCancerEvent ? open : [fallbackEvents[0], ...open];
+        setEvents(combined);
         setSelectedEvent((prev) => {
-          if (eventFromQuery && open.some((e) => e.value === eventFromQuery)) {
-            return eventFromQuery;
+          if (eventFromQuery && combined.some((e) => e.value === eventFromQuery || (eventFromQuery.includes("cancer") && e.value.includes("cancer")))) {
+            const matched = combined.find((e) => e.value === eventFromQuery || (eventFromQuery.includes("cancer") && e.value.includes("cancer")));
+            return matched ? matched.value : eventFromQuery;
           }
-          return open.some((e) => e.value === prev) ? prev : open[0].value;
+          return combined.some((e) => e.value === prev) ? prev : combined[0].value;
         });
       } catch {
         // keep fallback
@@ -455,7 +483,6 @@ function PaymentRegistrationFormInner() {
         const token = await getToken();
         if (!token || cancelled) return;
 
-        // Only sync if not already synced in this session
         const hasSynced = typeof window !== "undefined" && user?.id ? sessionStorage.getItem(`ru_synced_${user.id}`) : null;
         if (!hasSynced && user?.id) {
           await resilientFetch("/api/users/sync", {
@@ -487,7 +514,9 @@ function PaymentRegistrationFormInner() {
         };
         setDbUsername(data.username ?? null);
         setProfileName(data.name ?? "");
-        setRunnerName(data.name ?? user?.fullName ?? user?.firstName ?? "");
+        if (!runnerName) setRunnerName(data.name ?? user?.fullName ?? user?.firstName ?? "");
+        if (!runnerEmail) setRunnerEmail(user?.primaryEmailAddress?.emailAddress ?? "");
+        if (!runnerPhone) setRunnerPhone(user?.primaryPhoneNumber?.phoneNumber ?? "");
         setExistingRegs(data.registrations ?? []);
       } catch {
         // non-blocking
@@ -498,14 +527,14 @@ function PaymentRegistrationFormInner() {
     return () => {
       cancelled = true;
     };
-  }, [getToken, isSignedIn, user]);
+  }, [getToken, isSignedIn, user, runnerName, runnerEmail, runnerPhone]);
 
   const activeEvent = useMemo(
     () => events.find((event) => event.value === selectedEvent) ?? events[0],
     [events, selectedEvent],
   );
 
-  const distanceOptions = activeEvent?.distances ?? ["5 km"];
+  const distanceOptions = activeEvent?.distances ?? ["1.5 km", "3 km", "5 km", "10 km", "21 km"];
   const activityOptions =
     activeEvent?.activityTypes?.length ? activeEvent.activityTypes : ["running", "cycling", "walking"];
 
@@ -515,7 +544,7 @@ function PaymentRegistrationFormInner() {
       return;
     }
     if (!distanceOptions.includes(selectedDistance)) {
-      setSelectedDistance(distanceOptions[0] ?? "");
+      setSelectedDistance(distanceOptions[0] ?? "5 km");
     }
   }, [distanceOptions, distanceFromQuery, selectedDistance]);
 
@@ -580,6 +609,19 @@ function PaymentRegistrationFormInner() {
     setCouponLoading(true);
     setCouponError(null);
 
+    // Instant local VIP100 fast-path
+    if (raw === "VIP100") {
+      setAppliedCoupon({
+        code: "VIP100",
+        discountInRupees: 100,
+        discountInPaise: 10000,
+        finalAmountInRupees: Math.max(1, baseAmountInRupees - 100),
+      });
+      setCouponInput("VIP100");
+      setCouponLoading(false);
+      return;
+    }
+
     try {
       const res = await resilientFetch("/api/payments/validate-coupon", {
         method: "POST",
@@ -630,35 +672,6 @@ function PaymentRegistrationFormInner() {
     setCouponError(null);
   }
 
-  const handleCopyPromoCode = async (code?: string | null) => {
-    if (!code) return;
-    setCouponInput(code);
-    setCouponError(null);
-
-    try {
-      if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(code);
-      } else if (typeof document !== "undefined") {
-        const textArea = document.createElement("textarea");
-        textArea.value = code;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-      }
-      setCopiedCoupon(true);
-      setTimeout(() => setCopiedCoupon(false), 2000);
-    } catch {
-      setCopiedCoupon(true);
-      setTimeout(() => setCopiedCoupon(false), 2000);
-    }
-
-    void applyCoupon(code);
-  };
-
   const autoAppliedRef = useRef(false);
   useEffect(() => {
     const couponFromQuery = searchParams.get("coupon")?.trim();
@@ -676,7 +689,6 @@ function PaymentRegistrationFormInner() {
   const finalAmountInRupees = appliedCoupon
     ? Math.max(1, baseAmountInRupees - appliedCoupon.discountInRupees)
     : baseAmountInRupees;
-  const selectedAmount = `₹${finalAmountInRupees}`;
 
   const defaultName = profileName || user?.fullName || user?.firstName || "";
   const defaultEmail = user?.primaryEmailAddress?.emailAddress ?? "";
@@ -690,13 +702,9 @@ function PaymentRegistrationFormInner() {
   });
   const username = customUsername || autoUsername;
 
-
-
   const registeredKeys = useMemo(() => {
     const set = new Set<string>();
     for (const reg of existingRegs) {
-      // ONLY successful paid registrations count as already registered.
-      // Unpaid, pending, or failed attempts must NEVER block the user from retrying or completing payment.
       if (reg.payment?.status === "PAID") {
         set.add(`${reg.event?.slug}::${reg.distance}`);
       }
@@ -720,10 +728,30 @@ function PaymentRegistrationFormInner() {
     ),
   );
 
+  // ── Step Validation (Independent for Each Step) ──────────────────
+  // Step 1: Athlete Details
+  const isStep1Valid = useMemo(() => {
+    const cleanName = (runnerName || defaultName).trim();
+    const cleanPhone = (runnerPhone || defaultPhone).replace(/\D/g, "").slice(-10);
+    const cleanEmail = (runnerEmail || defaultEmail).trim();
+    return cleanName.length >= 2 && cleanPhone.length === 10 && cleanEmail.includes("@") && cleanEmail.includes(".");
+  }, [runnerName, defaultName, runnerPhone, defaultPhone, runnerEmail, defaultEmail]);
+
+  // Step 2: Category & Distance
+  const isStep2Valid = useMemo(() => {
+    return Boolean(selectedDistance);
+  }, [selectedDistance]);
+
+  // Step 3: Delivery Address
+  const isStep3Valid = useMemo(() => {
+    const cleanPin = pincode.replace(/\D/g, "");
+    return cleanPin.length === 6 && Boolean(city.trim()) && Boolean(stateVal.trim()) && streetAddress.trim().length >= 4;
+  }, [pincode, city, stateVal, streetAddress]);
+
   // Live Bib Number Generator Preview
   const previewBibNumber = useMemo(() => {
     const distNum = selectedDistance.match(/[0-9]+/)?.[0] || "5";
-    return `MR-${distNum}K-${Math.floor(100 + (runnerName.length * 17) % 899)}`;
+    return `MR-${distNum}K-${Math.floor(100 + ((runnerName || "RUNNER").length * 17) % 899)}`;
   }, [selectedDistance, runnerName]);
 
   async function handleDirectPayment(e: FormEvent<HTMLFormElement>) {
@@ -731,32 +759,53 @@ function PaymentRegistrationFormInner() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+
+    const fullName = (runnerName || defaultName || asString(formData.get("name"))).trim();
+    const rawPhone = (runnerPhone || defaultPhone || asString(formData.get("phoneNumber")) || asString(formData.get("phone"))).trim();
+    const phoneVal = rawPhone.replace(/\D/g, "").slice(-10);
+    const emailVal = (runnerEmail || defaultEmail || asString(formData.get("email"))).trim();
     const rawState = (stateVal || asString(formData.get("state"))).trim();
     const stateValue = normalizeIndianState(rawState) || rawState;
-    if (city) formData.set("city", city);
-    if (stateValue) formData.set("state", stateValue);
-    if (pincode) formData.set("pincode", pincode);
+    const cityVal = (city || asString(formData.get("city"))).trim();
+    const pincodeVal = (pincode || asString(formData.get("pincode"))).trim();
+    const streetAddr = (streetAddress || asString(formData.get("address"))).trim();
+    const landmarkVal = asString(formData.get("landmark")).trim();
+
+    if (fullName) formData.set("name", fullName);
+    if (phoneVal) {
+      formData.set("phone", phoneVal);
+      formData.set("phoneNumber", phoneVal);
+      formData.set("phoneCountry", "IN");
+      formData.set("countryCode", "+91");
+    }
+    if (emailVal) formData.set("email", emailVal);
+    if (selectedEvent) formData.set("eventSlug", selectedEvent);
+    if (selectedDistance) formData.set("distance", selectedDistance);
+    if (selectedActivity) formData.set("activityType", selectedActivity);
     if (selectedTshirt) formData.set("tshirtSize", selectedTshirt);
+    if (cityVal) formData.set("city", cityVal);
+    if (stateValue) formData.set("state", stateValue);
+    if (pincodeVal) formData.set("pincode", pincodeVal);
+    if (streetAddr) formData.set("address", streetAddr);
 
     const validationErrors = validateRegistrationForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       const firstField = Object.keys(validationErrors)[0];
-      const el = form.querySelector(`[name="${firstField}"]`);
+      const el = form.querySelector(`[name="${firstField}"]`) as HTMLElement | null;
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (typeof el.focus === "function") {
+          el.focus();
+        }
+      } else if (firstField === "distance") {
+        step2Ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else if (firstField === "address" || firstField === "pincode" || firstField === "city" || firstField === "state") {
+        step3Ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
       return;
     }
     setErrors({});
-
-    const fullName = (asString(formData.get("name")) || runnerName || defaultName).trim();
-    const phoneVal = (asString(formData.get("phone")) || runnerPhone || defaultPhone).trim();
-    const emailVal = (asString(formData.get("email")) || runnerEmail || defaultEmail).trim();
-    const streetAddr = (asString(formData.get("address")) || streetAddress).trim();
-    const landmarkVal = asString(formData.get("landmark")).trim();
-    const cityVal = (city || asString(formData.get("city"))).trim();
-    const pincodeVal = (pincode || asString(formData.get("pincode"))).trim();
 
     setRunnerName(fullName);
     setRunnerEmail(emailVal);
@@ -790,7 +839,7 @@ function PaymentRegistrationFormInner() {
     };
 
     setStatus("creating");
-    setMessage("Generating secure Razorpay order...");
+    setMessage("Connecting to secure Razorpay gateway...");
     paidRef.current = false;
     failedRef.current = false;
 
@@ -934,12 +983,10 @@ function PaymentRegistrationFormInner() {
       let pollCount = 0;
       pollIntervalRef.current = setInterval(() => {
         pollCount++;
-        // Limit to 50 polls (~3 minutes) so abandoned tabs don't exhaust server compute
         if (pollCount > 50) {
           stopPolling();
           return;
         }
-        // Don't poll while tab is minimized/hidden — visibility listener fires on return
         if (typeof document !== "undefined" && document.hidden) return;
         void checkLivePaymentStatus(order.orderId, registrationId);
       }, 3500);
@@ -1035,194 +1082,366 @@ function PaymentRegistrationFormInner() {
         setMessage(err?.error?.description ?? "Payment could not be completed. Click below to retry with a fresh session.");
       });
 
-      trackFbEvent("InitiateCheckout", {
-        value: order.amount / 100,
-        currency: "INR",
-        content_name: activeEvent.label,
-        content_category: selectedDistance,
-      });
       checkout.open();
-    } catch (error) {
+    } catch (err) {
+      stopPolling();
       setStatus("error");
-      setMessage(getFriendlyErrorMessage(error));
+      setMessage(getFriendlyErrorMessage(err));
     }
   }
 
+  // Handle direct payment submission from Desktop or Mobile CTA buttons
+  const handleCtaClick = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    } else {
+      const submitBtn = document.getElementById("main-payment-submit-btn");
+      submitBtn?.click();
+    }
+  };
+
   return (
     <>
-      {/* Confetti Explosion & Celebration Modal on Payment Success */}
+      {status === "paid" && <ConfettiOverlay />}
+
+      {/* ── SUCCESS MODAL OVERLAY ────────────────────────── */}
       {status === "paid" && (
-        <>
-          <ConfettiOverlay />
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="max-w-md w-full rounded-3xl border border-emerald-500/40 bg-(--panel) p-6 sm:p-8 text-center shadow-2xl"
-            >
-              <span className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-emerald-500/20 text-3xl">
-                🎉
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="relative w-full max-w-lg rounded-3xl border border-emerald-500/30 bg-[#0d141d] p-6 sm:p-8 shadow-2xl text-center space-y-5">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+              <Check className="h-8 w-8 stroke-[3]" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                ✓ Official Race Bib Confirmed
               </span>
-              <h2 className="mt-4 text-2xl font-black tracking-tight text-foreground">
-                Payment & Registration Confirmed!
+              <h2 className="text-2xl sm:text-3xl font-black text-white">
+                You&apos;re Officially Registered!
               </h2>
-              <p className="mt-1 text-xs sm:text-sm text-(--muted)">
-                Welcome to {activeEvent.label}. Your race kit is locked in.
+              <p className="text-sm text-slate-300 max-w-sm mx-auto">
+                Welcome to <strong className="text-white">{activeEvent.label}</strong>. Your slot and solid metal finisher medal are reserved.
               </p>
+            </div>
 
-              {/* Official Bib Pass */}
-              <div className="mt-5 rounded-2xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/5 p-4">
-                <p className="text-[0.65rem] font-bold uppercase tracking-wider text-(--muted)">
-                  Your Official Race Bib
-                </p>
-                <p className="mt-1 font-mono text-3xl font-black text-emerald-600 dark:text-emerald-400">
-                  {confirmedBib || previewBibNumber}
-                </p>
-                <div className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-foreground">
-                  <span>{runnerName || defaultName}</span>
-                  <span>·</span>
-                  <span>{selectedDistance}</span>
+            {/* Official Digital Race Bib Card */}
+            <div className="mx-auto max-w-xs rounded-2xl border-2 border-dashed border-amber-400/40 bg-gradient-to-b from-[#172c34] to-[#0f1f25] p-5 shadow-xl relative overflow-hidden">
+              <div className="absolute top-2 right-2 text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded">
+                OFFICIAL BIB
+              </div>
+              <p className="text-[10px] font-mono tracking-widest uppercase text-slate-400 text-left">
+                RUNNERUP VIRTUAL RUN
+              </p>
+              <div className="my-2 text-3xl font-black font-mono tracking-wider text-amber-400">
+                {confirmedBib || previewBibNumber}
+              </div>
+              <div className="flex items-center justify-between border-t border-white/10 pt-2 text-xs text-left">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase">Athlete</span>
+                  <span className="font-bold text-white break-words">{runnerName || defaultName || "Athlete"}</span>
+                  {username && <span className="text-[10px] text-amber-400 font-mono block">@{username}</span>}
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block uppercase">Category</span>
+                  <span className="font-bold text-emerald-400">{selectedDistance}</span>
                 </div>
               </div>
+            </div>
 
-              <div className="mt-6 flex flex-col gap-2.5">
-                <Link
-                  className="btn btn-primary w-full h-11 font-bold text-sm flex items-center justify-center gap-2"
-                  href={`/prize/${confirmedBib || previewBibNumber}`}
-                >
-                  View Official Bib & Race Pass →
-                </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link className="btn btn-secondary w-full h-10 text-xs font-semibold flex items-center justify-center" href="/leaderboard">
-                    Live Leaderboard
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="btn btn-secondary w-full h-10 text-xs font-semibold flex items-center justify-center cursor-pointer"
-                  >
-                    Save Entry Pass
-                  </button>
-                </div>
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-center mt-1">
-                  <p className="text-[0.72rem] text-emerald-300 font-medium">
-                    ✅ Registration & payment complete! No account or sign-in needed. Confirmation sent to <strong>{runnerEmail || "your email"}</strong>.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/dashboard"
+                className="btn btn-primary h-12 px-6 rounded-full font-bold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg hover:brightness-110"
+              >
+                <span>Go to Athlete Dashboard</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/events"
+                className="btn btn-secondary h-12 px-6 rounded-full font-bold text-sm flex items-center justify-center border border-white/10 bg-white/5 text-slate-300 hover:text-white"
+              >
+                Explore More Events
+              </Link>
+            </div>
           </div>
-        </>
+        </div>
       )}
 
-      <div className="max-w-6xl mx-auto py-2 sm:py-6">
-        {/* Top Brand & Header Section */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-6 sm:mb-8">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 16.5l-4-4 1.41-1.41L11 15.67l6.59-6.59L19 10.5l-8 8z" />
-                </svg>
-              </div>
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-white font-sans">
-                RunnerUp
+      <div className="mx-auto max-w-6xl space-y-4 pb-6 lg:pb-2">
+        {/* Navigation & Back Link */}
+        <div className="flex items-center justify-between">
+          <Link
+            href="/events"
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Back to Challenges</span>
+          </Link>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
+            <Lock className="h-3 w-3" />
+            <span>256-Bit SSL Encrypted</span>
+          </span>
+        </div>
+
+        {/* Clean, Focused Header */}
+        <div className="border-b border-white/10 pb-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
+              Official Race Registration &amp; Checkout
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white">
+            {activeEvent.label}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Fill in your athlete details, select category, and complete checkout.
+          </p>
+        </div>
+
+        {/* Mobile Quick Event & Price Card (Compact Instant Glance) */}
+        <div className="lg:hidden flex items-center justify-between p-3.5 rounded-2xl bg-[#0d141d] border border-white/10 shadow-lg">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-xl shrink-0">
+              🏅
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] text-amber-400 font-mono font-bold uppercase block tracking-wider">
+                VIP Early Access
+              </span>
+              <span className="text-xs font-bold text-white truncate block">
+                {selectedDistance} Heavy Finisher Medal Kit
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#fcf8f2] tracking-tight">
-              Secure Payment &amp; Registration
-            </h1>
-            <p className="text-sm sm:text-base text-[#90aead] mt-1">
-              Your information is safe and protected. Enter details and book your official race slot.
-            </p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-400">
-              <Lock className="h-3.5 w-3.5" />
-              <span>256-Bit SSL Encrypted</span>
+          <div className="text-right shrink-0">
+            <div className="flex items-baseline gap-1.5 justify-end">
+              <span className="text-xs text-slate-500 line-through font-mono">₹799</span>
+              <span className="text-base font-black font-mono text-emerald-400">₹{finalAmountInRupees}</span>
+            </div>
+            <span className="text-[9.5px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              Free Express Courier
             </span>
           </div>
         </div>
 
-        {/* Unified Responsive Form: Athlete Info on Left, Authentic Payment on Right */}
-        <form onSubmit={handleDirectPayment} noValidate>
+        {/* ── 3-STEP PROGRESS TRACKER (Interactive Navigation) ── */}
+        <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-[#0d141d] border border-white/10 text-xs shadow-md">
+          <button
+            type="button"
+            onClick={() => step1Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={cn(
+              "flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold transition-all cursor-pointer text-center",
+              isStep1Valid
+                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                : "bg-white/5 border border-white/10 text-white",
+            )}
+          >
+            <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black bg-white/10 shrink-0">
+              {isStep1Valid ? "✓" : "1"}
+            </span>
+            <span className="truncate">1. Athlete</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => step2Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={cn(
+              "flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold transition-all cursor-pointer text-center",
+              isStep2Valid
+                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                : "bg-white/5 border border-white/10 text-white",
+            )}
+          >
+            <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black bg-white/10 shrink-0">
+              {isStep2Valid ? "✓" : "2"}
+            </span>
+            <span className="truncate">2. Category</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => step3Ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={cn(
+              "flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-bold transition-all cursor-pointer text-center",
+              isStep3Valid
+                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                : "bg-white/5 border border-white/10 text-white",
+            )}
+          >
+            <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black bg-white/10 shrink-0">
+              {isStep3Valid ? "✓" : "3"}
+            </span>
+            <span className="truncate">3. Delivery</span>
+          </button>
+        </div>
+
+        {/* ── UNIFIED RESPONSIVE CHECKOUT FORM ────────────────── */}
+        <form ref={formRef} onSubmit={handleDirectPayment} noValidate>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-            {/* ── LEFT COLUMN: ATHLETE & DELIVERY FORM (Image 1) ── */}
+            {/* ── LEFT COLUMN: 3 SEQUENTIAL STEPS ── */}
             <div className="lg:col-span-7 space-y-5">
-              <div className="rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-5 sm:p-7 shadow-xl space-y-4">
-                <div className="border-b border-[rgba(144,174,173,0.14)] pb-4">
-                  <h2 className="text-lg font-black tracking-tight text-[#fcf8f2]">
-                    Athlete Information
-                  </h2>
-                  <p className="text-xs text-[#90aead]">
-                    Enter your official race details for Instant Digital Bib &amp; Certificate generation.
-                  </p>
+
+              {/* ═════════════════════════════════════════════════════
+                  STEP 1: ATHLETE INFORMATION (Clean Inputs, No Overlapping)
+                  ═════════════════════════════════════════════════════ */}
+              <div
+                ref={step1Ref}
+                className={cn(
+                  "rounded-3xl border transition-all duration-300 bg-[#0d141d] p-5 sm:p-6 shadow-xl space-y-4",
+                  isStep1Valid ? "border-emerald-500/30" : "border-white/10",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-black shrink-0",
+                      isStep1Valid ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-300",
+                    )}>
+                      {isStep1Valid ? <Check className="h-4 w-4 stroke-[3]" /> : "1"}
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-sm sm:text-base font-black text-white truncate">
+                        1. Athlete Details
+                      </h2>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        For Digital Bib &amp; Certificate
+                      </p>
+                    </div>
+                  </div>
+
+                  {isStep1Valid ? (
+                    <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      ✓ Completed
+                    </span>
+                  ) : (
+                    <span className="shrink-0 whitespace-nowrap text-[10.5px] font-semibold text-slate-400 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                      Required
+                    </span>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                  <Field label="Full Name" required>
+                <div className="space-y-3.5">
+                  {/* Field 1: Full Name */}
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
+                      <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span>Full Name</span>
+                      <span className="text-rose-400">*</span>
+                    </label>
                     <input
+                      ref={nameInputRef}
                       aria-invalid={Boolean(errors.name)}
                       autoComplete="name"
-                      className={inputClass}
-                      defaultValue={defaultName}
-                      value={runnerName || undefined}
-                      onChange={(e) => setRunnerName(e.target.value)}
+                      className="w-full h-11 sm:h-12 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                      value={runnerName || defaultName}
+                      onChange={(e) => {
+                        setRunnerName(e.target.value);
+                        setErrors((prev) => {
+                          if (!prev.name) return prev;
+                          const next = { ...prev };
+                          delete next.name;
+                          return next;
+                        });
+                      }}
                       name="name"
                       placeholder="e.g. Rahul Sharma"
                       required
                     />
                     <FieldError message={errors.name} />
-                  </Field>
-
-                  <Field label="Phone Number" required>
-                    <PhoneInput defaultValue={defaultPhone} invalid={Boolean(errors.phone)} onChange={(p) => setRunnerPhone(p)} />
-                    <FieldError message={errors.phone} />
-                  </Field>
-
-                  <Field label="Email Address" required>
-                    <input
-                      aria-invalid={Boolean(errors.email)}
-                      autoComplete="email"
-                      className={inputClass}
-                      defaultValue={defaultEmail}
-                      value={runnerEmail || undefined}
-                      onChange={(e) => setRunnerEmail(e.target.value)}
-                      name="email"
-                      placeholder="e.g. runner@example.com"
-                      required
-                      type="email"
-                    />
-                    <FieldError message={errors.email} />
-                  </Field>
-
-                  <div>
-                    <span className="field-label">Username</span>
-                    <div className={`${inputClass} flex items-center gap-2 bg-(--panel-soft)`}>
-                      <span className="text-sm font-bold text-(--sage) select-none">@</span>
-                      <input
-                        aria-label="Username"
-                        autoComplete="username"
-                        className="w-full bg-transparent font-medium text-foreground focus:outline-none placeholder:text-(--muted)"
-                        name="username"
-                        onChange={(e) => {
-                          const clean = e.target.value.replace(/[^a-zA-Z0-9_]/g, "").toLowerCase().slice(0, 20);
-                          setCustomUsername(clean);
-                        }}
-                        placeholder={autoUsername}
-                        value={customUsername !== "" ? customUsername : autoUsername}
-                      />
-                    </div>
-                    <p className="mt-1 text-[0.65rem] text-(--muted)">
-                      Auto-assigned from your name · Editable for your race profile
-                    </p>
                   </div>
 
-                  <Field label="Race Event" required>
+                  {/* Field 2: Mobile / WhatsApp Number (Dedicated Full Row) */}
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
+                      <Smartphone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                      <span>Mobile Number</span>
+                      <span className="text-rose-400">*</span>
+                      <span className="text-[10px] text-slate-400 ml-auto font-normal hidden sm:inline">(SMS &amp; WhatsApp updates)</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="h-11 sm:h-12 px-3 rounded-xl bg-[#14242a] border border-white/10 text-xs sm:text-sm font-mono text-slate-300 flex items-center gap-1.5 shrink-0 select-none shadow-inner">
+                        <span className="text-base leading-none">🇮🇳</span>
+                        <span className="font-bold">+91</span>
+                      </div>
+                      <input
+                        ref={phoneInputRef}
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        name="phone"
+                        id="phone"
+                        value={runnerPhone || defaultPhone}
+                        onChange={(e) => {
+                          const clean = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          setRunnerPhone(clean);
+                          if (clean.length === 10) {
+                            setErrors((prev) => {
+                              if (!prev.phone) return prev;
+                              const next = { ...prev };
+                              delete next.phone;
+                              return next;
+                            });
+                          }
+                        }}
+                        placeholder="10-digit mobile number"
+                        className="flex-1 min-w-0 h-11 sm:h-12 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                        required
+                      />
+                      <input type="hidden" name="phoneNumber" value={runnerPhone || defaultPhone} />
+                      <input type="hidden" name="phoneCountry" value="IN" />
+                    </div>
+                    <FieldError message={errors.phone} />
+                  </div>
+
+                  {/* Field 3: Email Address (Dedicated Full Row) */}
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 flex items-center gap-1.5 mb-1.5">
+                      <Mail className="h-3.5 w-3.5 text-slate-400" />
+                      <span>Email Address</span>
+                      <span className="text-rose-400">*</span>
+                      <span className="text-[10.5px] font-normal text-slate-400 ml-auto">(Race receipt &amp; bib delivery)</span>
+                    </label>
+                    <input
+                      ref={emailInputRef}
+                      aria-invalid={Boolean(errors.email)}
+                      autoComplete="email"
+                      type="email"
+                      name="email"
+                      value={runnerEmail || defaultEmail}
+                      onChange={(e) => {
+                        setRunnerEmail(e.target.value);
+                        setErrors((prev) => {
+                          if (!prev.email) return prev;
+                          const next = { ...prev };
+                          delete next.email;
+                          return next;
+                        });
+                      }}
+                      placeholder="e.g. rahul.sharma@example.com"
+                      className="w-full h-11 sm:h-12 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                      required
+                    />
+                    <FieldError message={errors.email} />
+                  </div>
+
+                  {/* Compact Username Pill */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-bold text-slate-300">Profile Handle:</span>
+                      <strong className="text-amber-400 font-mono">@{username}</strong>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Auto-linked</span>
+                  </div>
+
+                  {/* Race Event Dropdown */}
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                      Race Event <span className="text-rose-400">*</span>
+                    </label>
                     <select
                       aria-invalid={Boolean(errors.eventSlug)}
-                      className={inputClass}
+                      className="w-full h-11 sm:h-12 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm text-white focus:outline-none focus:border-amber-500"
                       name="eventSlug"
                       onChange={(e) => setSelectedEvent(e.target.value)}
                       required
@@ -1234,64 +1453,136 @@ function PaymentRegistrationFormInner() {
                         </option>
                       ))}
                     </select>
-                  </Field>
+                  </div>
+                </div>
+              </div>
 
-                  <Field label="Distance Category" required>
-                    <select
-                      aria-invalid={Boolean(errors.distance)}
-                      className={inputClass}
-                      name="distance"
-                      onChange={(e) => setSelectedDistance(e.target.value)}
-                      required
-                      value={selectedDistance}
-                    >
-                      {distanceOptions.map((distance) => {
-                        const taken = registeredKeys.has(`${selectedEvent}::${distance}`);
-                        return (
-                          <option disabled={taken} key={distance} value={distance}>
-                            {distance} {taken ? "(Already Registered & Paid)" : ""}
-                          </option>
-                        );
-                      })}
-                    </select>
-                    <FieldError message={errors.distance} />
-                  </Field>
+              {/* ═════════════════════════════════════════════════════
+                  STEP 2: RACE CATEGORY & DISCIPLINE (1-Tap Chips)
+                  ═════════════════════════════════════════════════════ */}
+              <div
+                ref={step2Ref}
+                className={cn(
+                  "rounded-3xl border transition-all duration-300 bg-[#0d141d] p-5 sm:p-6 shadow-xl space-y-4",
+                  isStep2Valid ? "border-emerald-500/30" : "border-white/10",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-black shrink-0",
+                      isStep2Valid ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-300",
+                    )}>
+                      {isStep2Valid ? <Check className="h-4 w-4 stroke-[3]" /> : "2"}
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-sm sm:text-base font-black text-white truncate">
+                        2. Race Category
+                      </h2>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        Mode &amp; distance target
+                      </p>
+                    </div>
+                  </div>
 
-                  <Field label="Activity Type" required>
-                    <select
-                      className={inputClass}
-                      name="activityType"
-                      onChange={(e) => setSelectedActivity(e.target.value)}
-                      required
-                      value={selectedActivity}
-                    >
-                      {activityOptions.map((act) => (
-                        <option key={act} value={act}>
-                          {act === "running"
-                            ? "Running"
-                            : act === "cycling"
-                              ? "Cycling"
-                              : act === "walking"
-                                ? "Walking"
-                                : act.charAt(0).toUpperCase() + act.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
+                  <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shadow-xs">
+                    <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+                    <span>GPS Verified</span>
+                  </span>
+                </div>
+
+                {/* 1-Tap Pill Chips: Activity Mode */}
+                <div>
+                  <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                    Choose Activity Mode <span className="text-[10px] text-slate-400 font-normal">(All earn authentic solid metal medal)</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: "running", label: "🏃 Running" },
+                      { id: "walking", label: "🚶 Walking" },
+                      { id: "cycling", label: "🚴 Cycling" },
+                    ].map(({ id, label }) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setSelectedActivity(id)}
+                        className={cn(
+                          "h-11 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center cursor-pointer border",
+                          selectedActivity === id
+                            ? "bg-[#ff4b26]/20 border-[#ff4b26] text-white shadow-md ring-1 ring-[#ff4b26]"
+                            : "bg-[#14242a] border-white/10 text-slate-400 hover:text-white",
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" name="activityType" value={selectedActivity} />
+                </div>
+
+                {/* 1-Tap Pill Chips: Distance Category */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11.5px] font-bold text-slate-300">
+                      Select Distance Target <span className="text-rose-400">*</span>
+                    </label>
+                    <span className="text-[10.5px] text-amber-400 font-mono">
+                      Selected: <strong className="text-white">{selectedDistance}</strong>
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {distanceOptions.map((dist) => {
+                      const taken = registeredKeys.has(`${selectedEvent}::${dist}`);
+                      const isSelected = selectedDistance === dist;
+                      return (
+                        <button
+                          key={dist}
+                          type="button"
+                          disabled={taken}
+                          onClick={() => {
+                            setSelectedDistance(dist);
+                            setErrors((prev) => {
+                              if (!prev.distance) return prev;
+                              const next = { ...prev };
+                              delete next.distance;
+                              return next;
+                            });
+                          }}
+                          className={cn(
+                            "h-12 rounded-xl text-xs sm:text-sm font-black transition-all flex flex-col items-center justify-center cursor-pointer border relative",
+                            taken
+                              ? "opacity-40 cursor-not-allowed bg-white/5 border-white/5 text-slate-500"
+                              : isSelected
+                                ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md ring-1 ring-emerald-500"
+                                : "bg-[#14242a] border-white/10 text-slate-300 hover:text-white hover:border-white/20",
+                          )}
+                        >
+                          <span>{dist}</span>
+                          {taken ? (
+                            <span className="text-[8px] text-slate-400">Paid</span>
+                          ) : isSelected ? (
+                            <span className="text-[9px] text-emerald-400 font-sans font-bold">✓ Active</span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <input type="hidden" name="distance" value={selectedDistance} />
+                  <FieldError message={errors.distance} />
                 </div>
 
                 {/* T-Shirt Size Selector - Top 3 Finishers Podium Award */}
-                <div className="border-t border-[rgba(144,174,173,0.14)] pt-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#90aead] flex items-center gap-1.5">
-                      <Shirt className="h-3.5 w-3.5 text-amber-500" /> Runner T-Shirt Size
+                <div className="border-t border-white/10 pt-3.5">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11.5px] font-bold text-slate-300 flex items-center gap-1.5">
+                      <Shirt className="h-3.5 w-3.5 text-amber-400" /> Dri-Fit T-Shirt Size
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[0.68rem] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                       🏆 Top 3 Finishers Award
                     </span>
                   </div>
-                  <p className="text-[0.72rem] text-[#90aead] mb-2.5">
-                    Select your size for the podium <strong>Top 3 Finishers</strong> Dri-Fit performance T-Shirt.
+                  <p className="text-[10.5px] text-slate-400 mb-2">
+                    Allocated if you finish on the podium for your category.
                   </p>
                   <div className="grid grid-cols-5 gap-2">
                     {TSHIRT_SIZES.map((t) => (
@@ -1300,130 +1591,164 @@ function PaymentRegistrationFormInner() {
                         type="button"
                         onClick={() => setSelectedTshirt(t.size)}
                         className={cn(
-                          "flex flex-col items-center justify-center rounded-xl p-2 border transition-all cursor-pointer",
+                          "h-11 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer",
                           selectedTshirt === t.size
-                            ? "border-amber-500 bg-amber-500/15 text-amber-400 font-black shadow-xs ring-2 ring-amber-500/30"
-                            : "border-[rgba(144,174,173,0.18)] bg-[rgba(23,44,52,0.6)] text-[#90aead] hover:text-white",
+                            ? "bg-amber-500/20 border-amber-500 text-amber-300 font-black shadow-md ring-1 ring-amber-500"
+                            : "bg-[#14242a] border-white/10 text-slate-400 hover:text-white",
                         )}
                       >
                         <span className="text-xs font-black">{t.size}</span>
-                        <span className="text-[0.55rem]">{t.chest}</span>
+                        <span className="text-[8.5px] text-slate-400">{t.chest}</span>
                       </button>
                     ))}
                   </div>
+                  <input type="hidden" name="tshirtSize" value={selectedTshirt} />
                 </div>
+              </div>
 
-                {/* Shipping Address with Instant Pincode Lookup */}
-                <div className="border-t border-[rgba(144,174,173,0.14)] pt-4 space-y-3.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#90aead] flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-cyan-400" /> Medal Delivery Address
-                    </span>
-                    <span className="text-[0.65rem] text-emerald-400 font-semibold">
-                      Free Doorstep Courier
-                    </span>
+              {/* ═════════════════════════════════════════════════════
+                  STEP 3: MEDAL COURIER DELIVERY ADDRESS & COUPON
+                  ═════════════════════════════════════════════════════ */}
+              <div
+                ref={step3Ref}
+                className={cn(
+                  "rounded-3xl border transition-all duration-300 bg-[#0d141d] p-5 sm:p-6 shadow-xl space-y-4",
+                  isStep3Valid ? "border-emerald-500/30" : "border-white/10",
+                )}
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-black shrink-0",
+                      isStep3Valid ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-300",
+                    )}>
+                      {isStep3Valid ? <Check className="h-4 w-4 stroke-[3]" /> : "3"}
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-sm sm:text-base font-black text-white truncate">
+                        3. Delivery Address
+                      </h2>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        Pan-India doorstep dispatch
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Field label="Pincode (6-Digit)" required>
-                      <div className="relative">
-                        <input
-                          aria-invalid={Boolean(errors.pincode)}
-                          autoComplete="postal-code"
-                          className={inputClass}
-                          inputMode="numeric"
-                          maxLength={6}
-                          name="pincode"
-                          onChange={(e) => void handlePincodeChange(e.target.value)}
-                          placeholder="e.g. 110001"
-                          required
-                          value={pincode}
-                        />
-                        {pincodeLoading && (
-                          <RefreshCw className="absolute right-3 top-3 h-4 w-4 animate-spin text-(--muted)" />
-                        )}
-                        {pincodeSuccess && (
-                          <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
-                        )}
-                      </div>
-                      <FieldError message={errors.pincode} />
-                    </Field>
+                  <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10.5px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    <Truck className="h-3 w-3 shrink-0" />
+                    <span>Free Courier</span>
+                  </span>
+                </div>
 
-                    <Field label="City" required>
+                {/* Smart Pincode, City, State Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                      Pincode (6-Digit) <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
                       <input
-                        aria-invalid={Boolean(errors.city)}
-                        autoComplete="address-level2"
-                        className={inputClass}
-                        name="city"
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="e.g. Mumbai"
+                        ref={pincodeInputRef}
+                        aria-invalid={Boolean(errors.pincode)}
+                        autoComplete="postal-code"
+                        className="w-full h-11 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                        inputMode="numeric"
+                        maxLength={6}
+                        name="pincode"
+                        onChange={(e) => void handlePincodeChange(e.target.value)}
+                        placeholder="e.g. 110001"
                         required
-                        value={city}
+                        value={pincode}
                       />
-                      <FieldError message={errors.city} />
-                    </Field>
-
-                    <Field label="State" required>
-                      <SearchableSelect
-                        emptyMessage="No state found."
-                        invalid={Boolean(errors.state)}
-                        name="state"
-                        onChange={(val) => {
-                          setStateVal(val);
-                          setErrors((prev) => {
-                            if (!prev.state) return prev;
-                            const next = { ...prev };
-                            delete next.state;
-                            return next;
-                          });
-                        }}
-                        options={INDIAN_STATES}
-                        placeholder="Select State"
-                        required
-                        value={stateVal}
-                      />
-                      <FieldError message={errors.state} />
-                    </Field>
+                      {pincodeLoading && (
+                        <RefreshCw className="absolute right-3 top-3.5 h-4 w-4 animate-spin text-slate-400" />
+                      )}
+                      {pincodeSuccess && (
+                        <CheckCircle2 className="absolute right-3 top-3.5 h-4 w-4 text-emerald-400" />
+                      )}
+                    </div>
+                    <FieldError message={errors.pincode} />
                   </div>
 
-                  <Field label="Complete Street Address" required>
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                      City <span className="text-rose-400">*</span>
+                    </label>
                     <input
-                      aria-invalid={Boolean(errors.address)}
-                      autoComplete="street-address"
-                      className={inputClass}
-                      name="address"
-                      value={streetAddress}
-                      onChange={(e) => setStreetAddress(e.target.value)}
-                      placeholder="Flat / House No., Building, Area"
+                      aria-invalid={Boolean(errors.city)}
+                      autoComplete="address-level2"
+                      className="w-full h-11 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                      name="city"
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="e.g. Mumbai"
                       required
+                      value={city}
                     />
-                    <FieldError message={errors.address} />
-                  </Field>
+                    <FieldError message={errors.city} />
+                  </div>
+
+                  <div>
+                    <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                      State <span className="text-rose-400">*</span>
+                    </label>
+                    <SearchableSelect
+                      emptyMessage="No state found."
+                      invalid={Boolean(errors.state)}
+                      name="state"
+                      onChange={(val) => {
+                        setStateVal(val);
+                        setErrors((prev) => {
+                          if (!prev.state) return prev;
+                          const next = { ...prev };
+                          delete next.state;
+                          return next;
+                        });
+                      }}
+                      options={INDIAN_STATES}
+                      placeholder="Select State"
+                      required
+                      value={stateVal}
+                    />
+                    <FieldError message={errors.state} />
+                  </div>
                 </div>
 
-                {/* Have a Coupon Code? (Optional) */}
-                <div className="rounded-2xl border border-[rgba(144,174,173,0.18)] bg-[#172c34]/70 p-4 space-y-3">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <span className="text-xs font-bold text-[#fcf8f2] flex items-center gap-1.5">
-                      <Tag className="h-3.5 w-3.5 text-amber-500" /> Have a Coupon Code?
-                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                {/* Street Address */}
+                <div>
+                  <label className="text-[11.5px] font-bold text-slate-300 block mb-1.5">
+                    Complete Street Address <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    ref={streetInputRef}
+                    aria-invalid={Boolean(errors.address)}
+                    autoComplete="street-address"
+                    className="w-full h-11 px-3.5 rounded-xl border border-white/10 bg-[#14242a] text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                    name="address"
+                    value={streetAddress}
+                    onChange={(e) => setStreetAddress(e.target.value)}
+                    placeholder="Flat / House No., Apartment, Street, Landmark"
+                    required
+                  />
+                  <FieldError message={errors.address} />
+                </div>
+
+                {/* Streamlined Coupon Code Box — Fixed Cutoff/Overlap UI */}
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-amber-400" /> Have a Coupon Code?
+                      <span className="text-[9.5px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded uppercase">
                         Optional
                       </span>
                     </span>
 
-                    {!appliedCoupon && Boolean(promoCode) && (
+                    {appliedCoupon && (
                       <button
                         type="button"
-                        onClick={() => void handleCopyPromoCode(promoCode)}
-                        className="group flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 text-xs font-mono text-emerald-300 transition-all cursor-pointer shadow-sm active:scale-95"
-                        title="Click to copy and auto-apply coupon"
+                        onClick={removeCoupon}
+                        className="text-xs text-rose-400 hover:text-rose-300 font-bold cursor-pointer transition-colors"
                       >
-                        <Tag className="h-3 w-3 text-emerald-400 group-hover:rotate-12 transition-transform" />
-                        <span className="font-bold tracking-wider">{promoCode}</span>
-                        <span className="text-[10.5px] font-sans text-emerald-400/90 font-semibold">10% OFF (₹50)</span>
-                        <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-emerald-500/25 px-1.5 py-0.5 text-[10px] font-sans font-bold text-emerald-200">
-                          {copiedCoupon ? "Applied!" : "Apply"}
-                        </span>
+                        ✕ Remove
                       </button>
                     )}
                   </div>
@@ -1431,46 +1756,60 @@ function PaymentRegistrationFormInner() {
                   {appliedCoupon ? (
                     <div className="flex items-center justify-between rounded-xl bg-emerald-500/15 border border-emerald-500/30 px-3.5 py-2.5 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] font-black">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black">
                           ✓
                         </span>
                         <div>
-                          <span className="font-mono font-bold text-emerald-300 uppercase">
+                          <span className="font-mono font-bold text-emerald-300 uppercase tracking-wider">
                             {appliedCoupon.code}
                           </span>
                           <span className="text-emerald-400 font-semibold ml-2">
-                            (-₹{appliedCoupon.discountInRupees} OFF applied)
+                            (-₹{appliedCoupon.discountInRupees} OFF Applied)
                           </span>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={removeCoupon}
-                        className="text-xs text-rose-400 hover:text-rose-300 font-bold cursor-pointer"
-                      >
-                        ✕ Remove
-                      </button>
                     </div>
                   ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Enter coupon code (Optional)"
-                        value={couponInput}
-                        onChange={(e) => {
-                          setCouponInput(e.target.value.toUpperCase());
-                          setCouponError(null);
-                        }}
-                        className="flex-1 rounded-xl border border-white/10 bg-[#14242a] px-3 py-2 text-xs text-white uppercase placeholder:text-[#90aead]/50 focus:outline-none focus:border-amber-500 font-mono tracking-wider"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => void applyCoupon(couponInput)}
-                        disabled={couponLoading || !couponInput.trim()}
-                        className="btn btn-secondary h-9 px-4 text-xs font-bold rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 cursor-pointer disabled:opacity-50"
-                      >
-                        {couponLoading ? "Checking..." : "Apply"}
-                      </button>
+                    <div className="space-y-2.5">
+                      {promoCode ? (
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (promoCode) {
+                                setCouponInput(promoCode);
+                                void applyCoupon(promoCode);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-mono text-emerald-300 transition-all cursor-pointer shadow-xs active:scale-95"
+                          >
+                            <Tag className="h-3.5 w-3.5 text-emerald-400" />
+                            <span className="font-bold tracking-wider">{promoCode}</span>
+                            <span className="text-[11px] text-emerald-400 font-sans font-semibold">· Tap to apply ₹100 OFF</span>
+                          </button>
+                        </div>
+                      ) : null}
+
+                      <div className="relative flex items-center">
+                        <input
+                          type="text"
+                          placeholder="Enter coupon or promo code"
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value.toUpperCase());
+                            setCouponError(null);
+                          }}
+                          className="w-full h-11 pl-3.5 pr-22 rounded-xl border border-white/10 bg-[#14242a] text-xs font-mono uppercase text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 tracking-wider transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => void applyCoupon(couponInput)}
+                          disabled={couponLoading || !couponInput.trim()}
+                          className="absolute right-1 top-1 bottom-1 px-3.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs cursor-pointer disabled:opacity-40 transition-colors shadow-sm"
+                        >
+                          {couponLoading ? "..." : "Apply"}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -1481,33 +1820,32 @@ function PaymentRegistrationFormInner() {
               </div>
             </div>
 
-            {/* ── RIGHT COLUMN: SECURE PAYMENT & TRUST BADGES (Image 2) ── */}
+            {/* ── RIGHT COLUMN: ORDER SUMMARY & PAYMENT PARTNERS ── */}
             <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-24">
               {/* Card 1: Order Summary */}
-              <div className="rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-5 sm:p-6 shadow-xl space-y-5">
-                {/* Header with Document Icon */}
-                <div className="flex items-center gap-3 border-b border-[rgba(144,174,173,0.14)] pb-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#244855]/60 border border-[rgba(144,174,173,0.2)] text-cyan-300">
+              <div className="rounded-3xl border border-white/10 bg-[#0d141d] p-5 sm:p-6 shadow-xl space-y-4">
+                <div className="flex items-center gap-3 border-b border-white/10 pb-3.5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-cyan-300">
                     <FileText className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#fcf8f2]">Order Summary</h2>
-                    <p className="text-xs text-[#90aead] line-clamp-1">{activeEvent.label}</p>
+                    <h2 className="text-sm sm:text-base font-bold text-white">Order Summary</h2>
+                    <p className="text-xs text-slate-400 line-clamp-1">{activeEvent.label}</p>
                   </div>
                 </div>
 
                 {/* Line Items */}
-                <div className="space-y-3.5 text-sm">
-                  <div className="flex items-center justify-between text-[#fcf8f2]">
-                    <span className="text-[#90aead]">Entry Fee ({selectedDistance || "5 km"})</span>
+                <div className="space-y-3 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between text-slate-300">
+                    <span>Entry Fee ({selectedDistance || "5 km"})</span>
                     <span className="font-mono font-bold text-white">₹{baseAmountInRupees}</span>
                   </div>
 
                   {appliedCoupon && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
-                        <Tag className="h-4 w-4" />
-                        <span>Promo Discount ({appliedCoupon.code})</span>
+                        <Tag className="h-3.5 w-3.5" />
+                        <span>VIP Discount ({appliedCoupon.code})</span>
                       </div>
                       <span className="font-mono font-bold text-emerald-400">
                         - ₹{appliedCoupon.discountInRupees}
@@ -1515,9 +1853,9 @@ function PaymentRegistrationFormInner() {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-[#fcf8f2]">
-                      <Truck className="h-4 w-4 text-cyan-400" />
+                  <div className="flex items-center justify-between text-slate-300">
+                    <div className="flex items-center gap-1.5">
+                      <Truck className="h-3.5 w-3.5 text-cyan-400" />
                       <span>Pan-India Tracked Courier</span>
                     </div>
                     <span className="font-bold text-xs uppercase tracking-wider text-emerald-400">
@@ -1527,90 +1865,40 @@ function PaymentRegistrationFormInner() {
                 </div>
 
                 {/* Total Payable Box */}
-                <div className="rounded-2xl bg-[#1e3b46] border border-[rgba(144,174,173,0.25)] p-4 sm:p-5 flex items-center justify-between shadow-inner">
+                <div className="rounded-2xl bg-[#14242a] border border-white/10 p-4 flex items-center justify-between shadow-inner">
                   <div>
-                    <p className="text-sm sm:text-base font-bold text-white">Total Payable</p>
-                    <p className="text-[11px] sm:text-xs text-[#90aead]">(All taxes &amp; delivery included)</p>
+                    <p className="text-xs sm:text-sm font-bold text-white">Total Payable</p>
+                    <p className="text-[10.5px] text-slate-400">(All taxes &amp; delivery included)</p>
                   </div>
-                  <div className="font-mono text-3xl sm:text-4xl font-black text-white tracking-tight">
+                  <div className="font-mono text-3xl font-black text-white tracking-tight">
                     ₹{finalAmountInRupees}
                   </div>
                 </div>
 
                 {/* Live Athlete & Bib Kit indicator */}
-                <div className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-2 text-[11.5px] text-[#90aead] border border-white/5">
-                  <span className="text-base">🏅</span>
-                  <span className="line-clamp-1">
-                    Heavy Finisher Medal &amp; Digital Bib for <strong className="text-white">{runnerName || "You"}</strong>
-                  </span>
-                </div>
-              </div>
-
-              {/* Card 2: Trust & Security Badges (Visible on Desktop, hidden on mobile) */}
-              <div className="hidden lg:flex rounded-3xl border border-[rgba(144,174,173,0.18)] bg-[#172c34] p-5 sm:p-6 shadow-xl flex-col justify-between gap-4">
-                {/* 100% Secure Payments */}
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[#fcf8f2]">100% Secure Payments</h3>
-                    <p className="text-[11px] text-[#90aead] leading-relaxed">
-                      Your data is encrypted and protected with industry-standard security.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Multiple Payment Options */}
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-400">
-                    <CreditCard className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[#fcf8f2]">Multiple Payment Options</h3>
-                    <p className="text-[11px] text-[#90aead] leading-relaxed">
-                      Pay via UPI (GPay, PhonePe, Paytm), Cards, Netbanking and more.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Pan-India Delivery */}
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
-                    <Truck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[#fcf8f2]">Pan-India Delivery</h3>
-                    <p className="text-[11px] text-[#90aead] leading-relaxed">
-                      Get your solid metal finisher kit delivered to your doorstep.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Need Help? */}
-                <div className="flex items-start gap-3.5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400">
-                    <Headphones className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-bold text-[#fcf8f2]">Need Help?</h3>
-                    <p className="text-[11px] text-[#90aead] leading-relaxed">
-                      Our support team is here for you at every step.
-                    </p>
-                    <a
-                      href="https://wa.me/918287831071"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
-                    >
-                      Chat on WhatsApp (+91 8287831071) →
-                    </a>
+                <div className="flex items-start gap-2.5 rounded-xl bg-white/5 p-3 text-xs border border-white/5">
+                  <span className="text-base shrink-0 leading-none">🏅</span>
+                  <div className="min-w-0 flex-1 leading-snug">
+                    <span className="text-slate-400 text-[11px] block">Medal &amp; Digital Bib Reserved For:</span>
+                    <div className="flex items-baseline gap-1.5 flex-wrap mt-0.5">
+                      <strong className="text-white font-bold text-xs sm:text-sm">
+                        {runnerName || defaultName || "Registered Runner"}
+                      </strong>
+                      {username ? (
+                        <span className="text-amber-400 font-mono text-[11px] font-semibold">
+                          (@{username})
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Action Area: Direct Pay Button */}
-              <div className="space-y-3">
+              {/* Card 2: Premium Trusted Payment Brands Card (Strictly Payment Gateways & Apps) */}
+              <PremiumTrustedBrandsCard />
+
+              {/* Card 3: Desktop Primary Action Button */}
+              <div className="space-y-3 pt-1">
                 {status === "error" && (
                   <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-300 font-medium">
                     {message}
@@ -1627,14 +1915,14 @@ function PaymentRegistrationFormInner() {
                       type="button"
                       onClick={() => void checkLivePaymentStatus()}
                       disabled={checkingStatus}
-                      className="btn btn-secondary text-xs font-bold px-3 py-1.5 h-8 shrink-0 flex items-center gap-1.5 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40"
+                      className="text-xs font-bold px-3 py-1.5 h-8 shrink-0 flex items-center gap-1.5 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl"
                     >
                       {checkingStatus ? "Verifying..." : "Verify Now →"}
                     </button>
                   </div>
                 )}
 
-                {status === "idle" && message && message !== "Complete the form and continue to secure checkout." && (
+                {status === "idle" && message && message !== "Complete the steps below to secure your official race bib & medal." && (
                   <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-300 font-medium flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-amber-400 shrink-0" />
                     <span>{message}</span>
@@ -1654,11 +1942,13 @@ function PaymentRegistrationFormInner() {
                   </div>
                 )}
 
+                {/* Primary Payment Action Button */}
                 <button
+                  id="main-payment-submit-btn"
                   type="submit"
                   disabled={status === "creating" || status === "paying" || distanceAlreadyTaken}
                   className={cn(
-                    "w-full h-14 sm:h-15 rounded-full text-base sm:text-lg font-black tracking-wide flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer",
+                    "w-full h-14 sm:h-15 rounded-full text-base sm:text-lg font-black tracking-wide flex items-center justify-center gap-3 transition-all duration-300 cursor-pointer shadow-xl",
                     distanceAlreadyTaken
                       ? "bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 cursor-not-allowed opacity-75"
                       : "bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white shadow-[0_0_30px_rgba(230,72,51,0.65)] hover:shadow-[0_0_45px_rgba(230,72,51,0.9)] hover:brightness-110 active:scale-[0.99] border border-amber-300/40",
@@ -1686,24 +1976,105 @@ function PaymentRegistrationFormInner() {
                   )}
                 </button>
 
-                <RazorpayTrustStrip />
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 pt-1">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>256-Bit SSL Encrypted · Instant Registration Confirmation</span>
+                </div>
               </div>
             </div>
           </div>
         </form>
+
+        {/* ── MOBILE STICKY BOTTOM PAY BAR ── */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d141d]/95 backdrop-blur-xl border-t border-white/10 p-3 shadow-2xl">
+          {/* Expandable Mini Summary Tray */}
+          <AnimatePresence>
+            {mobileSummaryOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden border-b border-white/10 pb-3 mb-2.5 text-xs space-y-1.5"
+              >
+                <div className="flex justify-between text-slate-300">
+                  <span>Challenge Entry ({selectedDistance})</span>
+                  <span className="font-mono text-white">₹{baseAmountInRupees}</span>
+                </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-emerald-400">
+                    <span>VIP Discount ({appliedCoupon.code})</span>
+                    <span className="font-mono">-₹{appliedCoupon.discountInRupees}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-slate-300">
+                  <span>Pan-India Courier</span>
+                  <span className="text-emerald-400 font-bold">FREE</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="flex items-center justify-between gap-3">
+            {/* Price Side */}
+            <div
+              onClick={() => setMobileSummaryOpen((prev) => !prev)}
+              className="cursor-pointer select-none"
+            >
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-mono text-xl font-black text-white">
+                  ₹{finalAmountInRupees}
+                </span>
+                {appliedCoupon && (
+                  <span className="font-mono text-xs line-through text-slate-500">
+                    ₹{baseAmountInRupees}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                <span>View Details</span>
+                {mobileSummaryOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+              </div>
+            </div>
+
+            {/* Action CTA Button */}
+            <button
+              type="button"
+              onClick={handleCtaClick}
+              disabled={status === "creating" || status === "paying" || distanceAlreadyTaken}
+              className={cn(
+                "flex-1 h-12 rounded-full font-black text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95 transition-transform",
+                distanceAlreadyTaken
+                  ? "bg-emerald-950 border border-emerald-500/40 text-emerald-300"
+                  : "bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white shadow-[0_0_20px_rgba(230,72,51,0.7)]",
+              )}
+            >
+              {status === "creating" || status === "paying" ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : distanceAlreadyTaken ? (
+                "Confirmed"
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" />
+                  <span>Pay ₹{finalAmountInRupees} Now</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
-</>
-);
+    </>
+  );
 }
 
 export function PaymentRegistrationForm() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center rounded-2xl border border-(--line) bg-(--panel) px-4 py-8">
+        <div className="flex items-center justify-center rounded-2xl border border-white/10 bg-[#0d141d] px-4 py-8">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-(--line-strong) border-t-(--sage)" />
-            <p className="text-sm text-(--muted)">Loading registration...</p>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-emerald-500/20 border-t-emerald-500" />
+            <p className="text-xs text-slate-400">Loading race registration...</p>
           </div>
         </div>
       }

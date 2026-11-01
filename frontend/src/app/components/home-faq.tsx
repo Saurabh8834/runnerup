@@ -14,7 +14,7 @@ const homeFaqs: FaqItem[] = [
   {
     question: "What is virtual running and how does RUNNERUP work in India?",
     answer:
-      "A virtual run allows you to participate from any city across India — outdoors on roads, trails, or indoors on a treadmill — at your own convenient pace and schedule. Register for any RUNNERUP challenge, complete your chosen distance (1.5 km, 5 km, 10 km, or 21 km Half Marathon) using any GPS tracking app (Strava, Garmin, Nike Run Club, Apple Fitness), and upload your activity screenshot on your dashboard. Once verified, your official QR-verified E-Certificate is unlocked instantly and your physical heavy metal finisher medal is dispatched to your doorstep with free delivery.",
+      "A virtual run allows you to participate from any city across India — outdoors on roads, trails, or indoors on a treadmill — at your own convenient pace and schedule. Register for any RUNNERUP challenge, complete your chosen distance (1.5 km, 5 km, 10 km, or 21 km Half Marathon) using any GPS tracking app (Strava, Garmin, Nike Run Club, Apple Fitness), and upload your activity screenshot on your dashboard. Once our arbiters verify your activity, your official QR-verified E-Certificate and Digital Bib are instantly unlocked for download, and your physical heavy 3D metal finisher medal is dispatched to your doorstep with free delivery.",
   },
   {
     question: "Which GPS running apps and smartwatches are accepted for verification?",
@@ -22,24 +22,24 @@ const homeFaqs: FaqItem[] = [
       "We accept all major GPS running apps and fitness trackers including Strava, Garmin Connect, Nike Run Club (NRC), Adidas Running, Apple Watch / Apple Fitness, Samsung Health, Google Fit, Coros, and Suunto. Treadmill runs are also accepted by uploading a clear photo of the treadmill console showing elapsed time and distance.",
   },
   {
-    question: "Do I get a real metal finisher medal, t-shirt, and certificate with my registration?",
+    question: "Do I get a real metal finisher medal, bib, and certificate with my registration?",
     answer:
-      "Yes! Every finisher who completes their distance and uploads valid activity proof receives an authentic, heavy die-cast 3D embossed metal finisher medal and official verifiable E-Certificate with QR verification. In addition, the Top 3 runners on the official leaderboard are awarded an exclusive DRI-FIT Performance T-Shirt! Physical kits and awards are dispatched via express tracked courier with zero delivery charges across all 19,000+ Indian pincodes.",
+      "Yes! Every finisher who completes their distance and uploads valid activity proof receives an authentic, heavy die-cast 3D metal finisher medal (solid forged alloy with high-relief ribbon) delivered to their doorstep. Once verified, you also unlock your official downloadable Digital Bib and QR-verifiable E-Certificate. Plus, top leaderboard runners and special challenge categories unlock DRI-FIT performance athletic apparel and finisher swag!",
   },
   {
     question: "Can beginners, joggers, women, and families participate in RUNNERUP events?",
     answer:
-      "Absolutely! RUNNERUP challenges are beginner-friendly and designed for all fitness levels. We offer starter distances from 1.5K and 5K fun runs up to 21K half marathons. You can complete your distance by running, jogging, or brisk walking at your own comfortable pace.",
+      "Absolutely! RUNNERUP challenges are beginner-friendly and designed for all fitness levels. We offer starter distances from 1.5K and 5K fun runs up to 21K half marathons. You can complete your distance by running, jogging, or brisk walking at your own comfortable pace anywhere in India.",
   },
   {
     question: "How long does verification take and when is the medal delivered?",
     answer:
-      "Our arbiters review and approve GPS proofs within 4 to 12 hours. Your digital QR-verifiable certificate is available immediately upon approval. Physical finisher medals and kits are dispatched via express courier (Delhivery/Shiprocket) and reach most runners within 5-8 business days with live tracking.",
+      "Our arbiters review and approve GPS activity proofs within 4 to 12 hours. Your digital QR-verifiable certificate and digital bib are unlocked immediately upon approval. Physical finisher medals and kits are dispatched via express courier (Delhivery/Shiprocket) and reach most runners within 5-8 business days with live SMS tracking.",
   },
   {
     question: "Do you deliver finisher medals across India?",
     answer:
-      "Yes! RUNNERUP delivers to all 19,000+ pincodes across India — including Delhi NCR, Mumbai, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, Ahmedabad, Jaipur, Chandigarh, Lucknow, Kochi, and all tier-2 and tier-3 towns, with 100% free delivery.",
+      "Yes! RUNNERUP delivers to all 19,000+ pincodes across India — including Delhi NCR, Mumbai, Bengaluru, Pune, Hyderabad, Chennai, Kolkata, Ahmedabad, Jaipur, Chandigarh, Lucknow, Kochi, and all tier-2 and tier-3 towns, with 100% free doorstep delivery.",
   },
 ];
 
@@ -51,9 +51,9 @@ export function HomeFaq() {
   };
 
   return (
-    <section id="faq" className="relative py-20 lg:py-24 bg-[#14242a] text-[#fbe9d0] border-t border-[#90aead]/15 overflow-hidden scroll-mt-28">
+    <section id="faq" className="relative pt-14 pb-10 sm:pt-18 sm:pb-12 bg-[#080c10] text-[#f8fafc] border-t border-white/10 overflow-hidden scroll-mt-28">
       {/* Background Accent Glow */}
-      <div className="pointer-events-none absolute top-1/2 left-0 -z-10 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#244855]/30 blur-[140px]" />
+      <div className="pointer-events-none absolute top-1/2 left-0 -z-10 h-[400px] w-[400px] -translate-y-1/2 rounded-full bg-[#ff4b26]/5 blur-[140px]" />
 
       <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
@@ -62,34 +62,36 @@ export function HomeFaq() {
           
           {/* LEFT COLUMN - Sticky Header & Quick Support CTA */}
           <div className="lg:col-span-5 lg:sticky lg:top-28">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#e64833]/40 bg-[#e64833]/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-[#e64833] shadow-sm">
-              <Sparkles className="h-3.5 w-3.5 fill-[#e64833]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ff4b26]/40 bg-[#ff4b26]/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-[#ff4b26] shadow-sm">
+              <Sparkles className="h-3.5 w-3.5 fill-[#ff4b26]" />
               FREQUENTLY ASKED QUESTIONS
             </span>
-            <h2 className="mt-4 font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#fbe9d0] leading-tight">
-              EVERYTHING YOU NEED TO KNOW ABOUT <span className="text-[#e64833] italic">VIRTUAL RACES</span>
+            <h2 className="mt-4 font-display font-black text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white leading-tight">
+              EVERYTHING YOU NEED TO KNOW ABOUT <span className="text-[#ff4b26] italic">VIRTUAL RACES</span>
             </h2>
-            <p className="mt-3 sm:mt-4 text-xs sm:text-base text-[#90aead] font-medium leading-relaxed">
-              Got questions about GPS verification, real metal medals, or certificate delivery? We&apos;ve got clear answers for every runner.
+            <p className="mt-3 sm:mt-4 text-xs sm:text-base text-slate-400 font-medium leading-relaxed">
+              Got questions about GPS verification, real metal medals, digital bibs, or certificate delivery? We&apos;ve got clear answers for every runner.
             </p>
 
             {/* Quick Contact Dark Glass Card */}
-            <div className="mt-8 rounded-3xl border border-[#90aead]/20 bg-[#172c34]/90 backdrop-blur-xl p-5 sm:p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="mt-8 rounded-3xl border border-white/10 bg-[#0d141d]/90 backdrop-blur-xl p-5 sm:p-6 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#90aead]/30 bg-[#244855] text-[#e64833]">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#ff4b26]/30 bg-[#ff4b26]/10 text-[#ff4b26]">
                   <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="block text-sm font-bold text-[#fbe9d0]">Have more questions?</span>
-                  <span className="block text-xs text-[#90aead] font-medium">Our athlete support is live 24/7</span>
+                  <span className="block text-sm font-bold text-white">Have questions?</span>
+                  <span className="block text-xs text-slate-400 font-medium">Chat directly with athlete support</span>
                 </div>
               </div>
-              <Link
-                href="/about"
-                className="w-full sm:w-auto text-center shrink-0 rounded-full border border-[#90aead]/30 bg-[#244855]/60 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] hover:bg-[#e64833] hover:text-[#fbe9d0] hover:border-[#e64833] transition-all shadow-md"
+              <a
+                href="https://wa.me/918287831071"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto text-center shrink-0 rounded-full border border-[#ff4b26]/50 bg-gradient-to-r from-[#ff4b26] to-[#e03a16] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white hover:brightness-110 active:scale-95 transition-all shadow-[0_2px_12px_rgba(255,75,38,0.3)]"
               >
-                Help & FAQs
-              </Link>
+                WhatsApp Us
+              </a>
             </div>
           </div>
 
@@ -102,22 +104,22 @@ export function HomeFaq() {
                   key={faq.question}
                   className={`overflow-hidden rounded-2xl border transition-all duration-300 ${
                     isOpen
-                      ? "border-[#e64833]/60 bg-[#1b323b] shadow-[0_4px_25px_rgba(230,72,51,0.15)]"
-                      : "border-[#90aead]/15 bg-[#172c34]/80 hover:border-[#90aead]/30 hover:bg-[#172c34]"
+                      ? "border-[#ff4b26]/60 bg-[#0d141d] shadow-[0_4px_25px_rgba(255,75,38,0.15)]"
+                      : "border-white/10 bg-[#0d141d]/70 hover:border-white/20 hover:bg-[#0d141d]"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggle(index)}
-                    className="flex w-full items-center justify-between gap-4 px-6 py-4.5 text-left font-display font-bold text-sm sm:text-base text-[#fbe9d0] transition-colors cursor-pointer"
+                    className="flex w-full items-center justify-between gap-4 px-6 py-4.5 text-left font-display font-bold text-sm sm:text-base text-white transition-colors cursor-pointer"
                     aria-expanded={isOpen}
                   >
                     <span className="flex items-center gap-3">
-                      <HelpCircle className={`h-4 w-4 shrink-0 transition-colors ${isOpen ? "text-[#e64833]" : "text-[#90aead]"}`} />
+                      <HelpCircle className={`h-4 w-4 shrink-0 transition-colors ${isOpen ? "text-[#ff4b26]" : "text-slate-400"}`} />
                       <span>{faq.question}</span>
                     </span>
                     <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all ${
-                      isOpen ? "border-[#e64833] bg-[#e64833] text-white" : "border-[#90aead]/20 bg-[#244855]/40 text-[#90aead]"
+                      isOpen ? "border-[#ff4b26] bg-[#ff4b26] text-white" : "border-white/10 bg-white/5 text-slate-400"
                     }`}>
                       <ChevronDown
                         className={`h-4 w-4 transition-transform duration-300 ${
@@ -135,8 +137,8 @@ export function HomeFaq() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       >
-                        <div className="px-6 pb-6 pt-1 border-t border-[#90aead]/15">
-                          <p className="text-xs sm:text-sm leading-relaxed text-[#fbe9d0]/80 font-medium">
+                        <div className="px-6 pb-6 pt-1 border-t border-white/10">
+                          <p className="text-xs sm:text-sm leading-relaxed text-slate-300 font-medium">
                             {faq.answer}
                           </p>
                         </div>

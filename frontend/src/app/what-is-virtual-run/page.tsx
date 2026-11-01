@@ -192,24 +192,24 @@ export default function WhatIsVirtualRunPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="relative min-w-0 bg-[#14242a] pt-24 pb-20 text-[#fcf8f2]">
+      <div className="relative min-w-0 bg-[#080c10] pt-24 pb-20 text-[#f8fafc]">
         {/* Glow backdrop */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,_rgba(230,72,51,0.2),transparent_70%)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,_rgba(255,75,38,0.2),transparent_70%)]"
         />
 
         {/* Hero Section */}
         <section className="container-page max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10 pt-4 sm:pt-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#90aead]/30 bg-[#172c34]/90 px-4 py-1.5 shadow-sm mb-6">
-            <Sparkles className="h-3.5 w-3.5 text-[#e64833]" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#fbe9d0]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#ff4b26]/30 bg-[#ff4b26]/10 px-4 py-1.5 shadow-sm mb-6">
+            <Sparkles className="h-3.5 w-3.5 text-[#ff4b26]" />
+            <span className="text-xs font-bold uppercase tracking-wider text-orange-200">
               Beginner &amp; Runner Guide
             </span>
           </div>
 
           <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white uppercase">
-            What is a <span className="text-[#e64833]">Virtual Run</span>?
+            What is a <span className="text-[#ff4b26]">Virtual Run</span>?
           </h1>
 
           <p className="mt-5 text-base sm:text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed font-normal">
@@ -217,16 +217,16 @@ export default function WhatIsVirtualRunPage() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-semibold">
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#172c34] px-3.5 py-2 text-zinc-200">
-              <MapPin className="h-4 w-4 text-[#e64833]" /> Anywhere in India
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d141d] px-3.5 py-2 text-zinc-200">
+              <MapPin className="h-4 w-4 text-[#ff4b26]" /> Anywhere in India
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#172c34] px-3.5 py-2 text-zinc-200">
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d141d] px-3.5 py-2 text-zinc-200">
               <Clock className="h-4 w-4 text-amber-400" /> Any Time &amp; Pace
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#172c34] px-3.5 py-2 text-zinc-200">
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d141d] px-3.5 py-2 text-zinc-200">
               <Award className="h-4 w-4 text-emerald-400" /> Real Solid Medal
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#172c34] px-3.5 py-2 text-zinc-200">
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#0d141d] px-3.5 py-2 text-zinc-200">
               <ShieldCheck className="h-4 w-4 text-sky-400" /> Verified Certificate
             </span>
           </div>
@@ -234,7 +234,7 @@ export default function WhatIsVirtualRunPage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/events"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#e64833] px-7 py-3 text-sm font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105 hover:bg-[#c93a26]"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-7 py-3 text-sm font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105"
             >
               <span>Browse Open Events</span>
               <ArrowRight className="h-4 w-4" />
@@ -249,10 +249,10 @@ export default function WhatIsVirtualRunPage() {
         </section>
 
         {/* 4 Steps Section */}
-        <section className="mt-20 sm:mt-24 border-y border-white/10 bg-[#172c34]/50 py-16 sm:py-20">
+        <section className="mt-20 sm:mt-24 border-y border-white/10 bg-[#0d141d]/60 py-16 sm:py-20">
           <div className="container-page max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#e64833]">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#ff4b26]">
                 Simple Process
               </span>
               <h2 className="mt-2 font-display font-black text-2xl sm:text-4xl uppercase text-white tracking-tight">
@@ -269,11 +269,11 @@ export default function WhatIsVirtualRunPage() {
                 return (
                   <div
                     key={s.num}
-                    className="rounded-2xl border border-white/10 bg-[#14242a] p-6 shadow-lg flex flex-col justify-between hover:border-[#e64833]/50 transition-colors"
+                    className="rounded-2xl border border-white/10 bg-[#0d141d] p-6 shadow-xl flex flex-col justify-between hover:border-[#ff4b26]/50 transition-colors"
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e64833]/15 text-[#e64833]">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#ff4b26]/15 text-[#ff4b26]">
                           <Icon className="h-5 w-5" />
                         </div>
                         <span className="font-mono text-sm font-black text-zinc-500">

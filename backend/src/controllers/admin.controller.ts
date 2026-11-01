@@ -1856,19 +1856,8 @@ export function invalidateProofCountsCache() {
 }
 
 async function getProofCounts(eventId?: string): Promise<CachedProofCounts> {
-  if (!eventId || eventId === "cmuwyg5m20000dhi8ie9tlmec") {
-    return {
-      pendingCount: 0,
-      approvedCount: 312,
-      rejectedCount: 0,
-      notSubmittedCount: 0,
-      allCount: 312,
-      expiresAt: Date.now() + 60_000,
-    };
-  }
-
   const baseWhere: Prisma.RegistrationWhereInput = {
-    eventId,
+    ...(eventId ? { eventId } : {}),
     OR: [
       { payment: { status: "PAID" } },
       { status: { in: ["CONFIRMED", "COMPLETED"] } },
@@ -1882,12 +1871,14 @@ async function getProofCounts(eventId?: string): Promise<CachedProofCounts> {
     prisma.registration.count({ where: { ...baseWhere, proofStatus: ProofStatus.NOT_SUBMITTED } }),
   ]);
 
+  const allCount = pending + approved + rejected + notSubmitted;
+
   return {
     pendingCount: pending,
     approvedCount: approved,
     rejectedCount: rejected,
     notSubmittedCount: notSubmitted,
-    allCount: pending + approved + rejected + notSubmitted,
+    allCount,
     expiresAt: Date.now() + 15_000,
   };
 }
@@ -1980,40 +1971,43 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     }),
   ]);
 
-  let total = 0;
-  if (search || (eventId && eventId !== "cmuwyg5m20000dhi8ie9tlmec")) {
-    if (skip === 0 && items.length < limit) {
-      total = items.length;
-    } else {
-      total = await prisma.registration.count({ where });
-    }
-  } else {
-    total = 312;
-  }
+  const baseEventWhere: Prisma.RegistrationWhereInput = {
+    ...paidCondition,
+    ...(eventId ? { eventId } : {}),
+  };
+
+  const [filteredCount, allCount, approvedCount, pendingCount, rejectedCount, notSubmittedCount] = await Promise.all([
+    prisma.registration.count({ where }),
+    prisma.registration.count({ where: baseEventWhere }),
+    prisma.registration.count({ where: { ...baseEventWhere, proofStatus: "APPROVED" } }),
+    prisma.registration.count({ where: { ...baseEventWhere, proofStatus: "SUBMITTED" } }),
+    prisma.registration.count({ where: { ...baseEventWhere, proofStatus: "REJECTED" } }),
+    prisma.registration.count({ where: { ...baseEventWhere, proofStatus: "NOT_SUBMITTED" } }),
+  ]);
 
   const downloadStats = getDownloadStats();
 
   response.json({
     data: items,
     meta: {
-      total: (eventId && eventId !== "cmuwyg5m20000dhi8ie9tlmec") ? total : Math.min(total, 312),
+      total: filteredCount,
       page,
       pageSize: limit,
-      totalPages: Math.ceil(Math.min(total, 312) / limit) || 1,
-      pendingCount: 0,
-      approvedCount: 312,
-      rejectedCount: 0,
-      notSubmittedCount: 0,
-      allCount: 312,
-      certificatesCount: 312,
+      totalPages: Math.ceil(filteredCount / limit) || 1,
+      pendingCount,
+      approvedCount,
+      rejectedCount,
+      notSubmittedCount,
+      allCount,
+      certificatesCount: approvedCount,
       downloadsCount: {
         certificates: downloadStats.certificateCount,
         bibs: downloadStats.bibCount,
         certificateDownloads: downloadStats.certificateMap,
         bibDownloads: downloadStats.bibMap,
       },
-      failedRate: 0,
-      completionRate: 100,
+      failedRate: allCount > 0 ? Math.round((rejectedCount / allCount) * 100) : 0,
+      completionRate: allCount > 0 ? Math.round((approvedCount / allCount) * 100) : 100,
     },
   });
 }

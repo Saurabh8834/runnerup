@@ -69,20 +69,7 @@ function initTracker() {
     }
   }).catch(() => {});
 
-  // Hydrate confirmed participants who downloaded early morning / previously
-  if (certSet.size < 219) {
-    for (let i = 1001; i <= 1219; i++) {
-      const bibStr = String(i);
-      certSet.add(bibStr);
-      certSet.add(`CERT-IAF26-${bibStr}`);
-    }
-  }
-  if (bibSet.size < 248) {
-    for (let i = 1001; i <= 1248; i++) {
-      const bibStr = String(i);
-      bibSet.add(bibStr);
-    }
-  }
+  // Non-blocking save of hydrated in-memory state
   scheduleSave();
 }
 
@@ -164,8 +151,8 @@ export function getDownloadStats(): {
     if (cleanBib && cleanBib.length === 4) uniqueBibs.add(cleanBib);
   }
 
-  const certificateCount = Math.min(Math.max(uniqueCerts.size, 219), 312);
-  const bibCount = Math.min(Math.max(uniqueBibs.size, 248), 312);
+  const certificateCount = Math.max(uniqueCerts.size, certSet.size);
+  const bibCount = Math.max(uniqueBibs.size, bibSet.size);
 
   return {
     certificateCount,

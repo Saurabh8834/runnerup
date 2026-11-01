@@ -69,7 +69,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function Home() {
   const [serverEvents, serverHome] = await Promise.all([
@@ -78,12 +79,12 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="page-shell flex min-h-screen flex-col bg-[#14242a] text-[#fcf8f2]">
+    <div className="page-shell flex min-h-screen flex-col bg-[#080c10] text-[#f8fafc]">
       <AppHeader />
 
       <main className="flex-1 pt-0">
         {/* 1. Hero Section with Ken Burns, Kinetic Typography & Trust Pills */}
-        <HomeHero />
+        <HomeHero featuredEvent={serverEvents?.[0]} />
 
         {/* 2. Athletic Performance Stats Ticker Bar */}
         <HomeStatsTicker />
@@ -92,13 +93,13 @@ export default async function Home() {
         <HomeSteps />
 
         {/* 4. Featured Live Races / Challenges */}
-        <section className="relative py-20 sm:py-24 bg-[#172c34] text-[#fcf8f2] border-t border-[#90aead]/15">
+        <section className="relative py-20 sm:py-24 bg-[#0d141d] text-[#f8fafc] border-t border-white/10">
           <div className="container-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <HomeSectionHeader
               theme="dark"
               action={
                 <Link
-                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-xs font-black uppercase tracking-wider text-[#fcf8f2] shadow-md transition-all hover:bg-[#e64833] hover:text-white hover:border-[#e64833]"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-xs font-black uppercase tracking-wider text-[#f8fafc] shadow-md transition-all hover:bg-[#ff4b26] hover:text-white hover:border-[#ff4b26]"
                   href="/events"
                 >
                   <span>View All Races</span>

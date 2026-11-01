@@ -40,6 +40,10 @@ export function Medal3DViewer({
   const [hasInteracted, setHasInteracted] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const isCancerAwareness =
+    slug.includes("cancer") ||
+    eventName.toLowerCase().includes("cancer");
+
   const isAirForce =
     slug.includes("air-force") ||
     slug.includes("airforce") ||
@@ -50,7 +54,7 @@ export function Medal3DViewer({
   const isPastEvent =
     isPast !== undefined
       ? isPast
-      : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || !isAirForce);
+      : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || (!isAirForce && !isCancerAwareness));
 
   // Preload images once per session to prevent repeated decodes
   useEffect(() => {
@@ -124,9 +128,9 @@ export function Medal3DViewer({
       haloSize: "h-[260px] w-[260px] sm:h-[320px] sm:w-[320px]",
     },
     desktop: {
-      maxH: "max-h-[440px] lg:max-h-[480px] xl:max-h-[520px]",
-      containerMaxW: "max-w-[380px] lg:max-w-[420px] xl:max-w-[460px]",
-      haloSize: "h-[420px] w-[420px] lg:h-[480px] lg:w-[480px]",
+      maxH: "max-h-[380px] lg:max-h-[420px] xl:max-h-[460px]",
+      containerMaxW: "max-w-[320px] sm:max-w-[350px] lg:max-w-[380px] xl:max-w-[420px]",
+      haloSize: "h-[360px] w-[360px] lg:h-[420px] lg:w-[420px]",
     },
     rewards: {
       maxH: "max-h-[320px] sm:max-h-[380px]",
@@ -143,17 +147,31 @@ export function Medal3DViewer({
   // Specific detail highlights for IAF medal
   const frontFeatures = [
     { label: "High-Relief Su-30MKI Jet", icon: Sparkles },
+    { label: "Solid Antique Bronze Alloy", icon: ShieldCheck },
     { label: "Himalayan Runway Base", icon: Award },
-    { label: "Solid Die-Cast Bronze", icon: ShieldCheck },
   ];
 
   const backFeatures = [
-    { label: "Ashoka Lion Capital", icon: ShieldCheck },
+    { label: "Ashoka Lion National Capital", icon: ShieldCheck },
     { label: 'IAF Motto: "नभः स्पृशं दीप्तम्"', icon: Flame },
     { label: '"Always Above Always Beyond"', icon: Award },
   ];
 
-  const activeFeatures = isBack ? backFeatures : frontFeatures;
+  const cancerFrontFeatures = [
+    { label: "Tree of Life Motif", icon: Sparkles },
+    { label: "Solid Metal Die-Cast", icon: ShieldCheck },
+    { label: "Satin Ribbon", icon: Award },
+  ];
+
+  const cancerBackFeatures = [
+    { label: "Fighter's Creed Inscription", icon: ShieldCheck },
+    { label: '"Hope · Courage · Strength"', icon: Flame },
+    { label: "Deep-Relief Crest", icon: Award },
+  ];
+
+  const activeFeatures = isCancerAwareness
+    ? (isBack ? cancerBackFeatures : cancerFrontFeatures)
+    : (isBack ? backFeatures : frontFeatures);
 
   // ════════ PAST EVENT CLEAN STATIC SHOWCASE (Zero Cloudinary, Zero Flip / 360) ════════
   if (isPastEvent) {
@@ -210,9 +228,9 @@ export function Medal3DViewer({
           </p>
         </div>
 
-        {/* ── Micro Feature Badges Under Medal ── */}
+        {/* ── Micro Feature Badges Under Medal (Responsive Wrapping) ── */}
         {showBadges && (
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 max-w-md px-1">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg px-2">
             <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300">
               <Award className="h-3 w-3 text-amber-400 shrink-0" />
               <span>Authentic Finisher Medal</span>
@@ -244,51 +262,6 @@ export function Medal3DViewer({
               isHovered ? "scale-110 opacity-100" : "scale-100 opacity-80"
             }`}
           />
-        </div>
-
-        {/* ── Interactive View Switcher Controls (Front / Back Segmented Buttons) ── */}
-        <div className="mb-3.5 z-20 flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-slate-950/85 p-1 backdrop-blur-xl shadow-lg shadow-black/40">
-          <button
-            type="button"
-            onClick={() => {
-              setHasInteracted(true);
-              setActiveFace("front");
-            }}
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-300 cursor-pointer ${
-              !isBack
-                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-md shadow-amber-500/30 scale-[1.02]"
-                : "text-zinc-400 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <span>🥇</span>
-            <span className="tracking-wide">Front View</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setHasInteracted(true);
-              setActiveFace("back");
-            }}
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-300 cursor-pointer ${
-              isBack
-                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-md shadow-amber-500/30 scale-[1.02]"
-                : "text-zinc-400 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <span>🛡️</span>
-            <span className="tracking-wide">Back Crest</span>
-          </button>
-
-          {/* Quick Zoom Inspector Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsZoomOpen(true)}
-            title="Inspect 100% fine metalwork detail"
-            className="flex items-center justify-center h-7 w-7 rounded-full text-zinc-400 hover:text-amber-300 hover:bg-white/10 transition-colors ml-0.5 cursor-pointer"
-          >
-            <Maximize2 className="h-3.5 w-3.5" />
-          </button>
         </div>
 
         {/* ── 3D Rotatable Medal Card Container ── */}
@@ -341,7 +314,7 @@ export function Medal3DViewer({
                 alt={`${eventName} - Front Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
+                className={`w-full h-auto ${sizeConfig.maxH}  object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
               {/* Ground Shadow */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
@@ -375,7 +348,7 @@ export function Medal3DViewer({
                 alt={`${eventName} - Back Crest Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
+                className={`w-full h-auto ${sizeConfig.maxH}  object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
               {/* Ground Shadow */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
@@ -392,22 +365,50 @@ export function Medal3DViewer({
 
         </div>
 
-        {/* ── Interactive Tap to Flip Badge (Docked cleanly below the medal - ZERO overlap with medal graphic) ── */}
-        <div className="mt-3 z-20 flex items-center justify-center">
-          <motion.button
+        {/* ── Single Clean View Switcher (Docked Below Medal - ZERO Ribbon Overlap) ── */}
+        <div className="mt-5 z-20 flex items-center justify-center gap-1.5 rounded-full border border-white/20 bg-black/85 p-1 backdrop-blur-xl shadow-xl">
+          <button
             type="button"
-            onClick={toggleFace}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/45 bg-slate-950/90 px-3.5 py-1 text-[0.68rem] sm:text-xs font-bold uppercase tracking-wider text-amber-300 shadow-[0_4px_16px_rgba(0,0,0,0.8)] backdrop-blur-md hover:bg-amber-950/40 hover:border-amber-300 transition-colors cursor-pointer"
+            onClick={() => {
+              setHasInteracted(true);
+              setActiveFace("front");
+            }}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              !isBack
+                ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-md scale-[1.02]"
+                : "text-slate-400 hover:text-white"
+            }`}
           >
-            <RotateCw className="h-3 w-3 text-amber-400" />
-            <span>Tap medal to flip 360°</span>
-          </motion.button>
+            <span>🥇 Front View</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setHasInteracted(true);
+              setActiveFace("back");
+            }}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              isBack
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md scale-[1.02]"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <span>🛡️ Back View</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsZoomOpen(true)}
+            title="Inspect 100% fine 4K detail"
+            className="flex items-center justify-center h-7 w-7 rounded-full text-slate-400 hover:text-amber-300 hover:bg-white/10 transition-colors ml-0.5 cursor-pointer"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+          </button>
         </div>
 
         {/* ── Active Face Descriptor Caption ── */}
-        <div className="mt-3.5 text-center max-w-sm px-2">
+        <div className="mt-3 text-center max-w-sm px-2">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeFace}
@@ -416,18 +417,30 @@ export function Medal3DViewer({
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-[0.75rem] sm:text-xs font-semibold text-zinc-300 leading-snug">
-                {isBack ? (
+              <p className="text-[0.78rem] sm:text-xs font-semibold text-zinc-300 leading-snug">
+                {isCancerAwareness ? (
+                  isBack ? (
+                    <>
+                      <span className="text-purple-400 font-bold">Reverse Face: </span>
+                      The Fighter&apos;s Creed &amp;{" "}
+                      <span className="text-amber-200 italic font-normal">&ldquo;Hope · Courage · Strength&rdquo;</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-orange-400 font-bold">Front Face: </span>
+                      Heavyweight 3D Die-Cast Metal Medal · Handcrafted Antique Bronze Finish
+                    </>
+                  )
+                ) : isBack ? (
                   <>
                     <span className="text-amber-400 font-bold">Reverse Face: </span>
-                    Ashoka Lion Crest, IAF Motto{" "}
-                    <span className="text-amber-200 italic font-normal">&ldquo;नभः स्पृशं दीप्तम्&rdquo;</span>{" "}
-                    & Inscription
+                    Ashoka Lion Crest &amp; IAF Motto{" "}
+                    <span className="text-amber-200 italic font-normal">&ldquo;नभः स्पृशं दीप्तम्&rdquo;</span>
                   </>
                 ) : (
                   <>
                     <span className="text-amber-400 font-bold">Front Face: </span>
-                    High-Relief Su-30MKI Fighter Jet, Himalayan Runway & IAF Roundel
+                    High-Relief Su-30MKI Fighter Jet, Himalayan Runway &amp; IAF Roundel
                   </>
                 )}
               </p>
@@ -435,13 +448,13 @@ export function Medal3DViewer({
           </AnimatePresence>
         </div>
 
-        {/* ── Micro Feature Badges Under Medal ── */}
+        {/* ── Micro Feature Badges Under Medal (Responsive Wrapping) ── */}
         {showBadges && (
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 max-w-md px-1">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg px-2">
             {activeFeatures.map(({ label, icon: Icon }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[0.65rem] sm:text-[0.7rem] font-medium text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 sm:px-3 py-1 text-[0.68rem] sm:text-xs font-semibold text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300"
               >
                 <Icon className="h-3 w-3 text-amber-400 shrink-0" />
                 <span>{label}</span>

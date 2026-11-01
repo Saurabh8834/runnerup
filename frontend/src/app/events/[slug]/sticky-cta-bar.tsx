@@ -23,6 +23,7 @@ export function EventStickyCta({
   eventName?: string;
 }) {
   const amount = price.toLowerCase().includes("free") ? "Free" : formatPrice(price);
+  const isCancer = slug.includes("cancer");
   const registerHref = `/register?event=${encodeURIComponent(slug)}`;
   const medalImg = getEventMedalImage(slug);
   const { isSignedIn, getToken } = useAuth();
@@ -84,8 +85,8 @@ export function EventStickyCta({
 
   return (
     <>
-      {/* Spacer so page content isn't obscured */}
-      <div className="h-20 sm:h-24" aria-hidden="true" />
+      {/* Spacer so page content isn't obscured by fixed mobile bar */}
+      <div className="h-6 sm:h-8" aria-hidden="true" />
 
       {/* Sleek, Premium Fixed Mobile Bottom Bar */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-[#060a0e]/95 border-t border-amber-500/25 shadow-[0_-12px_40px_rgba(0,0,0,0.92)] backdrop-blur-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">

@@ -145,35 +145,35 @@ function PodiumOlympicGold({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
-            className="order-2 md:order-1 rounded-2xl border border-slate-200/90 bg-white/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-transform"
+            className="order-2 md:order-1 rounded-2xl border border-slate-700/60 bg-[#0d141d]/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-xl hover:-translate-y-1 transition-transform"
           >
             {/* Metallic Silver Badge */}
-            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-200 via-slate-300 to-slate-100 text-slate-800 font-black text-2xl ring-4 ring-slate-200 shadow-md">
+            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-slate-600 via-slate-400 to-slate-200 text-slate-950 font-black text-2xl ring-4 ring-slate-500/30 shadow-md">
               🥈
-              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-300 border-2 border-white text-xs font-black text-slate-900 shadow">
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-slate-300 border-2 border-[#0d141d] text-xs font-black text-slate-900 shadow">
                 2
               </span>
             </div>
 
             {/* Runner Name in Bold Caps */}
-            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-[#14242a]">
+            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-white">
               {topThree.second.runnerName}
             </h3>
 
             {/* Category / Rank Meta */}
-            <p className="mt-0.5 text-xs font-semibold text-[#874f41] font-mono">
+            <p className="mt-0.5 text-xs font-semibold text-slate-400 font-mono">
               Rank #2 · Verified Finisher
             </p>
 
             {/* Time Pill */}
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1 text-xs font-mono font-bold text-slate-800 shadow-xs">
-              <Clock className="h-3.5 w-3.5 text-slate-500" />
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-mono font-bold text-slate-200 shadow-xs">
+              <Clock className="h-3.5 w-3.5 text-slate-400" />
               <span>{formatTime(topThree.second.finishTimeSeconds)}</span>
             </div>
 
             {/* Pace Chip */}
-            <p className="mt-2 text-[11px] font-medium text-[#244855]">
-              Pace: <span className="font-mono font-bold text-[#14242a]">{formatPace(topThree.second.finishTimeSeconds, activeDistance)}</span>
+            <p className="mt-2 text-[11px] font-medium text-slate-400">
+              Pace: <span className="font-mono font-bold text-slate-200">{formatPace(topThree.second.finishTimeSeconds, activeDistance)}</span>
             </p>
           </motion.div>
         ) : (
@@ -186,42 +186,42 @@ function PodiumOlympicGold({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="order-1 md:order-2 relative rounded-3xl border-2 border-[#e5a93b] bg-gradient-to-b from-[#fffbf0] via-[#fff5d6] to-[#feeebd] p-6 sm:p-7 text-center shadow-[0_16px_40px_rgba(217,119,6,0.18)] hover:-translate-y-1.5 transition-transform -mt-2 md:-mt-6"
+            className="order-1 md:order-2 relative rounded-3xl border-2 border-amber-500/60 bg-gradient-to-b from-[#1c180f] via-[#121820] to-[#0d141d] p-6 sm:p-7 text-center shadow-[0_16px_40px_rgba(245,158,11,0.18)] hover:-translate-y-1.5 transition-transform -mt-2 md:-mt-6"
           >
             {/* Floating Crown */}
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center filter drop-shadow-[0_4px_10px_rgba(217,119,6,0.4)] animate-bounce motion-reduce:animate-none">
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center justify-center filter drop-shadow-[0_4px_10px_rgba(217,119,6,0.6)] animate-bounce motion-reduce:animate-none">
               <span className="text-3xl sm:text-4xl">👑</span>
             </div>
 
             {/* Metallic Gold Badge */}
-            <div className="relative mx-auto mt-2 mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-300 via-yellow-400 to-amber-500 text-slate-950 font-black text-3xl ring-4 ring-[#e5a93b] shadow-[0_0_25px_rgba(245,158,11,0.5)]">
+            <div className="relative mx-auto mt-2 mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 text-slate-950 font-black text-3xl ring-4 ring-amber-400/50 shadow-[0_0_25px_rgba(245,158,11,0.6)]">
               🥇
-              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 border-2 border-white text-xs font-black text-slate-950 shadow">
+              <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-amber-400 border-2 border-[#0d141d] text-xs font-black text-slate-950 shadow">
                 1
               </span>
             </div>
 
             {/* Runner Name in ALL CAPS Gold */}
-            <h3 className="truncate font-display font-black text-lg sm:text-xl uppercase tracking-wider text-[#14242a]">
+            <h3 className="truncate font-display font-black text-lg sm:text-xl uppercase tracking-wider text-amber-300">
               {topThree.first.runnerName}
             </h3>
 
             {/* National Champion Badge */}
-            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-300 px-3 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-900 shadow-xs">
-              <Trophy className="h-3 w-3 text-amber-600" />
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-400/40 px-3 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-300 shadow-xs">
+              <Trophy className="h-3 w-3 text-amber-400" />
               <span>National Champion · {activeDistance}</span>
             </div>
 
             {/* Golden Time Pill */}
-            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full border border-amber-400 bg-amber-500/15 px-5 py-1.5 text-sm font-mono font-black text-amber-950 shadow-xs">
-              <Flame className="h-4 w-4 text-orange-600 fill-orange-500" />
+            <div className="mt-3.5 inline-flex items-center gap-2 rounded-full border border-amber-400/50 bg-amber-500/20 px-5 py-1.5 text-sm font-mono font-black text-amber-200 shadow-xs">
+              <Flame className="h-4 w-4 text-orange-400 fill-orange-400" />
               <span>{formatTime(topThree.first.finishTimeSeconds)}</span>
-              <span className="text-[10px] font-sans uppercase font-extrabold text-amber-800">GOLD</span>
+              <span className="text-[10px] font-sans uppercase font-extrabold text-amber-400">GOLD</span>
             </div>
 
             {/* Pace Chip */}
-            <p className="mt-2.5 text-xs font-semibold text-[#874f41]">
-              Pace: <span className="font-mono text-[#14242a] font-black">{formatPace(topThree.first.finishTimeSeconds, activeDistance)}</span> 🔥 (Speed Leader)
+            <p className="mt-2.5 text-xs font-semibold text-slate-300">
+              Pace: <span className="font-mono text-amber-300 font-black">{formatPace(topThree.first.finishTimeSeconds, activeDistance)}</span> 🔥 (Speed Leader)
             </p>
           </motion.div>
         )}
@@ -232,35 +232,35 @@ function PodiumOlympicGold({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.2 }}
-            className="order-3 rounded-2xl border border-orange-200/90 bg-white/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-[0_10px_25px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-transform"
+            className="order-3 rounded-2xl border border-amber-900/40 bg-[#0d141d]/95 p-5 sm:p-6 text-center backdrop-blur-xl shadow-xl hover:-translate-y-1 transition-transform"
           >
             {/* Metallic Bronze Badge */}
-            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#d97757] via-[#e5987d] to-[#d97757] text-white font-black text-2xl ring-4 ring-orange-200 shadow-md">
+            <div className="relative mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-[#9a4e32] via-[#c67150] to-[#d97757] text-white font-black text-2xl ring-4 ring-orange-900/40 shadow-md">
               🥉
-              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-400 border-2 border-white text-xs font-black text-white shadow">
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500 border-2 border-[#0d141d] text-xs font-black text-white shadow">
                 3
               </span>
             </div>
 
             {/* Runner Name in Bold Caps */}
-            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-[#14242a]">
+            <h3 className="truncate font-display font-black text-base sm:text-lg uppercase tracking-wide text-white">
               {topThree.third.runnerName}
             </h3>
 
             {/* Category / Rank Meta */}
-            <p className="mt-0.5 text-xs font-semibold text-[#874f41] font-mono">
+            <p className="mt-0.5 text-xs font-semibold text-slate-400 font-mono">
               Rank #3 · Verified Finisher
             </p>
 
             {/* Time Pill */}
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-1 text-xs font-mono font-bold text-orange-900 shadow-xs">
-              <Clock className="h-3.5 w-3.5 text-orange-600" />
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-mono font-bold text-slate-200 shadow-xs">
+              <Clock className="h-3.5 w-3.5 text-orange-400" />
               <span>{formatTime(topThree.third.finishTimeSeconds)}</span>
             </div>
 
             {/* Pace Chip */}
-            <p className="mt-2 text-[11px] font-medium text-[#244855]">
-              Pace: <span className="font-mono font-bold text-[#14242a]">{formatPace(topThree.third.finishTimeSeconds, activeDistance)}</span>
+            <p className="mt-2 text-[11px] font-medium text-slate-400">
+              Pace: <span className="font-mono font-bold text-slate-200">{formatPace(topThree.third.finishTimeSeconds, activeDistance)}</span>
             </p>
           </motion.div>
         ) : (
@@ -292,7 +292,7 @@ export function LeaderboardClient() {
   );
 
   const [selectedSlug, setSelectedSlug] = useState<string>(
-    initialEventParam || publicEvents[0]?.slug || "monsoon-mountain-miles",
+    initialEventParam || "indian-air-force-day-virtual-challenge",
   );
   const [selectedDistance, setSelectedDistance] = useState<string>(
     initialDistanceParam || "5 km",
@@ -501,35 +501,35 @@ export function LeaderboardClient() {
     <div className="min-w-0">
 
       {/* ── UNIFIED LEADERBOARD: CATEGORY SELECTION DIRECTLY ON TOP ──── */}
-      <section className="relative overflow-hidden pt-20 pb-16 sm:pt-24 sm:pb-20 isolate text-[#14242a] bg-[#fbf6ee] border-b border-[#90aead]/20">
+      <section className="relative overflow-hidden pt-20 pb-16 sm:pt-24 sm:pb-20 isolate text-white bg-[#080c10] border-b border-white/10">
         {/* Glow Effects */}
         <div aria-hidden className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[380px] w-[650px] -translate-x-1/2 rounded-full bg-amber-400/10 blur-[130px]" />
-        <div aria-hidden className="pointer-events-none absolute top-1/2 right-10 -z-10 h-[300px] w-[300px] rounded-full bg-[#e64833]/10 blur-[120px]" />
+        <div aria-hidden className="pointer-events-none absolute top-1/2 right-10 -z-10 h-[300px] w-[300px] rounded-full bg-[#ff4b26]/10 blur-[120px]" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
 
           {/* Header Title Banner */}
           <div className="mx-auto max-w-3xl text-center mb-6">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-900 mb-3 shadow-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 mb-3 shadow-xs">
               <Trophy className="h-3.5 w-3.5 text-amber-400" />
               OFFICIAL NATIONAL LEADERBOARD · LIVE REVEAL
             </span>
-            <h1 className="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-[#14242a]">
-              THE FINISHERS&apos; <span className="text-[#e64833]">BOARD</span>
+            <h1 className="font-display font-black text-3xl sm:text-5xl uppercase tracking-tight text-white">
+              THE FINISHERS&apos; <span className="text-[#ff4b26]">BOARD</span>
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-[#244855] max-w-lg mx-auto font-medium">
+            <p className="mt-2 text-xs sm:text-sm text-slate-400 max-w-lg mx-auto font-medium">
               Chip-verified results &amp; standings across all distance categories · Indian Air Force Day Challenge
             </p>
           </div>
 
           {/* ═══ REQUIREMENT: CATEGORY SELECTION DIRECTLY ABOVE LEADERBOARD ═══ */}
-          <div className="mb-8 rounded-2xl border border-[#90aead]/30 bg-white/90 p-4 sm:p-5 backdrop-blur-xl shadow-lg">
+          <div className="mb-8 rounded-2xl border border-white/10 bg-[#0d141d]/95 p-4 sm:p-5 backdrop-blur-xl shadow-2xl">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
               {/* Category Selection Pills */}
               <div className="flex-1">
-                <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-[#874f41] flex items-center gap-1.5">
-                  <Ruler className="h-3.5 w-3.5 text-[#e64833]" /> Choose Distance Category:
+                <p className="mb-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Ruler className="h-3.5 w-3.5 text-[#ff4b26]" /> Choose Distance Category:
                 </p>
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
                   {distanceOptions.map((dist) => {
@@ -544,13 +544,13 @@ export function LeaderboardClient() {
                         }}
                         className={`group relative flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer select-none ${
                           isSelected
-                            ? "bg-gradient-to-r from-[#e64833] to-[#c93b27] text-white shadow-lg shadow-[#e64833]/30 border border-[#e64833]"
-                            : "border border-[#90aead]/30 bg-[#fbf6ee] text-[#14242a] hover:border-[#90aead]/60 hover:bg-[#f4ede1]"
+                            ? "bg-gradient-to-r from-[#ff4b26] to-[#e64833] text-white shadow-lg shadow-[#ff4b26]/30 border border-[#ff4b26]"
+                            : "border border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10 hover:text-white"
                         }`}
                       >
                         <span>{dist}</span>
                         {isSelected && (
-                          <span className="rounded-full bg-white/20 px-1.5 py-0.2 text-[0.6rem] font-mono font-bold">
+                          <span className="rounded-full bg-black/25 px-1.5 py-0.2 text-[0.6rem] font-mono font-bold text-white">
                             Active
                           </span>
                         )}
@@ -561,11 +561,11 @@ export function LeaderboardClient() {
               </div>
 
               {/* Event Select & Instant Search Input */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0 lg:border-l lg:border-[#90aead]/20 lg:pl-5">
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 lg:pt-0 lg:border-l lg:border-white/10 lg:pl-5">
                 {/* Event Select */}
                 <div className="relative min-w-[160px] sm:min-w-[190px]">
                   <select
-                    className="w-full rounded-xl border border-[#90aead]/30 bg-white px-3 py-2 text-xs font-bold text-[#14242a] outline-none transition focus:border-[#e64833] cursor-pointer shadow-xs"
+                    className="w-full rounded-xl border border-white/15 bg-[#080c10] px-3 py-2 text-xs font-bold text-white outline-none transition focus:border-[#ff4b26] cursor-pointer shadow-xs"
                     value={selectedSlug}
                     onChange={(e) => {
                       setSelectedSlug(e.target.value);
@@ -573,7 +573,7 @@ export function LeaderboardClient() {
                     }}
                   >
                     {events.map((ev) => (
-                      <option key={ev.slug} value={ev.slug} className="bg-white text-[#14242a]">
+                      <option key={ev.slug} value={ev.slug} className="bg-[#0d141d] text-white">
                         {ev.name}
                       </option>
                     ))}
@@ -584,20 +584,20 @@ export function LeaderboardClient() {
                 <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
                   <Search
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#90aead]"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500"
                   />
                   <input
                     type="text"
                     placeholder="Search runner or bib..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-[#90aead]/30 bg-white pl-9 pr-8 py-2 text-xs text-[#14242a] placeholder-[#874f41]/70 outline-none transition focus:border-[#e64833] shadow-xs"
+                    className="w-full rounded-xl border border-white/15 bg-[#080c10] pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 outline-none transition focus:border-[#ff4b26] shadow-xs"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#874f41] hover:text-[#14242a] cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-white cursor-pointer"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -609,14 +609,14 @@ export function LeaderboardClient() {
           </div>
 
           {/* Dual Tab Switcher & GPS Badge */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 border-b border-[#90aead]/15 pb-5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/10 pb-5">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 type="button"
                 onClick={() => setActiveTab("verified")}
                 className={`flex shrink-0 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === "verified"
-                    ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
-                    : "border border-[#90aead]/30 bg-white text-[#244855] hover:border-[#90aead]/60"
+                    ? "bg-[#ff4b26] text-white shadow-md shadow-[#ff4b26]/30 border border-[#ff4b26]"
+                    : "border border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:text-white"
                   }`}
               >
                 <Trophy className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -627,8 +627,8 @@ export function LeaderboardClient() {
                 type="button"
                 onClick={() => setActiveTab("participants")}
                 className={`flex shrink-0 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${activeTab === "participants"
-                    ? "bg-[#e64833] text-white shadow-md shadow-[#e64833]/20 border border-[#e64833]"
-                    : "border border-[#90aead]/30 bg-white text-[#244855] hover:border-[#90aead]/60"
+                    ? "bg-[#ff4b26] text-white shadow-md shadow-[#ff4b26]/30 border border-[#ff4b26]"
+                    : "border border-white/10 bg-white/5 text-slate-300 hover:border-white/20 hover:text-white"
                   }`}
               >
                 <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -636,7 +636,7 @@ export function LeaderboardClient() {
               </button>
             </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 px-3 sm:px-3.5 py-1.5 rounded-full border border-emerald-300 shadow-xs w-fit shrink-0">
+            <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 sm:px-3.5 py-1.5 rounded-full border border-emerald-500/30 shadow-xs w-fit shrink-0">
               <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 shrink-0" />
               <span>GPS Timestamp Verified</span>
             </div>
@@ -764,7 +764,7 @@ export function LeaderboardClient() {
                         </div>
 
                         {/* 📱 MOBILE CARD VIEW (Under 640px) */}
-                        <div className="block sm:hidden divide-y divide-[#90aead]/15 p-3 space-y-2.5">
+                        <div className="block sm:hidden divide-y divide-white/10 p-3 space-y-2.5">
                           {filteredEntries.map((row) => {
                             const isYou =
                               Boolean(currentClerkId && row.clerkId === currentClerkId) ||
@@ -774,8 +774,8 @@ export function LeaderboardClient() {
                               <div
                                 key={`mob-${row.rank}-${row.bibNumber || row.runnerName}`}
                                 className={`rounded-2xl border p-3.5 transition-all ${isYou
-                                    ? "bg-[#e64833]/15 border-[#e64833]/50 shadow-md shadow-[#e64833]/10"
-                                    : "bg-[#fbf6ee]/80 border-[#90aead]/25 hover:bg-[#f4ede1]"
+                                    ? "bg-[#ff4b26]/15 border-[#ff4b26]/50 shadow-md shadow-[#ff4b26]/10"
+                                    : "bg-[#0d141d]/90 border-white/10 hover:border-white/20"
                                   }`}
                               >
                                 <div className="flex items-center justify-between gap-2">
@@ -788,22 +788,22 @@ export function LeaderboardClient() {
                                             ? "bg-slate-400/20 text-slate-200 border border-slate-400/40 text-sm"
                                             : row.rank === 3
                                               ? "bg-amber-800/20 text-amber-300 border border-amber-700/40 text-sm"
-                                              : "bg-white text-[#244855] border border-[#90aead]/30"
+                                              : "bg-white/5 text-slate-300 border border-white/10"
                                         }`}
                                     >
                                       {row.rank === 1 ? "🥇" : row.rank === 2 ? "🥈" : row.rank === 3 ? "🥉" : `#${row.rank}`}
                                     </span>
 
                                     <div className="min-w-0 flex-1">
-                                      <p className="truncate font-bold text-xs text-[#14242a] flex items-center gap-1.5">
+                                      <p className="truncate font-bold text-xs text-white flex items-center gap-1.5">
                                         {row.runnerName}
                                         {isYou && (
-                                          <span className="rounded-full bg-[#e64833] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
+                                          <span className="rounded-full bg-[#ff4b26] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
                                             You
                                           </span>
                                         )}
                                       </p>
-                                      <p className="text-[0.65rem] text-[#874f41] font-mono mt-0.5 truncate font-medium">
+                                      <p className="text-[0.65rem] text-slate-400 font-mono mt-0.5 truncate font-medium">
                                         {row.bibNumber || `MR-${parseKm(selectedDistance)}K-${100 + row.rank}`}
                                         {row.city && ` · ${row.city}`}
                                       </p>
@@ -812,10 +812,10 @@ export function LeaderboardClient() {
 
                                   {/* Timing & Verified Badge */}
                                   <div className="text-right shrink-0">
-                                    <p className="font-mono text-sm font-black text-[#14242a]">
+                                    <p className="font-mono text-sm font-black text-white">
                                       {formatTime(row.finishTimeSeconds)}
                                     </p>
-                                    <p className="font-mono text-[0.65rem] font-bold text-[#874f41]">
+                                    <p className="font-mono text-[0.65rem] font-bold text-amber-400">
                                       {formatPace(row.finishTimeSeconds, selectedDistance)}
                                     </p>
                                   </div>
@@ -826,10 +826,10 @@ export function LeaderboardClient() {
                         </div>
 
                         {/* 💻 DESKTOP DATA TABLE (640px and above) */}
-                        <div className="hidden sm:block overflow-x-auto">
+                        <div className="hidden sm:block overflow-x-auto rounded-2xl border border-white/10 bg-[#0d141d]/90">
                           <table className="w-full text-left text-xs sm:text-sm">
                             <thead>
-                              <tr className="border-b border-[#90aead]/20 bg-[#f4ede1] text-[0.65rem] font-black uppercase tracking-wider text-[#244855]">
+                              <tr className="border-b border-white/10 bg-[#080c10] text-[0.65rem] font-black uppercase tracking-wider text-slate-400">
                                 <th className="px-4 py-3.5">Rank</th>
                                 <th className="px-4 py-3.5">Runner</th>
                                 <th className="px-4 py-3.5">Bib #</th>
@@ -840,7 +840,7 @@ export function LeaderboardClient() {
                                 <th className="px-4 py-3.5">Status</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#90aead]/15">
+                            <tbody className="divide-y divide-white/5">
                               {filteredEntries.map((row) => {
                                 const isYou =
                                   Boolean(currentClerkId && row.clerkId === currentClerkId) ||
@@ -849,7 +849,7 @@ export function LeaderboardClient() {
                                 return (
                                   <tr
                                     key={`${row.rank}-${row.bibNumber || row.runnerName}`}
-                                    className={`transition-colors hover:bg-[#fbf6ee]/80 ${isYou ? "bg-[#e64833]/15 font-semibold" : ""
+                                    className={`transition-colors hover:bg-white/[0.04] ${isYou ? "bg-[#ff4b26]/15 font-semibold" : ""
                                       }`}
                                   >
                                     {/* Rank */}
@@ -878,14 +878,14 @@ export function LeaderboardClient() {
                                     {/* Runner Avatar & Name */}
                                     <td className="px-4 py-3.5">
                                       <div className="flex items-center gap-2.5">
-                                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-xs font-bold text-amber-900 border border-amber-200">
+                                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-xs font-bold text-amber-300 border border-amber-500/30">
                                           {getInitials(row.runnerName)}
                                         </div>
                                         <div>
-                                          <p className="font-bold text-[#14242a] flex items-center gap-1.5 text-xs sm:text-sm">
+                                          <p className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm">
                                             {row.runnerName}
                                             {isYou && (
-                                              <span className="rounded-full bg-[#e64833] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                                              <span className="rounded-full bg-[#ff4b26] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
                                                 You
                                               </span>
                                             )}
@@ -895,34 +895,34 @@ export function LeaderboardClient() {
                                     </td>
 
                                     {/* Bib */}
-                                    <td className="px-4 py-3.5 font-mono text-xs text-[#874f41] font-bold">
+                                    <td className="px-4 py-3.5 font-mono text-xs text-slate-400 font-bold">
                                       {row.bibNumber || `MR-${parseKm(selectedDistance)}K-${100 + row.rank}`}
                                     </td>
 
                                     {/* City */}
-                                    <td className="px-4 py-3.5 text-xs text-[#244855] font-medium">
+                                    <td className="px-4 py-3.5 text-xs text-slate-300 font-medium">
                                       {row.city || "India"}
                                     </td>
 
                                     {/* Distance */}
-                                    <td className="px-4 py-3.5 font-bold text-[#14242a] text-xs">
+                                    <td className="px-4 py-3.5 font-bold text-white text-xs">
                                       {row.distance || selectedDistance}
                                     </td>
 
                                     {/* Pace */}
-                                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-[#874f41]">
+                                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-amber-400">
                                       {formatPace(row.finishTimeSeconds, selectedDistance)}
                                     </td>
 
                                     {/* Time */}
-                                    <td className="px-4 py-3.5 font-mono text-xs font-black text-[#14242a]">
+                                    <td className="px-4 py-3.5 font-mono text-xs font-black text-white">
                                       {formatTime(row.finishTimeSeconds)}
                                     </td>
 
                                     {/* Status */}
                                     <td className="px-4 py-3.5">
-                                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-800">
-                                        <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Verified
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
+                                        <CheckCircle2 className="h-3 w-3 text-emerald-400" /> Verified
                                       </span>
                                     </td>
                                   </tr>
@@ -1018,10 +1018,10 @@ export function LeaderboardClient() {
                     </div>
 
                     {/* 💻 Desktop Participant Table */}
-                    <div className="hidden sm:block overflow-x-auto">
+                    <div className="hidden sm:block overflow-x-auto rounded-2xl border border-white/10 bg-[#0d141d]/90">
                       <table className="w-full text-left text-xs sm:text-sm">
                         <thead>
-                          <tr className="border-b border-[#90aead]/20 bg-[#f4ede1] text-[0.65rem] font-black uppercase tracking-wider text-[#244855]">
+                          <tr className="border-b border-white/10 bg-[#080c10] text-[0.65rem] font-black uppercase tracking-wider text-slate-400">
                             <th className="px-4 py-3.5">#</th>
                             <th className="px-4 py-3.5">Runner Name</th>
                             <th className="px-4 py-3.5">Bib Number</th>
@@ -1030,7 +1030,7 @@ export function LeaderboardClient() {
                             <th className="px-4 py-3.5">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#90aead]/15">
+                        <tbody className="divide-y divide-white/5">
                           {filteredParticipants.map((p, idx) => {
                             const isYou =
                               Boolean(currentClerkId && p.clerkId === currentClerkId) ||
@@ -1039,34 +1039,34 @@ export function LeaderboardClient() {
                             return (
                               <tr
                                 key={`${p.rosterNumber}-${p.bibNumber}`}
-                                className={`transition-colors hover:bg-[#fbf6ee]/80 ${isYou ? "bg-[#e64833]/15 font-semibold" : ""
+                                className={`transition-colors hover:bg-white/[0.04] ${isYou ? "bg-[#ff4b26]/15 font-semibold" : ""
                                   }`}
                               >
-                                <td className="px-4 py-3.5 font-mono text-xs text-[#874f41] font-bold">
+                                <td className="px-4 py-3.5 font-mono text-xs text-slate-400 font-bold">
                                   {idx + 1}
                                 </td>
                                 <td className="px-4 py-3.5">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-xs font-bold text-amber-900 border border-amber-200">
+                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-xs font-bold text-amber-300 border border-amber-500/30">
                                       {getInitials(p.runnerName)}
                                     </div>
-                                    <p className="font-bold text-[#14242a] flex items-center gap-1.5 text-xs sm:text-sm">
+                                    <p className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm">
                                       {p.runnerName}
                                       {isYou && (
-                                        <span className="rounded-full bg-[#e64833] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                                        <span className="rounded-full bg-[#ff4b26] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
                                           You
                                         </span>
                                       )}
                                     </p>
                                   </div>
                                 </td>
-                                <td className="px-4 py-3.5 font-mono text-xs font-bold text-[#14242a]">
+                                <td className="px-4 py-3.5 font-mono text-xs font-bold text-white">
                                   {p.bibNumber}
                                 </td>
-                                <td className="px-4 py-3.5 text-xs text-[#244855] font-medium">
+                                <td className="px-4 py-3.5 text-xs text-slate-300 font-medium">
                                   {p.city || "India"}
                                 </td>
-                                <td className="px-4 py-3.5 text-xs font-bold text-[#14242a]">
+                                <td className="px-4 py-3.5 text-xs font-bold text-white">
                                   {p.distance}
                                 </td>
                                 <td className="px-4 py-3.5">
@@ -1075,13 +1075,13 @@ export function LeaderboardClient() {
                                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                                         : p.status === "Under Review"
                                           ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                                          : "bg-[#90aead]/15 text-[#90aead] border-[#90aead]/30"
+                                          : "bg-white/5 text-slate-400 border-white/10"
                                       }`}
                                   >
                                     {p.status === "Verified Finisher" ? (
                                       <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                     ) : (
-                                      <Clock className="h-3 w-3 text-[#90aead]" />
+                                      <Clock className="h-3 w-3 text-slate-400" />
                                     )}
                                     {p.status}
                                   </span>
@@ -1106,19 +1106,19 @@ export function LeaderboardClient() {
         </div>
       </section>
 
-      {/* ── SECTION 3: CLAIM YOUR RANK / GPS BANNER (WARM IVORY #fbf6ee) ── */}
-      <section className="relative py-16 sm:py-20 bg-[#fbf6ee] text-[#14242a] overflow-hidden isolate border-b border-[#90aead]/20">
+      {/* ── SECTION 3: CLAIM YOUR RANK / GPS BANNER (DARK ATHLETIC THEME) ── */}
+      <section className="relative py-16 sm:py-20 bg-[#080c10] text-white overflow-hidden isolate border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white p-8 sm:p-12 shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0e1622] via-[#0d141d] to-[#080c10] p-8 sm:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-xl text-center md:text-left">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#e64833]/30 bg-[#e64833]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#e64833]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#ff4b26]/30 bg-[#ff4b26]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#ff4b26]">
                 <Zap className="h-3.5 w-3.5" />
                 CLAIM YOUR TIMING
               </span>
-              <h2 className="mt-4 font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-[#14242a]">
-                WANT YOUR NAME ON THE <span className="text-[#e64833]">LEADERBOARD?</span>
+              <h2 className="mt-4 font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-white">
+                WANT YOUR NAME ON THE <span className="text-[#ff4b26]">LEADERBOARD?</span>
               </h2>
-              <p className="mt-3 text-sm text-[#244855] font-medium leading-relaxed">
+              <p className="mt-3 text-sm text-slate-300 font-medium leading-relaxed">
                 Upload your Strava or Garmin GPS activity proof from the dashboard to claim your verified ranking, pace splits, and medal dispatch.
               </p>
             </div>
@@ -1126,17 +1126,17 @@ export function LeaderboardClient() {
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
               <Link
                 href="/dashboard"
-                className="neon-btn-blue inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-xs font-black uppercase tracking-wider text-[#fbe9d0] shadow-xl hover:scale-105 active:scale-95 transition-transform"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-7 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#ff4b26]/30 hover:scale-105 active:scale-95 transition-transform"
               >
                 <span>Upload GPS Proof</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#90aead]/30 bg-[#fbf6ee] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-[#244855] hover:bg-[#fbe9d0]/60 transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-white/10 hover:text-white transition-all"
               >
                 <span>Browse Races</span>
-                <ArrowUpRight className="h-4 w-4 text-[#90aead]" />
+                <ArrowUpRight className="h-4 w-4 text-slate-400" />
               </Link>
             </div>
           </div>

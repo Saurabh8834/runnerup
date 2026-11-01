@@ -20,6 +20,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
   const defaultDist =
     distances.find((d) => d.toLowerCase().includes("5")) ?? distances[0];
   const [selectedDistance, setSelectedDistance] = useState(defaultDist);
+  const [selectedActivity, setSelectedActivity] = useState<"running" | "walking" | "cycling">("running");
 
   // Price parsing
   const isFree = event.price.toLowerCase().includes("free");
@@ -31,12 +32,12 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
   const compareAtNumeric = event.compareAtPrice
     ? parseInt(event.compareAtPrice.replace(/[^\d]/g, ""), 10)
     : numericPrice > 0
-    ? numericPrice === 499
-      ? 549
-      : numericPrice >= 300
-      ? numericPrice + 100
-      : numericPrice + 50
-    : 549;
+      ? numericPrice === 499
+        ? 549
+        : numericPrice >= 300
+          ? numericPrice + 100
+          : numericPrice + 50
+      : 549;
   const savings =
     compareAtNumeric > numericPrice ? compareAtNumeric - numericPrice : 50;
 
@@ -87,29 +88,33 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  const registerHref = `/register?event=${encodeURIComponent(
-    event.slug
-  )}&distance=${encodeURIComponent(selectedDistance)}`;
+  // Determine if this is the Air Force or Cancer Awareness event
+  const isCancerAwareness =
+    event.slug.includes("cancer") ||
+    event.name.toLowerCase().includes("cancer");
 
-  // Determine if this is the Air Force Day event
   const isAirForce =
     event.slug.includes("air-force") ||
     event.name.toLowerCase().includes("air force") ||
     event.slug === "indian-air-force-day-2026" ||
     event.slug === "indian-air-force-day-virtual-challenge";
 
+  const registerHref = `/register?event=${encodeURIComponent(
+    event.slug
+  )}&distance=${encodeURIComponent(selectedDistance)}&activity=${encodeURIComponent(selectedActivity)}`;
+
   // Date eyebrow text
   const eyebrowDate = isAirForce
     ? "25-30 OCTOBER 2026"
     : event.date
-    ? event.date.toUpperCase()
-    : "25-30 OCTOBER 2026";
+      ? event.date.toUpperCase()
+      : "25-30 OCTOBER 2026";
 
   // Medal image source - dynamically matches each event's authentic physical finisher medal
   const medalImageSrc = event.medalImageUrl || getEventMedalImage(event.slug);
 
   return (
-    <section className="relative w-full overflow-hidden bg-black text-white isolate min-h-[92dvh] flex flex-col justify-center pt-24 pb-14 sm:pt-28 sm:pb-16 lg:pt-24 lg:pb-14 border-b border-white/10">
+    <section className="relative w-full overflow-hidden bg-black text-white isolate flex flex-col justify-center pt-20 pb-10 sm:pt-24 sm:pb-14 border-b border-white/10">
       {/* ─── Ambient Atmospheric Lighting ─── */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         {/* Soft golden spotlight directly centered on the medal on right */}
@@ -119,63 +124,72 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
       </div>
 
       <div className="container-page relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-14 items-center">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-14 items-start">
+
           {/* ══════════════════════════════════════════════════════
               LEFT COLUMN: HERO CONTENT & REGISTER ENGINE (7 cols)
              ══════════════════════════════════════════════════════ */}
           <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
-            
+
             {/* Top Pill Eyebrow */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#12161a]/90 px-3.5 sm:px-4 py-1.5 text-xs font-semibold backdrop-blur-md mb-4 sm:mb-6 shadow-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-[#12161a] px-3.5 py-1 text-xs font-semibold backdrop-blur-md mb-3 sm:mb-4 shadow-sm"
             >
-              <span className="text-[#f59e0b] font-bold tracking-wider">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-amber-400 font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs">
                 {eyebrowDate}
               </span>
               <span className="text-zinc-500">·</span>
-              <span className="text-zinc-300 font-bold uppercase tracking-wider text-[0.7rem] sm:text-xs">
+              <span className="text-zinc-300 font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs">
                 RUN, WALK OR CYCLE
               </span>
             </motion.div>
 
-            {/* Giant Stacked Headline */}
+            {/* Premium Athletic Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="font-display font-black text-4xl xs:text-5xl sm:text-6xl md:text-[4.2rem] lg:text-[4.6rem] xl:text-[5.4rem] tracking-tight uppercase leading-[0.93] drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]"
+              className="font-display font-black tracking-tight uppercase leading-[1.05] drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] mb-3"
             >
               {isAirForce ? (
                 <>
-                  <span className="block text-white">INDIAN AIR</span>
-                  <span className="block text-white">FORCE DAY</span>
-                  <span className="block text-[#f59e0b]">VIRTUAL</span>
-                  <span className="block text-[#f59e0b]">CHALLENGE</span>
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-white">INDIAN AIR FORCE DAY</span>
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-transparent bg-clip-text bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15]">
+                    VIRTUAL CHALLENGE 2026
+                  </span>
                 </>
+              ) : isCancerAwareness ? (
+                <div className="flex flex-col gap-1 sm:gap-1.5">
+                  <span className="font-mono text-xs sm:text-sm font-bold tracking-[0.25em] uppercase text-purple-400">
+                    NATIONAL EDITION · OFFICIAL VIRTUAL RUN
+                  </span>
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-black uppercase tracking-tight leading-[0.98] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+                    CANCER AWARENESS
+                  </span>
+                  <span className="block text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-black uppercase tracking-tight leading-[1] text-transparent bg-clip-text bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15] drop-shadow-[0_4px_16px_rgba(255,75,38,0.35)]">
+                    VIRTUAL CHALLENGE 2026
+                  </span>
+                </div>
               ) : (
                 <>
-                  <span className="block text-white">{event.name.split(" ")[0] || event.name}</span>
-                  {event.name.split(" ").length > 1 && (
-                    <span className="block text-white">
-                      {event.name.split(" ").slice(1, 3).join(" ")}
-                    </span>
-                  )}
-                  <span className="block text-[#f59e0b]">VIRTUAL</span>
-                  <span className="block text-[#f59e0b]">CHALLENGE</span>
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-white">{event.name}</span>
+                  <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-transparent bg-clip-text bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15]">
+                    VIRTUAL CHALLENGE
+                  </span>
                 </>
               )}
             </motion.h1>
 
-            {/* Subtitle / Event Description */}
+            {/* Inspiring Subtitle */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base lg:text-[1.05rem] text-zinc-300 font-medium leading-relaxed space-y-2.5"
+              className="mt-1 max-w-xl text-xs sm:text-sm lg:text-[0.95rem] text-zinc-300 font-medium leading-relaxed space-y-2.5 mb-2 sm:mb-4"
             >
               {isAirForce ? (
                 <>
@@ -186,6 +200,10 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                     Run for Glory. Run for India. Jai Hind! 🇮🇳
                   </p>
                 </>
+              ) : isCancerAwareness ? (
+                <p className="text-zinc-200 font-medium leading-relaxed text-sm sm:text-base">
+                  Honoring brave fighters, celebrating survivors, and remembering loved ones. Run, walk, or cycle anywhere across India at your own pace to bring hope.
+                </p>
               ) : (
                 <p className="text-zinc-400 font-normal">
                   {event.description ||
@@ -200,60 +218,95 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.22 }}
-                className="lg:hidden my-5 w-full flex flex-col items-center justify-center relative"
+                className="lg:hidden my-6 w-full flex flex-col items-center justify-center relative"
               >
                 <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" isPast={isPast} />
 
                 {/* Live Mobile Social Proof Counter */}
-                <div className="mt-2.5 inline-flex items-center gap-1.5 text-[0.72rem] text-zinc-400 font-semibold">
-                  <span className="text-amber-400 font-bold">🔥 1,420+ Runners Joined</span>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-center text-[0.7rem] sm:text-[0.72rem] text-zinc-400 font-semibold bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-md max-w-full">
+                  <span className="text-amber-400 font-bold">⚡ VIP Early-Bird Registration Active</span>
                   <span>·</span>
-                  <span className="text-emerald-400 font-bold">98% 5-Star Rating ⭐</span>
+                  <span className="text-emerald-400 font-bold">100% Solid Metal Finisher Medal ⭐</span>
                 </div>
               </motion.div>
             )}
 
-            {/* Distance Selector */}
+            {/* Unified Race Configuration Console: Activity Mode & Target KM Side-by-Side */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.25 }}
-              className="mt-4 sm:mt-6 w-full flex flex-col items-center lg:items-start"
+              className="mt-5 w-full max-w-xl rounded-2xl border border-white/15 bg-gradient-to-b from-[#121820]/90 to-[#0a0f14]/90 p-4 sm:p-5 backdrop-blur-xl shadow-2xl flex flex-col gap-3.5 text-left"
             >
-              <div className="flex items-center justify-between w-full max-w-md lg:max-w-none mb-2 px-1">
-                <span className="text-[0.68rem] sm:text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">
-                  CHOOSE YOUR DISTANCE
+              {/* Category 1: Mode (Run / Walk / Cycle) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                  1. Activity Mode:
                 </span>
-                <span className="text-[0.65rem] text-amber-400/90 font-semibold">
-                  Tap to switch
-                </span>
+                <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 shrink-0">
+                  {[
+                    { key: "running", label: "Run", icon: "🏃" },
+                    { key: "walking", label: "Walk", icon: "🚶" },
+                    { key: "cycling", label: "Cycle", icon: "🚴" },
+                  ].map(({ key, label, icon }) => {
+                    const active = selectedActivity === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setSelectedActivity(key as any)}
+                        className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${active
+                          ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-md scale-[1.02]"
+                          : "text-zinc-400 hover:text-white"
+                          }`}
+                      >
+                        <span>{icon}</span>
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-2.5 w-full">
-                {distances.map((dist) => {
-                  const isSelected = selectedDistance === dist;
-                  const isPopular = dist.includes("5");
-                  return (
-                    <button
-                      key={dist}
-                      type="button"
-                      onClick={() => setSelectedDistance(dist)}
-                      className={`relative px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                        isSelected
+
+              {/* Category 2: Target KM Distance (Placed Directly Under Mode) */}
+              <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                    2. Target Distance:
+                  </span>
+                  <span className="text-[11px] font-semibold text-zinc-400">
+                    Selected: <strong className="text-white font-mono">{selectedDistance}</strong> ({selectedActivity})
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {distances.map((dist) => {
+                    const isSelected = selectedDistance === dist;
+                    const isPopular = dist.includes("5");
+                    return (
+                      <button
+                        key={dist}
+                        type="button"
+                        onClick={() => setSelectedDistance(dist)}
+                        className={`relative px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${isSelected
                           ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30 scale-[1.03] border border-amber-300"
-                          : "bg-[#12161a] hover:bg-[#1b2127] text-zinc-300 hover:text-white border border-white/10 hover:border-zinc-500 active:scale-95"
-                      }`}
-                    >
-                      <span>{dist}</span>
-                      {isPopular && (
-                        <span className={`text-[0.55rem] px-1.5 py-0.2 rounded-full font-black uppercase ${
-                          isSelected ? "bg-black/25 text-black" : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                        }`}>
-                          Popular
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+                          : "bg-black/60 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 hover:border-zinc-500 active:scale-95"
+                          }`}
+                      >
+                        <span>{dist}</span>
+                        {isPopular && (
+                          <span
+                            className={`text-[0.55rem] px-1.5 py-0.2 rounded-full font-black uppercase ${isSelected
+                              ? "bg-black/25 text-black"
+                              : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                              }`}
+                          >
+                            Popular
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </motion.div>
 
@@ -273,11 +326,9 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                     ₹{compareAtNumeric}
                   </span>
                 )}
-                {savings && (
-                  <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-2.5 py-0.5 text-xs font-black text-amber-300">
-                    Save ₹{savings} (Early Bird)
-                  </span>
-                )}
+                <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-black text-emerald-300">
+                  Save 50% · VIP Early Bird
+                </span>
               </div>
               <p className="mt-1 text-xs sm:text-sm text-zinc-400 font-normal text-center lg:text-left">
                 Solid Metal Medal, Digital Race Bib, QR Certificate & delivery across India included.
@@ -365,7 +416,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
           {/* ══════════════════════════════════════════════════════
               RIGHT COLUMN: INTERACTIVE 3D MEDAL PREVIEW (Desktop)
              ══════════════════════════════════════════════════════ */}
-          <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-center">
+          <div className="hidden lg:flex lg:col-span-5 w-full items-center justify-center lg:sticky lg:top-28 self-start pt-2">
             {isDesktop && (
               <Medal3DViewer slug={event.slug} eventName={event.name} size="desktop" isPast={isPast} />
             )}

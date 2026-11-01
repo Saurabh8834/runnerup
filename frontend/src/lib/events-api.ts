@@ -81,15 +81,21 @@ export function mapApiEventToPublic(
     event.registrationOpen === false ||
     ["COMPLETED", "CLOSED", "CANCELLED"].includes(event.status);
 
+  const title = event.title || (event as any).name || "";
   const isAirForce =
     event.slug.includes("air-force") ||
-    event.title.toLowerCase().includes("air force") ||
+    title.toLowerCase().includes("air force") ||
     event.slug === "indian-air-force-day-2026" ||
     event.slug === "indian-air-force-day-virtual-challenge";
 
+  const isCancerAwareness =
+    event.slug.includes("cancer") ||
+    title.toLowerCase().includes("cancer");
+
   const staticMatch =
     allPublicEvents.find((item) => item.slug === event.slug) ||
-    (isAirForce ? allPublicEvents.find((item) => item.slug.includes("air-force")) : undefined);
+    (isAirForce ? allPublicEvents.find((item) => item.slug.includes("air-force")) : undefined) ||
+    (isCancerAwareness ? allPublicEvents.find((item) => item.slug.includes("cancer")) : undefined);
 
   const apiFinishers = event.stats?.finishers;
   const apiVerified = event.stats?.verifiedResults;
@@ -117,24 +123,31 @@ export function mapApiEventToPublic(
     bannerImageUrl:
       event.bannerImageUrl ??
       staticMatch?.bannerImageUrl ??
+      (isCancerAwareness ? "/images/cancer-awareness-medal-front-4k.png" : undefined) ??
       (isAirForce ? "/images/event-medal.webp" : undefined),
     medalImageUrl:
       (event as { medalImageUrl?: string }).medalImageUrl ??
       staticMatch?.medalImageUrl ??
+      (isCancerAwareness ? "/images/cancer-awareness-medal-front-4k.png" : undefined) ??
       (isAirForce ? "/images/event-medal.webp" : undefined),
     reward:
+      (isCancerAwareness
+        ? "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate"
+        : undefined) ??
       (isAirForce
         ? "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate"
         : undefined) ??
       staticMatch?.reward ??
-      (isPast ? "Medal + certificate" : "Register now"),
+      (isPast ? "Medal + certificate" : "Solid Metal Finisher Medal + Digital Bib"),
     couponCode: event.couponCode ?? undefined,
     showCouponOnCard: event.showCouponOnCard ?? undefined,
     activityTypes:
       event.activityTypes?.length ? event.activityTypes : staticMatch?.activityTypes ?? ["running", "cycling", "walking"],
     benefits: event.benefits ?? staticMatch?.benefits ?? [],
     status:
-      event.status === "CLOSED" || event.status === "closed"
+      isCancerAwareness
+        ? "upcoming"
+        : event.status === "CLOSED" || event.status === "closed"
         ? "closed"
         : isPast
         ? "past"
@@ -203,12 +216,12 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
   const limit = options?.limit;
   try {
     const response = await fetch(getApiUrl("/api/events?scope=open"), {
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
     if (response.ok) {
       const json = (await response.json()) as { data: ApiEvent[] };
       if (Array.isArray(json.data) && json.data.length > 0) {
-        let rows = [...json.data];
+        const rows = [...json.data];
         if (options?.homeFeaturedFirst) {
           rows.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
         }

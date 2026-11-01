@@ -206,40 +206,42 @@ export function EventSelect({ event }: { event: PublicEvent }) {
           {/* Distance picker - appears FIRST on mobile */}
           <div className="order-1 lg:order-1">
             <div className="rounded-3xl border border-(--line) bg-(--panel) p-5 shadow-premium sm:p-7">
-              <div className="flex items-center justify-between">
-                <p className="text-[0.65rem] font-black uppercase tracking-widest text-(--muted-soft)">
-                  Select Distance / Category
-                </p>
-                <span className="text-[0.62rem] text-amber-400 font-bold uppercase">
-                  Tap to Choose
-                </span>
-              </div>
+              {/* Activity Selector placed directly near the KM category */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="text-[0.68rem] font-black uppercase tracking-wider text-slate-300">
+                    Activity:
+                  </span>
+                  <div className="inline-flex items-center p-1 rounded-xl bg-black/50 border border-white/15 gap-1">
+                    {activities.map(({ key, label, icon: Icon }) => {
+                      const isOn = activity === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setActivity(key)}
+                          aria-pressed={isOn}
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black transition-all cursor-pointer ${
+                            isOn
+                              ? "bg-[#ff4b26] text-white shadow-sm"
+                              : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" strokeWidth={2.2} />
+                          <span>{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
 
-              {/* Activity segmented */}
-              <div className="mt-3 grid grid-cols-3 gap-2 rounded-2xl bg-(--panel-soft) p-1.5">
-                {activities.map(({ key, label, icon: Icon, active }) => {
-                  const isOn = activity === key;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setActivity(key)}
-                      aria-pressed={isOn}
-                      className={`inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs sm:text-sm font-black capitalize transition-all duration-200 cursor-pointer ${
-                        isOn
-                          ? active
-                          : "border-transparent bg-transparent text-(--muted) hover:text-(--foreground)"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" strokeWidth={2} />
-                      {label}
-                    </button>
-                  );
-                })}
+                <div className="flex items-center gap-1.5 text-[0.68rem] text-amber-400 font-bold uppercase tracking-wider">
+                  <span>Select Target KM Below ↓</span>
+                </div>
               </div>
 
               {/* Distance chips */}
-              <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                 {distances.map((distance) => {
                   const km = distanceNum(distance);
                   const t = tier(km ?? 5, activity);
@@ -259,8 +261,8 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                         <span className="text-xl sm:text-2xl font-black tracking-tight text-(--foreground) block">
                           {distance}
                         </span>
-                        <span className="mt-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-amber-400/90 block">
-                          {t.label}
+                        <span className="text-[0.65rem] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">
+                          {activity === "cycle" ? "🚴 Cycle" : activity === "walk" ? "🚶 Walk" : "🏃 Run"} · {t.label}
                         </span>
                       </div>
                       <span className="mt-3 inline-flex items-center gap-1 text-[0.68rem] font-bold text-amber-300 group-hover:translate-x-0.5 transition-transform">

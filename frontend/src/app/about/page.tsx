@@ -97,9 +97,9 @@ export default function AboutPage() {
   };
 
   const stats = [
-    { label: "Active Runners", val: "12,400+" },
+    { label: "Active Runners", val: "18,500+" },
     { label: "Pincodes Delivered", val: "19,000+" },
-    { label: "Solid Metal Medals Sent", val: "18,500+" },
+    { label: "Solid Metal Medals Sent", val: "14,200+" },
     { label: "Verified Kilometres", val: "94,000+" },
   ];
 
@@ -147,22 +147,22 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="relative min-w-0 bg-[#14242a] pt-24 pb-20 text-[#fcf8f2]">
+      <div className="relative min-w-0 bg-[#080c10] pt-24 pb-20 text-[#f8fafc]">
         {/* Subtle background glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,_rgba(230,72,51,0.18),transparent_70%)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(ellipse_at_top,_rgba(255,75,38,0.18),transparent_70%)]"
         />
 
         <div className="container-page max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header Eyebrow */}
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#90aead]/30 bg-[#172c34]/90 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#fbe9d0] shadow-sm mb-4">
-              <Sparkles className="h-3.5 w-3.5 text-[#e64833]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#ff4b26]/30 bg-[#ff4b26]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-orange-200 shadow-sm mb-4">
+              <Sparkles className="h-3.5 w-3.5 text-[#ff4b26]" />
               The RunnerUp Movement
             </span>
             <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-tight">
-              Empowering India to <span className="text-[#e64833]">Run, Rise & Triumph</span>
+              Empowering India to <span className="text-[#ff4b26]">Run, Rise & Triumph</span>
             </h1>
             <p className="mt-5 text-sm sm:text-base lg:text-lg text-zinc-300 leading-relaxed font-normal">
               RunnerUp was created with a single vision: to bring the thrill, celebration, and tangible prestige of marathon running to every runner in India, regardless of location, schedule, or experience.
@@ -174,12 +174,12 @@ export default function AboutPage() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="rounded-2xl border border-[#90aead]/20 bg-[#172c34]/80 p-5 sm:p-6 text-center backdrop-blur-sm shadow-lg hover:border-[#e64833]/50 transition-colors"
+                className="rounded-2xl border border-white/10 bg-[#0d141d]/90 p-5 sm:p-6 text-center backdrop-blur-sm shadow-xl hover:border-[#ff4b26]/50 transition-colors"
               >
-                <div className="font-display font-black text-2xl sm:text-4xl text-[#fbe9d0]">
+                <div className="font-display font-black text-2xl sm:text-4xl text-white">
                   {s.val}
                 </div>
-                <div className="mt-1 text-xs sm:text-sm font-semibold uppercase tracking-wider text-zinc-400">
+                <div className="mt-1 text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-400">
                   {s.label}
                 </div>
               </div>
@@ -189,7 +189,7 @@ export default function AboutPage() {
           {/* Our Story & Mission */}
           <div className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div className="space-y-5 text-zinc-300 leading-relaxed text-sm sm:text-base">
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#e64833]">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#ff4b26]">
                 Our Philosophy
               </span>
               <h2 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl uppercase text-white tracking-tight">
@@ -209,19 +209,19 @@ export default function AboutPage() {
                   "Direct courier delivery of your heavyweight medal kit",
                 ].map((point) => (
                   <div key={point} className="flex items-center gap-2.5 text-zinc-200 text-xs sm:text-sm font-semibold">
-                    <CheckCircle2 className="h-4 w-4 text-[#e64833] shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#ff4b26] shrink-0" />
                     <span>{point}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="relative rounded-3xl overflow-hidden border border-[#90aead]/25 bg-[#172c34] p-6 sm:p-8 shadow-2xl">
+            <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-[#0d141d] p-6 sm:p-8 shadow-2xl">
               <div className="absolute top-0 right-0 p-8 opacity-10">
-                <Compass className="h-48 w-48 text-[#e64833]" />
+                <Compass className="h-48 w-48 text-[#ff4b26]" />
               </div>
               <div className="relative z-10 space-y-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e64833]/15 border border-[#e64833]/30 px-3 py-1 text-xs font-bold text-[#e64833]">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ff4b26]/15 border border-[#ff4b26]/30 px-3 py-1 text-xs font-bold text-[#ff4b26]">
                   The Finisher Experience
                 </span>
                 <h3 className="font-display font-black text-xl sm:text-2xl text-white uppercase">
@@ -247,7 +247,7 @@ export default function AboutPage() {
           {/* Core Pillars Grid */}
           <div className="mt-20 sm:mt-28">
             <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#e64833]">
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-[#ff4b26]">
                 Built For Athletes
               </span>
               <h2 className="mt-2 font-display font-black text-2xl sm:text-4xl uppercase text-white tracking-tight">
@@ -261,9 +261,9 @@ export default function AboutPage() {
                 return (
                   <div
                     key={p.title}
-                    className="rounded-2xl border border-[#90aead]/20 bg-[#172c34]/70 p-6 backdrop-blur-sm shadow-md hover:border-[#e64833]/60 hover:shadow-xl transition-all duration-300 flex flex-col"
+                    className="rounded-2xl border border-white/10 bg-[#0d141d]/90 p-6 backdrop-blur-sm shadow-xl hover:border-[#ff4b26]/50 hover:shadow-2xl transition-all duration-300 flex flex-col"
                   >
-                    <div className="h-12 w-12 rounded-xl bg-[#e64833]/15 border border-[#e64833]/30 flex items-center justify-center text-[#e64833] mb-4">
+                    <div className="h-12 w-12 rounded-xl bg-[#ff4b26]/15 border border-[#ff4b26]/30 flex items-center justify-center text-[#ff4b26] mb-4">
                       <Icon className="h-6 w-6" />
                     </div>
                     <h3 className="font-display font-bold text-lg text-white mb-2">
@@ -279,10 +279,10 @@ export default function AboutPage() {
           </div>
 
           {/* Bottom Call to Action */}
-          <div className="mt-20 sm:mt-28 rounded-3xl border border-[#e64833]/40 bg-gradient-to-r from-[#172c34] via-[#1b323b] to-[#172c34] p-8 sm:p-12 text-center shadow-2xl relative overflow-hidden">
+          <div className="mt-20 sm:mt-28 rounded-3xl border border-[#ff4b26]/40 bg-gradient-to-r from-[#0d141d] via-[#121820] to-[#0d141d] p-8 sm:p-12 text-center shadow-2xl relative overflow-hidden">
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-96 bg-[radial-gradient(circle,_rgba(230,72,51,0.3),transparent_70%)]"
+              className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-96 bg-[radial-gradient(circle,_rgba(255,75,38,0.25),transparent_70%)]"
             />
             <h2 className="font-display font-black text-2xl sm:text-4xl uppercase text-white tracking-tight">
               Ready to Claim Your Next Finisher Medal?
@@ -293,7 +293,7 @@ export default function AboutPage() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/events"
-                className="inline-flex items-center gap-2 rounded-xl bg-[#e64833] px-7 py-3.5 text-sm font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105 hover:bg-[#c93a26]"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-7 py-3.5 text-sm font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105"
               >
                 <span>Browse Active Events</span>
                 <ArrowRight className="h-4 w-4" />

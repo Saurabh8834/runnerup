@@ -27,7 +27,7 @@ export function EventHow({ event }: { event: PublicEvent }) {
   ];
 
   return (
-    <section className="section border-b border-(--line)">
+    <section className="border-b border-white/10 py-8 sm:py-12">
       <div className="container-page">
         <SectionHeader
           eyebrow="How it works"

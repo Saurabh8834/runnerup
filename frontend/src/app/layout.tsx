@@ -233,7 +233,7 @@ export default function RootLayout({
           />
         </noscript>
       </head>
-      <body className="relative min-h-full flex flex-col bg-[#14242a] text-[#fcf8f2] overflow-x-hidden">
+      <body className="relative min-h-full flex flex-col bg-[#080c10] text-[#f8fafc] overflow-x-hidden">
         {/* Global Runner Backdrop Image Overlay (hidden on mobile for 60fps smooth hardware scrolling) */}
         <div
           aria-hidden="true"
@@ -246,7 +246,7 @@ export default function RootLayout({
             decoding="async"
             className="h-full w-full object-cover object-center opacity-10"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#14242a]/80 via-[#14242a]/95 to-[#14242a]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#080c10]/80 via-[#080c10]/95 to-[#080c10]" />
         </div>
 
         <ThemeProvider>
@@ -255,7 +255,7 @@ export default function RootLayout({
             proxyUrl={clerkProxyUrl}
             appearance={{
               variables: {
-                colorPrimary: "#e64833",
+                colorPrimary: "#ff4b26",
                 borderRadius: "0.75rem",
               },
               elements: {

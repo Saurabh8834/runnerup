@@ -1,88 +1,82 @@
+"use client";
+
 import Link from "next/link";
-import { ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldCheck, Sparkles, ArrowRight, MessageCircle } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
-import { RegisterCta } from "../../components/register-cta";
-import { Medal3D, MedalShowcase } from "./medal";
 import { EventCountdown } from "./countdown";
 import { Reveal } from "./reveal";
 
 const WHATSAPP_URL = "https://wa.me/918287831071";
 
-function formatPrice(price: string) {
-  return price.replace(/^Rs\.\s*/, "₹");
-}
-
 export function EventCta({ event }: { event: PublicEvent }) {
   const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(
-    `Hi! I'm interested in ${event.name}. Can you help me with registration?`,
+    `Hi! I have a question about ${event.name}. Can you help me?`,
   )}`;
-  const priceLabel = event.price.toLowerCase().includes("free")
-    ? "Register now"
-    : `Register now - ${formatPrice(event.price)}`;
+
+  const cleanPrice = event.price.replace(/^Rs\.\s*/i, "").replace(/^₹/, "").trim() || "499";
 
   return (
-    <section className="event-classic-cta relative overflow-hidden">
-      <div className="container-page py-14 sm:py-20">
+    <section className="relative overflow-hidden pt-8 pb-2 sm:pt-12 sm:pb-4 border-t border-white/10 bg-gradient-to-b from-[#0a0f14] via-[#0d141d] to-[#080c10]">
+      <div className="container-page max-w-4xl mx-auto px-4 sm:px-6">
         <Reveal>
-          <div className="event-classic-cta-card relative overflow-hidden border border-(--gold-line) bg-gradient-to-b from-[#e64833]/10 via-(--panel) to-(--panel) px-6 py-12 text-center shadow-premium sm:px-12 sm:py-16">
+          <div className="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 via-[#121a22] to-[#0d141d] p-6 sm:p-10 text-center shadow-2xl">
+            {/* Ambient Lighting */}
             <div
               aria-hidden
-              className="sun-pulse pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-2xl"
-              style={{
-                background:
-                  "radial-gradient(circle, rgba(230,72,51,0.4) 0%, rgba(135,79,65,0.16) 45%, transparent 70%)",
-              }}
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -bottom-24 -left-16 h-64 w-64 rounded-full bg-(--sage) opacity-[0.07] blur-2xl"
+              className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-56 w-72 rounded-full bg-gradient-to-r from-[#e64833]/25 via-amber-500/20 to-transparent blur-3xl"
             />
 
-            <div className="relative mx-auto flex max-w-2xl flex-col items-center">
-              <div className="w-36 sm:w-48 mb-2">
-                <MedalShowcase
-                  slug={event.slug}
-                  eventName={event.name}
-                  size="compact"
-                  showBadges={false}
-                />
+            <div className="relative z-10 flex flex-col items-center">
+              {/* VIP Eyebrow Badge */}
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-300 mb-4 shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <span>Final Early-Bird Window Active</span>
               </div>
 
-              <h2 className="heading mt-6 text-(--foreground)">This one&rsquo;s yours to win.</h2>
-              <p className="lede mt-3 max-w-lg">
-                {event.name} - pick a distance and register in under two minutes with UPI.
+              {/* Main Headline */}
+              <h2 className="font-display font-black text-2xl sm:text-4xl uppercase tracking-tight text-white leading-tight">
+                Ready to Earn Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-[#ff5e3a]">Official Finisher Medal</span>?
+              </h2>
+
+              <p className="mt-2 text-xs sm:text-sm text-zinc-300 max-w-lg leading-relaxed">
+                Complete your distance anywhere across India on your own schedule. Handcrafted 3D metal medal, digital bib, and certificate shipped directly to your door.
               </p>
 
+              {/* Countdown (Clean, single header) */}
               {event.endsAt ? (
                 <div className="mt-6 flex flex-col items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-[0.65rem] font-black uppercase tracking-widest text-(--muted)">
-                    <Sparkles className="h-3.5 w-3.5 text-(--gold-deep)" />
-                    Registration closes in
+                  <span className="text-[0.68rem] font-bold uppercase tracking-widest text-zinc-400">
+                    ⏳ Early-Bird Window Closes In:
                   </span>
                   <EventCountdown targetDate={event.endsAt} />
                 </div>
               ) : null}
 
-              <div className="mt-7 flex w-full max-w-md flex-col gap-2.5 sm:flex-row sm:justify-center">
-                <RegisterCta
-                  className="sm:min-w-56"
-                  signedInLabel="Register now"
-                  signedOutLabel={priceLabel}
-                  slug={event.slug}
-                />
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-md">
                 <Link
-                  className="btn btn-secondary gap-2 text-sm"
+                  href={`/register?event=${encodeURIComponent(event.slug)}`}
+                  className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white font-black text-sm px-7 py-3.5 shadow-lg shadow-[#e64833]/40 hover:scale-105 active:scale-95 transition-all duration-200"
+                >
+                  <span>Register Now · ₹{cleanPrice}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+
+                <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs px-5 py-3.5 transition-colors"
                 >
-                  Ask a question
-                </Link>
+                  <MessageCircle className="h-4 w-4 text-emerald-400" />
+                  <span>Ask a Question</span>
+                </a>
               </div>
 
-              <p className="mt-6 flex items-center gap-1.5 text-xs text-(--muted-soft)">
-                <ShieldCheck className="h-3.5 w-3.5 text-(--sage)" />
-                Secure Razorpay payment - Instant confirmation
+              {/* Trust Footer */}
+              <p className="mt-5 flex items-center justify-center gap-1.5 text-xs text-zinc-400">
+                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <span>100% Safe UPI / Card Checkout · Guaranteed Pan-India Courier Delivery</span>
               </p>
             </div>
           </div>

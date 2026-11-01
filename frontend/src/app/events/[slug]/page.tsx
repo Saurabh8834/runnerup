@@ -286,13 +286,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         ) : (
           <>
             <EventHero event={event} isPast={false} />
-            <EventSelect event={event} />
-            <EventStats />
-            <EventWhy />
             <EventRewards event={event} />
             <EventHow event={event} />
-            <EventCompare />
-            <EventCommunity />
             <EventReviews />
 
             <section className="section border-b border-(--line)">

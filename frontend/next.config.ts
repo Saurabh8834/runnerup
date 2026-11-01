@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
   // ── Backend API & Webhook proxy ─────────────────────────
   // Forwards /api/* and /health to the backend server (locally or configured URL)
   // so external clients accessing runnerup.in can reach the API without CORS or mixed-content issues.
+  async redirects() {
+    return [
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+    ];
+  },
+
   async rewrites() {
     const isDev = process.env.NODE_ENV !== "production";
     const rawTarget = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
@@ -79,6 +89,7 @@ const nextConfig: NextConfig = {
   // ── Image optimisation ───────────────────────────────────
   images: {
     unoptimized: true,
+    qualities: [75, 100],
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {

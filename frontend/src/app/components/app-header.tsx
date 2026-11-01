@@ -20,6 +20,11 @@ import {
   Sparkles,
   X,
   ArrowRight,
+  ChevronRight,
+  Flame,
+  MessageCircle,
+  Route,
+  ShieldCheck,
 } from "lucide-react";
 import { BrandText } from "./brand-text";
 import { ThemeToggle } from "./theme-toggle";
@@ -41,11 +46,11 @@ function Hamburger({ open, onClick }: { open: boolean; onClick: () => void }) {
       aria-label={open ? "Close menu" : "Open menu"}
       aria-expanded={open}
       onClick={onClick}
-      className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-[#172c34] text-[#fbe9d0] backdrop-blur-xl shadow-lg transition-all duration-200 hover:border-[#e64833]/60 hover:text-white hover:shadow-[0_0_15px_rgba(230,72,51,0.3)] active:scale-90"
+      className="relative flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.15] text-white transition-all active:scale-90"
     >
-      <span className="flex w-5 flex-col gap-[5px]">
+      <span className="flex w-4.5 flex-col gap-[4.5px]">
         <motion.span
-          animate={open ? { rotate: 45, y: 7, width: 20 } : { rotate: 0, y: 0, width: 20 }}
+          animate={open ? { rotate: 45, y: 6.5, width: 18 } : { rotate: 0, y: 0, width: 18 }}
           className="block h-[2px] origin-center rounded-full bg-current"
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         />
@@ -55,7 +60,7 @@ function Hamburger({ open, onClick }: { open: boolean; onClick: () => void }) {
           transition={{ duration: 0.2 }}
         />
         <motion.span
-          animate={open ? { rotate: -45, y: -7, width: 20 } : { rotate: 0, y: 0, width: 20 }}
+          animate={open ? { rotate: -45, y: -6.5, width: 18 } : { rotate: 0, y: 0, width: 18 }}
           className="block h-[2px] origin-center rounded-full bg-current"
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         />
@@ -140,13 +145,13 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
         onClick={() => setOpen((v) => !v)}
         aria-label="Open dashboard and profile menu"
         aria-expanded={open}
-        className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-white/15 bg-[#172c34]/95 backdrop-blur-xl transition-all duration-200 hover:border-white/30 hover:bg-[#112026] hover:text-white shadow-xl cursor-pointer active:scale-95 ${
+        className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full border border-white/15 bg-[#090d14]/90 backdrop-blur-xl transition-all duration-200 hover:border-white/30 hover:bg-[#121926] hover:text-white shadow-xl cursor-pointer active:scale-95 ${
           isMobile
             ? "h-8 w-8 sm:h-9 sm:w-auto p-1.5 sm:px-3.5 sm:py-2 text-[0.72rem] font-bold uppercase tracking-wider text-white"
             : "px-4 py-1.5 sm:px-4.5 sm:py-2 text-xs font-bold uppercase tracking-wider text-white"
         } ${
           isActive
-            ? "border-[#e64833]/60 bg-[#e64833]/20 text-[#fbe9d0] shadow-[0_0_15px_rgba(230,72,51,0.25)]"
+            ? "border-[#ff4b26]/60 bg-[#ff4b26]/20 text-white shadow-[0_0_15px_rgba(255,75,38,0.25)]"
             : ""
         }`}
       >
@@ -176,15 +181,15 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -6 }}
             transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute right-0 top-[calc(100%+10px)] z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-[#90aead]/25 bg-[#112026]/98 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(230,72,51,0.15)]"
+            className="absolute right-0 top-[calc(100%+10px)] z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-white/15 bg-[#090d14]/98 backdrop-blur-3xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(255,75,38,0.15)]"
           >
-            <div className="h-[2px] w-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#874f41]" />
+            <div className="h-[2px] w-full bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15]" />
             
             {/* Athlete Header */}
             <div className="border-b border-white/10 bg-white/[0.04] p-3.5 backdrop-blur-md">
               <div className="flex items-center justify-between">
                 <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{name}</p>
-                <span className="rounded-full bg-[#e64833]/25 border border-[#e64833]/50 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-[#fbe9d0]">
+                <span className="rounded-full bg-[#ff4b26]/20 border border-[#ff4b26]/50 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-orange-200">
                   {isAdmin ? "Admin 🛡️" : "Athlete ⚡"}
                 </span>
               </div>
@@ -210,7 +215,7 @@ function DashboardProfileDropdown({ isMobile = false }: { isMobile?: boolean }) 
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-xl border border-transparent bg-white/[0.04] px-3 py-2 text-xs font-bold text-white transition-all duration-200 hover:bg-white/10 hover:border-white/15 hover:text-[#fbe9d0]"
               >
-                <LayoutDashboard className="h-4 w-4 text-[#e64833]" />
+                <LayoutDashboard className="h-4 w-4 text-[#ff4b26]" />
                 Athlete Dashboard
               </Link>
 
@@ -265,17 +270,22 @@ function NavLink({
       href={href}
       prefetch={false}
       onClick={onClick}
-      className={`relative inline-flex flex-col items-center justify-center px-3.5 py-1.5 text-xs sm:text-sm transition-all duration-200 whitespace-nowrap shrink-0 ${
+      className={`relative inline-flex items-center justify-center px-4 py-1.5 rounded-full text-xs sm:text-[13px] transition-all duration-200 whitespace-nowrap shrink-0 ${
         active
-          ? "text-[#e64833] font-bold"
-          : "text-slate-300 hover:text-white font-medium"
+          ? "text-white font-bold"
+          : "text-slate-300 hover:text-white hover:bg-white/[0.08] font-medium"
       }`}
     >
-      <span className="whitespace-nowrap shrink-0">{label}</span>
+      <span className="relative z-10 whitespace-nowrap shrink-0 flex items-center gap-1.5">
+        {label}
+        {label === "Leaderboard" && (
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(250,204,21,0.8)]" />
+        )}
+      </span>
       {active && (
         <motion.span
-          layoutId="nav-header-active"
-          className="absolute -bottom-1 h-[2px] w-6 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#874f41] shadow-[0_0_8px_rgba(230,72,51,0.6)]"
+          layoutId="nav-header-active-pill"
+          className="absolute inset-0 rounded-full bg-white/15 border border-white/20 shadow-xs"
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
         />
       )}
@@ -369,16 +379,16 @@ export function AppHeader() {
 
   return (
     <>
-      <header
-        className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
-          scrolled
-            ? "bg-[#030d12]/95 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.85)] py-2.5 sm:py-3"
-            : "bg-[#030d12]/80 backdrop-blur-md border-b border-white/[0.08] py-3 sm:py-3.5"
-        }`}
-      >
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="fixed inset-x-0 top-0 z-50 pointer-events-none transition-all duration-300 pt-2.5 sm:pt-3.5 px-3 sm:px-6 lg:px-8">
+        <header
+          className={`pointer-events-auto w-full max-w-7xl mx-auto rounded-full transition-all duration-300 flex items-center justify-between ${
+            scrolled
+              ? "bg-[#090d14]/95 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.85)] py-2 pl-3.5 pr-2 sm:px-6"
+              : "bg-[#090d14]/85 backdrop-blur-xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.65)] py-2 sm:py-3 pl-3.5 pr-2 sm:px-6"
+          }`}
+        >
           {/* Left — Brand Logo */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/"
               aria-label="RUNNERUP home"
@@ -388,16 +398,16 @@ export function AppHeader() {
               <img
                 src="/runnerup-logo.png"
                 alt="RUNNERUP"
-                width={180}
-                height={40}
-                className="h-8 xs:h-8.5 sm:h-9 lg:h-9.5 w-auto object-contain drop-shadow-[0_2px_14px_rgba(230,72,51,0.35)] transition-transform duration-200 group-hover:scale-105"
+                width={170}
+                height={38}
+                className="h-7.5 xs:h-8 sm:h-8.5 lg:h-9 w-auto object-contain drop-shadow-[0_2px_12px_rgba(255,75,38,0.35)] transition-transform duration-200 group-hover:scale-105"
               />
             </Link>
           </div>
 
-          {/* Center — Clean Desktop Nav (Matches Image 2) */}
+          {/* Center — Clean Desktop Nav (Floating Pill Bar) */}
           <div className="hidden lg:flex items-center shrink-0">
-            <nav className="flex items-center gap-1 xl:gap-2" aria-label="Main navigation">
+            <nav className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.08] p-1 rounded-full shadow-inner" aria-label="Main navigation">
               {publicNav.map(({ label, href }) => {
                 const active = isActive(href);
                 return (
@@ -413,32 +423,31 @@ export function AppHeader() {
             </nav>
           </div>
 
-          {/* Right — Actions & High-contrast CTA */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            {/* Desktop Actions (lg and up) */}
-            <div className="hidden lg:flex items-center gap-2.5 xl:gap-3 shrink-0">
-              {isLoaded && !isSignedIn && (
+          {/* Right — Actions & Radiant CTA (Always visible on all screen sizes) */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* Desktop / Tablet Actions (md and up) */}
+            <div className="hidden md:flex items-center gap-2 sm:gap-2.5 shrink-0">
+              {(!isLoaded || !isSignedIn) ? (
                 <>
                   <Link
-                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-xs sm:text-[13px] font-bold text-white transition-all hover:text-white hover:bg-white/[0.1] whitespace-nowrap border border-white/20 bg-white/[0.05]"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 sm:px-4 text-xs font-bold text-slate-200 transition-all hover:text-white hover:bg-white/10 hover:border-white/30 whitespace-nowrap border border-white/15 bg-white/[0.04]"
                     href="/sign-in"
                   >
-                    <User className="h-3.5 w-3.5" />
+                    <User className="h-3.5 w-3.5 text-slate-300" />
                     <span>Login</span>
                   </Link>
                   <Link
-                    className="group inline-flex h-9 lg:h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-5 lg:px-6 text-xs lg:text-[13px] font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.4),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-300 hover:shadow-[0_0_32px_rgba(230,72,51,0.7),0_6px_20px_rgba(0,0,0,0.5)] hover:scale-105 active:scale-95 whitespace-nowrap overflow-hidden relative shrink-0"
+                    className="group relative inline-flex h-9 sm:h-9.5 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] border-t border-white/25 px-4.5 sm:px-5.5 text-xs sm:text-[13px] font-black uppercase tracking-wider text-white shadow-md shadow-orange-950/40 transition-all duration-150 hover:brightness-110 hover:scale-[1.025] active:scale-[0.98] whitespace-nowrap overflow-hidden shrink-0"
                     href="/events"
                   >
                     <span>Join Now</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5] transition-transform duration-300 group-hover:translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5] transition-transform duration-150 group-hover:translate-x-1" />
                   </Link>
                 </>
-              )}
-              {isLoaded && isSignedIn && (
-                <div className="flex items-center gap-2.5">
+              ) : (
+                <div className="flex items-center gap-2 sm:gap-2.5">
                   <Link
-                    className="group inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-4.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(230,72,51,0.5)] transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
+                    className="group relative inline-flex h-9 sm:h-9.5 items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] border-t border-white/25 px-4 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-orange-950/40 transition-all duration-150 hover:brightness-110 hover:scale-[1.025] active:scale-[0.98] whitespace-nowrap overflow-hidden"
                     href="/events"
                   >
                     <Sparkles className="h-3.5 w-3.5 text-white" />
@@ -450,16 +459,32 @@ export function AppHeader() {
               )}
             </div>
 
-            {/* Mobile Controls (below lg) - Circular hamburger button matching Image 1 */}
-            <div className="flex lg:hidden items-center gap-2">
-              {isLoaded && isSignedIn && (
+            {/* Mobile Actions (< md): Always show compact Login + Join Now + Hamburger */}
+            <div className="flex md:hidden items-center gap-1.5 xs:gap-2 shrink-0">
+              {(!isLoaded || !isSignedIn) ? (
+                <>
+                  <Link
+                    className="hidden xs:inline-flex h-8 items-center justify-center rounded-full px-2.5 text-[11px] font-bold text-slate-200 border border-white/15 bg-white/[0.04] hover:text-white"
+                    href="/sign-in"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    className="group relative inline-flex h-8 items-center justify-center gap-1 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] border-t border-white/25 px-3 text-[11px] font-black uppercase tracking-wider text-white shadow-sm shadow-orange-950/40 whitespace-nowrap overflow-hidden active:scale-95 transition-all duration-150"
+                    href="/events"
+                  >
+                    <span>JOIN</span>
+                    <ArrowRight className="h-3 w-3 text-white stroke-[2.5]" />
+                  </Link>
+                </>
+              ) : (
                 <DashboardProfileDropdown isMobile />
               )}
               <Hamburger open={open} onClick={() => setOpen((v) => !v)} />
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* ─── Production-Grade Slide-Over Mobile Drawer Sheet (Portaled to document.body) ─── */}
       {mounted && typeof document !== "undefined" && createPortal(
@@ -472,256 +497,343 @@ export function AppHeader() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                className="fixed inset-0 bg-black/75 backdrop-blur-md"
+                className="fixed inset-0 bg-black/90 backdrop-blur-md"
                 onClick={() => setOpen(false)}
                 onTouchMove={(e) => e.preventDefault()}
               />
 
-              {/* Glowing Accent Orb behind drawer */}
-              <div className="pointer-events-none fixed right-0 top-1/3 -z-10 h-80 w-80 rounded-full bg-[#e64833]/15 blur-[120px]" />
-
-              {/* Slide-Over Drawer Sheet */}
+              {/* Slide-Over Drawer Sheet (100% Solid Dark Athletic Shell - ZERO Ghost Bleed) */}
               <motion.nav
                 initial={{ x: "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 28, stiffness: 280 }}
-                className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[85%] max-w-[340px] flex-col overflow-hidden rounded-l-[32px] border-l border-white/20 bg-[#071922]/98 backdrop-blur-3xl shadow-[-25px_0_60px_rgba(0,0,0,0.85)] text-white"
+                className="fixed inset-y-0 right-0 z-10 flex h-full h-[100dvh] w-[86%] max-w-[340px] flex-col overflow-hidden rounded-l-[28px] border-l border-white/10 bg-[#080c10] shadow-[-30px_0_70px_rgba(0,0,0,0.95)] text-white"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Mobile Navigation"
               >
-                {/* Top Neon Accent Line */}
-                <div className="h-1 w-full bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#fbe9d0] shrink-0" />
+                {/* Top Subtle Brand Accent Line */}
+                <div className="h-0.5 w-full bg-gradient-to-r from-[#ff4b26] via-[#ff6a38] to-[#ff4b26] shrink-0" />
 
                 {/* Drawer Header: Brand Logo + Close Pill */}
-                <div className="flex items-center justify-between px-5 pt-4 pb-3.5 border-b border-white/10 shrink-0">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 shrink-0">
                   <Link
                     href="/"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 shrink-0"
+                    className="flex items-center gap-2 shrink-0"
                   >
                     <img
                       src="/runnerup-logo.png"
                       alt="RUNNERUP"
-                      style={{ height: "32px", width: "auto" }}
-                      className="h-8 max-h-[36px] w-auto object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(230,72,51,0.4)]"
+                      style={{ height: "26px", width: "auto" }}
+                      className="h-6.5 max-h-[28px] w-auto object-contain shrink-0 drop-shadow-[0_2px_8px_rgba(255,75,38,0.35)]"
                     />
                   </Link>
 
-                {/* Circular Glass Close Button */}
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close menu"
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/[0.08] text-slate-300 transition-all duration-200 hover:border-white/40 hover:bg-white/20 hover:text-white active:scale-90 shadow-md cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Scrollable Body */}
-              <div
-                className="flex-1 overflow-y-auto overscroll-contain no-scrollbar p-5 space-y-4"
-                style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
-              >
-                {/* Athlete Profile (only shown when signed in) */}
-                {isLoaded && isSignedIn && user ? (
-                  <div className="flex items-center gap-3 rounded-2xl border border-[#e64833]/30 bg-[#e64833]/[0.08] p-3.5 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
-                    {user?.imageUrl ? (
-                      <img
-                        src={user.imageUrl}
-                        alt={user?.fullName ?? "Athlete"}
-                        className="h-10 w-10 rounded-full object-cover ring-2 ring-[#e64833]/60 shadow-lg shrink-0"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-xs font-black text-white ring-2 ring-[#e64833]/60 shadow-lg shrink-0">
-                        {(user?.fullName ?? user?.firstName ?? "A").charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <p className="truncate text-xs font-black uppercase tracking-wider text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
-                          {user?.fullName ?? user?.firstName ?? "Athlete"}
-                        </p>
-                        <span className="rounded-full bg-[#e64833]/25 border border-[#e64833]/50 px-1.5 py-0.2 text-[0.52rem] font-black uppercase tracking-wider text-[#fbe9d0]">
-                          PRO ⚡
-                        </span>
-                      </div>
-                      <p className="truncate text-[0.68rem] text-slate-300 font-medium mt-0.5">
-                        {user?.primaryEmailAddress?.emailAddress}
-                      </p>
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Featured Primary CTA: Next Challenge */}
-                <Link
-                  href="/events"
-                  onClick={() => setOpen(false)}
-                  className="group relative flex items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] p-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#e64833]/30 transition-all hover:scale-[1.02] active:scale-95 border border-white/20"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/20 backdrop-blur-md">
-                      <Sparkles className="h-4.5 w-4.5 text-white" />
-                    </div>
-                    <div>
-                      <span className="block text-xs font-black uppercase tracking-wider text-white">Next Challenge</span>
-                      <span className="block text-[0.65rem] font-medium text-white/90 normal-case">Secret Perks · Dropping Soon</span>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-white stroke-[2.5] transition-transform group-hover:translate-x-1" />
-                </Link>
-
-                {/* Section Header */}
-                <div className="px-1 pt-1">
-                  <span className="text-[0.65rem] font-black uppercase tracking-widest text-[#90aead]">
-                    Menu Navigation
-                  </span>
-                </div>
-
-                {/* Navigation Links */}
-                <div className="space-y-2">
-                  {publicNav.map(({ label, href, icon: Icon }) => {
-                    const active = isActive(href);
-                    return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={(e) => handleMobileNavClick(href, e)}
-                        className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
-                          active
-                            ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
-                            : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
-                        }`}
-                      >
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
-                            active
-                              ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
-                              : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" strokeWidth={2.2} />
-                        </span>
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{label}</span>
-                          {href === "/events" && (
-                            <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-emerald-300">
-                              Active Races
-                            </span>
-                          )}
-                        </div>
-                        <svg
-                          className={`h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 ${
-                            active ? "text-[#e64833]" : "text-slate-500 group-hover:text-white"
-                          }`}
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="m6 4 4 4-4 4" />
-                        </svg>
-                      </Link>
-                    );
-                  })}
-
-                  {/* Dashboard Link (if signed in) */}
-                  {isLoaded && isSignedIn && (
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setOpen(false)}
-                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
-                        isActive("/dashboard")
-                          ? "bg-gradient-to-r from-[#e64833]/25 via-[#e64833]/15 to-transparent border border-[#e64833]/50 text-white shadow-[0_0_16px_rgba(230,72,51,0.2)] backdrop-blur-xl"
-                          : "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.1] hover:text-white hover:border-white/20 backdrop-blur-xl"
-                      }`}
-                    >
-                      <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 ${
-                          isActive("/dashboard")
-                            ? "bg-gradient-to-tr from-[#e64833] to-[#ea5a47] text-white shadow-[0_0_10px_rgba(230,72,51,0.5)]"
-                            : "bg-white/[0.08] text-[#e64833] border border-white/10 group-hover:bg-white/15 group-hover:text-white"
-                        }`}
-                      >
-                        <LayoutDashboard className="h-4 w-4" strokeWidth={2.2} />
-                      </span>
-                      <span className="flex-1">Athlete Dashboard</span>
-                      <svg
-                        className="h-3.5 w-3.5 text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-white"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m6 4 4 4-4 4" />
-                      </svg>
-                    </Link>
-                  )}
-
-                  {/* Admin Console Link (if admin) */}
-                  {isLoaded && isSignedIn && isAdmin && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setOpen(false)}
-                      className="group flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 active:scale-[0.98] border border-amber-400/40 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30 hover:text-white backdrop-blur-xl"
-                    >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/30 text-amber-400 border border-amber-400/50">
-                        <Award className="h-4 w-4" strokeWidth={2.2} />
-                      </span>
-                      <span className="flex-1">Admin Console</span>
-                      <span className="rounded-full bg-amber-500/30 border border-amber-400/50 px-1.5 py-0.5 text-[0.55rem] font-black uppercase tracking-wider text-amber-300">
-                        🛡️ Owner
-                      </span>
-                    </Link>
-                  )}
-                </div>
-              </div>
-
-              {/* Drawer Footer Actions - Sleek & Production Grade */}
-              <div className="p-5 border-t border-white/10 bg-[#040e13]/95 backdrop-blur-xl shrink-0 space-y-2.5">
-                {isLoaded && isSignedIn ? (
+                  {/* Circular Glass Close Button */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setOpen(false);
-                      void signOut(() => router.push("/"));
-                    }}
-                    className="group flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-rose-300 backdrop-blur-xl transition-all duration-200 hover:bg-rose-500/20 hover:border-rose-400/50 hover:text-white active:scale-[0.98] cursor-pointer"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close menu"
+                    className="flex h-7.5 w-7.5 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-slate-300 transition-all duration-200 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-90 shadow-sm cursor-pointer"
                   >
-                    <LogOut className="h-3.5 w-3.5 text-rose-300 transition-transform group-hover:-translate-x-0.5" />
-                    <span>Sign Out</span>
+                    <X className="h-3.5 w-3.5" />
                   </button>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2.5 w-full">
+                </div>
+
+                {/* Body - Compact Fit (Zero Scroll on Standard Devices) */}
+                <div
+                  className="flex-1 overflow-y-auto overscroll-contain no-scrollbar px-3.5 py-3 flex flex-col justify-start gap-2.5"
+                  style={{ touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
+                >
+                  {/* Athlete Profile (when signed in) */}
+                  {isLoaded && isSignedIn && user ? (
+                    <div className="flex items-center gap-2.5 rounded-xl border border-[#ff4b26]/30 bg-[#ff4b26]/10 px-3 py-2 shrink-0">
+                      {user?.imageUrl ? (
+                        <img
+                          src={user.imageUrl}
+                          alt={user?.fullName ?? "Athlete"}
+                          className="h-8 w-8 rounded-full object-cover ring-2 ring-[#ff4b26]/60 shrink-0"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff4b26] text-[11px] font-black text-white shrink-0">
+                          {(user?.fullName ?? user?.firstName ?? "A").charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-black uppercase text-white leading-tight">
+                          {user?.fullName ?? user?.firstName ?? "Athlete"}
+                        </p>
+                        <p className="truncate text-[10px] text-slate-400 font-medium leading-tight">
+                          {user?.primaryEmailAddress?.emailAddress}
+                        </p>
+                      </div>
+                      <span className="rounded-full bg-[#ff4b26]/25 border border-[#ff4b26]/40 px-1.5 py-0.2 text-[9px] font-black uppercase text-orange-200 shrink-0">
+                        PRO ⚡
+                      </span>
+                    </div>
+                  ) : null}
+
+                  {/* Primary Next Challenge Top Pill Banner */}
+                  <Link
+                    href="/events/national-cancer-awareness-day-virtual-run-2026"
+                    onClick={() => setOpen(false)}
+                    className="group flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#ff4b26]/20 via-[#ff4b26]/10 to-transparent border border-[#ff4b26]/40 p-3 text-white transition-all hover:border-[#ff4b26] active:scale-[0.98] shrink-0"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff4b26] text-white shrink-0 shadow-md">
+                        <Sparkles className="h-4 w-4 text-white" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black uppercase tracking-wide text-white truncate leading-tight">
+                          Cancer Awareness 2026
+                        </p>
+                        <p className="text-[11px] text-amber-300 font-semibold truncate leading-tight mt-0.5">
+                          Active Challenge · 7–15 Nov
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-amber-400 shrink-0 transition-transform group-hover:translate-x-1" />
+                  </Link>
+
+                  {/* Clean Unified Navigation Links - Single Professional Color Combination */}
+                  <div className="space-y-1.5 pt-0.5">
+                    {/* 1. Home */}
                     <Link
-                      href="/sign-in"
-                      onClick={() => setOpen(false)}
-                      className="flex items-center justify-center rounded-xl border border-white/20 bg-white/[0.05] px-3.5 py-2.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/30 active:scale-95 shadow-sm"
+                      href="/"
+                      onClick={(e) => handleMobileNavClick("/", e)}
+                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                        pathname === "/"
+                          ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      }`}
                     >
-                      Sign In
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                        pathname === "/" ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        <Calendar className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">Home</span>
+                      <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                        pathname === "/" ? "text-[#ff4b26]" : "text-slate-500"
+                      }`} />
                     </Link>
+
+                    {/* 2. Events */}
                     <Link
                       href="/events"
-                      onClick={() => setOpen(false)}
-                      className="group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-xl bg-gradient-to-r from-[#e64833] via-[#ea5a47] to-[#c93b27] px-3.5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-[#e64833]/30 border border-white/20 active:scale-95 transition-all hover:shadow-lg hover:shadow-[#e64833]/45"
+                      onClick={(e) => handleMobileNavClick("/events", e)}
+                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                        isActive("/events")
+                          ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      }`}
                     >
-                      <span className="relative z-10">Next Challenge</span>
-                      <ArrowRight className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 text-white stroke-[2.5]" />
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                        isActive("/events") ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        <Calendar className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">Events</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider ${
+                        isActive("/events")
+                          ? "bg-[#ff4b26]/20 border border-[#ff4b26]/40 text-[#ff4b26]"
+                          : "border border-white/10 bg-white/5 text-slate-400"
+                      }`}>
+                        Active
+                      </span>
+                      <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                        isActive("/events") ? "text-[#ff4b26]" : "text-slate-500"
+                      }`} />
                     </Link>
+
+                    {/* 3. Leaderboard */}
+                    <Link
+                      href="/leaderboard"
+                      onClick={(e) => handleMobileNavClick("/leaderboard", e)}
+                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                        isActive("/leaderboard")
+                          ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      }`}
+                    >
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                        isActive("/leaderboard") ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        <Trophy className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">Leaderboard</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider ${
+                        isActive("/leaderboard")
+                          ? "bg-[#ff4b26]/20 border border-[#ff4b26]/40 text-[#ff4b26]"
+                          : "border border-white/10 bg-white/5 text-slate-400"
+                      }`}>
+                        Live GPS
+                      </span>
+                      <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                        isActive("/leaderboard") ? "text-[#ff4b26]" : "text-slate-500"
+                      }`} />
+                    </Link>
+
+                    {/* 4. Medals */}
+                    <Link
+                      href="/gallery"
+                      onClick={(e) => handleMobileNavClick("/gallery", e)}
+                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                        isActive("/gallery")
+                          ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      }`}
+                    >
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                        isActive("/gallery") ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        <Award className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">Medals</span>
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-mono font-bold text-slate-300">
+                        3D Cast
+                      </span>
+                      <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                        isActive("/gallery") ? "text-[#ff4b26]" : "text-slate-500"
+                      }`} />
+                    </Link>
+
+                    {/* 5. How It Works */}
+                    <Link
+                      href="/#how-it-works"
+                      onClick={(e) => handleMobileNavClick("/#how-it-works", e)}
+                      className="group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 group-hover:text-white">
+                        <Route className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">How It Works</span>
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-mono font-bold text-slate-300">
+                        3 Steps
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-slate-500 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+
+                    {/* 6. Real Runners, Real Medals */}
+                    <Link
+                      href="/#real-runners"
+                      onClick={(e) => handleMobileNavClick("/#real-runners", e)}
+                      className="group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                    >
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 group-hover:text-white">
+                        <ShieldCheck className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">Real Runners & Medals</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 text-slate-300 px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider">
+                        Verified
+                      </span>
+                      <ChevronRight className="h-3.5 w-3.5 text-slate-500 transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+
+                    {/* 7. About */}
+                    <Link
+                      href="/about"
+                      onClick={(e) => handleMobileNavClick("/about", e)}
+                      className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                        isActive("/about")
+                          ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                          : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      }`}
+                    >
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                        isActive("/about") ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                      }`}>
+                        <Sparkles className="h-4 w-4" strokeWidth={2.2} />
+                      </div>
+                      <span className="flex-1 font-black">About</span>
+                      <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                        isActive("/about") ? "text-[#ff4b26]" : "text-slate-500"
+                      }`} />
+                    </Link>
+
+                    {/* Dashboard (if signed in) */}
+                    {isLoaded && isSignedIn && (
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setOpen(false)}
+                        className={`group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] ${
+                          isActive("/dashboard")
+                            ? "border border-[#ff4b26]/60 bg-[#ff4b26]/15 text-white shadow-md shadow-[#ff4b26]/10 font-black"
+                            : "border border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                        }`}
+                      >
+                        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                          isActive("/dashboard") ? "bg-[#ff4b26]/30 text-[#ff4b26]" : "text-slate-400 group-hover:text-white"
+                        }`}>
+                          <LayoutDashboard className="h-4 w-4" strokeWidth={2.2} />
+                        </div>
+                        <span className="flex-1 font-black">Dashboard</span>
+                        <ChevronRight className={`h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 ${
+                          isActive("/dashboard") ? "text-[#ff4b26]" : "text-slate-500"
+                        }`} />
+                      </Link>
+                    )}
+
+                    {/* Admin Console (if owner) */}
+                    {isLoaded && isSignedIn && isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setOpen(false)}
+                        className="group flex items-center gap-3 rounded-xl px-3.5 py-2 sm:py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-150 active:scale-[0.98] border border-amber-400/40 bg-amber-500/15 text-amber-200 hover:bg-amber-500/25"
+                      >
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/30 text-amber-400">
+                          <Award className="h-4 w-4" strokeWidth={2.2} />
+                        </div>
+                        <span className="flex-1 font-black">Admin Console</span>
+                        <span className="rounded-full bg-amber-500/30 border border-amber-400/50 px-1.5 py-0.2 text-[8px] font-black uppercase text-amber-300">
+                          🛡️ Owner
+                        </span>
+                      </Link>
+                    )}
                   </div>
-                )}
-                
-                <p className="text-center text-[0.62rem] text-[#90aead]/70 font-semibold tracking-wide pt-0.5">
-                  RUNNERUP © 2026 • Virtual Marathon Platform
-                </p>
-              </div>
-            </motion.nav>
+                </div>
+
+                {/* Drawer Footer Actions - Compact (Chat with Director REMOVED) */}
+                <div className="p-3 border-t border-white/10 bg-[#060a0f] shrink-0 space-y-2">
+                  {isLoaded && isSignedIn ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        void signOut(() => router.push("/"));
+                      }}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-rose-300 transition-all duration-150 hover:bg-rose-500/20 active:scale-[0.98] cursor-pointer"
+                    >
+                      <LogOut className="h-3.5 w-3.5 text-rose-300" />
+                      <span>Sign Out</span>
+                    </button>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <Link
+                        href="/sign-in"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-center rounded-xl border border-white/15 bg-white/[0.05] px-3 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all hover:bg-white/10 active:scale-95"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/events"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-3 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-sm active:scale-95 transition-all"
+                      >
+                        <span>Join Event</span>
+                        <ArrowRight className="h-3.5 w-3.5 text-white stroke-[2.5]" />
+                      </Link>
+                    </div>
+                  )}
+
+                  <p className="text-center text-[9.5px] text-slate-500 font-semibold tracking-wide">
+                    RUNNERUP © 2026 • Virtual Marathon Platform
+                  </p>
+                </div>
+              </motion.nav>
           </div>
         )}
       </AnimatePresence>,

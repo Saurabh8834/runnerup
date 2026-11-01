@@ -40,10 +40,10 @@ function CountUp({ value }: { value: number }) {
 }
 
 const stats: Stat[] = [
-  { icon: Users, value: 25000, suffix: "+", label: "Runners joined" },
-  { icon: Flag, value: 120, suffix: "+", label: "Cities covered" },
-  { icon: Star, value: 98, suffix: "%", label: "Completion rate" },
-  { icon: Medal, value: 1800, suffix: "+", label: "Verified reviews" },
+  { icon: Users, value: 18500, suffix: "+", label: "Pan-India Athletes" },
+  { icon: Flag, value: 54, suffix: "+", label: "Cities Reached" },
+  { icon: Star, value: 99, suffix: ".2%", label: "GPS Verification Rate" },
+  { icon: Medal, value: 14200, suffix: "+", label: "Finisher Medals Shipped" },
 ];
 
 export function EventStats() {

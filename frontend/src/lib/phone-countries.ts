@@ -103,8 +103,16 @@ export function validatePhoneFields(formData: FormData, fieldName = "phone") {
   const countryCode =
     typeof formData.get(`${fieldName}Country`) === "string"
       ? String(formData.get(`${fieldName}Country`))
-      : DEFAULT_PHONE_COUNTRY.code;
-  const phoneNumber = String(formData.get(`${fieldName}Number`) ?? "").replace(/\D/g, "");
+      : typeof formData.get("countryCode") === "string"
+        ? String(formData.get("countryCode"))
+        : DEFAULT_PHONE_COUNTRY.code;
+
+  const rawPhone =
+    formData.get(`${fieldName}Number`) ??
+    formData.get(fieldName) ??
+    formData.get("phoneNumber") ??
+    "";
+  const phoneNumber = String(rawPhone).replace(/\D/g, "");
   const country = findPhoneCountry(countryCode);
 
   if (!phoneNumber) {
