@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const isPast = event.status === "past";
   const metaTitle = `${event.name} - ${event.distance} Virtual Run | RunnerUp`;
   const metaDescription = isPast
-    ? `View results and recap for ${event.name}. ${event.finishers ?? 0} finishers, ${event.verifiedResults ?? 0} verified GPS results from across India.`
+    ? `View results and recap for ${event.name}. Official GPS-verified results and finisher awards from across India.`
     : `Register for ${event.name} - a ${event.distance} virtual running event. GPS verification, medals, certificates, and leaderboard. Entry: ${event.price}.`;
 
   const ogImageUrl = event.bannerImageUrl
