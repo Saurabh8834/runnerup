@@ -538,25 +538,33 @@ function PaymentRegistrationFormInner() {
   const activityOptions =
     activeEvent?.activityTypes?.length ? activeEvent.activityTypes : ["running", "cycling", "walking"];
 
+  // Apply initial query parameter once on mount without blocking manual user selection
+  const initialDistanceAppliedRef = useRef(false);
   useEffect(() => {
-    if (distanceFromQuery && distanceOptions.includes(distanceFromQuery)) {
-      setSelectedDistance(distanceFromQuery);
-      return;
+    if (!initialDistanceAppliedRef.current) {
+      if (distanceFromQuery && distanceOptions.includes(distanceFromQuery)) {
+        setSelectedDistance(distanceFromQuery);
+      }
+      initialDistanceAppliedRef.current = true;
+    } else {
+      // If event changed and current selectedDistance is not supported by new event, fallback to first option
+      setSelectedDistance((prev) => (distanceOptions.includes(prev) ? prev : (distanceOptions[0] ?? "5 km")));
     }
-    if (!distanceOptions.includes(selectedDistance)) {
-      setSelectedDistance(distanceOptions[0] ?? "5 km");
-    }
-  }, [distanceOptions, distanceFromQuery, selectedDistance]);
+  }, [distanceOptions, distanceFromQuery]);
 
+  // Apply initial activity query parameter once on mount without blocking manual user selection
+  const initialActivityAppliedRef = useRef(false);
   useEffect(() => {
-    if (rawActivityQuery && activityOptions.includes(activityFromQuery)) {
-      setSelectedActivity(activityFromQuery);
-      return;
+    if (!initialActivityAppliedRef.current) {
+      if (rawActivityQuery && activityOptions.includes(activityFromQuery)) {
+        setSelectedActivity(activityFromQuery);
+      }
+      initialActivityAppliedRef.current = true;
+    } else {
+      // If event changed and current selectedActivity is not supported by new event, fallback to first option
+      setSelectedActivity((prev) => (activityOptions.includes(prev) ? prev : (activityOptions[0] ?? "running")));
     }
-    if (!activityOptions.includes(selectedActivity)) {
-      setSelectedActivity(activityOptions[0] ?? "running");
-    }
-  }, [activityOptions, activityFromQuery, rawActivityQuery, selectedActivity]);
+  }, [activityOptions, activityFromQuery, rawActivityQuery]);
 
   // Pincode auto-lookup handler
   async function handlePincodeChange(code: string) {
@@ -1837,7 +1845,15 @@ function PaymentRegistrationFormInner() {
                 {/* Line Items */}
                 <div className="space-y-3 text-xs sm:text-sm">
                   <div className="flex items-center justify-between text-slate-300">
-                    <span>Entry Fee ({selectedDistance || "5 km"})</span>
+                    <span>
+                      Entry Fee ({selectedDistance || "5 km"} ·{" "}
+                      {selectedActivity === "cycling"
+                        ? "Cycling 🚴"
+                        : selectedActivity === "walking"
+                        ? "Walking 🚶"
+                        : "Running 🏃"}
+                      )
+                    </span>
                     <span className="font-mono font-bold text-white">₹{baseAmountInRupees}</span>
                   </div>
 
@@ -1997,7 +2013,15 @@ function PaymentRegistrationFormInner() {
                 className="overflow-hidden border-b border-white/10 pb-3 mb-2.5 text-xs space-y-1.5"
               >
                 <div className="flex justify-between text-slate-300">
-                  <span>Challenge Entry ({selectedDistance})</span>
+                  <span>
+                    Challenge Entry ({selectedDistance} ·{" "}
+                    {selectedActivity === "cycling"
+                      ? "Cycling"
+                      : selectedActivity === "walking"
+                      ? "Walking"
+                      : "Running"}
+                    )
+                  </span>
                   <span className="font-mono text-white">₹{baseAmountInRupees}</span>
                 </div>
                 {appliedCoupon && (
