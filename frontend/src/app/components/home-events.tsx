@@ -47,9 +47,9 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   const isMedalCard = isAirForce || isCancerAwareness;
 
   const resolvePoster = (slug: string, bannerUrl?: string) => {
-    if (isCancerAwareness) return "/images/cancer-awareness-medal-front-4k.png";
-    if (isAirForce) return "/images/iaf-medal-front-std.png";
-    if (bannerUrl && !bannerUrl.includes("res.cloudinary.com")) return bannerUrl;
+    if (isCancerAwareness) return "/images/cancer-awareness-medal-front-card.webp";
+    if (isAirForce) return "/images/iaf-medal-front-card.webp";
+    if (bannerUrl && !bannerUrl.includes("res.cloudinary.com") && !bannerUrl.endsWith("-4k.png")) return bannerUrl;
     return `/events/${slug}.webp`;
   };
 
@@ -116,9 +116,9 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
                 decoding="async"
                 onError={() => {
                   if (isCancerAwareness) {
-                    setImgSrc("/images/cancer-awareness-medal-front.png");
+                    setImgSrc("/images/cancer-awareness-medal-front-card.webp");
                   } else {
-                    setImgSrc("/images/iaf-medal-front-std.png");
+                    setImgSrc("/images/iaf-medal-front-card.webp");
                   }
                 }}
               />

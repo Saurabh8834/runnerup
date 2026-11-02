@@ -277,6 +277,9 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                           <img
                             src={front4k}
                             alt="Upcoming Finisher Medal - Front"
+                            fetchPriority="high"
+                            loading="eager"
+                            decoding="async"
                             className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(255,100,50,0.45)] select-none scale-[1.04] transition-transform duration-300"
                           />
                         </div>
@@ -290,6 +293,8 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                           <img
                             src={back4k}
                             alt="Upcoming Finisher Medal - Back"
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(168,85,247,0.45)] select-none scale-[1.04] transition-transform duration-300"
                           />
                         </div>
@@ -360,28 +365,32 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                         }}
                         className="relative w-full h-full flex items-center justify-center"
                       >
-                        {/* Front Face (Lossless High-Definition PNG, Antialiased Smooth Edges) */}
+                        {/* Front Face (Ultra-Fast 60fps WebP) */}
                         <div
                           style={{ backfaceVisibility: "hidden" }}
                           className="absolute inset-0 flex items-center justify-center p-1"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src="/images/iaf-medal-front-std.png"
+                            src="/images/iaf-medal-front.webp"
                             alt="Indian Air Force Day Finisher Medal - Front"
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.04] transition-transform duration-300"
                           />
                         </div>
 
-                        {/* Back Face (Lossless High-Definition PNG, Antialiased Smooth Edges) */}
+                        {/* Back Face (Ultra-Fast 60fps WebP) */}
                         <div
                           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                           className="absolute inset-0 flex items-center justify-center p-1"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src="/images/iaf-medal-back-std.png"
+                            src="/images/iaf-medal-back.webp"
                             alt="Indian Air Force Day Finisher Medal - Back"
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.04] transition-transform duration-300"
                           />
                         </div>

@@ -77,8 +77,9 @@ function FadeIn({ children, className, delay = 0 }: { children: React.ReactNode;
 }
 
 const FALLBACK_EVENT_IMAGES: Record<string, string> = {
-  "indian-air-force-day-virtual-challenge": "/images/iaf-medal-front-std.png",
-  "indian-air-force-day-2026": "/images/iaf-medal-front-std.png",
+  "national-cancer-awareness-day-virtual-run-2026": "/images/cancer-awareness-medal-front-card.webp",
+  "indian-air-force-day-virtual-challenge": "/images/iaf-medal-front-card.webp",
+  "indian-air-force-day-2026": "/images/iaf-medal-front-card.webp",
   "october-runner": "/events/october-runner.webp",
   "independence-day-virtual-run-2026": "/events/independence-day-virtual-run-2026.webp",
   "monsoon-mountain-miles": "/events/monsoon-mountain-miles.webp",
@@ -103,10 +104,10 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
   const defaultPoster =
     (isCancerAwareness
-      ? "/images/cancer-awareness-medal-front-4k.png"
+      ? "/images/cancer-awareness-medal-front-card.webp"
       : isAirForce
-        ? "/images/iaf-medal-front-std.png"
-        : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+        ? "/images/iaf-medal-front-card.webp"
+        : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
           ? event.bannerImageUrl
           : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
@@ -118,10 +119,10 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   useEffect(() => {
     const nextPoster =
       (isCancerAwareness
-        ? "/images/cancer-awareness-medal-front-4k.png"
+        ? "/images/cancer-awareness-medal-front-card.webp"
         : isAirForce
-          ? "/images/iaf-medal-front-std.png"
-          : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
+          ? "/images/iaf-medal-front-card.webp"
+          : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
             ? event.bannerImageUrl
             : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
@@ -179,9 +180,9 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
                 decoding="async"
                 onError={() => {
                   if (isCancerAwareness) {
-                    setImgSrc("/images/cancer-awareness-medal-front.png");
+                    setImgSrc("/images/cancer-awareness-medal-front-card.webp");
                   } else {
-                    setImgSrc("/images/iaf-medal-front-std.png");
+                    setImgSrc("/images/iaf-medal-front-card.webp");
                   }
                 }}
               />

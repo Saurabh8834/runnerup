@@ -50,8 +50,8 @@ export const cancerAwarenessEvent: PublicEvent = {
     "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
   highlight: "National Virtual Challenge · 7–15 Nov · Limited Edition 3D Metal Medal",
   banner: "Cancer Awareness Challenge",
-  bannerImageUrl: "/images/cancer-awareness-medal-front-4k.png",
-  medalImageUrl: "/images/cancer-awareness-medal-front-4k.png",
+  bannerImageUrl: "/images/cancer-awareness-medal-front-card.webp",
+  medalImageUrl: "/images/cancer-awareness-medal-front.webp",
   reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
   couponCode: "VIP100",
   showCouponOnCard: false,
@@ -269,8 +269,8 @@ export function getEventMedalImages(slug: string): { front: string; back: string
     slug.includes("national-cancer-awareness-day")
   ) {
     return {
-      front: "/images/cancer-awareness-medal-front-4k.png",
-      back: "/images/cancer-awareness-medal-back-4k.png",
+      front: "/images/cancer-awareness-medal-front.webp",
+      back: "/images/cancer-awareness-medal-back.webp",
     };
   }
   if (
@@ -281,8 +281,8 @@ export function getEventMedalImages(slug: string): { front: string; back: string
     slug === "indian-air-force-day-virtual-challenge"
   ) {
     return {
-      front: "/images/iaf-medal-front-std.png",
-      back: "/images/iaf-medal-back-std.png",
+      front: "/images/iaf-medal-front.webp",
+      back: "/images/iaf-medal-back.webp",
     };
   }
   const img = getEventMedalImage(slug);
@@ -294,7 +294,7 @@ export function getEventMedalImage(slug: string): string {
     slug.includes("cancer") ||
     slug.includes("national-cancer-awareness-day")
   ) {
-    return "/images/cancer-awareness-medal-front-4k.png";
+    return "/images/cancer-awareness-medal-front.webp";
   }
   if (
     slug.includes("air-force") ||
@@ -303,7 +303,7 @@ export function getEventMedalImage(slug: string): string {
     slug === "indian-air-force-day-2026" ||
     slug === "indian-air-force-day-virtual-challenge"
   ) {
-    return "/images/iaf-medal-front-std.png";
+    return "/images/iaf-medal-front.webp";
   }
   const medalMap: Record<string, string> = {
     "monsoon-mountain-miles": "/images/medals/monsoon-mountain-miles.webp",

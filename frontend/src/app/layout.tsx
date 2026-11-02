@@ -209,6 +209,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Preload critical LCP Hero Medal Image for instant paint */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/cancer-awareness-medal-front.webp"
+          type="image/webp"
+          fetchPriority="high"
+        />
         {/* Preconnect to external origins to reduce latency */}
         <link rel="preconnect" href="https://img.clerk.com" />
         <link rel="dns-prefetch" href="https://img.clerk.com" />

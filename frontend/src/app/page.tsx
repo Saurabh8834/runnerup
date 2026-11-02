@@ -69,8 +69,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Edge cached via Stale-While-Revalidate (60s) for rocket-fast <40ms TTFB
 
 export default async function Home() {
   const [serverEvents, serverHome] = await Promise.all([
