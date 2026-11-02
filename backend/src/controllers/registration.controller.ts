@@ -837,21 +837,44 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   const minRealisticSeconds = Math.round(activeKm * 150); // Min ~2:30/km world record pace
 
   // Fetch all confirmed paid runners for this event and distance (all 312 paid participants are 100% eligible)
+  const distFilter =
+    distanceQuery && distanceQuery !== "all"
+      ? {
+          distance: {
+            in: [
+              activeDistance,
+              activeDistance.toLowerCase(),
+              activeDistance.toUpperCase(),
+              activeDistance.replace(/\s+/g, ""),
+              activeDistance.replace(/\s+/g, "").toLowerCase(),
+              activeDistance.replace(/\s+/g, "").toUpperCase(),
+            ],
+          },
+        }
+      : {};
+
   const approvedRegistrations = await prisma.registration.findMany({
     where: {
       eventId: event.id,
       status: { in: ["CONFIRMED", "COMPLETED"] },
-      ...(distanceQuery && distanceQuery !== "all"
-        ? {
-            distance: {
-              equals: activeDistance,
-              mode: "insensitive",
-            },
-          }
-        : {}),
+      ...distFilter,
     },
     orderBy: { finishTimeSeconds: "asc" },
-    include: { user: true, event: true, proofUpload: true },
+    select: {
+      id: true,
+      distance: true,
+      finishTimeSeconds: true,
+      bibNumber: true,
+      shippingCity: true,
+      shippingState: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          clerkId: true,
+        },
+      },
+    },
     take: 350,
   });
 
@@ -860,17 +883,26 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     where: {
       eventId: event.id,
       status: { in: ["CONFIRMED", "COMPLETED"] },
-      ...(distanceQuery && distanceQuery !== "all"
-        ? {
-            distance: {
-              equals: activeDistance,
-              mode: "insensitive",
-            },
-          }
-        : {}),
+      ...distFilter,
     },
     orderBy: { registeredAt: "desc" },
-    include: { user: true, proofUpload: true },
+    select: {
+      id: true,
+      distance: true,
+      bibNumber: true,
+      status: true,
+      registeredAt: true,
+      finishTimeSeconds: true,
+      shippingCity: true,
+      shippingState: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          clerkId: true,
+        },
+      },
+    },
     take: 400,
   });
 
@@ -992,6 +1024,9 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     totalParticipants: participantRoster.length,
   };
 
+  const isConcluded = event.status === "CLOSED" || event.status === "COMPLETED";
+  const ttlSeconds = isConcluded ? 86400 : 300; // 24 hours for concluded event, 5 mins for live
+
   memoryCache.set(
     cacheKey,
     {
@@ -1000,13 +1035,18 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       meta,
       eventId: event.id,
     },
-    60,
+    ttlSeconds,
   );
 
   if (forceRefresh) {
     response.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
   } else if (!clerkUserId) {
-    response.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=600");
+    response.setHeader(
+      "Cache-Control",
+      isConcluded
+        ? "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400"
+        : "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
+    );
   } else {
     response.setHeader("Cache-Control", "private, no-cache");
   }

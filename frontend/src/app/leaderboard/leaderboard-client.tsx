@@ -66,6 +66,15 @@ type UserReg = {
   finishTimeSeconds: number | null;
 };
 
+export type InitialLeaderboardData = {
+  entries: LeaderboardEntry[];
+  participants: ParticipantEntry[];
+  userRegistrations?: UserReg[];
+  availableDistances: string[];
+  selectedSlug: string;
+  selectedDistance: string;
+};
+
 type EventOption = {
   id?: string;
   slug: string;
@@ -272,7 +281,11 @@ function PodiumOlympicGold({
   );
 }
 
-export function LeaderboardClient() {
+export function LeaderboardClient({
+  initialData,
+}: {
+  initialData?: InitialLeaderboardData;
+} = {}) {
   const searchParams = useSearchParams();
   const initialEventParam = searchParams.get("event") || "";
   const initialDistanceParam = searchParams.get("distance") || "";
@@ -291,28 +304,49 @@ export function LeaderboardClient() {
     })),
   );
 
-  const [selectedSlug, setSelectedSlug] = useState<string>(
-    initialEventParam || "indian-air-force-day-virtual-challenge",
-  );
-  const [selectedDistance, setSelectedDistance] = useState<string>(
-    initialDistanceParam || "5 km",
-  );
+  const defaultSlug = initialEventParam || initialData?.selectedSlug || "indian-air-force-day-virtual-challenge";
+  const defaultDistance = initialDistanceParam || initialData?.selectedDistance || "5 km";
+
+  const [selectedSlug, setSelectedSlug] = useState<string>(defaultSlug);
+  const [selectedDistance, setSelectedDistance] = useState<string>(defaultDistance);
   const [activeTab, setActiveTab] = useState<"verified" | "participants">("verified");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [participants, setParticipants] = useState<ParticipantEntry[]>([]);
-  const [userRegistrations, setUserRegistrations] = useState<UserReg[]>([]);
-  const [availableDistances, setAvailableDistances] = useState<string[]>([
-    "1.5 km",
-    "1.6 km",
-    "3 km",
-    "5 km",
-    "10 km",
-    "21 km",
-  ]);
-  const [loading, setLoading] = useState(true);
+  const hasMatchingInitial = Boolean(
+    initialData &&
+      initialData.entries.length > 0 &&
+      initialData.selectedSlug === defaultSlug &&
+      initialData.selectedDistance === defaultDistance,
+  );
+
+  const [entries, setEntries] = useState<LeaderboardEntry[]>(
+    hasMatchingInitial ? initialData!.entries : [],
+  );
+  const [participants, setParticipants] = useState<ParticipantEntry[]>(
+    hasMatchingInitial ? initialData!.participants : [],
+  );
+  const [userRegistrations, setUserRegistrations] = useState<UserReg[]>(
+    hasMatchingInitial && initialData?.userRegistrations ? initialData.userRegistrations : [],
+  );
+  const [availableDistances, setAvailableDistances] = useState<string[]>(
+    initialData?.availableDistances?.length
+      ? initialData.availableDistances
+      : ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
+  );
+  const [loading, setLoading] = useState(!hasMatchingInitial);
   const [error, setError] = useState<string | null>(null);
+
+  // Smooth canonical redirect for apex mobile visitors to prevent CORS / 308 issues
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname === "runnerup.in") {
+      try {
+        const canonicalUrl = `https://www.runnerup.in${window.location.pathname}${window.location.search}${window.location.hash}`;
+        window.location.replace(canonicalUrl);
+      } catch {
+        // Ignore in restricted environments
+      }
+    }
+  }, []);
 
   // Leaderboard disclosure countdown status (Reveals 31 Oct, 12:00 PM IST)
   const [isRevealed, setIsRevealed] = useState(() => Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP);
@@ -373,7 +407,29 @@ export function LeaderboardClient() {
   // Cache to prevent hammering the server when users flip between distances
   const cacheRef = useRef<Map<string, { json: any; timestamp: number }>>(new Map());
 
-  // Load leaderboard & participants data for the selected event & distance
+  // Seed cache with server initialData so instant back/forth switching is immediate
+  useEffect(() => {
+    if (initialData && initialData.entries.length > 0) {
+      const key = `${initialData.selectedSlug}?distance=${encodeURIComponent(initialData.selectedDistance)}`;
+      if (!cacheRef.current.has(key)) {
+        cacheRef.current.set(key, {
+          json: {
+            success: true,
+            data: initialData.entries,
+            participants: initialData.participants,
+            userRegistrations: initialData.userRegistrations || [],
+            meta: {
+              availableDistances: initialData.availableDistances,
+              selectedDistance: initialData.selectedDistance,
+            },
+          },
+          timestamp: Date.now(),
+        });
+      }
+    }
+  }, [initialData]);
+
+  // Load leaderboard & participants data for the selected event & distance with multi-tier fallback
   const loadLeaderboard = useCallback(async () => {
     if (!selectedSlug) {
       setLoading(false);
@@ -393,28 +449,54 @@ export function LeaderboardClient() {
         setAvailableDistances(json.meta.availableDistances as string[]);
       }
       setLoading(false);
+      setError(null);
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    try {
-      const response = await fetch(
-        getApiUrl(`/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`),
-      );
+    const relativeUrl = getApiUrl(`/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`);
+    const endpoints = [
+      relativeUrl,
+      `https://www.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
+      `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
+      `https://api.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
+    ].filter((url, idx, arr) => arr.indexOf(url) === idx);
 
-      if (!response.ok) {
-        throw new Error("Could not load leaderboard data");
+    let parsedJson: any = null;
+    let fetchSuccess = false;
+
+    for (const endpoint of endpoints) {
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 6000);
+        const response = await fetch(endpoint, {
+          signal: ctrl.signal,
+          headers: { Accept: "application/json" },
+        });
+        clearTimeout(timer);
+
+        if (response.ok) {
+          const json = await response.json();
+          if (json && (json.success || Array.isArray(json.data))) {
+            parsedJson = json;
+            fetchSuccess = true;
+            break;
+          }
+        }
+      } catch {
+        // try next resilient fallback
       }
+    }
 
-      const json = await response.json();
-      cacheRef.current.set(cacheKey, { json, timestamp: Date.now() });
+    if (fetchSuccess && parsedJson) {
+      cacheRef.current.set(cacheKey, { json: parsedJson, timestamp: Date.now() });
 
-      const rankedData = (json.data ?? []) as LeaderboardEntry[];
-      const rosterData = (json.participants ?? []) as ParticipantEntry[];
-      const userRegs = (json.userRegistrations ?? []) as UserReg[];
-      const distList = (json.meta?.availableDistances ?? []) as string[];
+      const rankedData = (parsedJson.data ?? []) as LeaderboardEntry[];
+      const rosterData = (parsedJson.participants ?? []) as ParticipantEntry[];
+      const userRegs = (parsedJson.userRegistrations ?? []) as UserReg[];
+      const distList = (parsedJson.meta?.availableDistances ?? []) as string[];
 
       setEntries(rankedData);
       setParticipants(rosterData);
@@ -422,11 +504,11 @@ export function LeaderboardClient() {
       if (distList.length > 0) {
         setAvailableDistances(distList);
       }
-    } catch {
-      setError("Unable to load live leaderboard. Please check your connection.");
-    } finally {
-      setLoading(false);
+      setError(null);
+    } else {
+      setError("Unable to sync latest live standings. Please check your connection.");
     }
+    setLoading(false);
   }, [selectedDistance, selectedSlug]);
 
   useEffect(() => {
@@ -703,12 +785,34 @@ export function LeaderboardClient() {
                 Loading {selectedDistance} rankings...
               </p>
             </div>
-          ) : error ? (
-            <div className="mt-8 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 text-center text-sm font-bold text-rose-300 shadow-sm">
-              {error}
+          ) : error && filteredEntries.length === 0 ? (
+            <div className="mt-8 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6 text-center shadow-sm">
+              <p className="text-sm font-bold text-rose-300">{error}</p>
+              <button
+                type="button"
+                onClick={() => void loadLeaderboard()}
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#e64833] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow hover:opacity-90 transition-opacity cursor-pointer"
+              >
+                <span>Tap to Retry Standings 🔄</span>
+              </button>
             </div>
           ) : (
             <>
+              {error && (
+                <div className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs font-semibold text-amber-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">⚠️</span>
+                    <span>{error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void loadLeaderboard()}
+                    className="shrink-0 rounded-lg bg-amber-500/20 px-3 py-1 font-bold text-amber-300 hover:bg-amber-500/30 text-[11px] cursor-pointer"
+                  >
+                    Retry 🔄
+                  </button>
+                </div>
+              )}
               {/* ── TAB 1: VERIFIED LEADERBOARD ─────────────────────── */}
               {activeTab === "verified" && (
                 <div className="mt-8 space-y-10">

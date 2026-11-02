@@ -1,11 +1,51 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PageShell } from "../components/app-shell";
-import { LeaderboardClient } from "./leaderboard-client";
+import { LeaderboardClient, type InitialLeaderboardData } from "./leaderboard-client";
 
-export const dynamic = "force-static";
+export const revalidate = 60;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
+
+async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefined> {
+  const defaultSlug = "indian-air-force-day-virtual-challenge";
+  const defaultDist = "5 km";
+  const distQuery = `?distance=${encodeURIComponent(defaultDist)}`;
+
+  const isDev = process.env.NODE_ENV !== "production";
+  const endpoints = isDev
+    ? [`http://127.0.0.1:4000/api/registrations/leaderboard/${defaultSlug}${distQuery}`]
+    : [
+        `https://www.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
+        `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
+        `https://api.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
+      ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        next: { revalidate: 60 },
+        headers: { Accept: "application/json" },
+        cache: "force-cache",
+      });
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json && (json.success || Array.isArray(json.data)) && Array.isArray(json.data) && json.data.length > 0) {
+        return {
+          entries: json.data,
+          participants: json.participants || [],
+          userRegistrations: json.userRegistrations || [],
+          availableDistances: json.meta?.availableDistances || ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
+          selectedSlug: defaultSlug,
+          selectedDistance: defaultDist,
+        };
+      }
+    } catch {
+      // try next resilient fallback
+    }
+  }
+  return undefined;
+}
 
 export const metadata: Metadata = {
   title: "Official Virtual Run Leaderboard & Finish Times | RunnerUp India",
@@ -46,7 +86,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LeaderboardPage() {
+export default async function LeaderboardPage() {
+  const initialData = await getInitialLeaderboard();
+
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -81,7 +123,7 @@ export default function LeaderboardPage() {
             </div>
           }
         >
-          <LeaderboardClient />
+          <LeaderboardClient initialData={initialData} />
         </Suspense>
       </div>
     </PageShell>
