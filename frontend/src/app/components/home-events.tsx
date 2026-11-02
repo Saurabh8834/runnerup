@@ -167,10 +167,10 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           {isCancerAwareness ? (
             <>
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
-                <span>Cancer Awareness</span>
+                <span>🎗️ Cancer Awareness</span>
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-black/80 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
-                <Flame className="h-3 w-3 text-amber-400" /> Only 30 Bibs Remaining
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-emerald-300 shadow-md shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live &amp; Open
               </span>
             </>
           ) : (
@@ -191,7 +191,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                   </span>
-                  <span>Open</span>
+                  <span>Live</span>
                 </span>
               )}
             </>
@@ -213,18 +213,18 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       <div className="flex flex-1 flex-col p-6">
         {/* Reward Highlight Badges for Medal Cards */}
         {isMedalCard ? (
-          <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300 shadow-sm">
+          <div className="mb-3.5 grid grid-cols-3 gap-1.5">
+            <span className="inline-flex items-center justify-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-1.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shadow-sm truncate">
               <Medal className="h-3 w-3 text-amber-400 shrink-0" />
-              Solid Metal Medal
+              <span className="truncate">Solid Medal</span>
             </span>
-            <span className="inline-flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-sky-300 shadow-sm">
+            <span className="inline-flex items-center justify-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/10 px-1.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-sky-300 shadow-sm truncate">
               <Ticket className="h-3 w-3 text-sky-400 shrink-0" />
-              Digital Race Bib
+              <span className="truncate">Digital Bib</span>
             </span>
-            <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-300 shadow-sm">
+            <span className="inline-flex items-center justify-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-emerald-300 shadow-sm truncate">
               <FileBadge className="h-3 w-3 text-emerald-400 shrink-0" />
-              E-Certificate
+              <span className="truncate">E-Certificate</span>
             </span>
           </div>
         ) : (
@@ -260,12 +260,12 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         </div>
 
         {/* Title */}
-        <h3 className="font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors uppercase tracking-tight text-white group-hover:text-[#ff4b26]">
+        <h3 className="font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors uppercase tracking-tight text-white group-hover:text-[#ff4b26] min-h-[3.6rem] sm:min-h-[4.2rem] flex items-center">
           {event.name}
         </h3>
 
         {/* Subtitle / Highlight */}
-        <p className="mt-2 text-xs sm:text-sm font-medium leading-relaxed text-slate-400 line-clamp-2">
+        <p className="mt-2 text-xs sm:text-sm font-medium leading-relaxed text-slate-400 min-h-[2.6rem] line-clamp-2">
           {event.highlight}
         </p>
 
@@ -306,7 +306,11 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
               {isCancerAwareness ? "₹799" : "₹549"}
             </span>
             <span className="font-mono text-xl font-black text-white">
-              {isCancerAwareness ? "₹499" : event.price.replace(/^Rs\.\s*/, "").replace(/^₹/, "₹")}
+              {isCancerAwareness
+                ? "₹499"
+                : event.price.startsWith("₹")
+                ? event.price
+                : `₹${event.price.replace(/^Rs\.\s*/, "")}`}
             </span>
           </div>
         </div>
@@ -316,25 +320,29 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
           <Link
             prefetch={false}
             data-prevent-card-nav
-            className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] text-white shadow-[0_0_20px_rgba(255,75,38,0.35)] border border-white/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,75,38,0.65)]"
+            className="mt-auto pt-4 w-full"
             href="/leaderboard"
             onClick={(e) => e.stopPropagation()}
           >
-            <Trophy className="h-4 w-4 text-amber-300" />
-            <span>View Leaderboard</span>
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <div className="w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] text-white shadow-[0_0_20px_rgba(255,75,38,0.35)] border border-white/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,75,38,0.65)]">
+              <Trophy className="h-4 w-4 text-amber-300" />
+              <span>View Leaderboard</span>
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </div>
           </Link>
         ) : (
           <Link
             prefetch={false}
             data-prevent-card-nav
-            className="mt-5 w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] text-white shadow-[0_0_20px_rgba(255,75,38,0.35)] border border-white/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,75,38,0.65)]"
+            className="mt-auto pt-4 w-full"
             href={isCancerAwareness ? `/events/${event.slug}` : `/events/${event.slug}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <Sparkles className="h-4 w-4" />
-            <span>Claim Your Slot</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <div className="w-full text-xs font-black uppercase tracking-wider py-3.5 rounded-full flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] text-white shadow-[0_0_20px_rgba(255,75,38,0.35)] border border-white/20 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(255,75,38,0.65)]">
+              <Sparkles className="h-4 w-4" />
+              <span>Claim Your Slot</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </div>
           </Link>
         )}
       </div>
