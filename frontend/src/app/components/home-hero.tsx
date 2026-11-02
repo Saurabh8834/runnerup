@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -22,6 +23,7 @@ type HomeHeroProps = {
 };
 
 export function HomeHero({ featuredEvent }: HomeHeroProps) {
+  const router = useRouter();
   const isEventOpen = Boolean(featuredEvent && featuredEvent.status === "upcoming");
   const [vaultTab, setVaultTab] = useState<"current" | "hallOfFame">("current");
   const [nextMedalSide, setNextMedalSide] = useState<"front" | "back">("front");
@@ -36,6 +38,18 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
   const currentSlug = featuredEvent?.slug || "national-cancer-awareness-day-virtual-run-2026";
   const currentDistances = featuredEvent?.distance || "1.5K • 3K • 5K • 10K • 21K Half Marathon";
   const currentMedalImg = nextMedalSide === "front" ? front4k : back4k;
+
+  const handleTrophyCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("[data-prevent-card-nav]") || target.closest("button") || target.closest("a")) {
+      return;
+    }
+    if (vaultTab === "current") {
+      router.push(`/events/${currentSlug}`);
+    } else {
+      router.push("/leaderboard");
+    }
+  };
 
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#080c10] via-[#090d14] to-[#080c10] text-[#f8fafc] isolate min-h-0 lg:min-h-[92dvh] flex flex-col justify-center pt-20 pb-8 sm:pt-28 sm:pb-10 lg:pt-28 lg:pb-8">
@@ -189,11 +203,14 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
             RIGHT COLUMN: DYNAMIC 3D TROPHY VAULT SHOWCASE PEDESTAL
            ══════════════════════════════════════════════════════ */}
         <div className="w-full lg:max-w-md xl:max-w-lg flex justify-center lg:justify-end shrink-0 z-10">
-          <div className="relative group rounded-3xl border border-white/15 bg-gradient-to-b from-[#111822] to-[#080d14] p-5 backdrop-blur-xl shadow-2xl max-w-sm sm:max-w-md w-full text-center transition-all duration-300 hover:scale-[1.01] min-h-[470px] flex flex-col justify-between">
+          <div
+            onClick={handleTrophyCardClick}
+            className="relative group rounded-3xl border border-white/15 hover:border-[#ff4b26]/50 bg-gradient-to-b from-[#111822] to-[#080d14] p-5 backdrop-blur-xl shadow-2xl max-w-sm sm:max-w-md w-full text-center transition-all duration-300 hover:scale-[1.01] min-h-[470px] flex flex-col justify-between cursor-pointer"
+          >
 
             <div>
               {/* Interactive Vault Switcher (Dynamic Active Challenge vs Concluded Hall of Fame Proof) */}
-              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10 mb-3">
+              <div data-prevent-card-nav className="flex items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10 mb-3">
                 <button
                   type="button"
                   onClick={() => setVaultTab("current")}
@@ -280,7 +297,7 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                     </div>
 
                     {/* Clean Floating Centered Pill Toggle */}
-                    <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
+                    <div data-prevent-card-nav className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => setNextMedalSide("front")}
@@ -372,7 +389,7 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                     </div>
 
                     {/* Clean Floating Centered Pill Toggle */}
-                    <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
+                    <div data-prevent-card-nav className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => setIafMedalSide("front")}

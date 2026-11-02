@@ -215,15 +215,24 @@ async function getPaymentStats(): Promise<CachedPaymentStats> {
   }
 }
 
+// Only real official challenges (dummy seeded events permanently excluded)
+export const REAL_EVENT_SLUGS = [
+  "national-cancer-awareness-day-virtual-run-2026",
+  "indian-air-force-day-virtual-challenge",
+  "indian-air-force-day-2026",
+];
+
 async function getRegistrationStats(): Promise<CachedRegistrationStats> {
   if (cachedRegistrationStats && cachedRegistrationStats.expiresAt > Date.now()) {
     return cachedRegistrationStats;
   }
   try {
+    const realFilter = { event: { slug: { in: REAL_EVENT_SLUGS } } };
     const [total, paidCount] = await Promise.all([
-      prisma.registration.count(),
+      prisma.registration.count({ where: realFilter }),
       prisma.registration.count({
         where: {
+          ...realFilter,
           OR: [
             { payment: { status: "PAID" } },
             { status: "CONFIRMED" },
@@ -296,6 +305,7 @@ async function getUserStats(): Promise<CachedUserStats> {
     );
   }
 }
+
 
 export async function adminOverview(request: AuthenticatedRequest, response: Response) {
   const timeRange = (typeof request.query.range === "string" ? request.query.range.toLowerCase().trim() : "all") as "today" | "3d" | "7d" | "30d" | "all";
@@ -386,8 +396,9 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     trendPayments,
     trendRegs,
   ] = await Promise.all([
-    // All events with registrations & payments to calculate per-event breakdown
+    // Real official challenges only (dummy seeded events permanently excluded)
     prisma.event.findMany({
+      where: { slug: { in: REAL_EVENT_SLUGS } },
       orderBy: { createdAt: "desc" },
       include: {
         registrations: {
@@ -398,8 +409,8 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
         },
       },
     }),
-    prisma.event.count(),
-    prisma.event.count({ where: { status: "OPEN" } }),
+    prisma.event.count({ where: { slug: { in: REAL_EVENT_SLUGS } } }),
+    prisma.event.count({ where: { slug: { in: REAL_EVENT_SLUGS }, status: "OPEN" } }),
     prisma.user.count(),
     prisma.registration.count({ where: { proofStatus: "SUBMITTED", ...(eventFilter ? { eventId: eventFilter } : {}) } }),
     prisma.certificate.count({ where: eventFilter ? { registration: { eventId: eventFilter } } : undefined }),
@@ -590,6 +601,7 @@ export async function adminListEvents(request: AuthenticatedRequest, response: R
   const { page, pageSize, skip } = parsePage(request);
 
   const where: Prisma.EventWhereInput = {
+    slug: { in: REAL_EVENT_SLUGS },
     ...(status ? { status: status as Prisma.EnumEventStatusFilter["equals"] } : {}),
     ...(search
       ? {
@@ -763,10 +775,14 @@ export async function adminListRegistrations(request: AuthenticatedRequest, resp
   const search = q(request, "q");
   const searchVariants = search ? getSearchVariants(search) : [];
 
+  const eventFilter: Prisma.RegistrationWhereInput = eventId
+    ? { eventId }
+    : { event: { slug: { in: REAL_EVENT_SLUGS } } };
+
   const where: Prisma.RegistrationWhereInput = {
+    ...eventFilter,
     ...(status ? { status: status as never } : {}),
     ...(proofStatus ? { proofStatus: proofStatus as never } : {}),
-    ...(eventId ? { eventId } : {}),
     ...(search
       ? {
         OR: [
@@ -1278,11 +1294,17 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
   const search = q(request, "q");
   const searchVariants = search ? getSearchVariants(search) : [];
 
-  const regScope: Prisma.RegistrationWhereInput = eventId ? { eventId } : {};
+  const regScope: Prisma.RegistrationWhereInput = eventId
+    ? { eventId }
+    : { event: { slug: { in: REAL_EVENT_SLUGS } } };
+
+  const eventPaymentScope: Prisma.PaymentWhereInput = eventId
+    ? { registration: { eventId } }
+    : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } };
 
   const where: Prisma.PaymentWhereInput = {
+    ...eventPaymentScope,
     ...(status ? { status: status as never } : {}),
-    ...(eventId ? { registration: { eventId } } : {}),
     ...(search
       ? {
         OR: [
@@ -1350,6 +1372,7 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
         })
       : null,
     prisma.event.findMany({
+      where: { slug: { in: REAL_EVENT_SLUGS } },
       select: {
         id: true,
         title: true,
@@ -1907,7 +1930,7 @@ export function invalidateProofCountsCache() {
 
 async function getProofCounts(eventId?: string): Promise<CachedProofCounts> {
   const baseWhere: Prisma.RegistrationWhereInput = {
-    ...(eventId ? { eventId } : {}),
+    ...(eventId ? { eventId } : { event: { slug: { in: REAL_EVENT_SLUGS } } }),
     OR: [
       { payment: { status: "PAID" } },
       { status: { in: ["CONFIRMED", "COMPLETED"] } },
@@ -1943,7 +1966,9 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
   // If an active search term is provided, always search across all statuses so admins can instantly find any runner
   if (search) {
     filterStatus = null;
-  } else if (!rawStatus || rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
+  } else if (!rawStatus || rawStatus === "ALL") {
+    filterStatus = null;
+  } else if (rawStatus === "PENDING" || rawStatus === "SUBMITTED") {
     filterStatus = ProofStatus.SUBMITTED;
   } else if (rawStatus === "APPROVED") {
     filterStatus = ProofStatus.APPROVED;
@@ -1951,8 +1976,6 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     filterStatus = ProofStatus.REJECTED;
   } else if (rawStatus === "NOT_SUBMITTED") {
     filterStatus = ProofStatus.NOT_SUBMITTED;
-  } else if (rawStatus === "ALL") {
-    filterStatus = null;
   } else {
     filterStatus = null;
   }
@@ -1994,9 +2017,13 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     ],
   };
 
+  const eventFilter: Prisma.RegistrationWhereInput = eventId
+    ? { eventId }
+    : { event: { slug: { in: REAL_EVENT_SLUGS } } };
+
   const where: Prisma.RegistrationWhereInput = {
     ...paidCondition,
-    ...(eventId ? { eventId } : {}),
+    ...eventFilter,
     ...(filterStatus ? { proofStatus: filterStatus } : {}),
     ...(searchOrConditions.length > 0 ? { AND: [{ OR: searchOrConditions }, paidCondition] } : {}),
   };
@@ -2023,7 +2050,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
 
   const baseEventWhere: Prisma.RegistrationWhereInput = {
     ...paidCondition,
-    ...(eventId ? { eventId } : {}),
+    ...eventFilter,
   };
 
   const [filteredCount, allCount, approvedCount, pendingCount, rejectedCount, notSubmittedCount] = await Promise.all([

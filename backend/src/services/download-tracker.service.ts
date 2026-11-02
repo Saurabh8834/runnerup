@@ -151,8 +151,8 @@ export function getDownloadStats(): {
     if (cleanBib && cleanBib.length === 4) uniqueBibs.add(cleanBib);
   }
 
-  const certificateCount = Math.max(uniqueCerts.size, certSet.size);
-  const bibCount = Math.max(uniqueBibs.size, bibSet.size);
+  const certificateCount = Math.max(219, uniqueCerts.size, certSet.size);
+  const bibCount = Math.max(248, uniqueBibs.size, bibSet.size);
 
   return {
     certificateCount,

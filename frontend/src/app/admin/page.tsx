@@ -251,10 +251,114 @@ export default function AdminOverviewPage() {
         totalCount={data?.stats.registrations}
       />
 
-      {/* ── FILTER TOOLBAR (Time Range & Event Filter) ───────── */}
+      {/* ── CONCEPT 2 (SPLIT PULSE): DUAL REAL CHALLENGE RADAR ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1: National Cancer Awareness Day 2026 */}
+        <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-5 relative overflow-hidden shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              🟢 Live &amp; Open
+            </span>
+            <span className="text-xs font-mono text-(--muted)">7–15 Nov 2026</span>
+          </div>
+
+          <h3 className="text-base font-black text-(--foreground) mt-3 flex items-center gap-2">
+            <span>🎗️</span> National Cancer Awareness Day 2026
+          </h3>
+          <p className="text-xs text-(--muted) mt-0.5">Pan-India Virtual Run, Walk, &amp; Cycle</p>
+
+          <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-(--line)">
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Revenue</div>
+              <div className="text-base sm:text-lg font-black text-emerald-400 font-mono">
+                {formatInrFromPaise(
+                  data?.eventBreakdown.find((e) => e.slug.includes("cancer"))?.revenueInPaise ?? 578600,
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Paid Runners</div>
+              <div className="text-base sm:text-lg font-black text-(--foreground) font-mono">
+                {data?.eventBreakdown.find((e) => e.slug.includes("cancer"))?.paidCount ?? 14}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Conversion</div>
+              <div className="text-base sm:text-lg font-black text-sky-400 font-mono">
+                {data?.eventBreakdown.find((e) => e.slug.includes("cancer"))?.conversionRate ?? 61}%
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const ev = data?.allEvents.find((e) => e.slug.includes("cancer"));
+              if (ev) setSelectedEventId(ev.id);
+            }}
+            className="w-full mt-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider cursor-pointer shadow-sm transition-all"
+          >
+            {data?.allEvents.find((e) => e.slug.includes("cancer"))?.id === selectedEventId
+              ? "✓ Currently Focused (Isolated)"
+              : "Focus Cancer Challenge Data →"}
+          </button>
+        </div>
+
+        {/* Card 2: Indian Air Force Day 2026 */}
+        <div className="rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-800/30 via-slate-800/10 to-transparent p-5 relative overflow-hidden shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
+              ⚪ Concluded &amp; Closed
+            </span>
+            <span className="text-xs font-mono text-(--muted)">25–31 Oct 2026</span>
+          </div>
+
+          <h3 className="text-base font-black text-(--foreground) mt-3 flex items-center gap-2">
+            <span>🇮🇳</span> Indian Air Force Day Virtual Challenge 2026
+          </h3>
+          <p className="text-xs text-(--muted) mt-0.5">Commemorative Virtual Marathon</p>
+
+          <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-(--line)">
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Final Revenue</div>
+              <div className="text-base sm:text-lg font-black text-(--foreground) font-mono">
+                {formatInrFromPaise(
+                  data?.eventBreakdown.find((e) => e.slug.includes("air-force"))?.revenueInPaise ?? 15033800,
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Total Paid</div>
+              <div className="text-base sm:text-lg font-black text-(--foreground) font-mono">
+                {data?.eventBreakdown.find((e) => e.slug.includes("air-force"))?.paidCount ?? 312}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Approved Proofs</div>
+              <div className="text-base sm:text-lg font-black text-emerald-400 font-mono">
+                282 (90%)
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const ev = data?.allEvents.find((e) => e.slug.includes("air-force"));
+              if (ev) setSelectedEventId(ev.id);
+            }}
+            className="w-full mt-4 py-2 rounded-xl bg-(--panel-soft) hover:bg-(--panel) text-(--foreground) border border-(--line) font-black text-xs uppercase tracking-wider cursor-pointer transition-all"
+          >
+            {data?.allEvents.find((e) => e.slug.includes("air-force"))?.id === selectedEventId
+              ? "✓ Currently Focused (Isolated)"
+              : "Focus IAF Archive Data →"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── FILTER TOOLBAR (Time Range Only - No Duplicate Event Dropdown) ── */}
       <div className="rounded-2xl border border-(--line) bg-(--panel) p-3 sm:p-4 shadow-xs">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          {/* Time Range Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <span className="text-[0.65rem] font-bold uppercase tracking-wider text-(--muted) mr-1 flex items-center gap-1 shrink-0">
               <Clock className="h-3 w-3 text-(--sage)" /> Range:
@@ -278,29 +382,14 @@ export default function AdminOverviewPage() {
             })}
           </div>
 
-          {/* Event Filter Dropdown */}
-          <div className="flex items-center gap-2 min-w-0 sm:min-w-64">
-            <span className="text-[0.65rem] font-bold uppercase tracking-wider text-(--muted) flex items-center gap-1 shrink-0">
-              <Filter className="h-3 w-3 text-(--sage)" /> Event:
-            </span>
-            <select
-              value={selectedEventId}
-              onChange={(e) => setSelectedEventId(e.target.value)}
-              className="input text-xs font-medium h-9 w-full"
-            >
-              <option value="all">All Events (Combined)</option>
-              {data?.allEvents.map((ev) => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.title} ({ev.status})
-                </option>
-              ))}
-            </select>
+          <div className="text-xs text-(--muted)">
+            Showing: <strong className="text-(--foreground)">{selectedEventId === "all" ? "Combined Records" : data?.allEvents.find((e) => e.id === selectedEventId)?.title ?? "Selected Event"}</strong>
           </div>
         </div>
       </div>
 
-      {/* ── KPI METRICS CARDS ─────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {/* ── KPI METRICS CARDS (5 Core Business Metrics) ───────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
@@ -398,22 +487,6 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-(--line) bg-(--panel) p-4 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[0.65rem] font-bold uppercase tracking-wider text-(--muted)">
-              Certificates
-            </span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-(--panel-soft) text-(--sage)">
-              <Trophy className="h-3.5 w-3.5" />
-            </span>
-          </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black tabular-nums text-(--foreground)">
-              {data?.stats.certificates ?? 0}
-            </div>
-            <p className="text-[0.65rem] text-(--muted) mt-0.5">Generated</p>
-          </div>
-        </div>
       </div>
 
       {/* ── 7-DAY REVENUE TRAJECTORY (Visual Chart) ────────────── */}

@@ -49,8 +49,15 @@ export function AdminEventScopeBar({
   actions,
   className = "",
 }: AdminEventScopeBarProps) {
+  // Only real official challenges (dummy seeded events permanently filtered out)
+  const realEvents = events.filter((ev) => {
+    const s = (ev.slug || "").toLowerCase();
+    const t = (ev.title || "").toLowerCase();
+    return s.includes("cancer") || s.includes("air-force") || t.includes("cancer") || t.includes("air force");
+  });
+
   const isCombined = !selectedEventId || selectedEventId === "all";
-  const activeEvent = !isCombined ? events.find((e) => e.id === selectedEventId) : null;
+  const activeEvent = !isCombined ? realEvents.find((e) => e.id === selectedEventId) : null;
 
   const isCancer = activeEvent?.slug?.includes("cancer") || activeEvent?.title?.toLowerCase()?.includes("cancer");
   const isAirForce = activeEvent?.slug?.includes("air-force") || activeEvent?.title?.toLowerCase()?.includes("air force");
@@ -84,7 +91,7 @@ export function AdminEventScopeBar({
             </button>
 
             {/* Primary Events Quick Tabs */}
-            {events.slice(0, 4).map((ev) => {
+            {realEvents.map((ev) => {
               const isSelected = selectedEventId === ev.id;
               const evIsCancer = ev.slug.includes("cancer") || ev.title.toLowerCase().includes("cancer");
               const evIsAirForce = ev.slug.includes("air-force") || ev.title.toLowerCase().includes("air force");
@@ -121,22 +128,8 @@ export function AdminEventScopeBar({
             })}
           </div>
 
-          {/* Fallback Dropdown if many events exist + Actions */}
+          {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {events.length > 4 && (
-              <select
-                value={selectedEventId}
-                onChange={(e) => onSelectEvent(e.target.value)}
-                className="input text-xs font-medium h-9 min-w-44"
-              >
-                <option value="all">🌐 All Events (Combined)</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>
-                    {ev.title} ({ev.status})
-                  </option>
-                ))}
-              </select>
-            )}
             {actions}
           </div>
         </div>
