@@ -3,22 +3,14 @@
 import { Calendar, CheckCircle2, Clock, Filter, Globe, Lock, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { formatInrFromPaise } from "../../lib/admin-api";
+import { useAdminEventScope, EventScopeItem } from "./admin-event-context";
 
-export type EventScopeItem = {
-  id: string;
-  title: string;
-  slug: string;
-  status?: string;
-  startsAt?: string | Date;
-  endsAt?: string | Date;
-  proofClosesAt?: string | Date;
-  priceInPaise?: number;
-};
+export type { EventScopeItem };
 
 interface AdminEventScopeBarProps {
-  events: EventScopeItem[];
-  selectedEventId: string;
-  onSelectEvent: (eventId: string) => void;
+  events?: EventScopeItem[];
+  selectedEventId?: string;
+  onSelectEvent?: (eventId: string) => void;
   sectionName?: string;
   totalCount?: number;
   paidCount?: number;
@@ -39,9 +31,9 @@ function formatDate(val?: string | Date): string {
 }
 
 export function AdminEventScopeBar({
-  events,
-  selectedEventId,
-  onSelectEvent,
+  events: propEvents,
+  selectedEventId: propSelectedEventId,
+  onSelectEvent: propOnSelectEvent,
   sectionName,
   totalCount,
   paidCount,
@@ -49,6 +41,12 @@ export function AdminEventScopeBar({
   actions,
   className = "",
 }: AdminEventScopeBarProps) {
+  const globalScope = useAdminEventScope();
+
+  const events = propEvents && propEvents.length > 0 ? propEvents : globalScope.events;
+  const selectedEventId = propSelectedEventId !== undefined ? propSelectedEventId : globalScope.selectedEventId;
+  const onSelectEvent = propOnSelectEvent || globalScope.setSelectedEventId;
+
   // Only real official challenges (dummy seeded events permanently filtered out)
   const realEvents = events.filter((ev) => {
     const s = (ev.slug || "").toLowerCase();

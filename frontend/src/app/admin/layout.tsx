@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminShell } from "./admin-shell";
+import { AdminEventProvider } from "./admin-event-context";
 
 export const metadata: Metadata = {
   robots: {
@@ -9,5 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminEventProvider>
+      <AdminShell>{children}</AdminShell>
+    </AdminEventProvider>
+  );
 }

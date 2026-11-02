@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
+import { useAdminEventScope } from "../admin-event-context";
 
 type Row = {
   id: string;
@@ -102,22 +103,15 @@ export default function AdminRegistrationsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
-  const [events, setEvents] = useState<EventScopeItem[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState("");
-
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: EventScopeItem[] }>(
-          "/api/admin/events?pageSize=100",
-          token
-        );
-        setEvents(res.data || []);
-      } catch {}
-    }
-    void loadEvents();
-  }, [getToken, isSignedIn]);
+  const {
+    events,
+    selectedEventId,
+    setSelectedEventId,
+    selectedEvent,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -280,7 +274,7 @@ export default function AdminRegistrationsPage() {
     <div className="admin-stack">
       <AdminPageHeader
         kicker="Operations"
-        title="Registrations"
+        title={isCancer ? "Registrations · National Cancer Awareness Day 2026" : isAirForce ? "Registrations · Indian Air Force Day 2026" : "Registrations · Combined Scope"}
         description={`${meta.total} total · ${meta.paidCount} Paid (🟢) · ${meta.unpaidCount} Unpaid (🔴)`}
         actions={
           <button
@@ -316,21 +310,6 @@ export default function AdminRegistrationsPage() {
           placeholder="Search name, email, bib, phone"
           value={searchInput}
         />
-        <select
-          className="input text-xs font-semibold"
-          onChange={(e) => {
-            setSelectedEventId(e.target.value);
-            setPage(1);
-          }}
-          value={selectedEventId}
-        >
-          <option value="">All Events (Combined)</option>
-          {events.map((ev) => (
-            <option key={ev.id} value={ev.id}>
-              {ev.title} ({ev.status})
-            </option>
-          ))}
-        </select>
         <select
           className="input"
           onChange={(e) => {

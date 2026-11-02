@@ -8,6 +8,7 @@ import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admi
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
 import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
+import { useAdminEventScope } from "../admin-event-context";
 import {
   CheckCircle,
   XCircle,
@@ -494,22 +495,15 @@ export default function AdminProofsPage() {
   // Search & Filters
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED" | "ALL">("ALL");
-  const [events, setEvents] = useState<EventScopeItem[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState<string>("");
-
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: EventScopeItem[] }>(
-          "/api/admin/events?pageSize=100",
-          token
-        );
-        setEvents(res.data || []);
-      } catch {}
-    }
-    void loadEvents();
-  }, [getToken, isSignedIn]);
+  const {
+    events,
+    selectedEventId,
+    setSelectedEventId,
+    selectedEvent,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
 
   // Custom verified times per proof id
   const [verifiedTimes, setVerifiedTimes] = useState<Record<string, { h: string; m: string; s: string }>>({});
@@ -738,7 +732,7 @@ export default function AdminProofsPage() {
       <div className="admin-stack">
         <AdminPageHeader
           kicker="Operations"
-          title="Proof queue & verification"
+          title={isCancer ? "Proof Queue · National Cancer Awareness Day 2026" : isAirForce ? "Proof Queue · Indian Air Force Day 2026" : "Proof Queue & Verification"}
           description={`${counts.total} paid runners · 100% eligible · Real-Time Download Telemetry Active 🟢`}
           actions={
             <button

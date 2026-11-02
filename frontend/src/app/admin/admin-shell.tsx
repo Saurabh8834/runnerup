@@ -16,6 +16,7 @@ import {
 import { getApiUrl, resilientFetch } from "../../lib/api";
 import { AdminThemeProvider, AdminThemeToggle, useAdminTheme } from "./admin-theme";
 import { BrandText } from "../components/brand-text";
+import { useAdminEventScope } from "./admin-event-context";
 import "./admin.css";
 
 type NavItem = { label: string; href: string; icon: string };
@@ -664,6 +665,11 @@ function SidebarNav({
   onNavClick?: () => void;
   onSignOut?: () => void;
 }) {
+  const { events, selectedEventId, setSelectedEventId, isCancer, isAirForce, isCombined } = useAdminEventScope();
+
+  const cancerEvent = events.find((e) => e.slug.includes("cancer") || e.title.toLowerCase().includes("cancer"));
+  const iafEvent = events.find((e) => e.slug.includes("air-force") || e.title.toLowerCase().includes("air force"));
+
   return (
     <>
       <Link href="/" className="admin-sidebar-brand" aria-label="Go to RunnerUp homepage">
@@ -677,6 +683,96 @@ function SidebarNav({
           <span>Operations</span>
         </div>
       </Link>
+
+      {/* ── Active Challenge Scope Switcher (Synchronized Across All Admin Sections) ── */}
+      <div className="p-3 border-b border-[var(--sidebar-border)] bg-[var(--sidebar-hover)]/30">
+        <div className="flex items-center justify-between text-[0.65rem] font-black uppercase tracking-wider text-[var(--sidebar-muted)] mb-2 px-1">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Event Scope</span>
+          </span>
+          <span className="text-[0.6rem] font-mono font-bold px-1.5 py-0.5 rounded border bg-black/40 border-white/10 text-[var(--foreground)]">
+            {isCombined ? "ALL" : isCancer ? "CANCER" : "IAF"}
+          </span>
+        </div>
+
+        <div className="space-y-1">
+          {/* Cancer Awareness Day 2026 */}
+          <button
+            type="button"
+            onClick={() => {
+              if (cancerEvent) {
+                setSelectedEventId(cancerEvent.id);
+              } else {
+                setSelectedEventId("virtual-cancer-day-2026");
+              }
+            }}
+            className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center justify-between cursor-pointer ${
+              isCancer
+                ? "bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 font-bold shadow-xs"
+                : "border border-transparent text-[var(--sidebar-muted)] hover:text-[var(--foreground)] hover:bg-white/5"
+            }`}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-sm">🎗️</span>
+              <div className="min-w-0">
+                <p className="truncate font-bold leading-tight text-white">Cancer Challenge</p>
+                <p className="text-[0.62rem] text-emerald-400/90 font-mono">7–15 Nov · Live</p>
+              </div>
+            </div>
+            <span className="text-[0.6rem] font-black uppercase tracking-wider bg-emerald-500/25 text-emerald-400 px-1.5 py-0.5 rounded shrink-0 border border-emerald-500/30">
+              OPEN
+            </span>
+          </button>
+
+          {/* Indian Air Force Day 2026 */}
+          <button
+            type="button"
+            onClick={() => {
+              if (iafEvent) {
+                setSelectedEventId(iafEvent.id);
+              } else {
+                setSelectedEventId("indian-air-force-day-virtual-challenge");
+              }
+            }}
+            className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center justify-between cursor-pointer ${
+              isAirForce
+                ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-xs"
+                : "border border-transparent text-[var(--sidebar-muted)] hover:text-[var(--foreground)] hover:bg-white/5"
+            }`}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-sm">🇮🇳</span>
+              <div className="min-w-0">
+                <p className="truncate font-bold leading-tight text-white">Air Force Day</p>
+                <p className="text-[0.62rem] text-amber-400/90 font-mono">25–31 Oct · Master</p>
+              </div>
+            </div>
+            <span className="text-[0.6rem] font-black uppercase tracking-wider bg-amber-500/25 text-amber-400 px-1.5 py-0.5 rounded shrink-0 border border-amber-500/30">
+              CLOSED
+            </span>
+          </button>
+
+          {/* All Events Combined */}
+          <button
+            type="button"
+            onClick={() => setSelectedEventId("all")}
+            className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center justify-between cursor-pointer ${
+              isCombined
+                ? "bg-white/10 border border-white/20 text-white font-bold shadow-xs"
+                : "border border-transparent text-[var(--sidebar-muted)] hover:text-[var(--foreground)] hover:bg-white/5"
+            }`}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-xs">🌐</span>
+              <span className="text-[0.72rem] font-medium truncate">All Events (Combined)</span>
+            </div>
+            <span className="text-[0.6rem] font-mono text-[var(--sidebar-muted)] shrink-0">
+              Audit
+            </span>
+          </button>
+        </div>
+      </div>
 
       <nav aria-label="Admin" className="admin-nav">
         {navGroups.map((group) => (

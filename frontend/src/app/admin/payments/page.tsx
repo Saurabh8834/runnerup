@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
 import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
+import { useAdminEventScope } from "../admin-event-context";
 
 type PaymentRow = {
   id: string;
@@ -45,8 +46,15 @@ export default function AdminPaymentsPage() {
     totalPages: 1,
   });
   const [status, setStatus] = useState("");
-  const [selectedEventId, setSelectedEventId] = useState<string>("all");
-  const [events, setEvents] = useState<EventScopeItem[]>([]);
+  const {
+    events,
+    selectedEventId,
+    setSelectedEventId,
+    selectedEvent,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -117,9 +125,6 @@ export default function AdminPaymentsPage() {
       if (thisReqId !== reqIdRef.current) return;
 
       setItems(json.data);
-      if (json.meta?.allEvents && json.meta.allEvents.length > 0) {
-        setEvents(json.meta.allEvents);
-      }
       const totalItems = json.meta?.total ?? json.data.length;
       const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / targetPageSize));
       setMeta({
@@ -218,8 +223,8 @@ export default function AdminPaymentsPage() {
     <div className="admin-stack">
       <AdminPageHeader
         kicker="Finance"
-        title="Payments"
-        description={`${meta.total} total · ${meta.paidCount} Paid (🟢) · ${Math.max(0, meta.total - meta.paidCount)} Unpaid (🔴) · Total Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
+        title={isCancer ? "Payments · National Cancer Awareness Day 2026" : isAirForce ? "Payments · Indian Air Force Day 2026" : "Payments · Combined Scope"}
+        description={`${meta.total} records · ${meta.paidCount} Paid (🟢) · ${Math.max(0, meta.total - meta.paidCount)} Unpaid (🔴) · Total Revenue ${formatInrFromPaise(meta.paidRevenueInPaise)}`}
         actions={
           <div className="flex items-center gap-2">
             <button
@@ -266,21 +271,6 @@ export default function AdminPaymentsPage() {
           placeholder="Search order id, email, bib"
           value={searchInput}
         />
-        <select
-          className="input text-xs font-semibold"
-          onChange={(e) => {
-            setSelectedEventId(e.target.value);
-            setPage(1);
-          }}
-          value={selectedEventId}
-        >
-          <option value="all">All Events (Combined)</option>
-          {events.map((ev) => (
-            <option key={ev.id} value={ev.id}>
-              {ev.title} ({ev.status})
-            </option>
-          ))}
-        </select>
         <select
           className="input"
           onChange={(e) => {

@@ -194,7 +194,10 @@ async function getPaymentStats(): Promise<CachedPaymentStats> {
   }
   try {
     const paidOnly = await prisma.payment.aggregate({
-      where: { status: "PAID" },
+      where: {
+        status: "PAID",
+        registration: { event: { slug: { in: REAL_EVENT_SLUGS } } },
+      },
       _sum: { amountInPaise: true },
       _count: true,
     });
@@ -217,6 +220,7 @@ async function getPaymentStats(): Promise<CachedPaymentStats> {
 
 // Only real official challenges (dummy seeded events permanently excluded)
 export const REAL_EVENT_SLUGS = [
+  "national-cancer-awareness-day-virtual-challenge-2026",
   "national-cancer-awareness-day-virtual-run-2026",
   "indian-air-force-day-virtual-challenge",
   "indian-air-force-day-2026",
@@ -270,6 +274,7 @@ async function getUserStats(): Promise<CachedUserStats> {
         where: {
           registrations: {
             some: {
+              event: { slug: { in: REAL_EVENT_SLUGS } },
               OR: [
                 { payment: { status: "PAID" } },
                 { status: "CONFIRMED" },
@@ -281,6 +286,7 @@ async function getUserStats(): Promise<CachedUserStats> {
       }),
       prisma.registration.count({
         where: {
+          event: { slug: { in: REAL_EVENT_SLUGS } },
           OR: [
             { payment: { status: "PAID" } },
             { status: "CONFIRMED" },
@@ -356,14 +362,27 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     );
   }
 
+  const realEventScope: Prisma.RegistrationWhereInput = eventFilter
+    ? { eventId: eventFilter }
+    : { event: { slug: { in: REAL_EVENT_SLUGS } } };
+
+  const realPaymentScope: Prisma.PaymentWhereInput = eventFilter
+    ? { registration: { eventId: eventFilter } }
+    : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } };
+
+  const realCertScope: Prisma.CertificateWhereInput = eventFilter
+    ? { registration: { eventId: eventFilter } }
+    : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } };
+
   // Base filters for registrations and payments
   const regWhere: Prisma.RegistrationWhereInput = {
-    ...(eventFilter ? { eventId: eventFilter } : {}),
+    ...realEventScope,
     ...(sinceDate ? { registeredAt: { gte: sinceDate } } : {}),
   };
 
   const paymentWhere: Prisma.PaymentWhereInput = {
     status: "PAID",
+    ...realPaymentScope,
     ...(sinceDate
       ? {
           OR: [
@@ -372,7 +391,6 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
           ],
         }
       : {}),
-    ...(eventFilter ? { registration: { eventId: eventFilter } } : {}),
   };
 
   // For the 7-day revenue trend chart: independent 7-day window in IST
@@ -412,14 +430,14 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     prisma.event.count({ where: { slug: { in: REAL_EVENT_SLUGS } } }),
     prisma.event.count({ where: { slug: { in: REAL_EVENT_SLUGS }, status: "OPEN" } }),
     prisma.user.count(),
-    prisma.registration.count({ where: { proofStatus: "SUBMITTED", ...(eventFilter ? { eventId: eventFilter } : {}) } }),
-    prisma.certificate.count({ where: eventFilter ? { registration: { eventId: eventFilter } } : undefined }),
+    prisma.registration.count({ where: { proofStatus: "SUBMITTED", ...realEventScope } }),
+    prisma.certificate.count({ where: realCertScope }),
     prisma.registration.count({
       where: {
         status: { in: ["CONFIRMED", "COMPLETED"] },
         proofStatus: "APPROVED",
         OR: [{ medalDelivery: null }, { medalDelivery: { status: "PENDING" } }],
-        ...(eventFilter ? { eventId: eventFilter } : {}),
+        ...realEventScope,
       },
     }),
     prisma.registration.findMany({
@@ -441,7 +459,7 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
       },
     }),
     prisma.payment.findMany({
-      where: eventFilter ? { registration: { eventId: eventFilter } } : undefined,
+      where: realPaymentScope,
       take: 10,
       orderBy: { createdAt: "desc" },
       include: {
@@ -458,7 +476,7 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
       where: {
         status: "PAID",
         OR: [{ paidAt: { gte: sevenDaysTrendStartIST } }, { createdAt: { gte: sevenDaysTrendStartIST } }],
-        ...(eventFilter ? { registration: { eventId: eventFilter } } : {}),
+        ...realPaymentScope,
       },
       select: { amountInPaise: true, paidAt: true, createdAt: true },
     }),
@@ -466,7 +484,7 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
     prisma.registration.findMany({
       where: {
         registeredAt: { gte: sevenDaysTrendStartIST },
-        ...(eventFilter ? { eventId: eventFilter } : {}),
+        ...realEventScope,
       },
       select: { registeredAt: true },
     }),
@@ -1186,7 +1204,9 @@ export async function adminExportPaymentsCsv(
 
   const where: Prisma.PaymentWhereInput = {
     ...(status ? { status: status as never } : {}),
-    ...(eventId ? { registration: { eventId } } : {}),
+    ...(eventId
+      ? { registration: { eventId } }
+      : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } }),
     ...(search
       ? {
           OR: [
@@ -1310,11 +1330,15 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
         OR: [
           ...searchVariants.map((v) => ({
             razorpayOrderId: { contains: v, mode: "insensitive" as const },
-            ...(eventId ? { registration: { eventId } } : {}),
+            ...(eventId
+      ? { registration: { eventId } }
+      : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } }),
           })),
           ...searchVariants.map((v) => ({
             razorpayPaymentId: { contains: v, mode: "insensitive" as const },
-            ...(eventId ? { registration: { eventId } } : {}),
+            ...(eventId
+      ? { registration: { eventId } }
+      : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } }),
           })),
           {
             registration: {
@@ -2496,7 +2520,9 @@ export async function adminListCertificates(request: AuthenticatedRequest, respo
 
   const where: Prisma.CertificateWhereInput = {
     ...(status ? { status: status as never } : {}),
-    ...(eventId ? { registration: { eventId } } : {}),
+    ...(eventId
+      ? { registration: { eventId } }
+      : { registration: { event: { slug: { in: REAL_EVENT_SLUGS } } } }),
     ...(search
       ? {
         OR: [

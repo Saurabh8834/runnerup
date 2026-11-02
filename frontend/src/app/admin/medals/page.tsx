@@ -30,6 +30,7 @@ import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { getApiUrl } from "../../../lib/api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
 import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
+import { useAdminEventScope } from "../admin-event-context";
 
 type DispatchItem = {
   id: string; // registration id
@@ -108,8 +109,16 @@ function formatTime(seconds: number | null | undefined): string {
 
 export default function AdminMedalDispatchPage() {
   const { getToken, isSignedIn } = useAuth();
+  const {
+    events,
+    selectedEventId,
+    setSelectedEventId,
+    selectedEvent,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
   const [items, setItems] = useState<DispatchItem[]>([]);
-  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [stats, setStats] = useState<DispatchStats>({
     readyCount: 0,
     dispatchedCount: 0,
@@ -123,8 +132,7 @@ export default function AdminMedalDispatchPage() {
 
   // Filters
   const [statusTab, setStatusTab] = useState<string>("PENDING"); // PENDING | DISPATCHED | DELIVERED | ALL
-  const [selectedEventId, setSelectedEventId] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("" );
   const [proofFilter, setProofFilter] = useState<string>("APPROVED");
 
   // Selected item for drawer
@@ -137,20 +145,6 @@ export default function AdminMedalDispatchPage() {
   const [editTrackingNumber, setEditTrackingNumber] = useState("");
   const [editTrackingUrl, setEditTrackingUrl] = useState("");
   const [editStatus, setEditStatus] = useState<string>("DISPATCHED");
-
-  // Load events for dropdown
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: EventScopeItem[] }>("/api/admin/events?pageSize=100", token);
-        setEvents(res.data || []);
-      } catch {
-        // ignore
-      }
-    }
-    void loadEvents();
-  }, [getToken]);
 
   // Main data load
   const loadData = useCallback(async () => {

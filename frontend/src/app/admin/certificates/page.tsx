@@ -6,7 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiUrl } from "../../../lib/api";
 import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
-import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
+import { AdminEventScopeBar } from "../admin-event-scope";
+import { useAdminEventScope } from "../admin-event-context";
 import {
   CheckCircle,
   XCircle,
@@ -303,22 +304,14 @@ export default function AdminCertificatesPage() {
   const [items, setItems] = useState<CertRow[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [events, setEvents] = useState<EventScopeItem[]>([]);
-  const [selectedEventId, setSelectedEventId] = useState("");
-
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: EventScopeItem[] }>(
-          "/api/admin/events?pageSize=100",
-          token
-        );
-        setEvents(res.data || []);
-      } catch {}
-    }
-    void loadEvents();
-  }, [getToken, isSignedIn]);
+  const {
+    events,
+    selectedEventId,
+    setSelectedEventId,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [resendAllBusy, setResendAllBusy] = useState(false);
@@ -463,7 +456,7 @@ export default function AdminCertificatesPage() {
       <div className="admin-stack">
         <AdminPageHeader
           kicker="Fulfillment"
-          title="Certificates"
+          title={isCancer ? "Certificates · National Cancer Awareness Day 2026" : isAirForce ? "Certificates · Indian Air Force Day 2026" : "Certificates · Combined Scope"}
           description="Send finisher certificates to runners. Certificates are created automatically when you approve a GPS proof."
         />
 
@@ -569,22 +562,6 @@ export default function AdminCertificatesPage() {
 
         {/* ── Search & Filter Toolbar ── */}
         <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-[var(--line)] bg-[var(--panel)]">
-          {/* Event Filter Dropdown */}
-          <div className="flex items-center gap-2">
-            <select
-              value={selectedEventId}
-              onChange={(e) => setSelectedEventId(e.target.value)}
-              className="input text-xs font-semibold h-10 rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 text-[var(--foreground)]"
-            >
-              <option value="">All Events (Combined)</option>
-              {events.map((ev) => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.title} ({ev.status})
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Search Box */}
           <div className="relative flex-1 min-w-[240px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted)] pointer-events-none z-10" />

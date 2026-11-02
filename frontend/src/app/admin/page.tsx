@@ -21,6 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel, AdminStat, CustomerStatusDot } from "./ui";
 import { AdminEventScopeBar } from "./admin-event-scope";
+import { useAdminEventScope } from "./admin-event-context";
 
 type EventBreakdown = {
   eventId: string;
@@ -117,7 +118,14 @@ export default function AdminOverviewPage() {
 
   // Default to 30d (This Month) so all active revenue, registrations, and metrics show immediately
   const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("30d");
-  const [selectedEventId, setSelectedEventId] = useState<string>("all");
+  const {
+    events: scopedEvents,
+    selectedEventId,
+    setSelectedEventId,
+    isCancer,
+    isAirForce,
+    isCombined,
+  } = useAdminEventScope();
 
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
@@ -293,12 +301,12 @@ export default function AdminOverviewPage() {
           <button
             type="button"
             onClick={() => {
-              const ev = data?.allEvents.find((e) => e.slug.includes("cancer"));
+              const ev = data?.allEvents.find((e) => e.slug.includes("cancer")) || scopedEvents.find((e) => e.slug.includes("cancer"));
               if (ev) setSelectedEventId(ev.id);
             }}
             className="w-full mt-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider cursor-pointer shadow-sm transition-all"
           >
-            {data?.allEvents.find((e) => e.slug.includes("cancer"))?.id === selectedEventId
+            {isCancer
               ? "✓ Currently Focused (Isolated)"
               : "Focus Cancer Challenge Data →"}
           </button>
@@ -344,12 +352,12 @@ export default function AdminOverviewPage() {
           <button
             type="button"
             onClick={() => {
-              const ev = data?.allEvents.find((e) => e.slug.includes("air-force"));
+              const ev = data?.allEvents.find((e) => e.slug.includes("air-force")) || scopedEvents.find((e) => e.slug.includes("air-force"));
               if (ev) setSelectedEventId(ev.id);
             }}
             className="w-full mt-4 py-2 rounded-xl bg-(--panel-soft) hover:bg-(--panel) text-(--foreground) border border-(--line) font-black text-xs uppercase tracking-wider cursor-pointer transition-all"
           >
-            {data?.allEvents.find((e) => e.slug.includes("air-force"))?.id === selectedEventId
+            {isAirForce
               ? "✓ Currently Focused (Isolated)"
               : "Focus IAF Archive Data →"}
           </button>
@@ -383,7 +391,7 @@ export default function AdminOverviewPage() {
           </div>
 
           <div className="text-xs text-(--muted)">
-            Showing: <strong className="text-(--foreground)">{selectedEventId === "all" ? "Combined Records" : data?.allEvents.find((e) => e.id === selectedEventId)?.title ?? "Selected Event"}</strong>
+            Showing: <strong className="text-(--foreground)">{isCombined ? "Combined Records" : (data?.allEvents.find((e) => e.id === selectedEventId)?.title ?? "Selected Event")}</strong>
           </div>
         </div>
       </div>
