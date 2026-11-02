@@ -47,7 +47,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   const isMedalCard = isAirForce || isCancerAwareness;
 
   const resolvePoster = (slug: string, bannerUrl?: string) => {
-    if (isCancerAwareness) return "/images/cancer-awareness-medal-front-std.png";
+    if (isCancerAwareness) return "/images/cancer-awareness-medal-front-4k.png";
     if (isAirForce) return "/images/iaf-medal-front-std.png";
     if (bannerUrl && !bannerUrl.includes("res.cloudinary.com")) return bannerUrl;
     return `/events/${slug}.webp`;

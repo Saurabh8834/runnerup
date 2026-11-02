@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getApiUrl } from "../../../lib/api";
 import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
+import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
 import {
   CheckCircle,
   XCircle,
@@ -302,14 +303,14 @@ export default function AdminCertificatesPage() {
   const [items, setItems] = useState<CertRow[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [events, setEvents] = useState<Array<{ id: string; title: string; slug: string; status: string }>>([]);
+  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [selectedEventId, setSelectedEventId] = useState("");
 
   useEffect(() => {
     async function loadEvents() {
       try {
         const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: Array<{ id: string; title: string; slug: string; status: string }> }>(
+        const res = await adminFetch<{ data: EventScopeItem[] }>(
           "/api/admin/events?pageSize=100",
           token
         );
@@ -555,6 +556,16 @@ export default function AdminCertificatesPage() {
             </button>
           </div>
         </div>
+
+        {/* ── Event Scope Switcher & Challenge Dates ── */}
+        <AdminEventScopeBar
+          events={events}
+          selectedEventId={selectedEventId}
+          onSelectEvent={(id) => setSelectedEventId(id === "all" ? "" : id)}
+          sectionName="Certificates"
+          totalCount={totalWithCert}
+          paidCount={sent}
+        />
 
         {/* ── Search & Filter Toolbar ── */}
         <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-[var(--line)] bg-[var(--panel)]">

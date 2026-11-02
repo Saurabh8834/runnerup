@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
+import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
 
 type Row = {
   id: string;
@@ -101,14 +102,14 @@ export default function AdminRegistrationsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
-  const [events, setEvents] = useState<Array<{ id: string; title: string; slug: string; status: string }>>([]);
+  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [selectedEventId, setSelectedEventId] = useState("");
 
   useEffect(() => {
     async function loadEvents() {
       try {
         const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: Array<{ id: string; title: string; slug: string; status: string }> }>(
+        const res = await adminFetch<{ data: EventScopeItem[] }>(
           "/api/admin/events?pageSize=100",
           token
         );
@@ -191,7 +192,7 @@ export default function AdminRegistrationsPage() {
         setLoading(false);
       }
     }
-  }, [getToken, isSignedIn, q, status]);
+  }, [getToken, isSignedIn, q, selectedEventId, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -214,10 +215,14 @@ export default function AdminRegistrationsPage() {
       const params = new URLSearchParams();
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
+      if (selectedEventId && selectedEventId !== "all") {
+        params.set("eventId", selectedEventId);
+      }
       const query = params.toString() ? `?${params.toString()}` : "";
+      const eventSlugPart = selectedEventId && selectedEventId !== "all" ? `-${selectedEventId}` : "-AllEvents";
       await downloadAdminExport(
         `/api/admin/registrations/export.csv${query}`,
-        `RunnerUp-Registrations-${new Date().toISOString().slice(0, 10)}.csv`,
+        `RunnerUp-Registrations${eventSlugPart}-${new Date().toISOString().slice(0, 10)}.csv`,
         token,
       );
     } catch (err) {
@@ -289,6 +294,19 @@ export default function AdminRegistrationsPage() {
             <span>{exporting ? "Generating Sheet..." : "Download Excel Sheet"}</span>
           </button>
         }
+      />
+
+      {/* ── EVENT SCOPE SWITCHER & DATES BANNER ── */}
+      <AdminEventScopeBar
+        events={events}
+        selectedEventId={selectedEventId}
+        onSelectEvent={(id) => {
+          setSelectedEventId(id === "all" ? "" : id);
+          setPage(1);
+        }}
+        sectionName="Registrations"
+        totalCount={meta.total}
+        paidCount={meta.paidCount}
       />
 
       <div className="admin-toolbar">

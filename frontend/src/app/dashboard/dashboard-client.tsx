@@ -131,8 +131,14 @@ function isEligible(reg: Registration) {
 }
 
 function canUpload(reg: Registration) {
-  // Officially closed as of 11:00 AM IST on 31 October 2026
-  return false;
+  const isOldAirForce =
+    reg.event?.slug?.includes("air-force") ||
+    reg.event?.title?.toLowerCase()?.includes("air force");
+
+  if (isOldAirForce) return false;
+  if (reg.proofStatus === "APPROVED") return false;
+
+  return isEligible(reg);
 }
 
 function dedupe(rows: Registration[]) {
@@ -493,8 +499,18 @@ export function DashboardClient() {
 
   async function submitProof(e: FormEvent) {
     e.preventDefault();
-    setProofError("GPS proof submission is officially closed as of 11:00 AM IST on 31 October 2026. Official leaderboard reveals at 12:00 PM Noon.");
-    return;
+    if (!proofRegId) return;
+
+    const activeReg = registrations.find((r) => r.id === proofRegId);
+    const isOldAirForce =
+      activeReg?.event?.slug?.includes("air-force") ||
+      activeReg?.event?.title?.toLowerCase()?.includes("air force");
+
+    if (isOldAirForce) {
+      setProofError("GPS proof submission for the Indian Air Force Day Virtual Marathon officially closed at 11:00 AM IST on 31 October 2026.");
+      return;
+    }
+
     try {
       const token = await getToken();
       if (!token) throw new Error("Please sign in again to submit proof.");
@@ -559,7 +575,7 @@ export function DashboardClient() {
         throw new Error(await readApiError(res, "Proof submission failed. Please try again."));
       }
 
-      setProofMessage("Proof submitted successfully! It will be reviewed once the event concludes on 30 October 2026.");
+      setProofMessage("🎉 Proof submitted successfully! Our verification team will review your GPS activity for your official certificate and finisher medal.");
       setProofRegId(null);
       setProofUrl("");
       setProofFileName(null);

@@ -29,6 +29,7 @@ import { adminFetch, downloadAdminExport, getFastAdminToken } from "../../../lib
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { getApiUrl } from "../../../lib/api";
 import { AdminEmpty, AdminPageHeader } from "../ui";
+import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
 
 type DispatchItem = {
   id: string; // registration id
@@ -108,7 +109,7 @@ function formatTime(seconds: number | null | undefined): string {
 export default function AdminMedalDispatchPage() {
   const { getToken, isSignedIn } = useAuth();
   const [items, setItems] = useState<DispatchItem[]>([]);
-  const [events, setEvents] = useState<EventOption[]>([]);
+  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [stats, setStats] = useState<DispatchStats>({
     readyCount: 0,
     dispatchedCount: 0,
@@ -142,7 +143,7 @@ export default function AdminMedalDispatchPage() {
     async function loadEvents() {
       try {
         const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: EventOption[] }>("/api/admin/events?pageSize=100", token);
+        const res = await adminFetch<{ data: EventScopeItem[] }>("/api/admin/events?pageSize=100", token);
         setEvents(res.data || []);
       } catch {
         // ignore
@@ -292,6 +293,16 @@ export default function AdminMedalDispatchPage() {
         kicker="Fulfillment & Logistics"
         title="Medal Dispatch Hub"
         description="Filter verified finishers, export 1-click shipping CSVs, and manage tracking IDs."
+      />
+
+      {/* ── Event Scope Switcher & Challenge Dates ── */}
+      <AdminEventScopeBar
+        events={events}
+        selectedEventId={selectedEventId}
+        onSelectEvent={(id) => setSelectedEventId(id === "all" ? "" : id)}
+        sectionName="Medal Logistics"
+        totalCount={stats.readyCount + stats.dispatchedCount + stats.deliveredCount}
+        paidCount={stats.approvedCount}
       />
 
       {/* ── KPI Stats Cards ── */}

@@ -5,6 +5,7 @@ import { Check, Copy, FileSpreadsheet, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { adminFetch, downloadAdminExport, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../../lib/admin-api";
 import { AdminPageHeader, CustomerStatusDot, AdminPagination } from "../ui";
+import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
 
 type PaymentRow = {
   id: string;
@@ -44,6 +45,8 @@ export default function AdminPaymentsPage() {
     totalPages: 1,
   });
   const [status, setStatus] = useState("");
+  const [selectedEventId, setSelectedEventId] = useState<string>("all");
+  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [q, setQ] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +97,9 @@ export default function AdminPaymentsPage() {
         pageSize: String(targetPageSize),
       });
       if (status) params.set("status", status);
+      if (selectedEventId && selectedEventId !== "all") {
+        params.set("eventId", selectedEventId);
+      }
       if (q.trim()) params.set("q", q.trim());
       const json = await adminFetch<{
         data: PaymentRow[];
@@ -104,12 +110,16 @@ export default function AdminPaymentsPage() {
           page?: number;
           pageSize?: number;
           totalPages?: number;
+          allEvents?: EventScopeItem[];
         };
       }>(`/api/admin/payments?${params}`, token);
 
       if (thisReqId !== reqIdRef.current) return;
 
       setItems(json.data);
+      if (json.meta?.allEvents && json.meta.allEvents.length > 0) {
+        setEvents(json.meta.allEvents);
+      }
       const totalItems = json.meta?.total ?? json.data.length;
       const computedTotalPages = json.meta?.totalPages ?? Math.max(1, Math.ceil(totalItems / targetPageSize));
       setMeta({
@@ -130,7 +140,7 @@ export default function AdminPaymentsPage() {
         setLoading(false);
       }
     }
-  }, [getToken, isSignedIn, q, status]);
+  }, [getToken, isSignedIn, q, selectedEventId, status]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -187,10 +197,14 @@ export default function AdminPaymentsPage() {
       const params = new URLSearchParams();
       if (q.trim()) params.set("q", q.trim());
       if (status) params.set("status", status);
+      if (selectedEventId && selectedEventId !== "all") {
+        params.set("eventId", selectedEventId);
+      }
       const query = params.toString() ? `?${params.toString()}` : "";
+      const eventSlugPart = selectedEventId && selectedEventId !== "all" ? `-${selectedEventId}` : "-AllEvents";
       await downloadAdminExport(
         `/api/admin/payments/export.csv${query}`,
-        `RunnerUp-Payments-${new Date().toISOString().slice(0, 10)}.csv`,
+        `RunnerUp-Payments${eventSlugPart}-${new Date().toISOString().slice(0, 10)}.csv`,
         token,
       );
     } catch (err) {
@@ -231,6 +245,20 @@ export default function AdminPaymentsPage() {
         }
       />
 
+      {/* ── EVENT SCOPE & DATE SECTION ── */}
+      <AdminEventScopeBar
+        events={events}
+        selectedEventId={selectedEventId}
+        onSelectEvent={(id) => {
+          setSelectedEventId(id);
+          setPage(1);
+        }}
+        sectionName="Payments"
+        totalCount={meta.total}
+        paidCount={meta.paidCount}
+        revenuePaise={meta.paidRevenueInPaise}
+      />
+
       <div className="admin-toolbar">
         <input
           className="input"
@@ -239,6 +267,21 @@ export default function AdminPaymentsPage() {
           value={searchInput}
         />
         <select
+          className="input text-xs font-semibold"
+          onChange={(e) => {
+            setSelectedEventId(e.target.value);
+            setPage(1);
+          }}
+          value={selectedEventId}
+        >
+          <option value="all">All Events (Combined)</option>
+          {events.map((ev) => (
+            <option key={ev.id} value={ev.id}>
+              {ev.title} ({ev.status})
+            </option>
+          ))}
+        </select>
+        <select
           className="input"
           onChange={(e) => {
             setStatus(e.target.value);
@@ -246,7 +289,7 @@ export default function AdminPaymentsPage() {
           }}
           value={status}
         >
-          <option value="">All</option>
+          <option value="">All statuses</option>
           {["CREATED", "PAID", "FAILED", "REFUNDED"].map((s) => (
             <option key={s} value={s}>
               {s}

@@ -456,11 +456,35 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     }
   }
 
+  // Proof submission window check per event:
+  const isOldOctoberAirForceEvent =
+    existing.event.slug === "indian-air-force-day-virtual-challenge" ||
+    existing.event.slug.includes("air-force") ||
+    existing.event.title.toLowerCase().includes("air force");
+
+  const isCancerEvent =
+    existing.event.slug.includes("cancer") ||
+    existing.event.title.toLowerCase().includes("cancer");
+
   if (!isAdmin) {
-    throw new ApiError(
-      400,
-      "GPS proof submission is officially closed as of 11:00 AM IST on 31 October 2026. The official leaderboard and finisher certificates will reveal at 12:00 PM Noon.",
-    );
+    if (isOldOctoberAirForceEvent) {
+      throw new ApiError(
+        400,
+        "GPS proof submission for the Indian Air Force Day Virtual Marathon officially closed at 11:00 AM IST on 31 October 2026.",
+      );
+    }
+
+    const nowMs = Date.now();
+    const proofClosesMs = existing.event.proofClosesAt
+      ? new Date(existing.event.proofClosesAt).getTime()
+      : null;
+
+    if (!isCancerEvent && proofClosesMs && nowMs > proofClosesMs) {
+      throw new ApiError(
+        400,
+        `GPS proof submission for ${existing.event.title} is officially closed.`,
+      );
+    }
   }
 
   const isPaid =

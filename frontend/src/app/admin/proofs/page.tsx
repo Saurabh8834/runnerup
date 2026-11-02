@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { adminFetch, formatDateTime, getFastAdminToken } from "../../../lib/admin-api";
 import { optimizeCloudinaryUrl } from "../../../lib/cloudinary";
 import { AdminEmpty, AdminPageHeader, CustomerStatusDot } from "../ui";
+import { AdminEventScopeBar, EventScopeItem } from "../admin-event-scope";
 import {
   CheckCircle,
   XCircle,
@@ -493,14 +494,14 @@ export default function AdminProofsPage() {
   // Search & Filters
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<"SUBMITTED" | "APPROVED" | "REJECTED" | "NOT_SUBMITTED" | "ALL">("SUBMITTED");
-  const [events, setEvents] = useState<Array<{ id: string; title: string; slug: string; status: string }>>([]);
+  const [events, setEvents] = useState<EventScopeItem[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
 
   useEffect(() => {
     async function loadEvents() {
       try {
         const token = await getFastAdminToken(getToken, isSignedIn);
-        const res = await adminFetch<{ data: Array<{ id: string; title: string; slug: string; status: string }> }>(
+        const res = await adminFetch<{ data: EventScopeItem[] }>(
           "/api/admin/events?pageSize=100",
           token
         );
@@ -845,32 +846,18 @@ export default function AdminProofsPage() {
             loading={loading}
           />
 
-          {/* Event Filter Selector Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 rounded-2xl bg-[var(--panel-soft)]/60 border border-[var(--line)] shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-[var(--muted)] flex items-center gap-1.5 shrink-0">
-                <Filter className="h-4 w-4 text-amber-500" /> Event:
-              </span>
-              <select
-                value={selectedEventId}
-                onChange={(e) => {
-                  setSelectedEventId(e.target.value);
-                  setPage(1);
-                }}
-                className="input text-xs font-semibold h-9 rounded-lg border border-[var(--line)] bg-[var(--panel)] px-3 text-[var(--foreground)] min-w-[240px]"
-              >
-                <option value="">All Events (Combined)</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>
-                    {ev.title} ({ev.status})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="text-xs text-[var(--muted)] font-medium">
-              Filter queue by specific challenge or view combined pipeline.
-            </div>
-          </div>
+          {/* Event Scope Switcher & Challenge Dates Banner */}
+          <AdminEventScopeBar
+            events={events}
+            selectedEventId={selectedEventId}
+            onSelectEvent={(id) => {
+              setSelectedEventId(id === "all" ? "" : id);
+              setPage(1);
+            }}
+            sectionName="Proof Queue"
+            totalCount={total}
+            paidCount={counts.approved}
+          />
 
           {/* Status Tabs & Active Search Pill */}
           <div className="flex flex-wrap items-center justify-between gap-2">

@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, formatDateTime, formatInrFromPaise, getFastAdminToken } from "../../lib/admin-api";
 import { AdminEmpty, AdminPageHeader, AdminPanel, AdminStat, CustomerStatusDot } from "./ui";
+import { AdminEventScopeBar } from "./admin-event-scope";
 
 type EventBreakdown = {
   eventId: string;
@@ -66,7 +67,15 @@ type Overview = {
   };
   eventBreakdown: EventBreakdown[];
   dailyTrend: DailyTrend[];
-  allEvents: Array<{ id: string; slug: string; title: string; status: string }>;
+  allEvents: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    status: string;
+    startsAt?: string;
+    endsAt?: string;
+    proofClosesAt?: string;
+  }>;
   recentRegistrations: Array<{
     id: string;
     bibNumber: string;
@@ -230,6 +239,17 @@ export default function AdminOverviewPage() {
           <span>{syncMessage}</span>
         </div>
       )}
+
+      {/* ── EVENT SCOPE SWITCHER & DATES BANNER ─────────────── */}
+      <AdminEventScopeBar
+        events={data?.allEvents ?? []}
+        selectedEventId={selectedEventId}
+        onSelectEvent={(id) => setSelectedEventId(id)}
+        sectionName="Overview"
+        revenuePaise={data?.stats.revenueInPaise}
+        paidCount={data?.stats.paidCount}
+        totalCount={data?.stats.registrations}
+      />
 
       {/* ── FILTER TOOLBAR (Time Range & Event Filter) ───────── */}
       <div className="rounded-2xl border border-(--line) bg-(--panel) p-3 sm:p-4 shadow-xs">

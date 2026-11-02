@@ -26,6 +26,35 @@ export type DefaultEvent = {
 
 export const defaultEvents: DefaultEvent[] = [
   {
+    title: "National Cancer Awareness Day Virtual Challenge 2026",
+    slug: "national-cancer-awareness-day-virtual-run-2026",
+    description:
+      "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
+    startsAt: new Date("2026-11-07T00:00:00.000Z"),
+    endsAt: new Date("2026-11-15T23:59:59.000Z"),
+    proofClosesAt: new Date("2026-11-20T23:59:59.000Z"),
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+    priceInPaise: 49900, // ₹499
+    status: "OPEN",
+    city: "Virtual (All India)",
+    featured: true,
+    medalIncluded: true,
+    activityTypes: ["running", "cycling", "walking"],
+    bannerImageUrl: "/images/cancer-awareness-medal-front-4k.png",
+    medalImageUrl: "/images/cancer-awareness-medal-front-4k.png",
+    banner: "National Cancer Awareness Day 2026",
+    reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
+    highlight: "Run, Walk or Cycle Pan-India · 7–15 Nov 2026",
+    benefits: [
+      "100% Solid Metal Finisher Medal Included",
+      "Official Digital Race Bib with Unique Number",
+      "Free Doorstep Delivery Across India",
+      "Works with Strava, Garmin, NRC, Smartwatch",
+      "Official Verifiable E-Certificate",
+      "Live GPS-Verified Leaderboard Ranking",
+    ],
+  },
+  {
     title: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
     description:

@@ -103,7 +103,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
   const defaultPoster =
     (isCancerAwareness
-      ? "/images/cancer-awareness-medal-front-std.png"
+      ? "/images/cancer-awareness-medal-front-4k.png"
       : isAirForce
         ? "/images/iaf-medal-front-std.png"
         : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")
@@ -118,7 +118,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   useEffect(() => {
     const nextPoster =
       (isCancerAwareness
-        ? "/images/cancer-awareness-medal-front-std.png"
+        ? "/images/cancer-awareness-medal-front-4k.png"
         : isAirForce
           ? "/images/iaf-medal-front-std.png"
           : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com")

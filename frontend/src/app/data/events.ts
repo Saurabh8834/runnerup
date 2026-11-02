@@ -50,8 +50,8 @@ export const cancerAwarenessEvent: PublicEvent = {
     "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
   highlight: "National Virtual Challenge · 7–15 Nov · Limited Edition 3D Metal Medal",
   banner: "Cancer Awareness Challenge",
-  bannerImageUrl: "/images/cancer-awareness-medal-front-std.png",
-  medalImageUrl: "/images/cancer-awareness-medal-front-std.png",
+  bannerImageUrl: "/images/cancer-awareness-medal-front-4k.png",
+  medalImageUrl: "/images/cancer-awareness-medal-front-4k.png",
   reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
   couponCode: "VIP100",
   showCouponOnCard: false,
@@ -269,8 +269,8 @@ export function getEventMedalImages(slug: string): { front: string; back: string
     slug.includes("national-cancer-awareness-day")
   ) {
     return {
-      front: "/images/cancer-awareness-medal-front-std.png",
-      back: "/images/cancer-awareness-medal-back-std.png",
+      front: "/images/cancer-awareness-medal-front-4k.png",
+      back: "/images/cancer-awareness-medal-back-4k.png",
     };
   }
   if (
@@ -294,7 +294,7 @@ export function getEventMedalImage(slug: string): string {
     slug.includes("cancer") ||
     slug.includes("national-cancer-awareness-day")
   ) {
-    return "/images/cancer-awareness-medal-front-std.png";
+    return "/images/cancer-awareness-medal-front-4k.png";
   }
   if (
     slug.includes("air-force") ||

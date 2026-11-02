@@ -562,7 +562,16 @@ export async function adminOverview(request: AuthenticatedRequest, response: Res
       },
       eventBreakdown,
       dailyTrend,
-      allEvents: allEventsList.map((e) => ({ id: e.id, slug: e.slug, title: e.title, status: e.status })),
+      allEvents: allEventsList.map((e) => ({
+        id: e.id,
+        slug: e.slug,
+        title: e.title,
+        status: e.status,
+        startsAt: e.startsAt,
+        endsAt: e.endsAt,
+        proofClosesAt: e.proofClosesAt,
+        priceInPaise: e.priceInPaise,
+      })),
       recentRegistrations: recentRegs,
       recentPayments,
     },
@@ -1265,18 +1274,29 @@ export async function adminExportPaymentsCsv(
 export async function adminListPayments(request: AuthenticatedRequest, response: Response) {
   const { page, pageSize, skip } = parsePage(request);
   const status = q(request, "status");
+  const eventId = q(request, "eventId");
   const search = q(request, "q");
   const searchVariants = search ? getSearchVariants(search) : [];
 
+  const regScope: Prisma.RegistrationWhereInput = eventId ? { eventId } : {};
+
   const where: Prisma.PaymentWhereInput = {
     ...(status ? { status: status as never } : {}),
+    ...(eventId ? { registration: { eventId } } : {}),
     ...(search
       ? {
         OR: [
-          ...searchVariants.map((v) => ({ razorpayOrderId: { contains: v, mode: "insensitive" as const } })),
-          ...searchVariants.map((v) => ({ razorpayPaymentId: { contains: v, mode: "insensitive" as const } })),
+          ...searchVariants.map((v) => ({
+            razorpayOrderId: { contains: v, mode: "insensitive" as const },
+            ...(eventId ? { registration: { eventId } } : {}),
+          })),
+          ...searchVariants.map((v) => ({
+            razorpayPaymentId: { contains: v, mode: "insensitive" as const },
+            ...(eventId ? { registration: { eventId } } : {}),
+          })),
           {
             registration: {
+              ...regScope,
               user: {
                 OR: [
                   { name: { contains: search, mode: "insensitive" } },
@@ -1288,11 +1308,13 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
           },
           {
             registration: {
+              ...regScope,
               shippingPhone: { contains: search, mode: "insensitive" },
             },
           },
           ...searchVariants.map((v) => ({
             registration: {
+              ...regScope,
               bibNumber: { contains: v, mode: "insensitive" as const },
             },
           })),
@@ -1301,7 +1323,7 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
       : {}),
   };
 
-  const [total, items, paymentStats] = await Promise.all([
+  const [total, items, eventPaidStats, allEvents] = await Promise.all([
     prisma.payment.count({ where }),
     prisma.payment.findMany({
       where,
@@ -1312,13 +1334,39 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
         registration: {
           include: {
             user: { select: { name: true, email: true, phone: true } },
-            event: { select: { title: true, slug: true } },
+            event: { select: { id: true, title: true, slug: true, status: true, startsAt: true, endsAt: true } },
           },
         },
       },
     }),
-    getPaymentStats(),
+    eventId
+      ? prisma.payment.aggregate({
+          where: {
+            status: "PAID",
+            registration: { eventId },
+          },
+          _sum: { amountInPaise: true },
+          _count: true,
+        })
+      : null,
+    prisma.event.findMany({
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        status: true,
+        startsAt: true,
+        endsAt: true,
+        proofClosesAt: true,
+        priceInPaise: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  const globalStats = !eventId ? await getPaymentStats() : null;
+  const paidCount = eventId ? (eventPaidStats?._count ?? 0) : (globalStats?.paidCount ?? 0);
+  const paidRevenueInPaise = eventId ? (eventPaidStats?._sum?.amountInPaise ?? 0) : (globalStats?.paidRevenueInPaise ?? 0);
 
   response.json({
     data: items,
@@ -1327,9 +1375,11 @@ export async function adminListPayments(request: AuthenticatedRequest, response:
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
-      paidCount: paymentStats.paidCount,
-      unpaidCount: Math.max(0, total - paymentStats.paidCount),
-      paidRevenueInPaise: paymentStats.paidRevenueInPaise,
+      paidCount,
+      unpaidCount: Math.max(0, total - paidCount),
+      paidRevenueInPaise,
+      eventId: eventId || null,
+      allEvents,
     },
   });
 }
