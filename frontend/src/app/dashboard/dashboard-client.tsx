@@ -303,6 +303,15 @@ export function DashboardClient() {
   const [proofBusy, setProofBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedAwbId, setCopiedAwbId] = useState<string | null>(null);
+
+  function handleCopyAwb(awb: string, id: string) {
+    if (!awb) return;
+    navigator.clipboard.writeText(awb).then(() => {
+      setCopiedAwbId(id);
+      setTimeout(() => setCopiedAwbId(null), 2000);
+    });
+  }
   const seq = useRef(0);
 
   const hoursInputRef = useRef<HTMLInputElement | null>(null);
@@ -1473,9 +1482,29 @@ export function DashboardClient() {
                                   <p className="text-[0.65rem] uppercase tracking-wider text-slate-300 font-bold">
                                     Courier: <span className="text-white font-mono font-black">{reg.medalDelivery.courier || "Delhivery"}</span>
                                   </p>
-                                  <p className="font-mono text-xs font-bold text-white tracking-wide">
-                                    AWB: {reg.medalDelivery.trackingNumber}
-                                  </p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <p className="font-mono text-xs font-black text-white tracking-wide">
+                                      AWB: {reg.medalDelivery.trackingNumber}
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyAwb(reg.medalDelivery?.trackingNumber || "", reg.id)}
+                                      className="inline-flex items-center gap-1 rounded bg-white/10 hover:bg-white/20 px-1.5 py-0.5 text-[0.65rem] font-bold text-slate-300 hover:text-white transition-all cursor-pointer"
+                                      title="Copy Tracking ID"
+                                    >
+                                      {copiedAwbId === reg.id ? (
+                                        <>
+                                          <CheckCircle2 className="h-2.5 w-2.5 text-emerald-400" />
+                                          <span className="text-emerald-400 text-[0.6rem]">Copied!</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Copy className="h-2.5 w-2.5" />
+                                          <span className="text-[0.6rem]">Copy</span>
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
                                 </div>
                                 <a
                                   href={
@@ -1486,7 +1515,7 @@ export function DashboardClient() {
                                   }
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-slate-950 transition-all shadow-md active:scale-95"
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-slate-950 transition-all shadow-md active:scale-95 cursor-pointer"
                                 >
                                   <Truck className="h-3.5 w-3.5" />
                                   <span>Track Live</span>

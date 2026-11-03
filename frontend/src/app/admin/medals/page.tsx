@@ -330,6 +330,37 @@ export default function AdminMedalDispatchPage() {
     }
   }
 
+  const [copiedAwb, setCopiedAwb] = useState<string | null>(null);
+
+  function handleCopyAwb(e: React.MouseEvent, awb: string, id: string) {
+    e.stopPropagation();
+    if (!awb) return;
+    navigator.clipboard.writeText(awb).then(() => {
+      setCopiedAwb(id);
+      setTimeout(() => setCopiedAwb(null), 2000);
+    });
+  }
+
+  function getLiveTrackingUrl(
+    courier?: string | null,
+    awb?: string | null,
+    explicitUrl?: string | null,
+  ): string {
+    if (explicitUrl && explicitUrl.startsWith("http")) return explicitUrl;
+    const cleanAwb = String(awb || "").trim();
+    if (!cleanAwb) return "";
+
+    const c = String(courier || "").toLowerCase();
+    if (c.includes("dtdc") || /^7D/i.test(cleanAwb)) {
+      return `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(cleanAwb)}`;
+    }
+    if (c.includes("post") || c.includes("speed")) {
+      return "https://www.indiapost.gov.in/_layouts/15/dpt.cept.tracking/trackconsignment.aspx";
+    }
+    // Default: Delhivery
+    return `https://www.delhivery.com/track/package/${encodeURIComponent(cleanAwb)}`;
+  }
+
   // Save dispatch updates
   async function handleSaveDispatch(e: React.FormEvent) {
     e.preventDefault();
@@ -633,14 +664,19 @@ export default function AdminMedalDispatchPage() {
                   <th className="py-3.5 pr-3 pl-4">BIB & Runner</th>
                   <th className="px-3 py-3.5">Shipping Address</th>
                   <th className="px-3 py-3.5">Event & Dist</th>
-                  <th className="px-3 py-3.5">Finish Time</th>
-                  <th className="px-3 py-3.5">Dispatch Status</th>
+                  <th className="px-3 py-3.5">Delivery Partner & AWB</th>
+                  <th className="px-3 py-3.5">Status & Live Tracking</th>
                   <th className="py-3.5 pr-4 pl-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--line)">
                 {items.map((row) => {
                   const mStatus = row.medalDelivery?.status || "PENDING";
+                  const trackingNum = row.medalDelivery?.trackingNumber?.trim();
+                  const courierName = row.medalDelivery?.courier?.trim() || (trackingNum ? (/^7D/i.test(trackingNum) ? "DTDC" : "Delhivery") : null);
+                  const isDtdc = (courierName || "").toLowerCase().includes("dtdc") || (trackingNum ? /^7D/i.test(trackingNum) : false);
+                  const liveTrackingUrl = trackingNum ? getLiveTrackingUrl(courierName, trackingNum, row.medalDelivery?.trackingUrl) : "";
+
                   return (
                     <tr
                       key={row.id}
@@ -682,81 +718,108 @@ export default function AdminMedalDispatchPage() {
                         </span>
                       </td>
 
-                      {/* Finish Time */}
-                      <td className="px-3 py-3.5 font-mono text-xs font-semibold text-(--foreground)">
-                        {formatTime(row.finishTimeSeconds)}
+                      {/* Delivery Partner & Tracking ID (AWB) */}
+                      <td className="px-3 py-3.5">
+                        {trackingNum ? (
+                          <div className="space-y-1.5">
+                            {/* Courier Partner Badge */}
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[0.65rem] font-black uppercase tracking-wider shadow-xs ${
+                                  isDtdc
+                                    ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+                                    : "bg-red-500/15 text-red-400 border border-red-500/30"
+                                }`}
+                              >
+                                <Truck className="h-3 w-3" />
+                                {courierName || "Delhivery"}
+                              </span>
+                            </div>
+
+                            {/* AWB Number + Copy Button */}
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono text-xs font-bold text-(--foreground) tracking-tight select-all">
+                                {trackingNum}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopyAwb(e, trackingNum, row.id)}
+                                className="inline-flex items-center gap-1 rounded-md border border-(--line) bg-(--panel-soft) hover:bg-(--line) px-1.5 py-0.5 text-[0.65rem] font-bold text-(--muted) hover:text-(--foreground) transition-all cursor-pointer"
+                                title="Copy Tracking ID (AWB)"
+                              >
+                                {copiedAwb === row.id ? (
+                                  <>
+                                    <Check className="h-2.5 w-2.5 text-emerald-400" />
+                                    <span className="text-emerald-400 font-bold">Copied!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="h-2.5 w-2.5" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-[0.7rem] text-(--muted-soft)">
+                            <span className="inline-flex items-center gap-1 text-amber-500/90 font-semibold">
+                              <Clock className="h-3 w-3" />
+                              No AWB Assigned
+                            </span>
+                            <p className="text-[0.62rem] text-(--muted-soft) mt-0.5">Pending courier dispatch</p>
+                          </div>
+                        )}
                       </td>
 
-                      {/* Dispatch Status */}
+                      {/* Status & Live Tracking */}
                       <td className="px-3 py-3.5">
-                        {mStatus === "PENDING" && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-amber-500">
-                            <Clock className="h-3 w-3" />
-                            Ready to Ship
-                          </span>
-                        )}
-                        {mStatus === "DISPATCHED" && (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-sky-400">
-                                <Truck className="h-3 w-3" />
-                                Dispatched
+                        <div className="space-y-1.5">
+                          {/* Fulfillment Status Badge */}
+                          <div>
+                            {mStatus === "PENDING" && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-amber-500">
+                                <Clock className="h-3 w-3" />
+                                Ready to Ship
                               </span>
-                              {row.medalDelivery?.courier && (
-                                <span
-                                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-[0.62rem] font-black uppercase tracking-wider ${
-                                    row.medalDelivery.courier.toLowerCase().includes("dtdc")
-                                      ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
-                                      : "bg-red-500/15 text-red-400 border border-red-500/30"
-                                  }`}
-                                >
-                                  {row.medalDelivery.courier}
-                                </span>
-                              )}
-                            </div>
-                            {row.medalDelivery?.trackingNumber ? (
-                              <div className="flex items-center gap-1.5 pt-0.5">
-                                <span className="font-mono text-[0.68rem] font-bold text-(--foreground)">
-                                  {row.medalDelivery.trackingNumber}
-                                </span>
-                                <a
-                                  href={
-                                    row.medalDelivery.trackingUrl ||
-                                    (row.medalDelivery.courier?.toLowerCase().includes("dtdc")
-                                      ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(row.medalDelivery.trackingNumber)}`
-                                      : `https://www.delhivery.com/track/package/${encodeURIComponent(row.medalDelivery.trackingNumber)}`)
-                                  }
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="inline-flex items-center gap-0.5 text-[0.65rem] font-bold text-sky-400 hover:text-sky-300 hover:underline"
-                                  title="Track shipment in new tab"
-                                >
-                                  <span>Track</span>
-                                  <ExternalLink className="h-2.5 w-2.5" />
-                                </a>
-                              </div>
-                            ) : null}
-                          </div>
-                        )}
-                        {mStatus === "DELIVERED" && (
-                          <div className="space-y-1">
-                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
-                              <Check className="h-3 w-3" />
-                              Delivered
-                            </span>
-                            {row.medalDelivery?.trackingNumber && (
-                              <p className="font-mono text-[0.65rem] text-(--muted-soft)">
-                                {row.medalDelivery.courier}: {row.medalDelivery.trackingNumber}
-                              </p>
+                            )}
+                            {mStatus === "DISPATCHED" && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-sky-400">
+                                <Truck className="h-3 w-3" />
+                                In Transit
+                              </span>
+                            )}
+                            {mStatus === "DELIVERED" && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
+                                <Check className="h-3 w-3" />
+                                Delivered
+                              </span>
+                            )}
+                            {mStatus === "RETURNED" && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-red-400">
+                                Returned
+                              </span>
                             )}
                           </div>
-                        )}
-                        {mStatus === "RETURNED" && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-red-400">
-                            Returned
-                          </span>
-                        )}
+
+                          {/* Live Tracking Link Button */}
+                          {trackingNum && liveTrackingUrl ? (
+                            <div>
+                              <a
+                                href={liveTrackingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/15 hover:bg-sky-500/30 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-sky-300 transition-all shadow-xs group/btn cursor-pointer active:scale-95"
+                                title={`Open live tracking on ${courierName || "courier"} website`}
+                              >
+                                <Truck className="h-3 w-3 text-sky-400 group-hover/btn:scale-110 transition-transform" />
+                                <span>Live Track</span>
+                                <ExternalLink className="h-3 w-3 text-sky-400" />
+                              </a>
+                            </div>
+                          ) : null}
+                        </div>
                       </td>
 
                       {/* Action */}
@@ -831,6 +894,84 @@ export default function AdminMedalDispatchPage() {
 
               {/* Drawer Body Scroll */}
               <div className="flex-1 space-y-5 overflow-y-auto p-5 text-xs sm:text-sm">
+                {/* 🚚 Courier & Live Tracking Status Card */}
+                {(() => {
+                  const dTracking = activeItem.medalDelivery?.trackingNumber?.trim();
+                  const dCourier = activeItem.medalDelivery?.courier?.trim() || (dTracking ? (/^7D/i.test(dTracking) ? "DTDC" : "Delhivery") : null);
+                  const isDtdc = (dCourier || "").toLowerCase().includes("dtdc") || (dTracking ? /^7D/i.test(dTracking) : false);
+                  const dLiveUrl = dTracking ? getLiveTrackingUrl(dCourier, dTracking, activeItem.medalDelivery?.trackingUrl) : "";
+
+                  return (
+                    <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[0.7rem] font-black uppercase tracking-wider ${
+                              isDtdc
+                                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+                                : "bg-red-500/20 text-red-300 border border-red-500/40"
+                            }`}
+                          >
+                            <Truck className="h-3.5 w-3.5" />
+                            {dCourier || "Delivery Partner"}
+                          </span>
+                          <span className="rounded-full bg-sky-500/20 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-sky-300">
+                            {activeItem.medalDelivery?.status || "PENDING"}
+                          </span>
+                        </div>
+                        {dTracking && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleCopyAwb(e, dTracking, "drawer-top")}
+                            className="flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/15 hover:bg-sky-500/25 px-2.5 py-1 text-xs font-bold text-sky-300 transition-all cursor-pointer"
+                          >
+                            {copiedAwb === "drawer-top" ? (
+                              <>
+                                <Check className="h-3 w-3 text-emerald-400" />
+                                <span className="text-emerald-400 font-bold">Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3 w-3" />
+                                Copy AWB
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+
+                      {dTracking ? (
+                        <div className="space-y-2.5 pt-1">
+                          <div>
+                            <p className="text-[0.65rem] font-bold uppercase tracking-wider text-slate-400">
+                              Official AWB / Tracking ID:
+                            </p>
+                            <p className="font-mono text-base font-black text-white tracking-wider select-all">
+                              {dTracking}
+                            </p>
+                          </div>
+
+                          {/* 🚀 Big Live Tracking Button */}
+                          <a
+                            href={dLiveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 py-3 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg transition-all active:scale-98 cursor-pointer"
+                          >
+                            <Truck className="h-4 w-4" />
+                            <span>Open Live Tracking on {dCourier || "Partner"}</span>
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-slate-400">
+                          No AWB assigned yet. Use the form below to enter Delhivery or DTDC tracking number.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* 📍 Shipping Address Box */}
                 <div className="rounded-xl border border-(--line) bg-(--panel-soft) p-4">
                   <div className="flex items-center justify-between">
@@ -890,9 +1031,9 @@ export default function AdminMedalDispatchPage() {
 
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <p className="text-[0.65rem] text-(--muted)">Finish Time</p>
-                      <p className="font-mono font-bold text-(--foreground)">
-                        {formatTime(activeItem.finishTimeSeconds)}
+                      <p className="text-[0.65rem] text-(--muted)">Challenge Distance</p>
+                      <p className="font-bold text-(--foreground)">
+                        {activeItem.distance}
                       </p>
                     </div>
                     <div>
