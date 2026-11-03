@@ -2233,9 +2233,7 @@ export async function adminListMedals(request: AuthenticatedRequest, response: R
     ...(eventId ? { eventId } : {}),
     ...(proofStatus && proofStatus !== "ALL"
       ? { proofStatus: proofStatus as never }
-      : !proofStatus
-        ? { proofStatus: "APPROVED" }
-        : {}),
+      : {}),
     ...(status && status !== "ALL"
       ? status === "PENDING"
         ? {
@@ -2285,7 +2283,6 @@ export async function adminListMedals(request: AuthenticatedRequest, response: R
       prisma.registration.count({
         where: {
           status: { in: ["CONFIRMED", "COMPLETED"] },
-          proofStatus: "APPROVED",
           OR: [{ medalDelivery: null }, { medalDelivery: { status: "PENDING" } }],
           ...(eventId ? { eventId } : {}),
         },
@@ -2307,7 +2304,6 @@ export async function adminListMedals(request: AuthenticatedRequest, response: R
       prisma.registration.count({
         where: {
           status: { in: ["CONFIRMED", "COMPLETED"] },
-          proofStatus: "APPROVED",
           ...(eventId ? { eventId } : {}),
         },
       }),
@@ -2344,9 +2340,7 @@ export async function adminExportMedalsCsv(
     ...(eventId ? { eventId } : {}),
     ...(proofStatus && proofStatus !== "ALL"
       ? { proofStatus: proofStatus as never }
-      : !proofStatus
-        ? { proofStatus: "APPROVED" }
-        : {}),
+      : {}),
     ...(status && status !== "ALL"
       ? status === "PENDING"
         ? {

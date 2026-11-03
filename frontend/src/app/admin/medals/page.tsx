@@ -134,8 +134,8 @@ export default function AdminMedalDispatchPage() {
 
   // Filters
   const [statusTab, setStatusTab] = useState<string>("ALL"); // Default to ALL so dispatched medals with tracking are visible immediately
-  const [searchQuery, setSearchQuery] = useState<string>("" );
-  const [proofFilter, setProofFilter] = useState<string>("APPROVED");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [proofFilter, setProofFilter] = useState<string>("ALL");
 
   // Selected item for drawer
   const [activeItem, setActiveItem] = useState<DispatchItem | null>(null);
@@ -629,8 +629,8 @@ export default function AdminMedalDispatchPage() {
               onChange={(e) => setProofFilter(e.target.value)}
               className="rounded-lg border border-(--line) bg-(--panel-soft) px-2 py-1 text-[0.75rem] text-(--foreground)"
             >
-              <option value="APPROVED">Approved Only</option>
-              <option value="ALL">All Proofs</option>
+              <option value="ALL">All Participants ({stats.approvedCount})</option>
+              <option value="APPROVED">Approved Proofs Only</option>
             </select>
           </div>
         </div>
