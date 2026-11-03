@@ -898,11 +898,17 @@ export function DashboardClient() {
                 </div>
               ) : (
                 activeRegistrations.map((reg) => {
+                  const slugLower = (reg.event.slug || "").toLowerCase();
+                  const titleLower = (reg.event.title || "").toLowerCase();
+                  const isIafEvent = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
+                  const isCancerEvent = slugLower.includes("cancer") || titleLower.includes("cancer");
+
                   const isPaid = reg.payment?.status === "PAID" || reg.status === "CONFIRMED";
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
                   const isProofRejected = reg.proofStatus === "REJECTED";
-                  const isCertReady = isPaid; // All 312 paid participants are 100% eligible for certificates & bibs
+                  // Certificates are only ready for the concluded IAF challenge; Cancer event is active and unlocked only post-event verification
+                  const isCertReady = isIafEvent && isPaid;
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
 
@@ -1136,7 +1142,8 @@ export function DashboardClient() {
                             Leaderboard <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                           </Link>
 
-                          {isPaid && (
+                          {/* Concluded IAF challenge participants can download certificate/bib. For newly started Cancer event, option is removed */}
+                          {isPaid && isIafEvent && isVerified && (
                             <div className="inline-flex items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleDownloadBib(reg)}
@@ -1392,6 +1399,10 @@ export function DashboardClient() {
               ) : (
                 <div className="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2">
                   {trophyRegistrations.map((reg) => {
+                    const slugLower = (reg.event.slug || "").toLowerCase();
+                    const titleLower = (reg.event.title || "").toLowerCase();
+                    const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
+
                     const isPaid =
                       reg.status === "CONFIRMED" ||
                       reg.status === "COMPLETED" ||
@@ -1453,25 +1464,27 @@ export function DashboardClient() {
                           </div>
                       </div>
 
-                      <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={() => handleDownloadCert(reg)}
-                          disabled={downloadingCertId === reg.id}
-                          className="flex-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-slate-950 shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          <span>{downloadingCertId === reg.id ? "Generating Certificate..." : "Download Certificate (HD)"}</span>
-                        </button>
+                      {isIaf && (
+                        <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => handleDownloadCert(reg)}
+                            disabled={downloadingCertId === reg.id}
+                            className="flex-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-slate-950 shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>{downloadingCertId === reg.id ? "Generating Certificate..." : "Download Certificate (HD)"}</span>
+                          </button>
 
-                        <button
-                          onClick={() => handleDownloadBib(reg)}
-                          disabled={downloadingBibId === reg.id}
-                          className="flex-1 rounded-full bg-gradient-to-r from-[#e64833] to-amber-500 hover:from-[#d13a27] hover:to-amber-400 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
-                        >
-                          <Download className="h-3.5 w-3.5" />
-                          <span>{downloadingBibId === reg.id ? "Generating Bib..." : "Download Bib (HD)"}</span>
-                        </button>
-                      </div>
+                          <button
+                            onClick={() => handleDownloadBib(reg)}
+                            disabled={downloadingBibId === reg.id}
+                            className="flex-1 rounded-full bg-gradient-to-r from-[#e64833] to-amber-500 hover:from-[#d13a27] hover:to-amber-400 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition-all disabled:opacity-50"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            <span>{downloadingBibId === reg.id ? "Generating Bib..." : "Download Bib (HD)"}</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                     );
                   })}

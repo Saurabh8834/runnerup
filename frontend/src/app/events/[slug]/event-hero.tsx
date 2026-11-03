@@ -136,15 +136,27 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/35 bg-[#12161a] px-3.5 py-1 text-xs font-semibold backdrop-blur-md mb-3 sm:mb-4 shadow-sm"
+              className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-semibold backdrop-blur-md mb-3 sm:mb-4 shadow-sm ${
+                isPast
+                  ? "border border-rose-500/40 bg-rose-500/15 text-rose-300"
+                  : "border border-amber-500/35 bg-[#12161a]"
+              }`}
             >
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-amber-400 font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs">
-                {eyebrowDate}
+              <span
+                className={`flex h-2 w-2 rounded-full ${
+                  isPast ? "bg-rose-500" : "bg-emerald-400 animate-pulse"
+                }`}
+              />
+              <span
+                className={`font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs ${
+                  isPast ? "text-rose-300" : "text-amber-400"
+                }`}
+              >
+                {isPast ? "REGISTRATIONS CLOSED · EVENT CONCLUDED" : eyebrowDate}
               </span>
               <span className="text-zinc-500">·</span>
               <span className="text-zinc-300 font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs">
-                RUN, WALK OR CYCLE
+                {isPast ? "ALL 312 PARTICIPANTS COMPLETED" : "RUN, WALK OR CYCLE"}
               </span>
             </motion.div>
 
@@ -231,111 +243,118 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               </motion.div>
             )}
 
-            {/* Unified Race Configuration Console: Activity Mode & Target KM Side-by-Side */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.25 }}
-              className="mt-5 w-full max-w-xl rounded-2xl border border-white/15 bg-gradient-to-b from-[#121820]/90 to-[#0a0f14]/90 p-4 sm:p-5 backdrop-blur-xl shadow-2xl flex flex-col gap-3.5 text-left"
-            >
-              {/* Category 1: Mode (Run / Walk / Cycle) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-400">
-                  1. Activity Mode:
-                </span>
-                <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 shrink-0">
-                  {[
-                    { key: "running", label: "Run", icon: "🏃" },
-                    { key: "walking", label: "Walk", icon: "🚶" },
-                    { key: "cycling", label: "Cycle", icon: "🚴" },
-                  ].map(({ key, label, icon }) => {
-                    const active = selectedActivity === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => setSelectedActivity(key as any)}
-                        className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${active
-                          ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-md scale-[1.02]"
-                          : "text-zinc-400 hover:text-white"
-                          }`}
-                      >
-                        <span>{icon}</span>
-                        <span>{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Category 2: Target KM Distance (Placed Directly Under Mode) */}
-              <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-wider text-amber-400">
-                    2. Target Distance:
-                  </span>
-                  <span className="text-[11px] font-semibold text-zinc-400">
-                    Selected: <strong className="text-white font-mono">{selectedDistance}</strong> ({selectedActivity})
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {distances.map((dist) => {
-                    const isSelected = selectedDistance === dist;
-                    const isPopular = dist.includes("5");
-                    return (
-                      <button
-                        key={dist}
-                        type="button"
-                        onClick={() => setSelectedDistance(dist)}
-                        className={`relative px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${isSelected
-                          ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30 scale-[1.03] border border-amber-300"
-                          : "bg-black/60 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 hover:border-zinc-500 active:scale-95"
-                          }`}
-                      >
-                        <span>{dist}</span>
-                        {isPopular && (
-                          <span
-                            className={`text-[0.55rem] px-1.5 py-0.2 rounded-full font-black uppercase ${isSelected
-                              ? "bg-black/25 text-black"
-                              : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                              }`}
+            {/* Unified Race Configuration Console: Activity Mode & Target KM (Only for Active Events) */}
+            {!isPast && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
+                  className="mt-5 w-full max-w-xl rounded-2xl border border-white/15 bg-gradient-to-b from-[#121820]/90 to-[#0a0f14]/90 p-4 sm:p-5 backdrop-blur-xl shadow-2xl flex flex-col gap-3.5 text-left"
+                >
+                  {/* Category 1: Mode (Run / Walk / Cycle) */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                      1. Activity Mode:
+                    </span>
+                    <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 shrink-0">
+                      {[
+                        { key: "running", label: "Run", icon: "🏃" },
+                        { key: "walking", label: "Walk", icon: "🚶" },
+                        { key: "cycling", label: "Cycle", icon: "🚴" },
+                      ].map(({ key, label, icon }) => {
+                        const active = selectedActivity === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => setSelectedActivity(key as any)}
+                            className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                              active
+                                ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-md scale-[1.02]"
+                                : "text-zinc-400 hover:text-white"
+                            }`}
                           >
-                            Popular
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
+                            <span>{icon}</span>
+                            <span>{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
-            {/* Pricing Callout Block */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-6 flex flex-col items-center lg:items-start w-full"
-            >
-              <div className="flex items-baseline justify-center lg:justify-start gap-3 w-full">
-                <span className="font-display font-black text-3xl sm:text-4xl lg:text-[2.6rem] text-white tracking-tight">
-                  {priceDisplay}
-                </span>
-                {compareAtNumeric && (
-                  <span className="text-base sm:text-lg text-zinc-500 line-through font-semibold">
-                    ₹{compareAtNumeric}
-                  </span>
-                )}
-                <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-black text-emerald-300">
-                  Save 50% · VIP Early Bird
-                </span>
-              </div>
-              <p className="mt-1 text-xs sm:text-sm text-zinc-400 font-normal text-center lg:text-left">
-                Solid Metal Medal, Digital Race Bib, QR Certificate & delivery across India included.
-              </p>
-            </motion.div>
+                  {/* Category 2: Target KM Distance (Placed Directly Under Mode) */}
+                  <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                        2. Target Distance:
+                      </span>
+                      <span className="text-[11px] font-semibold text-zinc-400">
+                        Selected: <strong className="text-white font-mono">{selectedDistance}</strong> ({selectedActivity})
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {distances.map((dist) => {
+                        const isSelected = selectedDistance === dist;
+                        const isPopular = dist.includes("5");
+                        return (
+                          <button
+                            key={dist}
+                            type="button"
+                            onClick={() => setSelectedDistance(dist)}
+                            className={`relative px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                              isSelected
+                                ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black shadow-lg shadow-amber-500/30 scale-[1.03] border border-amber-300"
+                                : "bg-black/60 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 hover:border-zinc-500 active:scale-95"
+                            }`}
+                          >
+                            <span>{dist}</span>
+                            {isPopular && (
+                              <span
+                                className={`text-[0.55rem] px-1.5 py-0.2 rounded-full font-black uppercase ${
+                                  isSelected
+                                    ? "bg-black/25 text-black"
+                                    : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                }`}
+                              >
+                                Popular
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
 
-            {/* CTA & Urgency Row */}
+                {/* Pricing Callout Block */}
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="mt-6 flex flex-col items-center lg:items-start w-full"
+                >
+                  <div className="flex items-baseline justify-center lg:justify-start gap-3 w-full">
+                    <span className="font-display font-black text-3xl sm:text-4xl lg:text-[2.6rem] text-white tracking-tight">
+                      {priceDisplay}
+                    </span>
+                    {compareAtNumeric && (
+                      <span className="text-base sm:text-lg text-zinc-500 line-through font-semibold">
+                        ₹{compareAtNumeric}
+                      </span>
+                    )}
+                    <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-black text-emerald-300">
+                      Save 50% · VIP Early Bird
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs sm:text-sm text-zinc-400 font-normal text-center lg:text-left">
+                    Solid Metal Medal, Digital Race Bib, QR Certificate & delivery across India included.
+                  </p>
+                </motion.div>
+              </>
+            )}
+
+            {/* CTA Row */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -361,30 +380,57 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                   </div>
                 </>
               ) : (
-                <Link
-                  href="/leaderboard"
-                  className="rounded-full bg-[#f59e0b] hover:bg-[#d97706] text-black font-extrabold text-sm sm:text-base px-8 py-3.5 shadow-md"
-                >
-                  View Final Results & Leaderboard
-                </Link>
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                  <Link
+                    href={`/leaderboard?event=${encodeURIComponent(event.slug)}`}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm sm:text-base px-8 py-3.5 shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <span>View Official Leaderboard & Standings 🏆</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href="/events/national-cancer-awareness-day-virtual-run-2026"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white font-black text-sm sm:text-base px-8 py-3.5 shadow-lg shadow-[#e64833]/30 active:scale-95 transition-all cursor-pointer"
+                  >
+                    <span>Explore Live Cancer Challenge 🎗️</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
               )}
             </motion.div>
 
             {/* Shortcut Link */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-3 text-xs sm:text-sm text-zinc-400"
-            >
-              <span>Already registered? </span>
-              <Link
-                href="/dashboard"
-                className="font-bold text-[#f59e0b] hover:text-amber-300 underline underline-offset-4 transition-colors"
+            {isPast ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-3 text-xs sm:text-sm text-zinc-400"
               >
-                Upload your GPS proof on Dashboard →
-              </Link>
-            </motion.div>
+                <span>Participant looking for your certificate or medal tracking? </span>
+                <Link
+                  href="/dashboard"
+                  className="font-bold text-[#f59e0b] hover:text-amber-300 underline underline-offset-4 transition-colors"
+                >
+                  Go to Athlete Dashboard →
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-3 text-xs sm:text-sm text-zinc-400"
+              >
+                <span>Already registered? </span>
+                <Link
+                  href="/dashboard"
+                  className="font-bold text-[#f59e0b] hover:text-amber-300 underline underline-offset-4 transition-colors"
+                >
+                  Upload your GPS proof on Dashboard →
+                </Link>
+              </motion.div>
+            )}
 
             {/* Trust Checklist */}
             <motion.div

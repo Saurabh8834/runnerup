@@ -22,6 +22,10 @@ export function EventStickyCta({
   slug: string;
   eventName?: string;
 }) {
+  if (slug.includes("air-force") || slug.includes("airforce")) {
+    return null;
+  }
+
   const amount = price.toLowerCase().includes("free") ? "Free" : formatPrice(price);
   const isCancer = slug.includes("cancer");
   const registerHref = `/register?event=${encodeURIComponent(slug)}`;

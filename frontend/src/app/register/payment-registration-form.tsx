@@ -99,14 +99,6 @@ const fallbackEvents: RegisterEventOption[] = [
     couponCode: "VIP100",
   },
   {
-    label: "Indian Air Force Day Virtual Challenge 2026",
-    value: "indian-air-force-day-virtual-challenge",
-    amount: "₹499",
-    priceInPaise: 49900,
-    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
-    activityTypes: ["running", "cycling", "walking"],
-  },
-  {
     label: "Monsoon Mountain Miles",
     value: "monsoon-mountain-miles",
     amount: "₹499",
@@ -429,7 +421,12 @@ function PaymentRegistrationFormInner() {
         }>;
 
         const open = rows
-          .filter((row) => row.registrationOpen !== false)
+          .filter(
+            (row) =>
+              row.registrationOpen !== false &&
+              !row.slug.includes("air-force") &&
+              !row.slug.includes("airforce")
+          )
           .map((row) => {
             const rawActs = (row as { activityTypes?: string[] }).activityTypes;
             const actSet = new Set(
@@ -456,9 +453,9 @@ function PaymentRegistrationFormInner() {
         const combined = hasCancerEvent ? open : [fallbackEvents[0], ...open];
         setEvents(combined);
         setSelectedEvent((prev) => {
-          if (eventFromQuery && combined.some((e) => e.value === eventFromQuery || (eventFromQuery.includes("cancer") && e.value.includes("cancer")))) {
+          if (eventFromQuery && !eventFromQuery.includes("air-force") && !eventFromQuery.includes("airforce")) {
             const matched = combined.find((e) => e.value === eventFromQuery || (eventFromQuery.includes("cancer") && e.value.includes("cancer")));
-            return matched ? matched.value : eventFromQuery;
+            return matched ? matched.value : combined[0].value;
           }
           return combined.some((e) => e.value === prev) ? prev : combined[0].value;
         });

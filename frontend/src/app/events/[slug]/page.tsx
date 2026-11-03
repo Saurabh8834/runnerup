@@ -26,7 +26,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const event = await fetchEventBySlug(slug);
   if (!event) return { title: "Event Not Found" };
 
-  const isPast = event.status === "past";
+  const isPast =
+    event.status === "past" ||
+    event.status === "closed" ||
+    event.slug.includes("air-force") ||
+    event.slug.includes("airforce");
   const metaTitle = `${event.name} - ${event.distance} Virtual Run | RunnerUp`;
   const metaDescription = isPast
     ? `View results and recap for ${event.name}. Official GPS-verified results and finisher awards from across India.`
@@ -93,7 +97,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const event = await fetchEventBySlug(slug);
   if (!event) notFound();
 
-  const isPast = event.status === "past";
+  const isPast =
+    event.status === "past" ||
+    event.status === "closed" ||
+    event.slug.includes("air-force") ||
+    event.slug.includes("airforce");
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -274,10 +282,16 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     </span>
                     <h2 className="heading text-(--foreground)">{event.name} recap</h2>
                     <p className="lede max-w-lg">{event.highlight}</p>
-                    <Link className="btn btn-gold gap-2 text-sm" href="/events">
-                      Join the next event
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <Link className="btn btn-gold gap-2 text-sm" href={`/leaderboard?event=${event.slug}`}>
+                        <span>View Final Leaderboard 🏆</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                      <Link className="btn btn-secondary gap-2 text-sm bg-gradient-to-r from-[#e64833] to-[#ff5e3a] text-white border-0 font-bold" href="/events/national-cancer-awareness-day-virtual-run-2026">
+                        <span>Join Live Cancer Challenge 🎗️</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </Reveal>
               </div>
