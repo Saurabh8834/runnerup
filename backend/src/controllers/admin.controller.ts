@@ -1,6 +1,7 @@
 import type { Response } from "express";
 import { Prisma, ProofStatus } from "@prisma/client";
 import { z } from "zod";
+import XLSX from "xlsx";
 import { createClerkClient } from "@clerk/backend";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
@@ -2508,6 +2509,241 @@ export async function adminUpdateMedal(request: AuthenticatedRequest, response: 
   });
 
   response.json({ data: medal });
+}
+
+export async function adminImportCourierTracking(
+  request: AuthenticatedRequest,
+  response: Response,
+) {
+  const body = (request.body || {}) as {
+    rows?: any[];
+    fileBase64?: string;
+    eventId?: string;
+    defaultCourier?: string;
+  };
+
+  let rawRows: any[] = [];
+  if (Array.isArray(body.rows) && body.rows.length > 0) {
+    rawRows = body.rows;
+  } else if (body.fileBase64) {
+    try {
+      const buffer = Buffer.from(body.fileBase64, "base64");
+      const wb = XLSX.read(buffer, { type: "buffer" });
+      const sheetName = wb.SheetNames[0];
+      if (sheetName) {
+        rawRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+      }
+    } catch (parseErr) {
+      return response.status(400).json({
+        error:
+          "Failed to parse uploaded Excel/CSV file: " +
+          (parseErr instanceof Error ? parseErr.message : String(parseErr)),
+      });
+    }
+  }
+
+  if (rawRows.length === 0) {
+    return response.status(400).json({
+      error: "No records found to import. Please check file format or sheet data.",
+    });
+  }
+
+  const eventId = body.eventId?.trim() || undefined;
+
+  const registrations = await prisma.registration.findMany({
+    where: {
+      status: { in: ["CONFIRMED", "COMPLETED"] },
+      ...(eventId ? { eventId } : {}),
+    },
+    include: {
+      user: { select: { id: true, name: true, phone: true, email: true } },
+      event: { select: { id: true, title: true, slug: true } },
+      medalDelivery: true,
+    },
+  });
+
+  function cleanPhone(raw: any): string {
+    if (!raw) return "";
+    const digits = String(raw).replace(/\D/g, "");
+    return digits.length >= 10 ? digits.slice(-10) : digits;
+  }
+
+  function cleanName(raw: any): string {
+    if (!raw) return "";
+    return String(raw).toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function detectCourierAndUrl(rawOid: string, preferredCourier?: string) {
+    const oid = String(rawOid).trim();
+    if (
+      preferredCourier?.toUpperCase() === "DTDC" ||
+      /^7D/i.test(oid) ||
+      /[A-Za-z]/.test(oid)
+    ) {
+      return {
+        courier: "DTDC" as const,
+        url: `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(oid)}`,
+      };
+    }
+    return {
+      courier: "Delhivery" as const,
+      url: `https://www.delhivery.com/track/package/${encodeURIComponent(oid)}`,
+    };
+  }
+
+  let updatedCount = 0;
+  let delhiveryCount = 0;
+  let dtdcCount = 0;
+  let pendingCount = 0;
+  const unmatchedRows: any[] = [];
+  const updatedRecords: Array<{
+    registrationId: string;
+    name: string;
+    phone: string;
+    courier: string;
+    trackingNumber: string;
+    status: string;
+  }> = [];
+
+  for (const row of rawRows) {
+    const rawOid =
+      row.OID ??
+      row.oid ??
+      row.awb ??
+      row.AWB ??
+      row.trackingNumber ??
+      row.tracking_number ??
+      row.trackingId ??
+      row.tracking ??
+      "";
+    const oid =
+      rawOid && String(rawOid).trim() !== "NaN" && String(rawOid).trim() !== "undefined"
+        ? String(rawOid).trim()
+        : "";
+
+    const rawPhone =
+      row["Contact Phone"] ??
+      row.phone ??
+      row.shippingPhone ??
+      row.mobile ??
+      row.Mobile ??
+      "";
+    const rowPhone = cleanPhone(rawPhone);
+
+    const rawName =
+      row["Participant Name"] ??
+      row.name ??
+      row.shippingName ??
+      row.customerName ??
+      "";
+    const rowName = cleanName(rawName);
+
+    const rawPin =
+      row["PIN Code"] ??
+      row.pincode ??
+      row.shippingPincode ??
+      row.pin ??
+      "";
+    const rowPin = String(rawPin || "").trim();
+
+    const preferredCourier =
+      row.courier || row.Courier || body.defaultCourier || undefined;
+
+    // Match 1: Phone
+    let match = registrations.find((r) => {
+      const regPhone = cleanPhone(r.shippingPhone);
+      const userPhone = cleanPhone(r.user?.phone);
+      return rowPhone && (regPhone === rowPhone || userPhone === rowPhone);
+    });
+
+    // Match 2: Name + PIN
+    if (!match && rowName && rowPin) {
+      match = registrations.find((r) => {
+        const regName = cleanName(r.shippingName || r.user?.name);
+        const regPin = String(r.shippingPincode || "").trim();
+        return (
+          (regName.includes(rowName) || rowName.includes(regName)) &&
+          regPin === rowPin
+        );
+      });
+    }
+
+    if (!match) {
+      unmatchedRows.push({
+        name: rawName,
+        phone: rawPhone,
+        pincode: rawPin,
+        oid,
+      });
+      continue;
+    }
+
+    if (oid) {
+      const { courier, url } = detectCourierAndUrl(oid, preferredCourier);
+      if (courier === "Delhivery") delhiveryCount++;
+      else dtdcCount++;
+
+      await prisma.medalDelivery.upsert({
+        where: { registrationId: match.id },
+        create: {
+          registrationId: match.id,
+          courier,
+          trackingNumber: oid,
+          trackingUrl: url,
+          status: "DISPATCHED",
+          dispatchedAt: new Date(),
+        },
+        update: {
+          courier,
+          trackingNumber: oid,
+          trackingUrl: url,
+          status: "DISPATCHED",
+          dispatchedAt: match.medalDelivery?.dispatchedAt || new Date(),
+        },
+      });
+
+      updatedRecords.push({
+        registrationId: match.id,
+        name: match.shippingName || match.user?.name || "Participant",
+        phone: match.shippingPhone || match.user?.phone || "",
+        courier,
+        trackingNumber: oid,
+        status: "DISPATCHED",
+      });
+      updatedCount++;
+    } else {
+      pendingCount++;
+      await prisma.medalDelivery.upsert({
+        where: { registrationId: match.id },
+        create: {
+          registrationId: match.id,
+          status: "PENDING",
+        },
+        update: {
+          status: "PENDING",
+        },
+      });
+    }
+  }
+
+  await writeAdminAudit(request, {
+    action: "medal.bulk_import",
+    entityType: "MedalDelivery",
+    entityId: "bulk",
+    summary: `Imported tracking: ${updatedCount} dispatched (${delhiveryCount} Delhivery, ${dtdcCount} DTDC), ${pendingCount} pending, ${unmatchedRows.length} unmatched`,
+  });
+
+  return response.json({
+    success: true,
+    totalRows: rawRows.length,
+    updatedCount,
+    delhiveryCount,
+    dtdcCount,
+    pendingCount,
+    unmatchedCount: unmatchedRows.length,
+    unmatchedRows: unmatchedRows.slice(0, 50),
+    sampleUpdates: updatedRecords.slice(0, 10),
+  });
 }
 
 // ── Certificates ───────────────────────────────────────────────

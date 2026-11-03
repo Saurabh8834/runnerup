@@ -1168,10 +1168,25 @@ export function DashboardClient() {
                           )}
 
                           {reg.medalDelivery?.trackingNumber && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[0.7rem] text-slate-300 backdrop-blur-xl">
-                              <Truck className="h-3 w-3 text-[#e64833]" />
+                            <a
+                              href={
+                                reg.medalDelivery.trackingUrl ||
+                                (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
+                                  ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
+                                  : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`)
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25 px-3 py-1.5 text-[0.7rem] font-bold text-amber-300 backdrop-blur-xl transition-all shadow-sm group/track"
+                              title={`Track on ${reg.medalDelivery.courier || "Courier Partner"}`}
+                            >
+                              <Truck className="h-3.5 w-3.5 text-amber-400 group-hover/track:scale-110 transition-transform" />
                               <span className="font-mono font-bold text-white">{reg.medalDelivery.trackingNumber}</span>
-                            </span>
+                              <span className="rounded bg-black/40 px-1.5 py-0.5 text-[0.6rem] font-black uppercase tracking-wider text-amber-300">
+                                {reg.medalDelivery.courier || "Track"}
+                              </span>
+                              <ExternalLink className="h-3 w-3 text-amber-300" />
+                            </a>
                           )}
                         </div>
 
@@ -1453,9 +1468,31 @@ export function DashboardClient() {
                             </span>
                           </p>
                             {reg.medalDelivery?.trackingNumber ? (
-                              <p className="mt-1 text-slate-300 font-mono text-[0.7rem]">
-                                Courier: {reg.medalDelivery.courier || "SpeedPost"} · {reg.medalDelivery.trackingNumber}
-                              </p>
+                              <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-emerald-500/20 pt-2.5">
+                                <div>
+                                  <p className="text-[0.65rem] uppercase tracking-wider text-slate-300 font-bold">
+                                    Courier: <span className="text-white font-mono font-black">{reg.medalDelivery.courier || "Delhivery"}</span>
+                                  </p>
+                                  <p className="font-mono text-xs font-bold text-white tracking-wide">
+                                    AWB: {reg.medalDelivery.trackingNumber}
+                                  </p>
+                                </div>
+                                <a
+                                  href={
+                                    reg.medalDelivery.trackingUrl ||
+                                    (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
+                                      ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
+                                      : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`)
+                                  }
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 px-3.5 py-1.5 text-xs font-black uppercase tracking-wider text-slate-950 transition-all shadow-md active:scale-95"
+                                >
+                                  <Truck className="h-3.5 w-3.5" />
+                                  <span>Track Live</span>
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              </div>
                             ) : (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
                                 ✉️ Address verification email has been sent to your inbox. Once dispatched, your live tracking link will be shared directly via Email.

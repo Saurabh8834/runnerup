@@ -3,12 +3,15 @@
 import { useAuth } from "@clerk/nextjs";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  AlertCircle,
   Check,
+  CheckCircle2,
   ChevronRight,
   Clock,
   Copy,
   Download,
   ExternalLink,
+  FileSpreadsheet,
   Filter,
   Loader2,
   MapPin,
@@ -20,6 +23,7 @@ import {
   Send,
   ShieldCheck,
   Truck,
+  Upload,
   User,
   X,
 } from "lucide-react";
@@ -90,12 +94,10 @@ type DispatchStats = {
 
 const COURIER_PRESETS = [
   "Delhivery",
-  "Shiprocket",
-  "India Post (Speed Post)",
   "DTDC",
+  "India Post (Speed Post)",
   "BlueDart",
   "Shadowfax",
-  "Xpressbees",
   "Other",
 ];
 
@@ -213,6 +215,118 @@ export default function AdminMedalDispatchPage() {
       alert(err instanceof Error ? err.message : "CSV export failed");
     } finally {
       setExporting(false);
+    }
+  }
+
+  // Import Courier Sheet state
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<{
+    totalRows: number;
+    updatedCount: number;
+    delhiveryCount: number;
+    dtdcCount: number;
+    pendingCount: number;
+    unmatchedCount: number;
+  } | null>(null);
+
+  function handleFileSelect(file: File) {
+    setImportFile(file);
+    setImportError(null);
+    setImportSuccess(null);
+  }
+
+  async function handleExecuteImport() {
+    if (!importFile) return;
+    setImporting(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const token = await getFastAdminToken(getToken, isSignedIn);
+      const reader = new FileReader();
+
+      reader.onload = async (e) => {
+        try {
+          const dataUrl = (e.target?.result as string) || "";
+          const base64 = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+
+          const res = await adminFetch<{
+            success: boolean;
+            totalRows: number;
+            updatedCount: number;
+            delhiveryCount: number;
+            dtdcCount: number;
+            pendingCount: number;
+            unmatchedCount: number;
+            error?: string;
+          }>("/api/admin/medals/import-tracking", token, {
+            method: "POST",
+            body: JSON.stringify({
+              fileBase64: base64,
+              filename: importFile.name,
+              eventId: selectedEventId || undefined,
+            }),
+          });
+
+          if (res.error) {
+            throw new Error(res.error);
+          }
+
+          setImportSuccess({
+            totalRows: res.totalRows,
+            updatedCount: res.updatedCount,
+            delhiveryCount: res.delhiveryCount,
+            dtdcCount: res.dtdcCount,
+            pendingCount: res.pendingCount,
+            unmatchedCount: res.unmatchedCount,
+          });
+
+          // Refresh dispatch data
+          await loadData();
+        } catch (err) {
+          setImportError(err instanceof Error ? err.message : "Failed to import tracking data");
+        } finally {
+          setImporting(false);
+        }
+      };
+
+      reader.onerror = () => {
+        setImportError("Failed to read file. Please retry.");
+        setImporting(false);
+      };
+
+      reader.readAsDataURL(importFile);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : "Authentication error");
+      setImporting(false);
+    }
+  }
+
+  function handleCourierSelect(newCourier: string) {
+    setEditCourier(newCourier);
+    if (editTrackingNumber.trim()) {
+      if (newCourier.toLowerCase().includes("dtdc")) {
+        setEditTrackingUrl(`https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(editTrackingNumber.trim())}`);
+      } else if (newCourier.toLowerCase().includes("delhivery")) {
+        setEditTrackingUrl(`https://www.delhivery.com/track/package/${encodeURIComponent(editTrackingNumber.trim())}`);
+      }
+    }
+  }
+
+  function handleTrackingNumberInput(rawVal: string) {
+    setEditTrackingNumber(rawVal);
+    const val = rawVal.trim();
+    if (val) {
+      if (/^7D/i.test(val) || /[A-Za-z]/.test(val)) {
+        setEditCourier("DTDC");
+        setEditTrackingUrl(`https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(val)}`);
+      } else if (/^\d{10,16}$/.test(val)) {
+        setEditCourier("Delhivery");
+        setEditTrackingUrl(`https://www.delhivery.com/track/package/${encodeURIComponent(val)}`);
+      }
     }
   }
 
@@ -423,6 +537,21 @@ export default function AdminMedalDispatchPage() {
             Refresh
           </button>
 
+          {/* 📥 Import Courier Tracking Sheet Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setImportModalOpen(true);
+              setImportFile(null);
+              setImportError(null);
+              setImportSuccess(null);
+            }}
+            className="flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/15 hover:bg-sky-500/25 px-4 py-2 text-xs font-bold text-sky-300 shadow-sm transition sm:text-sm cursor-pointer"
+          >
+            <Upload className="h-4 w-4" />
+            Import Courier Tracking (Excel / CSV)
+          </button>
+
           {/* 1-Click CSV Export Button */}
           <button
             type="button"
@@ -567,27 +696,67 @@ export default function AdminMedalDispatchPage() {
                           </span>
                         )}
                         {mStatus === "DISPATCHED" && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-sky-400">
-                            <Truck className="h-3 w-3" />
-                            Dispatched
-                          </span>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="inline-flex items-center gap-1 rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-sky-400">
+                                <Truck className="h-3 w-3" />
+                                Dispatched
+                              </span>
+                              {row.medalDelivery?.courier && (
+                                <span
+                                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-[0.62rem] font-black uppercase tracking-wider ${
+                                    row.medalDelivery.courier.toLowerCase().includes("dtdc")
+                                      ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30"
+                                      : "bg-red-500/15 text-red-400 border border-red-500/30"
+                                  }`}
+                                >
+                                  {row.medalDelivery.courier}
+                                </span>
+                              )}
+                            </div>
+                            {row.medalDelivery?.trackingNumber ? (
+                              <div className="flex items-center gap-1.5 pt-0.5">
+                                <span className="font-mono text-[0.68rem] font-bold text-(--foreground)">
+                                  {row.medalDelivery.trackingNumber}
+                                </span>
+                                <a
+                                  href={
+                                    row.medalDelivery.trackingUrl ||
+                                    (row.medalDelivery.courier?.toLowerCase().includes("dtdc")
+                                      ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(row.medalDelivery.trackingNumber)}`
+                                      : `https://www.delhivery.com/track/package/${encodeURIComponent(row.medalDelivery.trackingNumber)}`)
+                                  }
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-0.5 text-[0.65rem] font-bold text-sky-400 hover:text-sky-300 hover:underline"
+                                  title="Track shipment in new tab"
+                                >
+                                  <span>Track</span>
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              </div>
+                            ) : null}
+                          </div>
                         )}
                         {mStatus === "DELIVERED" && (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
-                            <Check className="h-3 w-3" />
-                            Delivered
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-emerald-400">
+                              <Check className="h-3 w-3" />
+                              Delivered
+                            </span>
+                            {row.medalDelivery?.trackingNumber && (
+                              <p className="font-mono text-[0.65rem] text-(--muted-soft)">
+                                {row.medalDelivery.courier}: {row.medalDelivery.trackingNumber}
+                              </p>
+                            )}
+                          </div>
                         )}
                         {mStatus === "RETURNED" && (
                           <span className="inline-flex items-center gap-1 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-red-400">
                             Returned
                           </span>
                         )}
-                        {row.medalDelivery?.trackingNumber ? (
-                          <p className="mt-1 text-[0.65rem] font-mono text-(--muted-soft)">
-                            {row.medalDelivery.courier}: {row.medalDelivery.trackingNumber}
-                          </p>
-                        ) : null}
                       </td>
 
                       {/* Action */}
@@ -794,8 +963,8 @@ export default function AdminMedalDispatchPage() {
                     <input
                       type="text"
                       value={editCourier}
-                      onChange={(e) => setEditCourier(e.target.value)}
-                      placeholder="e.g. Delhivery / India Post"
+                      onChange={(e) => handleCourierSelect(e.target.value)}
+                      placeholder="e.g. Delhivery or DTDC"
                       className="w-full rounded-xl border border-(--line) bg-(--panel) px-3 py-2 text-xs text-(--foreground)"
                     />
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -803,7 +972,7 @@ export default function AdminMedalDispatchPage() {
                         <button
                           key={preset}
                           type="button"
-                          onClick={() => setEditCourier(preset)}
+                          onClick={() => handleCourierSelect(preset)}
                           className={`rounded-md px-2 py-0.5 text-[0.65rem] font-semibold transition ${editCourier === preset
                               ? "bg-(--sage) text-(--on-accent)"
                               : "bg-(--line) text-(--muted) hover:text-(--foreground)"
@@ -823,17 +992,30 @@ export default function AdminMedalDispatchPage() {
                     <input
                       type="text"
                       value={editTrackingNumber}
-                      onChange={(e) => setEditTrackingNumber(e.target.value)}
-                      placeholder="e.g. DL123456789IN"
+                      onChange={(e) => handleTrackingNumberInput(e.target.value)}
+                      placeholder="e.g. 44465010284126 (Delhivery) or 7D141523514 (DTDC)"
                       className="w-full rounded-xl border border-(--line) bg-(--panel) px-3 py-2 font-mono text-xs text-(--foreground)"
                     />
                   </div>
 
                   {/* Tracking URL */}
                   <div>
-                    <label className="mb-1 block text-[0.7rem] font-bold uppercase tracking-wider text-(--muted)">
-                      Tracking URL (Optional)
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-[0.7rem] font-bold uppercase tracking-wider text-(--muted)">
+                        Tracking URL
+                      </label>
+                      {editTrackingUrl ? (
+                        <a
+                          href={editTrackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[0.65rem] font-bold text-sky-400 hover:underline"
+                        >
+                          <span>Test Link</span>
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ) : null}
+                    </div>
                     <input
                       type="url"
                       value={editTrackingUrl}
@@ -866,6 +1048,152 @@ export default function AdminMedalDispatchPage() {
             </motion.div>
           </motion.div>
         ) : null}
+      </AnimatePresence>
+
+      {/* ── Import Courier Tracking Sheet Modal ── */}
+      <AnimatePresence>
+        {importModalOpen && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-lg rounded-2xl border border-(--line) bg-(--panel) p-6 shadow-2xl relative"
+            >
+              <button
+                type="button"
+                onClick={() => setImportModalOpen(false)}
+                className="absolute top-4 right-4 text-(--muted) hover:text-(--foreground)"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400">
+                  <Truck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-(--foreground)">
+                    Import Courier Tracking Sheet
+                  </h3>
+                  <p className="text-xs text-(--muted)">
+                    Upload Delhivery or DTDC dispatch Excel (.xlsx) or CSV
+                  </p>
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="rounded-xl border border-(--line) bg-(--panel-soft) p-3 text-xs text-(--muted) space-y-1.5 mb-4">
+                <p className="font-semibold text-(--foreground) flex items-center gap-1.5">
+                  <FileSpreadsheet className="h-4 w-4 text-sky-400" />
+                  Supported Courier Sheet Columns:
+                </p>
+                <p>
+                  • <strong className="text-(--foreground)">OID / AWB</strong>: Tracking number (e.g. 14-digit Delhivery or 7D... DTDC)
+                </p>
+                <p>
+                  • <strong className="text-(--foreground)">Contact Phone / Phone</strong>: 10-digit mobile number for 100% accurate runner match
+                </p>
+                <p>
+                  • <strong className="text-(--foreground)">Participant Name & PIN Code</strong>: Secondary fallback matching
+                </p>
+              </div>
+
+              {/* Dropzone */}
+              <label className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-(--line) hover:border-sky-500/50 bg-(--panel-soft)/50 p-6 text-center cursor-pointer transition">
+                <Upload className="h-8 w-8 text-sky-400" />
+                <div>
+                  <p className="text-xs font-bold text-(--foreground)">
+                    {importFile ? importFile.name : "Click to browse or drag & drop file"}
+                  </p>
+                  <p className="text-[0.7rem] text-(--muted-soft) mt-0.5">
+                    Supports .xlsx, .xls, .csv from Delhivery or DTDC
+                  </p>
+                </div>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                />
+              </label>
+
+              {importError && (
+                <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs font-semibold text-red-400">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{importError}</span>
+                </div>
+              )}
+
+              {importSuccess && (
+                <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs space-y-1.5">
+                  <p className="font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    Tracking Sheet Integrated Successfully!
+                  </p>
+                  <p className="text-(--foreground)">
+                    • <strong className="text-emerald-300">{importSuccess.updatedCount}</strong> shipments updated to <strong className="text-sky-300">DISPATCHED</strong>
+                  </p>
+                  <p className="text-(--muted)">
+                    • Delhivery: <strong className="text-(--foreground)">{importSuccess.delhiveryCount}</strong> | DTDC: <strong className="text-(--foreground)">{importSuccess.dtdcCount}</strong>
+                  </p>
+                  {importSuccess.pendingCount > 0 && (
+                    <p className="text-amber-400">
+                      • {importSuccess.pendingCount} rows had no AWB yet (marked Pending)
+                    </p>
+                  )}
+                  {importSuccess.unmatchedCount > 0 && (
+                    <p className="text-red-400">
+                      • {importSuccess.unmatchedCount} rows could not be matched
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Modal Actions */}
+              <div className="mt-5 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setImportModalOpen(false)}
+                  className="rounded-xl border border-(--line) px-4 py-2 text-xs font-bold text-(--muted) hover:text-(--foreground) cursor-pointer"
+                >
+                  {importSuccess ? "Close" : "Cancel"}
+                </button>
+                {!importSuccess && (
+                  <button
+                    type="button"
+                    disabled={!importFile || importing}
+                    onClick={() => void handleExecuteImport()}
+                    className="flex items-center gap-2 rounded-xl bg-sky-500 hover:bg-sky-400 px-5 py-2 text-xs font-black uppercase tracking-wider text-slate-950 transition disabled:opacity-50 cursor-pointer shadow-md"
+                  >
+                    {importing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing Sheet...
+                      </>
+                    ) : (
+                      <>
+                        <Truck className="h-4 w-4" />
+                        Apply Tracking & Dispatch
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
