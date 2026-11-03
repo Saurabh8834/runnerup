@@ -133,7 +133,7 @@ export default function AdminMedalDispatchPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
-  const [statusTab, setStatusTab] = useState<string>("PENDING"); // PENDING | DISPATCHED | DELIVERED | ALL
+  const [statusTab, setStatusTab] = useState<string>("ALL"); // Default to ALL so dispatched medals with tracking are visible immediately
   const [searchQuery, setSearchQuery] = useState<string>("" );
   const [proofFilter, setProofFilter] = useState<string>("APPROVED");
 
@@ -154,7 +154,7 @@ export default function AdminMedalDispatchPage() {
     setError(null);
     try {
       const token = await getFastAdminToken(getToken, isSignedIn);
-      const params = new URLSearchParams({ pageSize: "100" });
+      const params = new URLSearchParams({ pageSize: "500" });
       if (statusTab && statusTab !== "ALL") params.set("status", statusTab);
       if (selectedEventId) params.set("eventId", selectedEventId);
       if (proofFilter && proofFilter !== "ALL") params.set("proofStatus", proofFilter);
@@ -447,43 +447,60 @@ export default function AdminMedalDispatchPage() {
       {/* ── KPI Stats Cards ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <div
-          onClick={() => setStatusTab("PENDING")}
-          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "PENDING"
-              ? "border-(--sage) bg-(--sage)/10 shadow-sm"
+          onClick={() => setStatusTab("DISPATCHED")}
+          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "DISPATCHED"
+              ? "border-sky-500 bg-sky-500/15 shadow-sm ring-1 ring-sky-500/50"
               : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
             }`}
         >
           <div className="flex items-center justify-between text-(--muted)">
-            <span className="text-xs font-bold uppercase tracking-wider">Ready To Ship</span>
-            <Package className="h-4 w-4 text-(--sage)" />
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-400">In Transit (Dispatched)</span>
+            <Truck className="h-4 w-4 text-sky-400" />
+          </div>
+          <p className="mt-2 text-2xl font-black text-sky-400 sm:text-3xl">
+            {stats.dispatchedCount}
+          </p>
+          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Dispatched with live courier tracking</p>
+        </div>
+
+        <div
+          onClick={() => setStatusTab("ALL")}
+          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "ALL"
+              ? "border-amber-500 bg-amber-500/15 shadow-sm ring-1 ring-amber-500/50"
+              : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
+            }`}
+        >
+          <div className="flex items-center justify-between text-(--muted)">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Total Qualifiers</span>
+            <Medal className="h-4 w-4 text-amber-400" />
+          </div>
+          <p className="mt-2 text-2xl font-black text-(--foreground) sm:text-3xl">
+            {stats.approvedCount}
+          </p>
+          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">All confirmed finishers</p>
+        </div>
+
+        <div
+          onClick={() => setStatusTab("PENDING")}
+          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "PENDING"
+              ? "border-amber-500 bg-amber-500/10 shadow-sm ring-1 ring-amber-500/40"
+              : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
+            }`}
+        >
+          <div className="flex items-center justify-between text-(--muted)">
+            <span className="text-xs font-bold uppercase tracking-wider">Awaiting Dispatch</span>
+            <Package className="h-4 w-4 text-amber-500" />
           </div>
           <p className="mt-2 text-2xl font-black text-(--foreground) sm:text-3xl">
             {stats.readyCount}
           </p>
-          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Approved & pending dispatch</p>
-        </div>
-
-        <div
-          onClick={() => setStatusTab("DISPATCHED")}
-          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "DISPATCHED"
-              ? "border-sky-500 bg-sky-500/10 shadow-sm"
-              : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
-            }`}
-        >
-          <div className="flex items-center justify-between text-(--muted)">
-            <span className="text-xs font-bold uppercase tracking-wider">In Transit</span>
-            <Truck className="h-4 w-4 text-sky-400" />
-          </div>
-          <p className="mt-2 text-2xl font-black text-(--foreground) sm:text-3xl">
-            {stats.dispatchedCount}
-          </p>
-          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Dispatched with tracking</p>
+          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">No AWB assigned yet</p>
         </div>
 
         <div
           onClick={() => setStatusTab("DELIVERED")}
           className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "DELIVERED"
-              ? "border-emerald-500 bg-emerald-500/10 shadow-sm"
+              ? "border-emerald-500 bg-emerald-500/10 shadow-sm ring-1 ring-emerald-500/40"
               : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
             }`}
         >
@@ -494,27 +511,7 @@ export default function AdminMedalDispatchPage() {
           <p className="mt-2 text-2xl font-black text-(--foreground) sm:text-3xl">
             {stats.deliveredCount}
           </p>
-          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Successfully received</p>
-        </div>
-
-        <div
-          onClick={() => {
-            setStatusTab("ALL");
-            setProofFilter("APPROVED");
-          }}
-          className={`cursor-pointer rounded-2xl border p-4 transition-all ${statusTab === "ALL"
-              ? "border-amber-500 bg-amber-500/10 shadow-sm"
-              : "border-(--line) bg-(--panel) hover:border-(--line-strong)"
-            }`}
-        >
-          <div className="flex items-center justify-between text-(--muted)">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Approved</span>
-            <Medal className="h-4 w-4 text-amber-400" />
-          </div>
-          <p className="mt-2 text-2xl font-black text-(--foreground) sm:text-3xl">
-            {stats.approvedCount}
-          </p>
-          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Total medal qualifiers</p>
+          <p className="mt-0.5 text-[0.7rem] text-(--muted-soft)">Successfully received by runners</p>
         </div>
       </div>
 
@@ -607,10 +604,10 @@ export default function AdminMedalDispatchPage() {
         {/* Row 2: Status Tabs */}
         <div className="flex flex-wrap items-center gap-2 border-t border-(--line) pt-2">
           {[
-            { id: "PENDING", label: `Ready to Ship (${stats.readyCount})` },
+            { id: "ALL", label: `All Finishers (${stats.approvedCount})` },
             { id: "DISPATCHED", label: `In Transit (${stats.dispatchedCount})` },
+            { id: "PENDING", label: `Awaiting Dispatch (${stats.readyCount})` },
             { id: "DELIVERED", label: `Delivered (${stats.deliveredCount})` },
-            { id: "ALL", label: "All Records" },
           ].map((tab) => (
             <button
               key={tab.id}

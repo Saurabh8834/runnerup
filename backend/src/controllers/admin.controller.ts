@@ -2268,7 +2268,10 @@ export async function adminListMedals(request: AuthenticatedRequest, response: R
       prisma.registration.count({ where }),
       prisma.registration.findMany({
         where,
-        orderBy: [{ proofUpload: { reviewedAt: "desc" } }, { registeredAt: "desc" }],
+        orderBy: [
+          { medalDelivery: { dispatchedAt: { sort: "desc", nulls: "last" } } },
+          { registeredAt: "desc" },
+        ],
         skip,
         take: pageSize,
         include: {
