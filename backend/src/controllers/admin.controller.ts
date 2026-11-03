@@ -2579,7 +2579,7 @@ export async function adminImportCourierTracking(
     ) {
       return {
         courier: "DTDC" as const,
-        url: `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(oid)}`,
+        url: `https://trackcourier.io/track/dtdc/${encodeURIComponent(oid)}`,
       };
     }
     return {

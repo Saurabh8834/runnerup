@@ -309,7 +309,7 @@ export default function AdminMedalDispatchPage() {
     setEditCourier(newCourier);
     if (editTrackingNumber.trim()) {
       if (newCourier.toLowerCase().includes("dtdc")) {
-        setEditTrackingUrl(`https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(editTrackingNumber.trim())}`);
+        setEditTrackingUrl(`https://trackcourier.io/track/dtdc/${encodeURIComponent(editTrackingNumber.trim())}`);
       } else if (newCourier.toLowerCase().includes("delhivery")) {
         setEditTrackingUrl(`https://www.delhivery.com/track/package/${encodeURIComponent(editTrackingNumber.trim())}`);
       }
@@ -322,7 +322,7 @@ export default function AdminMedalDispatchPage() {
     if (val) {
       if (/^7D/i.test(val) || /[A-Za-z]/.test(val)) {
         setEditCourier("DTDC");
-        setEditTrackingUrl(`https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(val)}`);
+        setEditTrackingUrl(`https://trackcourier.io/track/dtdc/${encodeURIComponent(val)}`);
       } else if (/^\d{10,16}$/.test(val)) {
         setEditCourier("Delhivery");
         setEditTrackingUrl(`https://www.delhivery.com/track/package/${encodeURIComponent(val)}`);
@@ -346,16 +346,16 @@ export default function AdminMedalDispatchPage() {
     awb?: string | null,
     explicitUrl?: string | null,
   ): string {
-    if (explicitUrl && explicitUrl.startsWith("http")) return explicitUrl;
+    if (explicitUrl && explicitUrl.startsWith("http") && !explicitUrl.includes("track.dtdc.com")) return explicitUrl;
     const cleanAwb = String(awb || "").trim();
     if (!cleanAwb) return "";
 
     const c = String(courier || "").toLowerCase();
     if (c.includes("dtdc") || /^7D/i.test(cleanAwb)) {
-      return `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(cleanAwb)}`;
+      return `https://trackcourier.io/track/dtdc/${encodeURIComponent(cleanAwb)}`;
     }
     if (c.includes("post") || c.includes("speed")) {
-      return "https://www.indiapost.gov.in/_layouts/15/dpt.cept.tracking/trackconsignment.aspx";
+      return "https://www.indiapost.gov.in";
     }
     // Default: Delhivery
     return `https://www.delhivery.com/track/package/${encodeURIComponent(cleanAwb)}`;

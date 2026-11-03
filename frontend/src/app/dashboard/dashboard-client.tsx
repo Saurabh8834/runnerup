@@ -1179,10 +1179,13 @@ export function DashboardClient() {
                           {reg.medalDelivery?.trackingNumber && (
                             <a
                               href={
-                                reg.medalDelivery.trackingUrl ||
-                                (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
-                                  ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
-                                  : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`)
+                                reg.medalDelivery.trackingUrl && !reg.medalDelivery.trackingUrl.includes("track.dtdc.com")
+                                  ? reg.medalDelivery.trackingUrl
+                                  : (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
+                                    ? `https://trackcourier.io/track/dtdc/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
+                                    : (reg.medalDelivery.courier?.toLowerCase().includes("post")
+                                      ? "https://www.indiapost.gov.in"
+                                      : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`))
                               }
                               target="_blank"
                               rel="noopener noreferrer"
@@ -1508,10 +1511,13 @@ export function DashboardClient() {
                                 </div>
                                 <a
                                   href={
-                                    reg.medalDelivery.trackingUrl ||
-                                    (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
-                                      ? `https://track.dtdc.com/ctrack/track?awb=${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
-                                      : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`)
+                                    reg.medalDelivery.trackingUrl && !reg.medalDelivery.trackingUrl.includes("track.dtdc.com")
+                                      ? reg.medalDelivery.trackingUrl
+                                      : (reg.medalDelivery.courier?.toLowerCase().includes("dtdc")
+                                        ? `https://trackcourier.io/track/dtdc/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`
+                                        : (reg.medalDelivery.courier?.toLowerCase().includes("post")
+                                          ? "https://www.indiapost.gov.in"
+                                          : `https://www.delhivery.com/track/package/${encodeURIComponent(reg.medalDelivery.trackingNumber)}`))
                                   }
                                   target="_blank"
                                   rel="noopener noreferrer"
