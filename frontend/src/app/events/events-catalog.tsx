@@ -304,9 +304,9 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
           <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
             <span className="flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-              <span>VIP Early-Bird Pricing Active</span>
+              <span>Limited Edition 3D Metal Medal</span>
             </span>
-            <span className="font-mono text-emerald-400 font-extrabold">Save 50%</span>
+            <span className="font-mono text-emerald-400 font-extrabold">Official Finisher Kit</span>
           </div>
         ) : isClosed ? (
           <div className="mb-3 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-rose-400">
@@ -400,7 +400,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
               href={`/register?event=${encodeURIComponent(event.slug)}`}
               onClick={(e) => e.stopPropagation()}
             >
-              <span>Register</span>
+              <span>CLAIM MEDAL</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           )}

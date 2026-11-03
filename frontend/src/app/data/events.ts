@@ -53,7 +53,6 @@ export const cancerAwarenessEvent: PublicEvent = {
   bannerImageUrl: "/images/cancer-awareness-medal-front-card.webp",
   medalImageUrl: "/images/cancer-awareness-medal-front.webp",
   reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
-  couponCode: "VIP100",
   showCouponOnCard: false,
   status: "upcoming",
   compareAtPrice: "Rs. 799",

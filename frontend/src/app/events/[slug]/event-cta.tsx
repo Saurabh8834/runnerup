@@ -30,7 +30,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
               {/* VIP Eyebrow Badge */}
               <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-300 mb-4 shadow-sm">
                 <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                <span>Final Early-Bird Window Active</span>
+                <span>Limited Edition Finisher Medal</span>
               </div>
 
               {/* Main Headline */}
@@ -46,7 +46,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
               {event.endsAt ? (
                 <div className="mt-6 flex flex-col items-center gap-2">
                   <span className="text-[0.68rem] font-bold uppercase tracking-widest text-zinc-400">
-                    ⏳ Early-Bird Window Closes In:
+                    ⏳ Registration Closes In:
                   </span>
                   <EventCountdown targetDate={event.endsAt} />
                 </div>
@@ -58,7 +58,7 @@ export function EventCta({ event }: { event: PublicEvent }) {
                   href={`/register?event=${encodeURIComponent(event.slug)}`}
                   className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white font-black text-sm px-7 py-3.5 shadow-lg shadow-[#e64833]/40 hover:scale-105 active:scale-95 transition-all duration-200"
                 >
-                  <span>Register Now · ₹{cleanPrice}</span>
+                  <span>CLAIM MEDAL · ₹{cleanPrice}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
 

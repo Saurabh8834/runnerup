@@ -96,7 +96,6 @@ const fallbackEvents: RegisterEventOption[] = [
     priceInPaise: 49900,
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     activityTypes: ["running", "cycling", "walking"],
-    couponCode: "VIP100",
   },
   {
     label: "Monsoon Mountain Miles",
@@ -614,15 +613,10 @@ function PaymentRegistrationFormInner() {
     setCouponLoading(true);
     setCouponError(null);
 
-    // Instant local VIP100 fast-path
-    if (raw === "VIP100") {
-      setAppliedCoupon({
-        code: "VIP100",
-        discountInRupees: 100,
-        discountInPaise: 10000,
-        finalAmountInRupees: Math.max(1, baseAmountInRupees - 100),
-      });
-      setCouponInput("VIP100");
+    // VIP and previous promo codes are now expired
+    if (["VIP100", "VIP", "EARLYBIRD", "LAST50", "DUSSEHRA50", "RUN50"].includes(raw)) {
+      setAppliedCoupon(null);
+      setCouponError("This coupon code has expired.");
       setCouponLoading(false);
       return;
     }
@@ -1212,7 +1206,7 @@ function PaymentRegistrationFormInner() {
             </div>
             <div className="min-w-0">
               <span className="text-[10px] text-amber-400 font-mono font-bold uppercase block tracking-wider">
-                VIP Early Access
+                Official Finisher Kit
               </span>
               <span className="text-xs font-bold text-white truncate block">
                 {selectedDistance} Heavy Finisher Medal Kit

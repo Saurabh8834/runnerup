@@ -26,18 +26,68 @@ function formatRupees(amountInPaise: number) {
 }
 
 function buildConfirmationHtml(payload: RegistrationEmailPayload) {
-  const DARK_GREEN = "#1a3a2e";
-  const GOLD = "#c9a227";
+  const isCancerEvent =
+    /cancer/i.test(payload.eventTitle || "") ||
+    (payload.bibNumber && payload.bibNumber.startsWith("NCAD")) ||
+    /cancer/i.test(payload.eventUrl || "");
+
+  const DARK_GREEN = isCancerEvent ? "#1e293b" : "#1a3a2e";
+  const GOLD = isCancerEvent ? "#f59e0b" : "#c9a227";
   const CREAM = "#fcfaf5";
   const MUTED = "#7a6e5a";
   const BORDER_COLOR = "#e2d9c2";
 
   const firstName = payload.runnerName.trim().split(" ")[0] || payload.runnerName;
-  const eventTitle = payload.eventTitle || "Indian Air Force Day Virtual Challenge 2026";
-  const eventDates = payload.eventDates || "25–30 October 2026";
+  const eventTitle = isCancerEvent
+    ? (payload.eventTitle || "National Cancer Awareness Day Virtual Challenge 2026")
+    : (payload.eventTitle || "Indian Air Force Day Virtual Challenge 2026");
+  const eventDates = isCancerEvent
+    ? (payload.eventDates || "7–15 November 2026")
+    : (payload.eventDates || "25–30 October 2026");
   const activity = payload.activityType || "Running / Walking / Cycling";
   const orderId = payload.orderId || payload.bibNumber;
-  const eventUrl = payload.eventUrl || "https://www.runnerup.in/events/indian-air-force-day-virtual-challenge";
+  const eventUrl = isCancerEvent
+    ? (payload.eventUrl || "https://www.runnerup.in/events/national-cancer-awareness-day-virtual-run-2026")
+    : (payload.eventUrl || "https://www.runnerup.in/events/indian-air-force-day-virtual-challenge");
+
+  const headerBadge = isCancerEvent
+    ? "🎗️ RUNNER UP · CANCER AWARENESS CHALLENGE"
+    : "🏃 RUNNER UP · VIRTUAL CHALLENGE";
+  const headerTitle = isCancerEvent
+    ? `🎗️ ${eventTitle}`
+    : `🇮🇳 ${eventTitle} ✈️`;
+
+  const congratulationsPara = isCancerEvent
+    ? `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
+         Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🎗️
+       </p>
+       <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
+         We're honoured to have you join us in running, walking, or cycling to raise vital awareness and support cancer survivors across India.
+       </p>`
+    : `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
+         Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🇮🇳
+       </p>
+       <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
+         We're excited to have you join us in celebrating the courage, commitment, and spirit of our Indian Air Force heroes.
+       </p>`;
+
+  const rewardPara = isCancerEvent
+    ? "Once the event concludes (15 Nov) and your activity proof is verified, your authentic 3D Die-Cast Metal Medal with commemorative lanyard will be delivered directly to your doorstep with free pan-India courier."
+    : "Once the event concludes and your activity proof is verified, your applicable finisher kit will be delivered to your doorstep, as per the event terms and conditions.";
+
+  const signoffText = isCancerEvent
+    ? `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
+         Thank you for choosing <strong>RunnerUp.in</strong>. Every kilometer you complete spreads hope and honors the fighters, survivors, and families affected by cancer across our nation. 🎗️
+       </p>
+       <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
+         Run with purpose. Run with hope. Make every step count!
+       </p>`
+    : `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
+         Thank you for choosing <strong>RunnerUp.in</strong>. Every step you take is a tribute to the brave hearts who protect our nation. 🇮🇳✈️
+       </p>
+       <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
+         Run with purpose. Honour our heroes. Make every step count!
+       </p>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -71,10 +121,10 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
           <tr>
             <td style="background:${DARK_GREEN};padding:24px 32px;text-align:center;">
               <div style="display:inline-block;background:rgba(255,255,255,0.08);border:1px solid rgba(201,162,39,0.5);border-radius:50px;padding:6px 20px;margin-bottom:8px;">
-                <span style="font-size:11px;font-weight:800;letter-spacing:0.25em;text-transform:uppercase;color:${GOLD};">🏃 RUNNER UP · VIRTUAL CHALLENGE</span>
+                <span style="font-size:11px;font-weight:800;letter-spacing:0.25em;text-transform:uppercase;color:${GOLD};">${headerBadge}</span>
               </div>
               <h2 style="margin:4px 0 0;font-size:18px;color:#ffffff;font-weight:700;letter-spacing:0.05em;">
-                🇮🇳 ${eventTitle} ✈️
+                ${headerTitle}
               </h2>
             </td>
           </tr>
@@ -87,12 +137,7 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
               </p>
 
               <div style="background:#f1f8f5;border-left:4px solid #138808;padding:16px 20px;border-radius:0 10px 10px 0;margin-bottom:24px;">
-                <p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
-                  Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🇮🇳
-                </p>
-                <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
-                  We're excited to have you join us in celebrating the courage, commitment, and spirit of our Indian Air Force heroes.
-                </p>
+                ${congratulationsPara}
               </div>
 
               <!-- 📋 Your Event Details -->
@@ -142,10 +187,10 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                   🏃 What's Next?
                 </h3>
                 <ol style="margin:0;padding-left:20px;font-size:13.5px;color:#334155;line-height:1.75;">
-                  <li style="margin-bottom:8px;"><strong>Complete your chosen distance</strong> (1.5 km, 3 km, 5 km, 10 km, or 21 km) by running, walking, or cycling.</li>
-                  <li style="margin-bottom:8px;"><strong>Complete your activity anywhere</strong>, at your convenience, within the official event period.</li>
-                  <li style="margin-bottom:8px;"><strong>Track your activity</strong> using Strava or another compatible fitness-tracking app.</li>
-                  <li style="margin-bottom:0;"><strong>Upload a screenshot</strong> of your completed activity on RunnerUp.in during the event window (${eventDates}).</li>
+                  <li style="margin-bottom:8px;"><strong>Complete your chosen distance</strong> (${payload.distance}) anytime during the event window (<strong>${eventDates}</strong>) by running, walking, or cycling.</li>
+                  <li style="margin-bottom:8px;"><strong>Complete your activity anywhere</strong>, at your convenience, on roads, trails, parks, or treadmill.</li>
+                  <li style="margin-bottom:8px;"><strong>Track your activity</strong> using Strava, Nike Run Club, Garmin, Apple Fitness, or any fitness app.</li>
+                  <li style="margin-bottom:0;"><strong>Upload a screenshot</strong> of your activity on RunnerUp.in from your Athlete Dashboard during the official submission window.</li>
                 </ol>
               </div>
 
@@ -155,7 +200,7 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                   🎁 Your Reward Awaits!
                 </p>
                 <p style="margin:0;font-size:13px;color:#634a17;line-height:1.6;">
-                  Once the event concludes and your activity proof is verified, your applicable finisher kit will be delivered to your doorstep, as per the event terms and conditions.
+                  ${rewardPara}
                 </p>
               </div>
 
@@ -164,26 +209,21 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
                 <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:${DARK_GREEN};">
                   Ready to take on the challenge?
                 </p>
-                <a href="${eventUrl}" style="display:inline-block;background:linear-gradient(135deg,#1a3a2e,#0d5c45);color:#ffffff;text-decoration:none;font-weight:800;font-size:14px;padding:14px 32px;border-radius:50px;border:2px solid ${GOLD};box-shadow:0 4px 14px rgba(26,58,46,0.25);">
-                  👉 View Event Details &amp; Upload Proof
+                <a href="${eventUrl}" style="display:inline-block;background:linear-gradient(135deg,#ff5722,#e64a19);color:#ffffff;text-decoration:none;font-weight:800;font-size:14px;padding:14px 32px;border-radius:50px;box-shadow:0 4px 14px rgba(255,87,34,0.3);">
+                  👉 View Event Details &amp; Dashboard
                 </a>
               </div>
 
-              <!-- Patriotic Sign-off -->
+              <!-- Sign-off -->
               <div style="border-top:1px dashed ${BORDER_COLOR};padding-top:20px;text-align:center;">
-                <p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
-                  Thank you for choosing <strong>RunnerUp.in</strong>. Every step you take is a tribute to the brave hearts who protect our nation. 🇮🇳✈️
-                </p>
-                <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
-                  Run with purpose. Honour our heroes. Make every step count!
-                </p>
-                <p style="margin:0;font-size:13px;font-weight:700;color:#1e293b;">
+                ${signoffText}
+                <p style="margin:12px 0 0;font-size:13px;font-weight:700;color:#1e293b;">
                   Warm regards,<br/>
                   <strong style="color:${DARK_GREEN};font-size:14px;">Team RunnerUp 🏅</strong><br/>
-                  <a href="https://www.runnerup.in" style="color:#c9a227;text-decoration:none;">runnerup.in</a>
+                  <a href="https://www.runnerup.in" style="color:${GOLD};text-decoration:none;">www.runnerup.in</a>
                 </p>
-                <p style="margin:16px 0 0;font-size:11px;color:#94a3b8;font-style:italic;">
-                  *Terms and conditions apply.
+                <p style="margin:10px 0 0;font-size:12px;color:#64748b;">
+                  Need assistance? Write to us directly at <a href="mailto:runnerupofficials@gmail.com" style="color:#ea580c;font-weight:700;text-decoration:none;">runnerupofficials@gmail.com</a> or WhatsApp: <strong>+91 94796 64858</strong>
                 </p>
               </div>
 
@@ -212,7 +252,6 @@ function buildConfirmationHtml(payload: RegistrationEmailPayload) {
 </html>`;
 }
 
-
 export type EmailSendResult = { sent: boolean; id?: string; error?: string };
 
 export async function sendRegistrationConfirmationEmail(
@@ -230,11 +269,20 @@ export async function sendRegistrationConfirmationEmail(
 
   try {
     const from = env.resendFromEmail;
+    const isCancer =
+      /cancer/i.test(payload.eventTitle || "") ||
+      (payload.bibNumber && payload.bibNumber.startsWith("NCAD")) ||
+      /cancer/i.test(payload.eventUrl || "");
+
+    const subject = isCancer
+      ? `Registration Confirmed: National Cancer Awareness Day Challenge — Bib ${payload.bibNumber}`
+      : `Registration Confirmed: Indian Air Force Day Challenge — Bib ${payload.bibNumber}`;
+
     const result = await resend.emails.send({
       from,
       to: payload.to,
-      replyTo: env.resendReplyToEmail,
-      subject: `Runner Up confirmed — Bib ${payload.bibNumber}`,
+      replyTo: "runnerupofficials@gmail.com",
+      subject,
       html: buildConfirmationHtml(payload),
     });
 

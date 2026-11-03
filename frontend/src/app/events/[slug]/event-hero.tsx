@@ -236,7 +236,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
 
                 {/* Live Mobile Social Proof Counter */}
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-center text-[0.7rem] sm:text-[0.72rem] text-zinc-400 font-semibold bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-md max-w-full">
-                  <span className="text-amber-400 font-bold">⚡ VIP Early-Bird Registration Active</span>
+                  <span className="text-amber-400 font-bold">⚡ Limited Edition 3D Metal Medal</span>
                   <span>·</span>
                   <span className="text-emerald-400 font-bold">100% Solid Metal Finisher Medal ⭐</span>
                 </div>
@@ -344,7 +344,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                       </span>
                     )}
                     <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-black text-emerald-300">
-                      Save 50% · VIP Early Bird
+                      3D Die-Cast Metal Medal Included
                     </span>
                   </div>
                   <p className="mt-1 text-xs sm:text-sm text-zinc-400 font-normal text-center lg:text-left">
@@ -367,7 +367,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                     href={registerHref}
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] hover:brightness-110 text-white font-black text-sm sm:text-base px-8 py-3.5 sm:py-4 shadow-[0_0_30px_rgba(230,72,51,0.6)] active:scale-95 transition-all duration-200 cursor-pointer border border-amber-300/40"
                   >
-                    <span>Register for {priceDisplay} · Claim Your Kit</span>
+                    <span>CLAIM MEDAL · Register for {priceDisplay}</span>
                     <ArrowRight className="h-4 w-4 stroke-[3]" />
                   </Link>
 

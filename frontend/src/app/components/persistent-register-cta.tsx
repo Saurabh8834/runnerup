@@ -105,7 +105,7 @@ export function PersistentRegisterCta() {
     return null;
   }
 
-  const targetHref = "/events#next-challenge";
+  const targetHref = "/register?event=national-cancer-awareness-day-virtual-run-2026";
 
   return (
     <>
@@ -113,7 +113,7 @@ export function PersistentRegisterCta() {
           1. MOBILE VIEW (< md): Fixed Bottom Sticky Bar
           ───────────────────────────────────────────────────────────── */}
       <aside
-        aria-label="Next challenge early access"
+        aria-label="Register and claim your finisher medal"
         className="fixed inset-x-0 bottom-0 z-40 bg-[#0d141d]/98 backdrop-blur-xl border-t border-white/10 shadow-[0_-12px_36px_rgba(0,0,0,0.8)] px-3 py-2.5 pb-[max(0.6rem,env(safe-area-inset-bottom))] md:hidden"
       >
         <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
@@ -125,10 +125,10 @@ export function PersistentRegisterCta() {
             </span>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[11px] font-black uppercase tracking-wider text-white truncate">
-                Next Challenge
+                Cancer Awareness Run
               </span>
-              <p className="text-[9px] font-medium text-orange-300 truncate">
-                Secret Perks · Dropping Soon
+              <p className="text-[9px] font-medium text-emerald-400 truncate">
+                3D Metal Medal · Free Delivery
               </p>
             </div>
           </div>
@@ -139,7 +139,7 @@ export function PersistentRegisterCta() {
             className="group relative inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#ff4b26] to-[#e03a16] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_16px_rgba(255,75,38,0.5)] active:scale-95 transition-all shrink-0 border border-white/20 whitespace-nowrap"
           >
             <Zap className="h-3.5 w-3.5 text-white fill-white" />
-            <span>VIP Early Access</span>
+            <span>CLAIM MEDAL</span>
             <ArrowRight className="h-3.5 w-3.5 text-white transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
@@ -149,7 +149,7 @@ export function PersistentRegisterCta() {
           2. DESKTOP VIEW (>= md): Floating Action Pill
           ───────────────────────────────────────────────────────────── */}
       <aside
-        aria-label="Next challenge early access"
+        aria-label="Register and claim your finisher medal"
         className="fixed bottom-6 left-6 z-40 hidden md:flex items-center"
       >
         <Link
@@ -166,17 +166,17 @@ export function PersistentRegisterCta() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff4b26]" />
             </span>
             <span className="text-xs font-bold text-white tracking-wide">
-              Next Challenge
+              Cancer Awareness Virtual Run
             </span>
-            <span className="text-[10px] text-orange-300 font-medium hidden lg:inline">
-              · Secret Perks Dropping Soon
+            <span className="text-[10px] text-emerald-400 font-medium hidden lg:inline">
+              · Heavyweight 3D Medal Included
             </span>
           </div>
 
           {/* Vermilion Button Pill */}
           <span className="relative z-10 flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#e03a16] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_rgba(255,75,38,0.5)] group-hover:shadow-[0_0_24px_rgba(255,75,38,0.85)] transition-all">
             <Sparkles className="h-3 w-3 text-white" />
-            <span>VIP Early Access</span>
+            <span>CLAIM YOUR MEDAL</span>
             <ArrowRight className="h-3 w-3 text-white transition-transform duration-200 group-hover:translate-x-1" />
           </span>
         </Link>

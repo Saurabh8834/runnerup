@@ -38,6 +38,28 @@ export async function resolveCouponDiscount(
     return { valid: false, code, discountPaise: 0, message: "Please enter a coupon code" };
   }
 
+  // Expired campaign codes (VIP campaign has concluded)
+  const expiredCodes = [
+    "VIP100",
+    "VIP",
+    "VIP50",
+    "EARLYBIRD",
+    "LAST50",
+    "DUSSEHRA50",
+    "RUN50",
+    "RUNNER100",
+    "DIWALI100",
+    "OFF100",
+  ];
+  if (expiredCodes.includes(code)) {
+    return {
+      valid: false,
+      code,
+      discountPaise: 0,
+      message: "This coupon code has expired.",
+    };
+  }
+
   // 1. Check Coupon model in database
   const dbCoupon = await prisma.coupon.findUnique({
     where: { code },
@@ -81,7 +103,7 @@ export async function resolveCouponDiscount(
   }
 
   // 3. Universal VIP & Launch Coupons
-  if (code === "VIP100") {
+  if (code === "VIP100_DISABLED") {
     return {
       valid: true,
       code,
@@ -90,7 +112,7 @@ export async function resolveCouponDiscount(
     };
   }
 
-  return { valid: false, code, discountPaise: 0, message: "Invalid coupon code" };
+  return { valid: false, code, discountPaise: 0, message: "This coupon code has expired." };
 }
 
 export async function validateCoupon(request: Request, response: Response) {
@@ -125,7 +147,7 @@ export async function validateCoupon(request: Request, response: Response) {
     title: "National Cancer Awareness Day Virtual Challenge 2026",
     slug: payload.eventSlug || "national-cancer-awareness-day-virtual-run-2026",
     priceInPaise: 49900,
-    couponCode: "VIP100",
+    couponCode: null,
   };
 
   const result = await resolveCouponDiscount(code, activeEvent);
