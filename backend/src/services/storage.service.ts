@@ -38,19 +38,20 @@ export interface StoredImageResult {
  */
 export function saveBase64ImageLocally(dataUrl: string, subfolder = "proofs"): StoredImageResult {
   const cleanDataUrl = dataUrl.trim();
-  const match = cleanDataUrl.match(/^data:image\/([a-zA-Z0-9+.-]+)(?:;[a-zA-Z0-9=+.-]+)*;base64,([\s\S]+)$/);
-  if (!match) {
+  const commaIdx = cleanDataUrl.indexOf(",");
+  if (commaIdx === -1) {
     throw new Error("Invalid base64 image data URL format");
   }
 
-  const mimeSubtype = match[1].toLowerCase();
-  const base64Data = match[2];
+  const meta = cleanDataUrl.substring(0, commaIdx).toLowerCase();
+  const base64Data = cleanDataUrl.substring(commaIdx + 1).replace(/\s/g, "");
 
   let ext = ".jpg";
-  if (mimeSubtype.includes("png")) ext = ".png";
-  else if (mimeSubtype.includes("webp")) ext = ".webp";
-  else if (mimeSubtype.includes("gif")) ext = ".gif";
-  else if (mimeSubtype.includes("svg")) ext = ".svg";
+  if (meta.includes("png")) ext = ".png";
+  else if (meta.includes("webp")) ext = ".webp";
+  else if (meta.includes("gif")) ext = ".gif";
+  else if (meta.includes("svg")) ext = ".svg";
+  else if (meta.includes("heic")) ext = ".heic";
 
   const targetDir = path.join(UPLOADS_ROOT, subfolder);
   ensureDir(targetDir);

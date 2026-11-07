@@ -228,12 +228,32 @@ export default function PrizeBibPage() {
     setProofSubmitError(null);
     setProofSubmitSuccess(null);
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error("Failed to read image file"));
-        reader.readAsDataURL(proofFile);
-      });
+      // Compress image client-side before upload to prevent timeouts on mobile 4G/5G
+      let dataUrl = "";
+      try {
+        if (typeof window !== "undefined" && typeof createImageBitmap === "function") {
+          const bmp = await createImageBitmap(proofFile);
+          const scale = Math.min(1, 1400 / Math.max(bmp.width, bmp.height));
+          const c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(bmp.width * scale));
+          c.height = Math.max(1, Math.round(bmp.height * scale));
+          const ctx = c.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(bmp, 0, 0, c.width, c.height);
+            bmp.close();
+            dataUrl = c.toDataURL("image/jpeg", 0.8);
+          }
+        }
+      } catch {}
+
+      if (!dataUrl) {
+        dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("Failed to read image file"));
+          reader.readAsDataURL(proofFile);
+        });
+      }
 
       const h = Math.max(0, parseInt(hours, 10) || 0);
       const m = Math.max(0, parseInt(minutes, 10) || 0);
@@ -449,12 +469,6 @@ export default function PrizeBibPage() {
                   <div className="mt-6">
                     <Timeline stages={data.timeline} />
                   </div>
-
-                  {!data.timeline.find((t) => t.stage === "proof_approved")?.done && (
-                    <div className="mt-4">
-                      <EventNoticeCard eventTitle={data.event.title} />
-                    </div>
-                  )}
                 </div>
 
                 {/* Proof Submission Card */}

@@ -577,6 +577,8 @@ export function DashboardClient() {
           activityImageUrl: url,
           sourceApp: sourceApp.trim() || "Strava",
           finishTimeSeconds: secs,
+          phone: user?.primaryPhoneNumber?.phoneNumber || undefined,
+          email: user?.primaryEmailAddress?.emailAddress || undefined,
         }),
       });
 
@@ -1094,16 +1096,6 @@ export function DashboardClient() {
                         </div>
                       </div>
 
-                      {/* Live Event Notice for Submitted Proof */}
-                      {isProofSubmitted && !isVerified && (
-                        <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
-                          <EventNoticeCard
-                            eventTitle={reg.event.title}
-                            endsAt={reg.event.endsAt}
-                          />
-                        </div>
-                      )}
-
                       {/* Notice for Rejected / Needs Re-upload Proof */}
                       {isProofRejected && (
                         <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
@@ -1261,12 +1253,6 @@ export function DashboardClient() {
                                 {proofError}
                               </div>
                             )}
-
-                            {/* Informational notice before uploading */}
-                            <EventNoticeCard
-                              eventTitle={reg.event.title}
-                              endsAt={reg.event.endsAt}
-                            />
 
                             <label className="block">
                               <span className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">

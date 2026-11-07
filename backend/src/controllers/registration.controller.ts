@@ -502,13 +502,6 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     throw new ApiError(409, "Proof already approved. Contact support to re-submit.");
   }
 
-  if (existing.proofStatus === "SUBMITTED" && !isAdmin) {
-    throw new ApiError(
-      409,
-      "Proof already submitted and waiting for review. You can re-upload only after rejection.",
-    );
-  }
-
   let finalImageUrl = payload.activityImageUrl;
   if (finalImageUrl.startsWith("data:image/")) {
     try {

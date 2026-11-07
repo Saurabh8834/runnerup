@@ -26,10 +26,11 @@ function formatRupees(amountInPaise: number) {
 }
 
 function buildConfirmationHtml(payload: RegistrationEmailPayload) {
-  const isCancerEvent =
-    /cancer/i.test(payload.eventTitle || "") ||
-    (payload.bibNumber && payload.bibNumber.startsWith("NCAD")) ||
-    /cancer/i.test(payload.eventUrl || "");
+  const isIafEvent =
+    /air.?force|iaf/i.test(payload.eventTitle || "") ||
+    /air.?force|iaf/i.test(payload.eventUrl || "") ||
+    (Boolean(payload.bibNumber) && /^IAF/i.test(payload.bibNumber));
+  const isCancerEvent = !isIafEvent;
 
   const DARK_GREEN = isCancerEvent ? "#1e293b" : "#1a3a2e";
   const GOLD = isCancerEvent ? "#f59e0b" : "#c9a227";
@@ -269,10 +270,11 @@ export async function sendRegistrationConfirmationEmail(
 
   try {
     const from = env.resendFromEmail;
-    const isCancer =
-      /cancer/i.test(payload.eventTitle || "") ||
-      (payload.bibNumber && payload.bibNumber.startsWith("NCAD")) ||
-      /cancer/i.test(payload.eventUrl || "");
+    const isIaf =
+      /air.?force|iaf/i.test(payload.eventTitle || "") ||
+      /air.?force|iaf/i.test(payload.eventUrl || "") ||
+      (Boolean(payload.bibNumber) && /^IAF/i.test(payload.bibNumber));
+    const isCancer = !isIaf;
 
     const subject = isCancer
       ? `Registration Confirmed: National Cancer Awareness Day Challenge — Bib ${payload.bibNumber}`
@@ -328,7 +330,7 @@ export function buildCancerCorrectionEmailHtml(payload: CancerCorrectionEmailPay
   const firstName = payload.runnerName.trim().split(" ")[0] || payload.runnerName;
   const eventTitle = "National Cancer Awareness Day Virtual Challenge 2026";
   const eventDates = "7–15 November 2026";
-  const proofWindow = "7–20 November 2026";
+  const proofWindow = "7–15 November 2026";
   const activity = payload.activityType || "Running / Walking / Cycling";
   const orderId = payload.orderId || payload.bibNumber;
   const eventUrl = "https://www.runnerup.in/events/national-cancer-awareness-day-virtual-run-2026";
@@ -462,7 +464,7 @@ export function buildCancerCorrectionEmailHtml(payload: CancerCorrectionEmailPay
                   <li style="margin-bottom:8px;"><strong>Activity Dates:</strong> Complete your registered distance (${payload.distance}) anytime between <strong>7 November and 15 November 2026</strong>.</li>
                   <li style="margin-bottom:8px;"><strong>Location:</strong> Run, walk, or cycle anywhere in India — outdoors, roads, parks, or treadmill.</li>
                   <li style="margin-bottom:8px;"><strong>Tracking Apps:</strong> Track your activity using Strava, Garmin, Nike Run Club, Apple Fitness, Samsung Health, or any fitness app.</li>
-                  <li style="margin-bottom:0;"><strong>Submit Proof:</strong> Upload a screenshot of your completed activity on your RunnerUp.in Athlete Dashboard anytime between <strong>7 Nov and 20 Nov 2026</strong>.</li>
+                  <li style="margin-bottom:0;"><strong>Submit Proof:</strong> Upload a screenshot of your completed activity on your RunnerUp.in Athlete Dashboard anytime between <strong>7 Nov and 15 Nov 2026</strong>.</li>
                 </ol>
               </div>
 

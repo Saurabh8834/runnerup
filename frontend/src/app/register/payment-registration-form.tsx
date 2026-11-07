@@ -1784,7 +1784,7 @@ function PaymentRegistrationFormInner() {
                           >
                             <Tag className="h-3.5 w-3.5 text-emerald-400" />
                             <span className="font-bold tracking-wider">{promoCode}</span>
-                            <span className="text-[11px] text-emerald-400 font-sans font-semibold">· Tap to apply ₹100 OFF</span>
+                            <span className="text-[11px] text-emerald-400 font-sans font-semibold">· Tap to apply 10% OFF (₹50 OFF · Final ₹449)</span>
                           </button>
                         </div>
                       ) : null}

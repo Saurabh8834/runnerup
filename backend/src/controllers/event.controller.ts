@@ -78,9 +78,17 @@ export async function listEvents(request: Request, response: Response) {
     return response.json(groupResult);
   }
 
-  // For open/upcoming lists, show soonest first
+  // For open/upcoming lists, prioritize active OPEN events, specifically current Cancer event
   if (scope === "upcoming" || scope === "open" || scope === "live") {
-    dedupedEnriched.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    dedupedEnriched.sort((a, b) => {
+      const aOpen = a.status === "OPEN" ? 1 : 0;
+      const bOpen = b.status === "OPEN" ? 1 : 0;
+      if (aOpen !== bOpen) return bOpen - aOpen;
+      const aCancer = a.slug.includes("cancer") ? 1 : 0;
+      const bCancer = b.slug.includes("cancer") ? 1 : 0;
+      if (aCancer !== bCancer) return bCancer - aCancer;
+      return a.startsAt.getTime() - b.startsAt.getTime();
+    });
   }
 
   const listResult = {

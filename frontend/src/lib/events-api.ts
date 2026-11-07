@@ -222,9 +222,12 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
       const json = (await response.json()) as { data: ApiEvent[] };
       if (Array.isArray(json.data) && json.data.length > 0) {
         const rows = [...json.data];
-        if (options?.homeFeaturedFirst) {
-          rows.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
-        }
+        rows.sort((a, b) => {
+          const aCancer = a.slug.includes("cancer") ? 1 : 0;
+          const bCancer = b.slug.includes("cancer") ? 1 : 0;
+          if (aCancer !== bCancer) return bCancer - aCancer;
+          return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+        });
         const mapped = rows.map((event) => mapApiEventToPublic(event, "upcoming"));
         const deduped = deduplicateOpenEvents(mapped);
         return limit != null ? deduped.slice(0, limit) : deduped;
@@ -235,7 +238,7 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
   }
 
   const fallback = deduplicateOpenEvents(
-    allPublicEvents.filter((event) => event.status === "upcoming" || event.status === "closed"),
+    allPublicEvents.filter((event) => event.status === "upcoming"),
   );
   return limit != null ? fallback.slice(0, limit) : fallback;
 });

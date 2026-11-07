@@ -313,7 +313,7 @@ export function getEventMedalImage(slug: string): string {
     "holi-color-virtual-run": "/images/medals/holi-color-virtual-run.webp",
     "new-year-night-miles": "/images/medals/new-year-night-miles.webp",
   };
-  return medalMap[slug] || "/images/iaf-medal-front.webp";
+  return medalMap[slug] || "/images/cancer-awareness-medal-front.webp";
 }
 
 export function getEventBySlug(slug: string) {
