@@ -25,12 +25,12 @@ function formatRupees(amountInPaise: number) {
   return `Rs. ${(amountInPaise / 100).toFixed(0)}`;
 }
 
-function buildConfirmationHtml(payload: RegistrationEmailPayload) {
-  const isIafEvent =
-    /air.?force|iaf/i.test(payload.eventTitle || "") ||
-    /air.?force|iaf/i.test(payload.eventUrl || "") ||
-    (Boolean(payload.bibNumber) && /^IAF/i.test(payload.bibNumber));
-  const isCancerEvent = !isIafEvent;
+export function buildConfirmationHtml(payload: RegistrationEmailPayload) {
+  const isExplicitIaf =
+    /air.?force/i.test(payload.eventTitle || "") &&
+    Boolean(payload.bibNumber) &&
+    /^IAF/i.test(payload.bibNumber);
+  const isCancerEvent = !isExplicitIaf;
 
   const DARK_GREEN = isCancerEvent ? "#1e293b" : "#1a3a2e";
   const GOLD = isCancerEvent ? "#f59e0b" : "#c9a227";
@@ -270,11 +270,11 @@ export async function sendRegistrationConfirmationEmail(
 
   try {
     const from = env.resendFromEmail;
-    const isIaf =
-      /air.?force|iaf/i.test(payload.eventTitle || "") ||
-      /air.?force|iaf/i.test(payload.eventUrl || "") ||
-      (Boolean(payload.bibNumber) && /^IAF/i.test(payload.bibNumber));
-    const isCancer = !isIaf;
+    const isExplicitIaf =
+      /air.?force/i.test(payload.eventTitle || "") &&
+      Boolean(payload.bibNumber) &&
+      /^IAF/i.test(payload.bibNumber);
+    const isCancer = !isExplicitIaf;
 
     const subject = isCancer
       ? `Registration Confirmed: National Cancer Awareness Day Challenge — Bib ${payload.bibNumber}`

@@ -990,13 +990,13 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     };
   });
 
-  // Generate deterministic realistic padding if real finishers are under 35
-  const paddedRows = generatePaddedLeaderboard(event.slug, activeDistance, 35);
+  // Generate deterministic realistic padding if real finishers are under 100
+  const paddedRows = generatePaddedLeaderboard(event.slug, activeDistance, 100);
 
   // Merge real + padded (prioritizing real users)
   const mergedRows = [...realLeaderboardRows];
   for (const dummy of paddedRows) {
-    if (mergedRows.length >= 35) break;
+    if (mergedRows.length >= 100) break;
     if (!mergedRows.some((r) => r.runnerName.toLowerCase() === dummy.runnerName.toLowerCase())) {
       mergedRows.push(dummy);
     }
@@ -1011,9 +1011,30 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     ...row,
   }));
 
-  // Transform participants list (strictly paid participants)
-  const participantRoster = allParticipants.map((p, idx) => {
+  // Generate realistic social proof padded participant roster for national virtual run
+  const paddedRosterEntries = INDIAN_RUNNERS_ROSTER.map((profile, idx) => {
+    const cleanCode = activeDistance.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase() || "5K";
+    const bibNum = 1200 + idx;
     return {
+      rosterNumber: allParticipants.length + idx + 1,
+      runnerName: profile.name,
+      city: profile.city,
+      state: profile.state,
+      distance: activeDistance,
+      bibNumber: `NCAD-${cleanCode}-${bibNum}`,
+      status: "Verified Finisher" as const,
+      proofStatus: "APPROVED" as const,
+      registrationStatus: "CONFIRMED" as const,
+      registeredAt: new Date(Date.now() - (idx + 1) * 3600000 * 3),
+      finishTimeSeconds: Math.round(activeKm * (240 + (idx % 80))),
+      userId: `dummy-roster-${idx}`,
+      clerkId: null,
+    };
+  });
+
+  // Transform participants list (real participants first, padded next)
+  const participantRoster = [
+    ...allParticipants.map((p, idx) => ({
       rosterNumber: idx + 1,
       runnerName: p.user.name,
       city: p.shippingCity || "India",
@@ -1027,8 +1048,12 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       finishTimeSeconds: p.finishTimeSeconds,
       userId: p.user.id,
       clerkId: p.user.clerkId,
-    };
-  });
+    })),
+    ...paddedRosterEntries,
+  ];
+
+  const totalEventParticipants = event.slug.includes("cancer") ? 1480 : 2150;
+  const totalVerifiedFinishers = event.slug.includes("cancer") ? 1260 : 1890;
 
   const meta = {
     eventId: event.id,
@@ -1036,8 +1061,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     eventTitle: event.title,
     availableDistances,
     selectedDistance: activeDistance,
-    totalVerified: rankedLeaderboard.length,
-    totalParticipants: participantRoster.length,
+    totalVerified: totalVerifiedFinishers,
+    totalParticipants: totalEventParticipants,
   };
 
   const isConcluded = event.status === "CLOSED" || event.status === "COMPLETED";
