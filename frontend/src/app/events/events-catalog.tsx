@@ -636,7 +636,7 @@ function NextChallengeLaunchpad() {
 
       {/* Copy */}
       <p className="relative z-10 text-xs sm:text-sm text-[#90aead] max-w-xl mx-auto mt-3 leading-relaxed">
-        The Indian Air Force Day Challenge concluded with <span className="text-[#fbe9d0] font-bold">100% capacity booked</span>. For our next nationwide edition, we&apos;re taking the finisher experience to another level with brand-new perks and rewards that we can&apos;t reveal just yet.
+        RunnerUp challenges feature verified GPS activity timing, handcrafted solid metal 3D finisher medals, and pan-India doorstep delivery. Join our active national edition now or subscribe for upcoming city editions.
       </p>
 
       {/* Mystery Feature Pills */}

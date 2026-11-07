@@ -62,39 +62,63 @@ function buildPrizeItems(
   certificateStatus: string | null,
   medalTracking: { courier: string | null; trackingNumber: string | null; trackingUrl: string | null } | null,
   certificateNumber: string | null,
+  isCancer = false,
 ): PrizeItem[] {
   const items: PrizeItem[] = [];
 
-  // Certificate always comes first
-  const certStatus = getPrizeStatus(null, certificateStatus, "certificate");
-  items.push({
-    type: "certificate",
-    name: "E-Certificate",
-    icon: "certificate",
-    ...certStatus,
-    action: certificateStatus && certificateStatus !== "QUEUED" && certificateNumber
-      ? { label: "View certificate", href: `/certificates/${certificateNumber}` }
-      : null,
-  });
+  // Certificate logic: For cancer challenge, designs are awaited so keep pending without action link
+  if (isCancer) {
+    items.push({
+      type: "certificate",
+      name: "E-Certificate",
+      icon: "certificate",
+      status: "pending",
+      statusLabel: "Designs Awaited",
+      action: null,
+    });
+  } else {
+    const certStatus = getPrizeStatus(null, certificateStatus, "certificate");
+    items.push({
+      type: "certificate",
+      name: "E-Certificate",
+      icon: "certificate",
+      ...certStatus,
+      action: certificateStatus && certificateStatus !== "QUEUED" && certificateNumber
+        ? { label: "View certificate", href: `/certificates/${certificateNumber}` }
+        : null,
+    });
+  }
 
   // Medal if in benefits or medalIncluded
   const hasMedal = benefits.some((b) => b.toLowerCase().includes("medal")) || medalStatus !== null;
   if (hasMedal) {
-    const medalInfo = getPrizeStatus(medalStatus, null, "medal");
-    items.push({
-      type: "medal",
-      name: "Finisher Medal",
-      icon: "medal",
-      ...medalInfo,
-      tracking: medalTracking?.trackingNumber
-        ? { courier: medalTracking.courier ?? "Courier", number: medalTracking.trackingNumber, url: medalTracking.trackingUrl ?? "" }
-        : null,
-      action: medalTracking?.trackingUrl
-        ? { label: "Track package", href: medalTracking.trackingUrl }
-        : medalStatus === "DELIVERED" && medalTracking?.trackingNumber
-          ? { label: "Track package", href: medalTracking.trackingUrl ?? "#" }
+    if (isCancer && medalStatus !== "DELIVERED" && medalStatus !== "DISPATCHED") {
+      items.push({
+        type: "medal",
+        name: "Finisher Medal",
+        icon: "medal",
+        status: "processing",
+        statusLabel: "Dispatches Post-Event",
+        tracking: null,
+        action: null,
+      });
+    } else {
+      const medalInfo = getPrizeStatus(medalStatus, null, "medal");
+      items.push({
+        type: "medal",
+        name: "Finisher Medal",
+        icon: "medal",
+        ...medalInfo,
+        tracking: medalTracking?.trackingNumber
+          ? { courier: medalTracking.courier ?? "Courier", number: medalTracking.trackingNumber, url: medalTracking.trackingUrl ?? "" }
           : null,
-    });
+        action: medalTracking?.trackingUrl
+          ? { label: "Track package", href: medalTracking.trackingUrl }
+          : medalStatus === "DELIVERED" && medalTracking?.trackingNumber
+            ? { label: "Track package", href: medalTracking.trackingUrl ?? "#" }
+            : null,
+      });
+    }
   }
 
   // T-shirt if in benefits
@@ -177,11 +201,9 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     registration.status === "CONFIRMED" ||
     registration.status === "COMPLETED";
 
-  if (isPaid) {
-    try {
-      recordDownload("BIB", registration.bibNumber);
-    } catch {}
-  }
+  const isCancer =
+    registration.event.slug.includes("cancer") ||
+    registration.event.title.toLowerCase().includes("cancer");
 
   const prizes = isPaid
     ? buildPrizeItems(
@@ -196,6 +218,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
             }
           : null,
         registration.certificate?.certificateNumber ?? null,
+        isCancer,
       )
     : [];
 
@@ -277,6 +300,10 @@ export async function myPrizes(request: AuthenticatedRequest, response: Response
   });
 
   const data = registrations.map((reg) => {
+    const isCancer =
+      reg.event.slug.includes("cancer") ||
+      reg.event.title.toLowerCase().includes("cancer");
+
     const prizes = buildPrizeItems(
       reg.event.benefits,
       reg.medalDelivery?.status ?? null,
@@ -285,6 +312,7 @@ export async function myPrizes(request: AuthenticatedRequest, response: Response
         ? { courier: reg.medalDelivery.courier, trackingNumber: reg.medalDelivery.trackingNumber, trackingUrl: reg.medalDelivery.trackingUrl }
         : null,
       reg.certificate?.certificateNumber ?? null,
+      isCancer,
     );
 
     const hasPrizes = prizes.some((p) => p.status !== "pending" && p.status !== "not_eligible");

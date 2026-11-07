@@ -19,9 +19,10 @@ type UserReg = {
 interface LeaderboardCountdownProps {
   userReg?: UserReg | null;
   onTimerComplete?: () => void;
+  eventName?: string;
 }
 
-export function LeaderboardCountdown({ userReg, onTimerComplete }: LeaderboardCountdownProps) {
+export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: LeaderboardCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -212,7 +213,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete }: LeaderboardCo
 
       {/* Bottom Footer Note */}
       <div className="px-6 py-3 bg-black/40 border-t border-[#90aead]/15 text-center text-[11px] text-[#90aead]">
-        Indian Air Force Day Virtual Challenge 2026 &bull; Official Results Disclosure: <strong>31 October 2026, 12:00:00 PM IST</strong>
+        {eventName || "National Cancer Awareness Day Virtual Challenge 2026"} &bull; Official Verified Standings &bull; Instant GPS Audit
       </div>
     </div>
   );

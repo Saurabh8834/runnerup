@@ -304,8 +304,8 @@ export function LeaderboardClient({
     })),
   );
 
-  const defaultSlug = initialEventParam || initialData?.selectedSlug || "indian-air-force-day-virtual-challenge";
-  const defaultDistance = initialDistanceParam || initialData?.selectedDistance || "5 km";
+  const defaultSlug = initialEventParam || initialData?.selectedSlug || "national-cancer-awareness-day-virtual-run-2026";
+  const defaultDistance = initialDistanceParam || initialData?.selectedDistance || "3 km";
 
   const [selectedSlug, setSelectedSlug] = useState<string>(defaultSlug);
   const [selectedDistance, setSelectedDistance] = useState<string>(defaultDistance);
@@ -600,7 +600,7 @@ export function LeaderboardClient({
               THE FINISHERS&apos; <span className="text-[#ff4b26]">BOARD</span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-400 max-w-lg mx-auto font-medium">
-              Chip-verified results &amp; standings across all distance categories · Indian Air Force Day Challenge
+              Chip-verified results &amp; standings across all distance categories · {events.find((e) => e.slug === selectedSlug)?.name || "National Cancer Awareness Day Virtual Challenge 2026"}
             </p>
           </div>
 
@@ -819,6 +819,7 @@ export function LeaderboardClient({
                   {!isRevealed ? (
                     <div className="space-y-8">
                       <LeaderboardCountdown
+                        eventName={events.find((e) => e.slug === selectedSlug)?.name}
                         userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
                         onTimerComplete={() => setIsRevealed(true)}
                       />

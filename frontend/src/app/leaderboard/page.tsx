@@ -8,8 +8,8 @@ export const revalidate = 60;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://runnerup.in";
 
 async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefined> {
-  const defaultSlug = "indian-air-force-day-virtual-challenge";
-  const defaultDist = "5 km";
+  const defaultSlug = "national-cancer-awareness-day-virtual-run-2026";
+  const defaultDist = "3 km";
   const distQuery = `?distance=${encodeURIComponent(defaultDist)}`;
 
   const isDev = process.env.NODE_ENV !== "production";

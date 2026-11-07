@@ -79,7 +79,7 @@ const stageIcons: Record<string, typeof Clock> = {
   prizes: Truck,
 };
 
-function PrizeCard({ prize, index }: { prize: PrizeItem; index: number }) {
+function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number; isCancer?: boolean }) {
   const colors = statusColors[prize.status];
   const Icon = prizeIcons[prize.type] ?? Gift;
 
@@ -124,9 +124,15 @@ function PrizeCard({ prize, index }: { prize: PrizeItem; index: number }) {
               ) : null}
             </div>
           ) : prize.type === "medal" ? (
-            <div className="mt-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-200/90 leading-relaxed">
-              <span className="font-semibold text-amber-300">📦 Medal Dispatch Notice:</span> Your Finisher Medal is being prepared for dispatch. We have sent a shipping address verification email to your registered inbox. Once dispatched, your <strong>live courier tracking link will be delivered exclusively via Email</strong>.
-            </div>
+            isCancer ? (
+              <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
+                <span className="font-semibold text-purple-300">🎗️ Finisher Medal:</span> Your official handcrafted 3D medal will dispatch following GPS proof verification after the challenge closes on 15 November 2026. Live courier tracking will be delivered directly via Email.
+              </div>
+            ) : (
+              <div className="mt-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-200/90 leading-relaxed">
+                <span className="font-semibold text-amber-300">📦 Medal Dispatch Notice:</span> Your Finisher Medal is being prepared for dispatch. We have sent a shipping address verification email to your registered inbox. Once dispatched, your <strong>live courier tracking link will be delivered exclusively via Email</strong>.
+              </div>
+            )
           ) : null}
 
           {prize.action ? (
@@ -678,7 +684,12 @@ export default function PrizeBibPage() {
                     </div>
                     <div className="space-y-3">
                       {data.prizes.map((prize, i) => (
-                        <PrizeCard key={prize.type} index={i} prize={prize} />
+                        <PrizeCard
+                          key={prize.type}
+                          index={i}
+                          prize={prize}
+                          isCancer={data.event.slug.includes("cancer") || data.event.title.toLowerCase().includes("cancer")}
+                        />
                       ))}
                     </div>
                   </div>

@@ -72,7 +72,9 @@ export default function CertificateVerifyPage() {
             certificateNumber,
             status: "ISSUED",
             runnerName: (officialRunner?.name || "VERIFIED FINISHER").toUpperCase().trim(),
-            event: "Indian Air Force Day Virtual Challenge 2026",
+            event: certificateNumber.includes("NCAD") || certificateNumber.includes("CANCER")
+              ? "National Cancer Awareness Day Virtual Challenge 2026"
+              : "Indian Air Force Day Virtual Challenge 2026",
             distance: (officialRunner?.distance || "5 km").toUpperCase().trim(),
             bibNumber: officialRunner?.bibNumber || bibGuess,
             issuedAt: new Date().toISOString(),
@@ -148,7 +150,7 @@ export default function CertificateVerifyPage() {
 
   function handleShareWhatsApp() {
     if (!data) return;
-    const shareText = `🏅 Proud Finisher of Indian Air Force Day Virtual Challenge 2026! Check out my official verified certificate: ${window.location.href}`;
+    const shareText = `🏅 Proud Finisher of ${data.event}! Check out my official verified certificate: ${window.location.href}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
   }
 

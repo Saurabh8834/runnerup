@@ -43,13 +43,12 @@ function ToastContainer({ toasts, dismiss }: { toasts: Toast[]; dismiss: (id: nu
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg text-sm font-medium min-w-[260px] max-w-sm ${
-            t.type === "success"
+          className={`pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg text-sm font-medium min-w-[260px] max-w-sm ${t.type === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-950/60 dark:text-emerald-300"
               : t.type === "error"
-              ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800/40 dark:bg-red-950/60 dark:text-red-300"
-              : "border-[var(--line)] bg-[var(--panel)] text-[var(--foreground)]"
-          }`}
+                ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800/40 dark:bg-red-950/60 dark:text-red-300"
+                : "border-[var(--line)] bg-[var(--panel)] text-[var(--foreground)]"
+            }`}
         >
           <span className="mt-0.5 shrink-0">
             {t.type === "success" ? (
@@ -469,7 +468,7 @@ export default function AdminProofsPage() {
             return parsed;
           }
         }
-      } catch {}
+      } catch { }
     }
     return {
       pending: 0,
@@ -578,7 +577,7 @@ export default function AdminProofsPage() {
         }
         try {
           localStorage.setItem("runnerup_admin_proof_counts", JSON.stringify(updated));
-        } catch {}
+        } catch { }
       }
 
       // Initialize verifiedTimes map
@@ -899,11 +898,10 @@ export default function AdminProofsPage() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("ALL")}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  statusFilter === "ALL"
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${statusFilter === "ALL"
                     ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
+                  }`}
               >
                 <span>All Paid</span>
                 <span className="rounded-full bg-slate-500/20 text-slate-300 px-1.5 py-0.2 text-[0.68rem] font-bold">
@@ -914,11 +912,10 @@ export default function AdminProofsPage() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("APPROVED")}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  statusFilter === "APPROVED"
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${statusFilter === "APPROVED"
                     ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
+                  }`}
               >
                 <span>Approved</span>
                 <span className="rounded-full bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 text-[0.68rem] font-bold">
@@ -929,11 +926,10 @@ export default function AdminProofsPage() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("NOT_SUBMITTED")}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  statusFilter === "NOT_SUBMITTED"
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${statusFilter === "NOT_SUBMITTED"
                     ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
+                  }`}
               >
                 <span>⚠️ Unsubmitted</span>
                 <span className="rounded-full bg-amber-500/20 text-amber-400 px-1.5 py-0.2 text-[0.68rem] font-bold">
@@ -944,11 +940,10 @@ export default function AdminProofsPage() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("SUBMITTED")}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  statusFilter === "SUBMITTED"
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${statusFilter === "SUBMITTED"
                     ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
+                  }`}
               >
                 <span>Pending Review</span>
                 <span className="rounded-full bg-sky-500/20 text-sky-400 px-1.5 py-0.2 text-[0.68rem] font-bold">
@@ -959,11 +954,10 @@ export default function AdminProofsPage() {
               <button
                 type="button"
                 onClick={() => setStatusFilter("REJECTED")}
-                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                  statusFilter === "REJECTED"
+                className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${statusFilter === "REJECTED"
                     ? "bg-[var(--panel)] text-[var(--foreground)] shadow-xs font-bold"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                }`}
+                  }`}
               >
                 <span>Rejected</span>
                 <span className="rounded-full bg-rose-500/20 text-rose-500 px-1.5 py-0.2 text-[0.68rem] font-bold">
@@ -1213,34 +1207,30 @@ export default function AdminProofsPage() {
                               <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--panel-soft)]/70 p-3 flex flex-wrap items-center justify-between gap-2.5">
                                 <div className="flex flex-wrap items-center gap-2 text-xs">
                                   {/* Digital Bib Status */}
-                                  <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${
-                                    isBibDownloaded
+                                  <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${isBibDownloaded
                                       ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
                                       : "border-amber-500/30 bg-amber-500/10 text-amber-300"
-                                  }`}>
+                                    }`}>
                                     🎽 Bib: #{row.bibNumber}
-                                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                                      isBibDownloaded
+                                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${isBibDownloaded
                                         ? "bg-emerald-500/30 text-emerald-200"
                                         : "bg-amber-500/20 text-amber-300"
-                                    }`}>
+                                      }`}>
                                       {isBibDownloaded ? "📥 Downloaded" : "⏳ Not Downloaded"}
                                     </span>
                                   </span>
 
                                   {/* Certificate Status */}
                                   {currentStatus === "APPROVED" ? (
-                                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${
-                                      isCertDownloaded
+                                    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${isCertDownloaded
                                         ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
                                         : "border-sky-500/30 bg-sky-500/10 text-sky-300"
-                                    }`}>
+                                      }`}>
                                       <Award className="h-3 w-3" /> Certificate
-                                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                                        isCertDownloaded
+                                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${isCertDownloaded
                                           ? "bg-emerald-500/30 text-emerald-200"
                                           : "bg-sky-500/20 text-sky-300"
-                                      }`}>
+                                        }`}>
                                         {isCertDownloaded ? "📥 Downloaded" : "⏳ Ready"}
                                       </span>
                                     </span>
@@ -1359,8 +1349,8 @@ export default function AdminProofsPage() {
                           {busyId === row.id
                             ? "Approving…"
                             : currentStatus === "APPROVED"
-                            ? "✓ Update Verified Time & Re-issue"
-                            : "✓ Approve & Queue Certificate"}
+                              ? "✓ Update Verified Time & Re-issue"
+                              : "✓ Approve & Queue Certificate"}
                         </button>
 
                         <button

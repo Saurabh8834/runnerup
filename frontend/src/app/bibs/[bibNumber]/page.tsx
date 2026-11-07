@@ -100,9 +100,11 @@ export default function DigitalBibPage() {
             runnerName: runnerNameUpper,
             bibNumber: payload.runner?.bibNumber || bibNumber,
             distance: distStr,
-            eventTitle: payload.event?.title || "Indian Air Force Day Virtual Challenge 2026",
+            eventTitle: payload.event?.title || (bibNumber.startsWith("NCAD") ? "National Cancer Awareness Day Virtual Challenge 2026" : "Indian Air Force Day Virtual Challenge 2026"),
             rankNumber: positionStr,
-            certificateNumber: `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
+            certificateNumber: bibNumber.startsWith("NCAD")
+              ? `CERT-NCAD-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
+              : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
             isPaid: true,
           });
         }
@@ -180,7 +182,7 @@ export default function DigitalBibPage() {
 
   function handleShareWhatsApp() {
     if (!data) return;
-    const shareText = `🎽 Ready to race! Here is my official race bib #${data.bibNumber} for the Indian Air Force Day Virtual Challenge 2026: ${window.location.href}`;
+    const shareText = `🎽 Ready to race! Here is my official race bib #${data.bibNumber} for the ${data.eventTitle}: ${window.location.href}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, "_blank");
   }
 

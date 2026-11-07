@@ -8,7 +8,7 @@ interface EventNoticeCardProps {
 }
 
 export function EventNoticeCard({
-  eventTitle = "INDIAN AIR FORCE DAY VIRTUAL CHALLENGE 2026",
+  eventTitle = "NATIONAL CANCER AWARENESS DAY VIRTUAL CHALLENGE 2026",
   endDateFormatted,
   endsAt,
   className = "",
