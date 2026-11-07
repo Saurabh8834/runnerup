@@ -133,6 +133,10 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
                 <span className="font-semibold text-amber-300">📦 Medal Dispatch Notice:</span> Your Finisher Medal is being prepared for dispatch. We have sent a shipping address verification email to your registered inbox. Once dispatched, your <strong>live courier tracking link will be delivered exclusively via Email</strong>.
               </div>
             )
+          ) : prize.type === "certificate" && isCancer ? (
+            <div className="mt-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-xs text-emerald-200/90 leading-relaxed">
+              <span className="font-semibold text-emerald-300">🏆 Available After 15 Nov:</span> Your official QR-verified Finisher E-Certificate will be unlocked for instant HD download once the challenge concludes on <strong>15 November 2026</strong> and your GPS run/walk proof is verified by our team.
+            </div>
           ) : null}
 
           {prize.action ? (

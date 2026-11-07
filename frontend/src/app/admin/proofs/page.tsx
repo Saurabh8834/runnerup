@@ -818,9 +818,9 @@ export default function AdminProofsPage() {
             </div>
             {isCancer ? (
               <>
-                <p className="mt-2 text-base font-bold text-amber-300/80 font-mono">Designs Awaited</p>
+                <p className="mt-2 text-base font-bold text-amber-300/80 font-mono">Available Soon</p>
                 <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
-                  <span>Pending release for Cancer event</span>
+                  <span>Unlocks post-event (15 Nov)</span>
                 </div>
               </>
             ) : (
@@ -846,9 +846,9 @@ export default function AdminProofsPage() {
             </div>
             {isCancer ? (
               <>
-                <p className="mt-2 text-base font-bold text-sky-300/80 font-mono">Designs Awaited</p>
+                <p className="mt-2 text-base font-bold text-sky-300/80 font-mono">Available Soon</p>
                 <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
-                  <span>Pending release for Cancer event</span>
+                  <span>Unlocks post-event (15 Nov)</span>
                 </div>
               </>
             ) : (
@@ -1186,7 +1186,7 @@ export default function AdminProofsPage() {
                         {isCancer || row.event.title.toLowerCase().includes("cancer") ? (
                           <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5 flex items-center justify-between text-xs text-amber-300/80">
                             <span className="font-medium flex items-center gap-1.5">
-                              🎗️ Cancer Challenge Assets: Digital Bib &amp; Finisher Certificate designs have not been provided yet (Pending release).
+                              🎗️ Cancer Challenge Assets: Digital Bib &amp; Finisher Certificate unlock after event concludes (15 November).
                             </span>
                           </div>
                         ) : row.payment?.status === "PAID" || row.proofStatus === "APPROVED" ? (

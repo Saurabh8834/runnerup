@@ -66,14 +66,14 @@ function buildPrizeItems(
 ): PrizeItem[] {
   const items: PrizeItem[] = [];
 
-  // Certificate logic: For cancer challenge, designs are awaited so keep pending without action link
+  // Certificate logic: For cancer challenge, certificate unlocks post-event after verification
   if (isCancer) {
     items.push({
       type: "certificate",
       name: "E-Certificate",
       icon: "certificate",
-      status: "pending",
-      statusLabel: "Designs Awaited",
+      status: "processing",
+      statusLabel: "Available Soon",
       action: null,
     });
   } else {
