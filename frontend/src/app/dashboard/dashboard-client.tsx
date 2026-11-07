@@ -577,8 +577,8 @@ export function DashboardClient() {
           activityImageUrl: url,
           sourceApp: sourceApp.trim() || "Strava",
           finishTimeSeconds: secs,
-          phone: user?.primaryPhoneNumber?.phoneNumber || undefined,
-          email: user?.primaryEmailAddress?.emailAddress || undefined,
+          phone: user?.primaryPhoneNumber?.phoneNumber || dbUser?.phone || undefined,
+          email: user?.primaryEmailAddress?.emailAddress || dbUser?.email || undefined,
         }),
       });
 
@@ -1083,10 +1083,14 @@ export function DashboardClient() {
                               >
                                 4
                               </span>
-                              <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider truncate">Rewards Kit</span>
+                              <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider truncate">{isCancerEvent ? "Finisher Medal" : "Rewards Kit"}</span>
                             </div>
                             <p className="mt-1 text-[0.65rem] sm:text-[0.7rem] text-slate-300 font-medium truncate">
-                              {isCertReady
+                              {isCancerEvent
+                                ? isVerified
+                                  ? "Medal Verified"
+                                  : "Dispatches Post-Event"
+                                : isCertReady
                                 ? isMedalDispatched
                                   ? "Medal Dispatched"
                                   : "Certificate Ready"

@@ -426,33 +426,56 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
 
   if (!isAdmin) {
     const userFromClerk = clerkId ? await prisma.user.findFirst({ where: { clerkId } }) : null;
+    
+    // Normalize db phones (shipping phone & user phone) to last 10 digits
+    const dbPhones = [existing.user.phone, existing.shippingPhone]
+      .map((p) => (p || "").replace(/[^0-9]/g, ""))
+      .filter((p) => p.length >= 8)
+      .map((p) => p.slice(-10));
+
+    const dbEmail = existing.user.email.toLowerCase().trim();
+
+    // Check ownership via Clerk account ID or matching Clerk user email/phone
+    const clerkUserPhoneDigits = (userFromClerk?.phone || "").replace(/[^0-9]/g, "");
+    const clerkPhoneMatches = Boolean(
+      clerkUserPhoneDigits.length >= 8 && dbPhones.includes(clerkUserPhoneDigits.slice(-10))
+    );
+    const clerkEmailMatches = Boolean(
+      userFromClerk?.email && userFromClerk.email.toLowerCase().trim() === dbEmail
+    );
+
     const isOwner = Boolean(
       (clerkId && existing.user.clerkId && existing.user.clerkId === clerkId) ||
       (userFromClerk && existing.userId === userFromClerk.id) ||
-      (userFromClerk && userFromClerk.email && existing.user.email.toLowerCase() === userFromClerk.email.toLowerCase())
+      clerkEmailMatches ||
+      clerkPhoneMatches
     );
 
-    const payloadPhone = payload.phone?.trim()?.replace(/[^0-9]/g, "");
-    const payloadEmail = payload.email?.trim()?.toLowerCase();
-
-    const dbUserPhone = (existing.user.phone || existing.shippingPhone || "").replace(/[^0-9]/g, "");
-    const dbUserEmail = existing.user.email.toLowerCase();
-
-    const phoneMatches = Boolean(
-      payloadPhone &&
-      dbUserPhone &&
-      (dbUserPhone.endsWith(payloadPhone) || payloadPhone.endsWith(dbUserPhone)),
+    // Check ownership via payload phone or email
+    const payloadPhoneDigits = (payload.phone || "").replace(/[^0-9]/g, "");
+    const payloadPhoneMatches = Boolean(
+      payloadPhoneDigits.length >= 8 && dbPhones.includes(payloadPhoneDigits.slice(-10))
     );
-    const emailMatches = Boolean(payloadEmail && payloadEmail === dbUserEmail);
+    const payloadEmailMatches = Boolean(
+      payload.email && payload.email.trim().toLowerCase() === dbEmail
+    );
 
-    if (!isOwner && !phoneMatches && !emailMatches) {
-      if (!clerkId) {
+    if (!isOwner && !payloadPhoneMatches && !payloadEmailMatches) {
+      if (!clerkId && !payload.phone && !payload.email) {
         throw new ApiError(
           401,
-          "Please sign in or provide your registered phone number / email to submit proof.",
+          "Please sign in or provide your registered mobile number / email to submit proof.",
         );
       }
-      throw new ApiError(403, "You can only submit proof for your own registration");
+      throw new ApiError(403, "Mobile number or email does not match this registration. Please verify and try again.");
+    }
+
+    // Auto-link clerkId if not yet bound
+    if (clerkId && !existing.user.clerkId) {
+      prisma.user.update({
+        where: { id: existing.user.id },
+        data: { clerkId },
+      }).catch(() => {});
     }
   }
 

@@ -761,8 +761,44 @@ export default function AdminProofsPage() {
             </div>
           </div>
 
-          {/* Card 2: Approved Finishers */}
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 shadow-xs">
+          {/* Card 2: Submitted Proofs (Pending Verification) */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter("SUBMITTED")}
+            className="rounded-2xl border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/15 p-4 shadow-xs text-left cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-sky-400">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Proofs Submitted</span>
+              <Clock className="h-4 w-4" />
+            </div>
+            <p className="mt-2 text-2xl font-black text-sky-300 font-mono">{counts.pending}</p>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-sky-300/90 font-medium">
+              <span>{counts.pending > 0 ? "⚡ Awaiting Review (Click to view)" : "All Caught Up"}</span>
+            </div>
+          </button>
+
+          {/* Card 3: Unsubmitted Proofs */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter("NOT_SUBMITTED")}
+            className="rounded-2xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/15 p-4 shadow-xs text-left cursor-pointer transition-all"
+          >
+            <div className="flex items-center justify-between text-amber-400">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wider">⚠️ Unsubmitted</span>
+              <Clock className="h-4 w-4 text-amber-400" />
+            </div>
+            <p className="mt-2 text-2xl font-black text-amber-300 font-mono">{counts.notSubmitted}</p>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
+              <span>Awaiting Activity Upload</span>
+            </div>
+          </button>
+
+          {/* Card 4: Approved Finishers */}
+          <button
+            type="button"
+            onClick={() => setStatusFilter("APPROVED")}
+            className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15 p-4 shadow-xs text-left cursor-pointer transition-all"
+          >
             <div className="flex items-center justify-between text-emerald-400">
               <span className="text-[0.68rem] font-bold uppercase tracking-wider">Approved Finishers</span>
               <FileCheck className="h-4 w-4" />
@@ -773,70 +809,62 @@ export default function AdminProofsPage() {
               <span>·</span>
               <span>{counts.total > 0 ? Math.round((counts.approved / counts.total) * 100) : 0}% of Paid</span>
             </div>
+          </button>
+
+          {/* Card 5: Digital Bibs */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Digital Bibs</span>
+              <Trophy className="h-4 w-4 text-slate-400" />
+            </div>
+            {isCancer ? (
+              <>
+                <p className="mt-2 text-base font-bold text-amber-300/80 font-mono">Designs Awaited</p>
+                <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
+                  <span>Pending release for Cancer event</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <p className="text-2xl font-black text-amber-300 font-mono">{counts.bibDownloads}</p>
+                  <span className="text-xs font-bold text-amber-300/80">
+                    / {counts.total} ({counts.total > 0 ? Math.round((counts.bibDownloads / counts.total) * 100) : 0}%)
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
+                  <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Claimed</span>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Card 3: Unsubmitted Proofs */}
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs">
-            <div className="flex items-center justify-between text-amber-400">
-              <span className="text-[0.68rem] font-bold uppercase tracking-wider">⚠️ Unsubmitted</span>
-              <Clock className="h-4 w-4" />
+          {/* Card 6: Certificates */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Certificates</span>
+              <Award className="h-4 w-4 text-slate-400" />
             </div>
-            <p className="mt-2 text-2xl font-black text-amber-300 font-mono">{counts.notSubmitted}</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span>Awaiting Activity Upload</span>
-            </div>
-          </div>
-
-          {/* Card 4: Digital Bibs Downloaded (Live 📥) */}
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 shadow-xs">
-            <div className="flex items-center justify-between text-amber-400">
-              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Digital Bibs (Live 📥)</span>
-              <Trophy className="h-4 w-4" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <p className="text-2xl font-black text-amber-300 font-mono">{counts.bibDownloads}</p>
-              <span className="text-xs font-bold text-amber-300/80">
-                / {counts.total} ({counts.total > 0 ? Math.round((counts.bibDownloads / counts.total) * 100) : 0}%)
-              </span>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Claimed</span>
-              <span>·</span>
-              <span>{Math.max(0, counts.total - counts.bibDownloads)} Pending</span>
-            </div>
-          </div>
-
-          {/* Card 5: Certificates Downloaded (Live 📥) */}
-          <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-xs">
-            <div className="flex items-center justify-between text-blue-400">
-              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Certificates (Live 📥)</span>
-              <Award className="h-4 w-4" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
-              <span className="text-xs font-bold text-blue-300/80">
-                / {counts.approved || counts.total} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
-              </span>
-            </div>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Claimed</span>
-              <span>·</span>
-              <span>{Math.max(0, (counts.approved || counts.total) - counts.certDownloads)} Pending</span>
-            </div>
-          </div>
-
-          {/* Card 6: GPS Proof Failed / Rejection Rate */}
-          <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 shadow-xs">
-            <div className="flex items-center justify-between text-rose-400">
-              <span className="text-[0.68rem] font-bold uppercase tracking-wider">Failed / Cutoff</span>
-              <ShieldAlert className="h-4 w-4" />
-            </div>
-            <p className="mt-2 text-2xl font-black text-rose-300 font-mono">{counts.failedRate}%</p>
-            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-emerald-400/90 font-medium">
-              <span>{counts.rejected} Rejections</span>
-              <span>·</span>
-              <span>0 Anti-Cheat Flags</span>
-            </div>
+            {isCancer ? (
+              <>
+                <p className="mt-2 text-base font-bold text-sky-300/80 font-mono">Designs Awaited</p>
+                <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
+                  <span>Pending release for Cancer event</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mt-2 flex items-baseline gap-1.5">
+                  <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
+                  <span className="text-xs font-bold text-blue-300/80">
+                    / {counts.approved || counts.total} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
+                  <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Claimed</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -862,7 +890,7 @@ export default function AdminProofsPage() {
             }}
             sectionName="Proof Queue"
             totalCount={total}
-            paidCount={counts.approved}
+            paidCount={counts.total}
           />
 
           {/* Status Tabs & Active Search Pill */}
@@ -951,10 +979,17 @@ export default function AdminProofsPage() {
                 Failed Rate: <strong>{counts.failedRate}%</strong> ({counts.notSubmitted} unsubmitted)
               </span>
 
-              <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
-                <Award className="h-3.5 w-3.5 text-emerald-400" />
-                Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
-              </span>
+              {!isCancer ? (
+                <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
+                  <Award className="h-3.5 w-3.5 text-emerald-400" />
+                  Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
+                </span>
+              ) : (
+                <span className="rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-400 flex items-center gap-1.5 shadow-xs">
+                  <Award className="h-3.5 w-3.5 text-sky-400" />
+                  Certificates &amp; Bibs: <strong>Pending Organizer Release</strong>
+                </span>
+              )}
             </div>
 
             {/* Search result indicator */}
@@ -1154,7 +1189,13 @@ export default function AdminProofsPage() {
                         )}
 
                         {/* ── Finisher Assets: Certificate & Digital Bib Download Bar (PAID USERS ONLY) ── */}
-                        {row.payment?.status === "PAID" || row.proofStatus === "APPROVED" ? (
+                        {isCancer || row.event.title.toLowerCase().includes("cancer") ? (
+                          <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5 flex items-center justify-between text-xs text-amber-300/80">
+                            <span className="font-medium flex items-center gap-1.5">
+                              🎗️ Cancer Challenge Assets: Digital Bib &amp; Finisher Certificate designs have not been provided yet (Pending release).
+                            </span>
+                          </div>
+                        ) : row.payment?.status === "PAID" || row.proofStatus === "APPROVED" ? (
                           (() => {
                             const isBibDownloaded = Boolean(
                               downloadMaps.bibs[row.bibNumber] ||

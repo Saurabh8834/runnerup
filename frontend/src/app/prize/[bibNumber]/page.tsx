@@ -271,6 +271,11 @@ export default function PrizeBibPage() {
         return;
       }
 
+      const cleanContact = runnerPhone.trim();
+      const isEmailInput = cleanContact.includes("@");
+      const phonePayload = isEmailInput ? undefined : cleanContact;
+      const emailPayload = isEmailInput ? cleanContact.toLowerCase() : undefined;
+
       const targetBib = data?.runner?.bibNumber || bibNumber;
       const res = await resilientFetch(`/api/registrations/${encodeURIComponent(targetBib)}/proof`, {
         method: "POST",
@@ -279,7 +284,8 @@ export default function PrizeBibPage() {
           activityImageUrl: dataUrl,
           sourceApp: sourceApp.trim() || "Strava",
           finishTimeSeconds: totalSecs > 0 ? totalSecs : undefined,
-          phone: runnerPhone.trim() || undefined,
+          phone: phonePayload,
+          email: emailPayload,
         }),
       });
 
@@ -586,17 +592,17 @@ export default function PrizeBibPage() {
 
                               <div>
                                 <label className="block text-xs font-semibold text-(--foreground) mb-1.5">
-                                  Registered Mobile Number <span className="text-red-500">*</span>
+                                  Registered Mobile or Email <span className="text-red-500">*</span>
                                 </label>
                                 <input
-                                  type="tel"
-                                  placeholder="e.g. 9876543210"
+                                  type="text"
+                                  placeholder="e.g. 9876543210 or registered email"
                                   value={runnerPhone}
                                   onChange={(e) => setRunnerPhone(e.target.value)}
                                   className="w-full rounded-xl border border-(--line) bg-(--panel-soft) px-3 py-2 text-sm text-(--foreground) placeholder:text-(--muted-soft) focus:border-(--sage) focus:outline-none"
                                 />
                                 <p className="text-[11px] text-(--muted-soft) mt-1">
-                                  Enter phone number used during registration.
+                                  Enter phone or email used during registration.
                                 </p>
                               </div>
                             </div>

@@ -2087,6 +2087,14 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
     prisma.registration.count({ where: { ...baseEventWhere, proofStatus: "NOT_SUBMITTED" } }),
   ]);
 
+  let isCancerScoped = false;
+  if (eventId) {
+    const ev = await prisma.event.findUnique({ where: { id: eventId }, select: { slug: true, title: true } });
+    if (ev && (ev.slug.includes("cancer") || ev.title.toLowerCase().includes("cancer"))) {
+      isCancerScoped = true;
+    }
+  }
+
   const downloadStats = getDownloadStats();
 
   response.json({
@@ -2101,13 +2109,22 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       rejectedCount,
       notSubmittedCount,
       allCount,
-      certificatesCount: approvedCount,
-      downloadsCount: {
-        certificates: downloadStats.certificateCount,
-        bibs: downloadStats.bibCount,
-        certificateDownloads: downloadStats.certificateMap,
-        bibDownloads: downloadStats.bibMap,
-      },
+      certificatesCount: isCancerScoped ? 0 : approvedCount,
+      downloadsCount: isCancerScoped
+        ? {
+            certificates: 0,
+            bibs: 0,
+            certificateDownloads: {},
+            bibDownloads: {},
+            isReleased: false,
+          }
+        : {
+            certificates: downloadStats.certificateCount,
+            bibs: downloadStats.bibCount,
+            certificateDownloads: downloadStats.certificateMap,
+            bibDownloads: downloadStats.bibMap,
+            isReleased: true,
+          },
       failedRate: allCount > 0 ? Math.round((rejectedCount / allCount) * 100) : 0,
       completionRate: allCount > 0 ? Math.round((approvedCount / allCount) * 100) : 100,
     },
