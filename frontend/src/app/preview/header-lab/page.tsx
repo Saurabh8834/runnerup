@@ -166,7 +166,7 @@ export default function HeaderLabPage() {
                 {/* Micro Ticker */}
                 <span className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-0.5 text-[11px] font-bold text-slate-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>312 Medals Dispatching</span>
+                  <span>Medals Dispatching</span>
                 </span>
               </div>
 

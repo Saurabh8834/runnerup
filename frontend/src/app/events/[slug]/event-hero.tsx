@@ -158,7 +158,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               </span>
               <span className="text-zinc-500">·</span>
               <span className="text-zinc-300 font-bold uppercase tracking-wider text-[0.68rem] sm:text-xs">
-                {isPast ? "ALL 312 PARTICIPANTS COMPLETED" : "RUN, WALK OR CYCLE"}
+                {isPast ? "OFFICIAL CHALLENGE CONCLUDED" : "RUN, WALK OR CYCLE"}
               </span>
             </motion.div>
 
