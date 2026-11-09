@@ -48,6 +48,7 @@ export async function resolveCouponDiscount(
     "DUSSEHRA50",
     "RUN50",
     "RUNNER100",
+    "DIWALI50",
     "DIWALI100",
     "OFF100",
   ];
@@ -67,10 +68,10 @@ export async function resolveCouponDiscount(
 
   if (dbCoupon) {
     if (!dbCoupon.active) {
-      return { valid: false, code, discountPaise: 0, message: "This coupon is no longer active" };
+      return { valid: false, code, discountPaise: 0, message: "This coupon code has expired." };
     }
     if (dbCoupon.expiresAt && dbCoupon.expiresAt < new Date()) {
-      return { valid: false, code, discountPaise: 0, message: "This coupon has expired" };
+      return { valid: false, code, discountPaise: 0, message: "This coupon code has expired." };
     }
     if (dbCoupon.maxRedemptions !== null && dbCoupon.redeemedCount >= dbCoupon.maxRedemptions) {
       return { valid: false, code, discountPaise: 0, message: "This coupon has reached maximum redemptions" };

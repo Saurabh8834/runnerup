@@ -614,7 +614,7 @@ function PaymentRegistrationFormInner() {
     setCouponError(null);
 
     // VIP and previous promo codes are now expired
-    if (["VIP100", "VIP", "EARLYBIRD", "LAST50", "DUSSEHRA50", "RUN50"].includes(raw)) {
+    if (["VIP100", "VIP", "EARLYBIRD", "LAST50", "DUSSEHRA50", "RUN50", "DIWALI50", "DIWALI100"].includes(raw)) {
       setAppliedCoupon(null);
       setCouponError("This coupon code has expired.");
       setCouponLoading(false);
