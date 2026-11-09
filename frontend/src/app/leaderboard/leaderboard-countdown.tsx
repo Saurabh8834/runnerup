@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock, ShieldCheck, Trophy, Award, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
 
-// Target Reveal Time: 31 October 2026, 12:00:00 PM IST (UTC+5:30)
-export const LEADERBOARD_REVEAL_TIMESTAMP = new Date("2026-10-31T12:00:00+05:30").getTime();
+// Default Fallback Target Reveal Time: 16 November 2026, 12:00:00 PM IST (UTC+5:30)
+export const LEADERBOARD_REVEAL_TIMESTAMP = new Date("2026-11-16T12:00:00+05:30").getTime();
 
 type UserReg = {
   id: string;
@@ -20,9 +20,19 @@ interface LeaderboardCountdownProps {
   userReg?: UserReg | null;
   onTimerComplete?: () => void;
   eventName?: string;
+  targetTimestamp?: number;
+  revealLabel?: string;
+  isCancerEvent?: boolean;
 }
 
-export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: LeaderboardCountdownProps) {
+export function LeaderboardCountdown({
+  userReg,
+  onTimerComplete,
+  eventName,
+  targetTimestamp = LEADERBOARD_REVEAL_TIMESTAMP,
+  revealLabel = "16 Nov, 12:00 PM IST",
+  isCancerEvent = true,
+}: LeaderboardCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -40,7 +50,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
   useEffect(() => {
     function calculateTime() {
       const now = Date.now();
-      const diff = LEADERBOARD_REVEAL_TIMESTAMP - now;
+      const diff = targetTimestamp - now;
 
       if (diff <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isRevealed: true });
@@ -61,7 +71,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
     calculateTime();
     const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
-  }, [onTimerComplete]);
+  }, [onTimerComplete, targetTimestamp]);
 
   if (timeLeft.isRevealed) {
     return null;
@@ -72,8 +82,12 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
 
   return (
     <div className="my-8 rounded-3xl border border-[#90aead]/30 bg-[#14242a] text-[#fbe9d0] shadow-2xl overflow-hidden relative isolate">
-      {/* Top Indian Tricolor Stripe */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
+      {/* Top Accent Stripe: Cancer Awareness Ribbon Ribbon (Rose -> Amber -> Gold) or Indian Tricolor */}
+      {isCancerEvent ? (
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#e64833] via-[#ff6b57] to-amber-400" />
+      ) : (
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
+      )}
 
       <div className="p-6 sm:p-10 text-center relative overflow-hidden">
         {/* Ambient Glows */}
@@ -90,7 +104,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
                   Your Activity Proof is Submitted &amp; Under Arbiter Review!
                 </p>
                 <p className="text-[11px] sm:text-xs text-slate-300 mt-1">
-                  Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}). Your official validated rank and QR-verified certificate will unlock when the countdown reaches zero!
+                  Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}). Your official validated rank and QR-verified certificate will unlock when the countdown reaches zero on {revealLabel}!
                 </p>
               </div>
             </div>
@@ -98,16 +112,16 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
         )}
 
         {needsSubmission && (
-          <div className="mb-6 mx-auto max-w-xl rounded-2xl border border-rose-500/50 bg-rose-500/10 p-4 text-left shadow-lg">
+          <div className="mb-6 mx-auto max-w-xl rounded-2xl border border-amber-500/50 bg-amber-500/10 p-4 text-left shadow-lg">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs sm:text-sm font-bold text-rose-300">
-                    Proof Submissions Closed (11:00 AM Deadline)
+                  <p className="text-xs sm:text-sm font-bold text-amber-300">
+                    Challenge Active (7–15 Nov 2026) · GPS Proof Pending
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
-                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — GPS proof submission closed at 11:00 AM. Arbiters are reviewing final times before the 12:00 PM reveal.
+                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — Complete your run, walk, or cycling activity and upload your GPS screenshot to secure your official rank.
                   </p>
                 </div>
               </div>
@@ -115,7 +129,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#e64833] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-[#c93b27] shrink-0"
               >
-                <span>View Dashboard</span>
+                <span>Submit Proof</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
@@ -125,7 +139,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-400/30 bg-amber-500/10 text-amber-300 text-xs sm:text-sm font-black uppercase tracking-wider mb-4">
           <Clock className="h-4 w-4" />
-          <span>Official Results Reveal &bull; 31 Oct, 12:00 PM IST</span>
+          <span>Official Results Reveal &bull; {revealLabel}</span>
         </div>
 
         {/* Heading */}
@@ -136,7 +150,7 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
           </span>
         </h2>
         <p className="text-xs sm:text-sm text-[#90aead] max-w-xl mx-auto mb-8 font-medium leading-relaxed">
-          Our race arbiters are currently verifying all GPS activity proofs. Official category rankings, top 3 champions, and verified finish times will be unlocked on <strong>31 October at 12:00 PM (Noon) IST</strong>.
+          Our race arbiters are currently verifying all GPS activity proofs submitted during the challenge. Official category rankings, top 3 champions, and verified finish times will unlock on <strong>{revealLabel}</strong> after the event concludes.
         </p>
 
         {/* ═══ BIG COUNTDOWN TIMER BOXES ═══ */}
@@ -218,4 +232,3 @@ export function LeaderboardCountdown({ userReg, onTimerComplete, eventName }: Le
     </div>
   );
 }
-

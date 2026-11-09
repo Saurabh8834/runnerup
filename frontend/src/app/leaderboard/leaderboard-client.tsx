@@ -348,22 +348,31 @@ export function LeaderboardClient({
     }
   }, []);
 
-  // Leaderboard disclosure countdown status (Reveals 31 Oct, 12:00 PM IST)
-  const [isRevealed, setIsRevealed] = useState(() => Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP);
+  // Event-specific Leaderboard reveal target timestamp:
+  // - National Cancer Awareness Day Challenge (7–15 Nov 2026): Reveals 16 Nov 2026, 12:00 PM IST (after event ends)
+  // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
+  const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
+  const targetRevealTime = useMemo(() => {
+    if (isCancerEvent) {
+      return new Date("2026-11-16T12:00:00+05:30").getTime();
+    }
+    return new Date("2026-10-31T12:00:00+05:30").getTime();
+  }, [isCancerEvent]);
+
+  const [isRevealed, setIsRevealed] = useState(() => Date.now() >= targetRevealTime);
 
   useEffect(() => {
-    if (Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP) {
-      setIsRevealed(true);
-      return;
-    }
+    setIsRevealed(Date.now() >= targetRevealTime);
+    if (Date.now() >= targetRevealTime) return;
+
     const checkTimer = setInterval(() => {
-      if (Date.now() >= LEADERBOARD_REVEAL_TIMESTAMP) {
+      if (Date.now() >= targetRevealTime) {
         setIsRevealed(true);
         clearInterval(checkTimer);
       }
     }, 1000);
     return () => clearInterval(checkTimer);
-  }, []);
+  }, [targetRevealTime]);
 
   // Sync available distances when event changes
   const distanceOptions = useMemo(() => {
@@ -557,13 +566,22 @@ export function LeaderboardClient({
     };
   }, [entries]);
 
-  // User's own entry / standing on the board
+  // User's own entry / standing on the board (Strict Event Isolation)
   const userStanding = useMemo(() => {
     if (!isSignedIn) return null;
+    // CRITICAL: Ensure user has a valid confirmed registration for THIS specific event.
+    // If user is only registered for Cancer event, they MUST NOT match or show standing on IAF board!
+    if (!userRegistrations || userRegistrations.length === 0) {
+      return null;
+    }
+
+    // Match strictly by user's Clerk ID or bibNumber associated with the user's registration in THIS event
     const matchingRank = entries.find(
       (e) =>
         (currentClerkId && e.clerkId === currentClerkId) ||
-        (user?.fullName && e.runnerName.toLowerCase() === user.fullName.toLowerCase()),
+        userRegistrations.some(
+          (r) => r.bibNumber && e.bibNumber && r.bibNumber.trim().toLowerCase() === e.bibNumber.trim().toLowerCase(),
+        ),
     );
     const userRegForEvent = userRegistrations.find(
       (r) => r.distance.toLowerCase().trim() === selectedDistance.toLowerCase().trim(),
@@ -577,7 +595,7 @@ export function LeaderboardClient({
       currentDistanceReg: userRegForEvent || null,
       otherDistanceReg: otherDistanceReg || null,
     };
-  }, [currentClerkId, entries, isSignedIn, selectedDistance, user, userRegistrations]);
+  }, [currentClerkId, entries, isSignedIn, selectedDistance, userRegistrations]);
 
   return (
     <div className="min-w-0">
@@ -820,6 +838,9 @@ export function LeaderboardClient({
                     <div className="space-y-8">
                       <LeaderboardCountdown
                         eventName={events.find((e) => e.slug === selectedSlug)?.name}
+                        targetTimestamp={targetRevealTime}
+                        revealLabel={isCancerEvent ? "16 Nov, 12:00 PM IST" : "31 Oct, 12:00 PM IST"}
+                        isCancerEvent={isCancerEvent}
                         userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
                         onTimerComplete={() => setIsRevealed(true)}
                       />
@@ -832,7 +853,9 @@ export function LeaderboardClient({
                           Leaderboard Standings Under Seal
                         </h3>
                         <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
-                          All activity proofs uploaded before tonight&apos;s 11:59 PM cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock tomorrow at 12:00 PM IST!
+                          {isCancerEvent
+                            ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–15 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 16 November at 12:00 PM IST after the event concludes."
+                            : "All activity proofs uploaded before the event cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock at 12:00 PM IST."}
                         </p>
                       </div>
                     </div>

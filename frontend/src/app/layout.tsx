@@ -117,10 +117,10 @@ export const metadata: Metadata = {
       "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates with free doorstep delivery.",
     images: [
       {
-        url: "/og-image.png",
+        url: `${SITE_URL}/og-image.png?v=cancer2026`,
         width: 1200,
         height: 630,
-        alt: "RUNNERUP - Virtual Running Events India",
+        alt: "RUNNERUP - National Cancer Awareness Day Virtual Run 2026",
       },
     ],
   },
@@ -129,7 +129,7 @@ export const metadata: Metadata = {
     title: "Virtual Running Events India 2026 | Real Medals & GPS Verified Races — RUNNERUP",
     description:
       "Join India's premier virtual running events. Run anywhere with Strava/Garmin, earn authentic metal finisher medals and digital certificates.",
-    images: ["/og-image.png"],
+    images: [`${SITE_URL}/og-image.png?v=cancer2026`],
     creator: "@runnerup",
     site: "@runnerup",
   },

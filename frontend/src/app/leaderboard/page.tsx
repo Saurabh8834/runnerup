@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${SITE_URL}/og-image.png`,
+        url: `${SITE_URL}/og-image.png?v=cancer2026`,
         width: 1200,
         height: 630,
         alt: "RunnerUp Official Virtual Marathon Leaderboard",
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Official Virtual Run Leaderboard | RunnerUp",
     description: "View live GPS-verified virtual running rankings and times across India.",
-    images: [`${SITE_URL}/og-image.png`],
+    images: [`${SITE_URL}/og-image.png?v=cancer2026`],
   },
   alternates: {
     canonical: `${SITE_URL}/leaderboard`,
