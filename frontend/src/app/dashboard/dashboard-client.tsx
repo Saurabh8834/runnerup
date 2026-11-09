@@ -428,12 +428,35 @@ export function DashboardClient() {
   }, [registrations]);
 
   const trophyRegistrations = useMemo(() => {
-    return registrations.filter(
-      (r) =>
-        r.proofStatus === "APPROVED" ||
-        Boolean(r.certificate) ||
-        Boolean(r.medalDelivery),
-    );
+    return registrations.filter((r) => {
+      const slugLower = (r.event?.slug || "").toLowerCase();
+      const titleLower = (r.event?.title || "").toLowerCase();
+      const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
+      const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
+
+      // Concluded IAF event: confirmed/paid runners have trophies/certificates/medal tracking
+      if (isIaf) {
+        return (
+          r.proofStatus === "APPROVED" ||
+          Boolean(r.certificate) ||
+          Boolean(r.medalDelivery?.trackingNumber) ||
+          r.status === "COMPLETED"
+        );
+      }
+
+      // Live / Ongoing events (e.g. National Cancer Awareness Day Challenge):
+      // The event is active (7–15 Nov). It must NEVER show in Trophy Cabinet while ongoing.
+      // Only moves to Trophy Cabinet AFTER the event ends AND proof is APPROVED with certificate/dispatch.
+      if (isCancer) {
+        return (
+          r.proofStatus === "APPROVED" &&
+          (Boolean(r.certificate) || (Boolean(r.medalDelivery?.trackingNumber) && r.medalDelivery?.status !== "PENDING"))
+        );
+      }
+
+      // Default for any other event
+      return r.proofStatus === "APPROVED" && Boolean(r.certificate);
+    });
   }, [registrations]);
 
   const totalKmRun = useMemo(() => {
@@ -1035,7 +1058,9 @@ export function DashboardClient() {
                               {isVerified
                                 ? "Proof Approved"
                                 : isProofSubmitted
-                                  ? "Audited Post-Event (30 Oct)"
+                                  ? isCancerEvent
+                                    ? "Audited Post-Event (15 Nov)"
+                                    : "Audited Post-Event (30 Oct)"
                                   : isProofRejected
                                     ? "Re-upload Required"
                                     : "Upload Activity"}
@@ -1063,6 +1088,8 @@ export function DashboardClient() {
                             <p className="mt-1 text-[0.65rem] sm:text-[0.7rem] font-mono font-bold text-white truncate">
                               {isVerified && reg.finishTimeSeconds
                                 ? formatDuration(reg.finishTimeSeconds)
+                                : isProofSubmitted
+                                ? "Pending Review"
                                 : "Pending Finish"}
                             </p>
                           </div>
@@ -1089,7 +1116,7 @@ export function DashboardClient() {
                               {isCancerEvent
                                 ? isVerified
                                   ? "Medal Verified"
-                                  : "Dispatches Post-Event"
+                                  : "Dispatches Post-Event (15 Nov)"
                                 : isCertReady
                                 ? isMedalDispatched
                                   ? "Medal Dispatched"
@@ -1121,9 +1148,13 @@ export function DashboardClient() {
                           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200 backdrop-blur-xl flex items-start gap-3 shadow-[0_0_15px_rgba(245,158,11,0.08)]">
                             <Truck className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                             <div className="space-y-0.5">
-                              <p className="font-bold text-amber-300 text-xs sm:text-sm">Finisher Medal: Dispatching Soon</p>
+                              <p className="font-bold text-amber-300 text-xs sm:text-sm">
+                                {isCancerEvent ? "Finisher Medal: Dispatches Post-Event (15 Nov)" : "Finisher Medal: Dispatching Soon"}
+                              </p>
                               <p className="text-slate-300 text-[0.72rem] sm:text-xs leading-relaxed">
-                                Address verification details have been sent to your registered email. Once handed over to our express courier partner, your live tracking link will be delivered directly via Email.
+                                {isCancerEvent
+                                  ? "Your GPS run activity will be reviewed after the event window closes on 15 November. Official 3D medals will be dispatched to your delivery address following verification."
+                                  : "Address verification details have been sent to your registered email. Once handed over to our express courier partner, your live tracking link will be delivered directly via Email."}
                               </p>
                             </div>
                           </div>
@@ -1419,6 +1450,7 @@ export function DashboardClient() {
                     const slugLower = (reg.event.slug || "").toLowerCase();
                     const titleLower = (reg.event.title || "").toLowerCase();
                     const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
+                    const isCancerEvent = slugLower.includes("cancer") || titleLower.includes("cancer");
 
                     const isPaid =
                       reg.status === "CONFIRMED" ||
@@ -1466,6 +1498,8 @@ export function DashboardClient() {
                                 ? "Delivered"
                                 : reg.medalDelivery?.status === "DISPATCHED"
                                 ? "On The Way"
+                                : isCancerEvent
+                                ? "Post-Event Dispatch (15 Nov)"
                                 : "Dispatch Soon"}
                             </span>
                           </p>
@@ -1518,6 +1552,10 @@ export function DashboardClient() {
                                   <ExternalLink className="h-3 w-3" />
                                 </a>
                               </div>
+                            ) : isCancerEvent ? (
+                              <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
+                                🎗️ Finisher medals will be dispatched to your delivery address following event conclusion on 15 November and activity verification.
+                              </p>
                             ) : (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
                                 ✉️ Address verification email has been sent to your inbox. Once dispatched, your live tracking link will be shared directly via Email.
