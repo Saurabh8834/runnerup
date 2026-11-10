@@ -469,7 +469,6 @@ export function LeaderboardClient({
     const endpoints = [
       relativeUrl,
       `https://www.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
-      `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
       `https://api.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
     ].filter((url, idx, arr) => arr.indexOf(url) === idx);
 

@@ -70,12 +70,10 @@ export async function resilientFetch(path: string, init: ResilientFetchOptions =
   // Multi-tier redundancy:
   // 1) Primary (same-origin / configured Vercel proxy)
   // 2) Cloudflare Tunnel Direct (https://api.runnerup.in/api/...)
-  // 3) Railway 24/7 Backup (https://runnerup-production.up.railway.app/api/...)
   const candidates: string[] = [primaryUrl];
   if (isProduction) {
     const list = [
       `${CLOUD_BACKEND_URL}${cleanPath}`,
-      `${RAILWAY_FALLBACK_URL}${cleanPath}`,
     ];
     for (const url of list) {
       if (!candidates.includes(url)) {

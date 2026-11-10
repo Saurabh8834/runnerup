@@ -17,7 +17,6 @@ async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefin
     ? [`http://127.0.0.1:4000/api/registrations/leaderboard/${defaultSlug}${distQuery}`]
     : [
         `https://www.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
-        `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
         `https://api.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
       ];
 
