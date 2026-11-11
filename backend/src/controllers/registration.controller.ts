@@ -525,6 +525,10 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     throw new ApiError(409, "Proof already approved. Contact support to re-submit.");
   }
 
+  if ((!payload.finishTimeSeconds || payload.finishTimeSeconds <= 0) && !isAdmin) {
+    throw new ApiError(400, "Please enter your exact finish time from your activity screenshot.");
+  }
+
   let finalImageUrl = payload.activityImageUrl;
   if (finalImageUrl.startsWith("data:image/")) {
     try {

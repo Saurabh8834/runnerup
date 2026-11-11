@@ -234,22 +234,28 @@ export function validateProofForm(data: {
   const mStr = (data.finishMinutes ?? "").trim();
   const sStr = (data.finishSeconds ?? "").trim();
 
-  if (hStr) {
-    const h = Number(hStr);
+  if (!hStr && !mStr && !sStr) {
+    errors.finishTime = "Please enter the exact finish time from your screenshot.";
+  } else {
+    const h = hStr ? Number(hStr) : 0;
+    const m = mStr ? Number(mStr) : 0;
+    const s = sStr ? Number(sStr) : 0;
+
     if (Number.isNaN(h) || !Number.isInteger(h) || h < 0 || h > 23) {
       errors.finishHours = "Hours must be between 0 and 23.";
     }
-  }
-  if (mStr) {
-    const m = Number(mStr);
     if (Number.isNaN(m) || !Number.isInteger(m) || m < 0 || m > 59) {
       errors.finishMinutes = "Minutes must be between 0 and 59.";
     }
-  }
-  if (sStr) {
-    const s = Number(sStr);
     if (Number.isNaN(s) || !Number.isInteger(s) || s < 0 || s > 59) {
       errors.finishSeconds = "Seconds must be between 0 and 59.";
+    }
+
+    const totalSecs = h * 3600 + m * 60 + s;
+    if (totalSecs <= 0) {
+      errors.finishTime = "Finish time must be greater than 00:00:00.";
+    } else if (totalSecs < 60) {
+      errors.finishTime = "Finish time must be at least 1 minute.";
     }
   }
 

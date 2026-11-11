@@ -166,7 +166,7 @@ export const submitProofSchema = z.object({
       "Provide a valid image URL or uploaded image data",
     ),
   sourceApp: z.string().min(2, "Source app is required"),
-  finishTimeSeconds: z.number().int().positive().nullable().optional(),
+  finishTimeSeconds: z.number({ message: "Finish time is required" }).int().positive("Finish time must be greater than 0"),
   phone: z.string().optional(),
   email: z.string().optional(),
 });

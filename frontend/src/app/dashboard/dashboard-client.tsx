@@ -669,11 +669,15 @@ export function DashboardClient() {
       const s = Math.max(0, parseInt(finishSeconds, 10) || 0);
       const totalSecs = h * 3600 + m * 60 + s;
 
-      if (totalSecs > 0 && totalSecs < 60) {
-        throw new Error("Finish time cannot be under 1 minute. Please check your entered time or leave it empty.");
+      if (totalSecs <= 0) {
+        throw new Error("Please enter your exact finish time (Hours, Minutes, Seconds) shown in your activity screenshot.");
       }
 
-      const secs = totalSecs > 0 ? totalSecs : undefined;
+      if (totalSecs < 60) {
+        throw new Error("Finish time cannot be under 1 minute. Please enter the exact finish time from your screenshot.");
+      }
+
+      const secs = totalSecs;
 
       const res = await resilientFetch(`/api/registrations/${proofRegId}/proof`, {
         method: "POST",
@@ -1530,8 +1534,9 @@ export function DashboardClient() {
                               </label>
 
                               <div>
-                                <span className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-                                  Finish Time (Optional)
+                                <span className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5 flex items-center justify-between">
+                                  <span>Finish Time <span className="text-[#ff4b26] font-bold">*</span></span>
+                                  <span className="text-[0.68rem] text-slate-400 font-normal">From screenshot</span>
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                   <input
