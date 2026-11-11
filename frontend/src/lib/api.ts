@@ -108,6 +108,7 @@ export async function resilientFetch(path: string, init: ResilientFetchOptions =
 
     try {
       const res = await fetch(candidateUrl, {
+        credentials: "include",
         ...init,
         signal: controller.signal,
       });

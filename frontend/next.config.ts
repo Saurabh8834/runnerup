@@ -13,7 +13,7 @@ const publishableKey =
     : LIVE_CLERK_PUBLISHABLE_KEY;
 
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publishableKey;
-process.env.NEXT_PUBLIC_CLERK_PROXY_URL = "https://www.runnerup.in/__clerk";
+process.env.NEXT_PUBLIC_CLERK_PROXY_URL = "/__clerk";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -23,7 +23,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   env: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: publishableKey,
-    NEXT_PUBLIC_CLERK_PROXY_URL: "https://www.runnerup.in/__clerk",
+    NEXT_PUBLIC_CLERK_PROXY_URL: "/__clerk",
   },
 
   // ── Backend API & Webhook proxy ─────────────────────────

@@ -306,7 +306,9 @@ export function DashboardClient() {
     }
   };
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!dbUser);
+  const dbUserRef = useRef<DbUser | null>(dbUser);
+  dbUserRef.current = dbUser;
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"active" | "trophies" | "refer">("active");
 
@@ -387,7 +389,7 @@ export function DashboardClient() {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (!dbUserRef.current) setLoading(true);
     setError(null);
     try {
       const token = await getToken();
@@ -433,14 +435,14 @@ export function DashboardClient() {
       if (seq.current === id) {
         // If we already have user data from cache, keep it visible and do not break the dashboard
         setError((prev) => {
-          if (dbUser && dbUser.registrations?.length > 0) return null;
+          if (dbUserRef.current && dbUserRef.current.registrations?.length > 0) return null;
           return err instanceof Error ? err.message : "Failed to load";
         });
       }
     } finally {
       if (seq.current === id) setLoading(false);
     }
-  }, [dbUser, getToken, isSignedIn, user]);
+  }, [getToken, isSignedIn, user?.id, user?.primaryEmailAddress?.emailAddress]);
 
   const loadMe = useCallback(async () => {
     const id = ++seq.current;
@@ -478,6 +480,14 @@ export function DashboardClient() {
       } catch {}
     }
   }, [isLoaded, isSignedIn, user?.id]);
+
+  useEffect(() => {
+    // Safety watchdog: ensure athlete dashboard is never stuck in loading spinner under any network condition
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (isLoaded) {
@@ -733,7 +743,7 @@ export function DashboardClient() {
     setTimeout(() => setCopiedCode(false), 2500);
   }
 
-  if (!isLoaded || loading) {
+  if (!dbUser && (!isLoaded || loading)) {
     return (
       <div className="min-h-[75vh] w-full bg-[#090d16] text-white flex items-center justify-center pt-28 pb-20 relative overflow-hidden">
         <div className="pointer-events-none absolute h-72 w-72 rounded-full bg-sky-500/20 blur-[120px]" />

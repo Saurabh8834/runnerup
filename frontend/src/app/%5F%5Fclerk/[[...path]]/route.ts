@@ -23,4 +23,5 @@ const secretKey =
 export const { GET, POST, PUT, DELETE, PATCH } = createFrontendApiProxyHandlers({
   publishableKey,
   secretKey,
+  fapiUrl: process.env.CLERK_FAPI_URL || "https://frontend-api.clerk.dev",
 });
