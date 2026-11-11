@@ -240,7 +240,23 @@ export function DashboardClient() {
   const { signOut, openUserProfile } = useClerk();
   const router = useRouter();
 
-  const [dbUser, setDbUser] = useState<DbUser | null>(null);
+  const [dbUser, setDbUser] = useState<DbUser | null>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("ru_cached_user_")) {
+            const cached = localStorage.getItem(key);
+            if (cached) {
+              const parsed = JSON.parse(cached);
+              if (parsed && Array.isArray(parsed.registrations)) return parsed;
+            }
+          }
+        }
+      }
+    } catch {}
+    return null;
+  });
   const [downloadingBibId, setDownloadingBibId] = useState<string | null>(null);
   const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
 
@@ -365,7 +381,7 @@ export function DashboardClient() {
     return { label: parts.join(" "), digital };
   }, [finishHours, finishMinutes, finishSeconds]);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (retryCount = 0) => {
     const id = ++seq.current;
     if (!isSignedIn) {
       setLoading(false);
@@ -399,13 +415,32 @@ export function DashboardClient() {
       });
       if (!res.ok) throw new Error(await readApiError(res, "Could not load dashboard"));
       const json = await res.json();
-      if (seq.current === id) setDbUser(json.data as DbUser);
+      if (seq.current === id && json?.data) {
+        setDbUser(json.data as DbUser);
+        setError(null);
+        try {
+          if (typeof window !== "undefined" && user?.id) {
+            localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+          }
+        } catch {}
+      }
     } catch (err: any) {
-      if (seq.current === id) setError(err instanceof Error ? err.message : "Failed to load");
+      // Auto-retry once after 1.5s on transient network lag
+      if (retryCount < 1) {
+        setTimeout(() => void load(retryCount + 1), 1500);
+        return;
+      }
+      if (seq.current === id) {
+        // If we already have user data from cache, keep it visible and do not break the dashboard
+        setError((prev) => {
+          if (dbUser && dbUser.registrations?.length > 0) return null;
+          return err instanceof Error ? err.message : "Failed to load";
+        });
+      }
     } finally {
       if (seq.current === id) setLoading(false);
     }
-  }, [getToken, isSignedIn, user]);
+  }, [dbUser, getToken, isSignedIn, user]);
 
   const loadMe = useCallback(async () => {
     const id = ++seq.current;
@@ -416,11 +451,33 @@ export function DashboardClient() {
       const res = await resilientFetch("/api/users/me", { headers: authHeaders(token) });
       if (!res.ok) return;
       const json = await res.json();
-      if (seq.current === id) setDbUser(json.data as DbUser);
+      if (seq.current === id && json?.data) {
+        setDbUser(json.data as DbUser);
+        try {
+          if (typeof window !== "undefined" && user?.id) {
+            localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+          }
+        } catch {}
+      }
     } catch {
       // keep last known state
     }
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, user?.id]);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user?.id) {
+      try {
+        const cached = localStorage.getItem(`ru_cached_user_${user.id}`);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && Array.isArray(parsed.registrations) && parsed.registrations.length > 0) {
+            setDbUser(parsed);
+            setLoading(false);
+          }
+        }
+      } catch {}
+    }
+  }, [isLoaded, isSignedIn, user?.id]);
 
   useEffect(() => {
     if (isLoaded) {

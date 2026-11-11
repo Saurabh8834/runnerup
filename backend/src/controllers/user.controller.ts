@@ -185,6 +185,27 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
     throw new ApiError(404, "User not found in database");
   }
 
+  // If user has no registrations attached directly to their ID, immediately relink
+  // any registrations that match their email or phone from Razorpay checkout
+  if (user.registrations.length === 0 && (user.email || user.phone)) {
+    try {
+      const didRelink = await relinkUserOrphans(user);
+      if (didRelink) {
+        const refreshedUser = await prisma.user.findFirst({
+          where: { id: user.id },
+          include: {
+            registrations: registrationInclude,
+          },
+        });
+        if (refreshedUser) {
+          user = refreshedUser;
+        }
+      }
+    } catch (e) {
+      logger.warn("[User] Auto-relink on getMe non-fatal error", { error: String(e) });
+    }
+  }
+
   response.json({ data: user });
 }
 

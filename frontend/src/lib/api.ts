@@ -69,10 +69,12 @@ export async function resilientFetch(path: string, init: ResilientFetchOptions =
 
   // Multi-tier redundancy:
   // 1) Primary (same-origin / configured Vercel proxy)
-  // 2) Cloudflare Tunnel Direct (https://api.runnerup.in/api/...)
+  // 2) 24/7 Cloud Backend Redundancy (Railway: https://runnerup-production.up.railway.app/api/...)
+  // 3) Cloudflare Tunnel Direct (https://api.runnerup.in/api/...)
   const candidates: string[] = [primaryUrl];
   if (isProduction) {
     const list = [
+      `${RAILWAY_FALLBACK_URL}${cleanPath}`,
       `${CLOUD_BACKEND_URL}${cleanPath}`,
     ];
     for (const url of list) {
@@ -82,7 +84,7 @@ export async function resilientFetch(path: string, init: ResilientFetchOptions =
     }
   }
 
-  const perCandidateTimeoutMs = init.timeoutMs ?? 25000;
+  const perCandidateTimeoutMs = init.timeoutMs ?? 7000;
   let lastError: unknown = null;
   let lastResponse: Response | null = null;
 
