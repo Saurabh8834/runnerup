@@ -192,7 +192,9 @@ const publishableKey =
 
 const clerkProxyUrl =
   process.env.NEXT_PUBLIC_CLERK_PROXY_URL ||
-  (process.env.NODE_ENV === "production" ? "https://www.runnerup.in/__clerk" : undefined);
+  (typeof window === "undefined" || !window.location.hostname.includes("localhost")
+    ? "https://www.runnerup.in/__clerk"
+    : undefined);
 
 export default function RootLayout({
   children,

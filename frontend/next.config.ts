@@ -13,6 +13,7 @@ const publishableKey =
     : LIVE_CLERK_PUBLISHABLE_KEY;
 
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = publishableKey;
+process.env.NEXT_PUBLIC_CLERK_PROXY_URL = "https://www.runnerup.in/__clerk";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
