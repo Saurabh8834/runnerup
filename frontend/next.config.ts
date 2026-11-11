@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   env: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: publishableKey,
+    NEXT_PUBLIC_CLERK_PROXY_URL: "https://www.runnerup.in/__clerk",
   },
 
   // ── Backend API & Webhook proxy ─────────────────────────
