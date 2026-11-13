@@ -63,6 +63,7 @@ type Overview = {
     openEvents: number;
     pendingProofs: number;
     certificates: number;
+    medalsDispatched?: number;
     medalsPending: number;
     users: number;
   };
@@ -477,7 +478,7 @@ export default function AdminOverviewPage() {
         <div className="rounded-2xl border border-(--line) bg-(--panel) p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[0.65rem] font-bold uppercase tracking-wider text-(--muted)">
-              Medals Out
+              Medals Dispatched
             </span>
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-(--panel-soft) text-(--sage)">
               <Medal className="h-3.5 w-3.5" />
@@ -485,11 +486,11 @@ export default function AdminOverviewPage() {
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black tabular-nums text-(--foreground)">
-              {data?.stats.medalsPending ?? 0}
+              {data?.stats.medalsDispatched ?? 0}
             </div>
             <p className="text-[0.65rem] text-(--muted) mt-0.5">
               <Link href="/admin/medals" className="text-(--sage) hover:underline">
-                Ready to ship →
+                {data?.stats.medalsPending ? `${data.stats.medalsPending} ready to ship →` : "Ready to ship →"}
               </Link>
             </p>
           </div>
