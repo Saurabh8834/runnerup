@@ -124,6 +124,7 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
               where: { id: paymentToUpdate.id },
               data: {
                 status: "PAID",
+                amountInPaise: rzp.amount || paymentToUpdate.amountInPaise,
                 razorpayPaymentId: rzp.id,
                 razorpayOrderId: rzp.order_id || paymentToUpdate.razorpayOrderId,
                 paidAt: paidAtDate,

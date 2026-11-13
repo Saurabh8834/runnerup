@@ -116,8 +116,8 @@ export default function AdminOverviewPage() {
   const [loading, setLoading] = useState(!cachedOverviewData);
   const [error, setError] = useState<string | null>(null);
 
-  // Default to 30d (This Month) so all active revenue, registrations, and metrics show immediately
-  const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("30d");
+  // Default to all (All Time) so all lifetime revenue, registrations, and metrics show immediately matching Razorpay
+  const [selectedRange, setSelectedRange] = useState<"today" | "3d" | "7d" | "30d" | "all">("all");
   const {
     events: scopedEvents,
     selectedEventId,

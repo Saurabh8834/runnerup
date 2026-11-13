@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock, ShieldCheck, Trophy, Award, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
 
-// Default Fallback Target Reveal Time: 16 November 2026, 12:00:00 PM IST (UTC+5:30)
-export const LEADERBOARD_REVEAL_TIMESTAMP = new Date("2026-11-16T12:00:00+05:30").getTime();
+// Default Target Reveal Time: 17 November 2026, 12:00:00 AM IST (Midnight 16/17 Nov, UTC+5:30)
+export const LEADERBOARD_REVEAL_TIMESTAMP = new Date("2026-11-17T00:00:00+05:30").getTime();
 
 type UserReg = {
   id: string;
@@ -30,7 +30,7 @@ export function LeaderboardCountdown({
   onTimerComplete,
   eventName,
   targetTimestamp = LEADERBOARD_REVEAL_TIMESTAMP,
-  revealLabel = "16 Nov, 12:00 PM IST",
+  revealLabel = "17 Nov, 12:00 AM IST",
   isCancerEvent = true,
 }: LeaderboardCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{

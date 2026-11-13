@@ -26,6 +26,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getApiUrl } from "../../lib/api";
 import { publicEvents } from "../data/events";
 import { LeaderboardCountdown, LEADERBOARD_REVEAL_TIMESTAMP } from "./leaderboard-countdown";
+import {
+  generateClientDummyLeaderboard,
+  generateClientDummyRoster,
+  isDummyEvent,
+} from "./leaderboard-dummy-generator";
 
 export type LeaderboardEntry = {
   rank: number;
@@ -349,12 +354,12 @@ export function LeaderboardClient({
   }, []);
 
   // Event-specific Leaderboard reveal target timestamp:
-  // - National Cancer Awareness Day Challenge (7–15 Nov 2026): Reveals 16 Nov 2026, 12:00 PM IST (after event ends)
+  // - National Cancer Awareness Day Challenge (7–15 Nov 2026): Reveals 17 Nov 2026, 12:00 AM IST (Midnight 16/17 Nov)
   // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
   const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
   const targetRevealTime = useMemo(() => {
     if (isCancerEvent) {
-      return new Date("2026-11-16T12:00:00+05:30").getTime();
+      return new Date("2026-11-17T00:00:00+05:30").getTime();
     }
     return new Date("2026-10-31T12:00:00+05:30").getTime();
   }, [isCancerEvent]);
@@ -501,10 +506,25 @@ export function LeaderboardClient({
     if (fetchSuccess && parsedJson) {
       cacheRef.current.set(cacheKey, { json: parsedJson, timestamp: Date.now() });
 
-      const rankedData = (parsedJson.data ?? []) as LeaderboardEntry[];
-      const rosterData = (parsedJson.participants ?? []) as ParticipantEntry[];
+      let rankedData = (parsedJson.data ?? []) as LeaderboardEntry[];
+      let rosterData = (parsedJson.participants ?? []) as ParticipantEntry[];
       const userRegs = (parsedJson.userRegistrations ?? []) as UserReg[];
       const distList = (parsedJson.meta?.availableDistances ?? []) as string[];
+
+      // If this is a dummy past event and the backend returns old un-shuffled data or MR- bibs,
+      // override with our bespoke client generator immediately!
+      if (isDummyEvent(selectedSlug)) {
+        const isOldData =
+          rankedData.length === 0 ||
+          rankedData[0]?.bibNumber?.startsWith("MR-") ||
+          (rankedData[0]?.runnerName === "Aarav Sharma" && !selectedSlug.includes("cancer"));
+        if (isOldData) {
+          const currentEventName = events.find((e) => e.slug === selectedSlug)?.name || selectedSlug;
+          const targetDist = selectedDistance || distList[0] || "5 km";
+          rankedData = generateClientDummyLeaderboard(selectedSlug, currentEventName, targetDist, 60);
+          rosterData = generateClientDummyRoster(selectedSlug, currentEventName, targetDist, 75);
+        }
+      }
 
       setEntries(rankedData);
       setParticipants(rosterData);
@@ -514,7 +534,15 @@ export function LeaderboardClient({
       }
       setError(null);
     } else {
-      setError("Unable to sync latest live standings. Please check your connection.");
+      if (isDummyEvent(selectedSlug)) {
+        const currentEventName = events.find((e) => e.slug === selectedSlug)?.name || selectedSlug;
+        const curDist = selectedDistance || "5 km";
+        setEntries(generateClientDummyLeaderboard(selectedSlug, currentEventName, curDist, 60));
+        setParticipants(generateClientDummyRoster(selectedSlug, currentEventName, curDist, 75));
+        setError(null);
+      } else {
+        setError("Unable to sync latest live standings. Please check your connection.");
+      }
     }
     setLoading(false);
   }, [selectedDistance, selectedSlug]);
@@ -838,7 +866,7 @@ export function LeaderboardClient({
                       <LeaderboardCountdown
                         eventName={events.find((e) => e.slug === selectedSlug)?.name}
                         targetTimestamp={targetRevealTime}
-                        revealLabel={isCancerEvent ? "16 Nov, 12:00 PM IST" : "31 Oct, 12:00 PM IST"}
+                        revealLabel={isCancerEvent ? "17 Nov, 12:00 AM IST" : "31 Oct, 12:00 PM IST"}
                         isCancerEvent={isCancerEvent}
                         userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
                         onTimerComplete={() => setIsRevealed(true)}

@@ -64,8 +64,8 @@ export async function syncUserAndPaymentData(): Promise<FullSyncResult> {
   try {
     logger.info("[DataSync] Starting comprehensive user and payment sync...");
 
-    // 1. Reconcile payments against Razorpay (up to 500 captured payments)
-    const paymentResult = await reconcilePaymentsWithRazorpay({ count: 500 });
+    // 1. Reconcile payments against Razorpay (up to 1000 captured payments)
+    const paymentResult = await reconcilePaymentsWithRazorpay({ count: 1000 });
 
     // 2. Fix unconfirmed registrations with PAID payments
     const unconfirmedPaidRegs = await prisma.registration.findMany({

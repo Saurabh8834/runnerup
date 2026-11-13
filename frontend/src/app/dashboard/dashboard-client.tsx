@@ -138,7 +138,13 @@ function canUpload(reg: Registration) {
     reg.event?.title?.toLowerCase()?.includes("air force");
 
   if (isOldAirForce) return false;
-  if (reg.proofStatus === "APPROVED") return false;
+
+  const isCancerEvent =
+    reg.event?.slug?.includes("cancer") ||
+    reg.event?.title?.toLowerCase()?.includes("cancer");
+
+  // For active ongoing challenges (like Cancer Awareness Day), always allow athletes to update or replace proof
+  if (reg.proofStatus === "APPROVED" && !isCancerEvent) return false;
 
   return isEligible(reg);
 }

@@ -521,7 +521,7 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     throw new ApiError(422, "Complete payment before uploading GPS proof");
   }
 
-  if (existing.proofStatus === "APPROVED" && !isAdmin) {
+  if (existing.proofStatus === "APPROVED" && !isAdmin && !isCancerEvent) {
     throw new ApiError(409, "Proof already approved. Contact support to re-submit.");
   }
 
@@ -623,7 +623,7 @@ export async function reviewProof(request: AuthenticatedRequest, response: Respo
   response.json({ data: registration });
 }
 
-const INDIAN_RUNNERS_ROSTER = [
+const DIVERSE_INDIAN_RUNNERS = [
   { name: "Aarav Sharma", city: "Bengaluru", state: "Karnataka" },
   { name: "Nisha Rawat", city: "Dehradun", state: "Uttarakhand" },
   { name: "Kabir Sethi", city: "Delhi NCR", state: "Delhi" },
@@ -664,7 +664,79 @@ const INDIAN_RUNNERS_ROSTER = [
   { name: "Varun Kaushik", city: "Ghaziabad", state: "Uttar Pradesh" },
   { name: "Ankita Roy", city: "Ranchi", state: "Jharkhand" },
   { name: "Naveen Choudhury", city: "Bhubaneswar", state: "Odisha" },
+  { name: "Arjun Nambiar", city: "Kozhikode", state: "Kerala" },
+  { name: "Pooja Hegde", city: "Mysuru", state: "Karnataka" },
+  { name: "Kunal Chauhan", city: "Chandigarh", state: "Punjab" },
+  { name: "Tanvi Bhatt", city: "Vadodara", state: "Gujarat" },
+  { name: "Chetan Rathore", city: "Jodhpur", state: "Rajasthan" },
+  { name: "Meghna Mukherjee", city: "Kolkata", state: "West Bengal" },
+  { name: "Nikhil Solanki", city: "Surat", state: "Gujarat" },
+  { name: "Radhika Dwivedi", city: "Prayagraj", state: "Uttar Pradesh" },
+  { name: "Yashvardhan Gill", city: "Ludhiana", state: "Punjab" },
+  { name: "Sunita Grewal", city: "Jalandhar", state: "Punjab" },
+  { name: "Kartik Balakrishnan", city: "Chennai", state: "Tamil Nadu" },
+  { name: "Preeti Thakur", city: "Solan", state: "Himachal Pradesh" },
+  { name: "Rakesh Nanda", city: "Cuttack", state: "Odisha" },
+  { name: "Shweta Ahuja", city: "Ambala", state: "Haryana" },
+  { name: "Vivek Chatterjee", city: "Siliguri", state: "West Bengal" },
+  { name: "Ruchi Pandey", city: "Gorakhpur", state: "Uttar Pradesh" },
+  { name: "Mayank Trivedi", city: "Rajkot", state: "Gujarat" },
+  { name: "Pallavi Shukla", city: "Gwalior", state: "Madhya Pradesh" },
+  { name: "Deepak Gokhale", city: "Kolhapur", state: "Maharashtra" },
+  { name: "Riya Shenoy", city: "Udupi", state: "Karnataka" },
+  { name: "Aniket Somani", city: "Udaipur", state: "Rajasthan" },
+  { name: "Vandana Yadav", city: "Agra", state: "Uttar Pradesh" },
+  { name: "Sandeep Warrier", city: "Thrissur", state: "Kerala" },
+  { name: "Shilpa Mohanty", city: "Rourkela", state: "Odisha" },
+  { name: "Saurabh Mishra", city: "Prayagraj", state: "Uttar Pradesh" },
+  { name: "Rashmi Kothari", city: "Bikaner", state: "Rajasthan" },
+  { name: "Sumit Bharadwaj", city: "Haridwar", state: "Uttarakhand" },
+  { name: "Komal Barman", city: "Dibrugarh", state: "Assam" },
+  { name: "Vijay Ranganathan", city: "Madurai", state: "Tamil Nadu" },
+  { name: "Shalini Dixit", city: "Bareilly", state: "Uttar Pradesh" },
+  { name: "Rajesh Singhania", city: "Raipur", state: "Chhattisgarh" },
+  { name: "Sonali Patra", city: "Bhubaneswar", state: "Odisha" },
+  { name: "Manoj Deshpande", city: "Aurangabad", state: "Maharashtra" },
+  { name: "Suman Sengupta", city: "Howrah", state: "West Bengal" },
+  { name: "Bhavesh Parekh", city: "Bhavnagar", state: "Gujarat" },
+  { name: "Aarti Vishwakarma", city: "Jabalpur", state: "Madhya Pradesh" },
+  { name: "Tushar Naik", city: "Panaji", state: "Goa" },
+  { name: "Sakshi Talwar", city: "Rohtak", state: "Haryana" },
+  { name: "Harish Venkat", city: "Visakhapatnam", state: "Andhra Pradesh" },
+  { name: "Nidhi Bhatnagar", city: "Meerut", state: "Uttar Pradesh" },
+  { name: "Pranav Sundaram", city: "Salem", state: "Tamil Nadu" },
+  { name: "Bhavna Mahajan", city: "Jammu", state: "Jammu & Kashmir" },
+  { name: "Rishabh Goel", city: "Moradabad", state: "Uttar Pradesh" },
+  { name: "Payal Somani", city: "Ajmer", state: "Rajasthan" },
+  { name: "Chirag Doshi", city: "Jamnagar", state: "Gujarat" },
+  { name: "Jyoti Dogra", city: "Dharamshala", state: "Himachal Pradesh" },
+  { name: "Akshay Bhosle", city: "Satara", state: "Maharashtra" },
+  { name: "Shivani Negi", city: "Rishikesh", state: "Uttarakhand" },
+  { name: "Vishal Murthy", city: "Belagavi", state: "Karnataka" },
+  { name: "Smriti Goswami", city: "Shillong", state: "Meghalaya" },
+  { name: "Ajay Grewal", city: "Patiala", state: "Punjab" },
+  { name: "Manisha Kadam", city: "Thane", state: "Maharashtra" },
+  { name: "Sunny Lobo", city: "Margao", state: "Goa" },
+  { name: "Swarnalata Jena", city: "Puri", state: "Odisha" },
+  { name: "Aman Bindra", city: "Hoshiarpur", state: "Punjab" },
+  { name: "Gayatri Swaminathan", city: "Tiruchirappalli", state: "Tamil Nadu" },
+  { name: "Mohit Sangwan", city: "Hisar", state: "Haryana" },
+  { name: "Kasturi Sarma", city: "Tezpur", state: "Assam" },
+  { name: "Amit Bais", city: "Bilaspur", state: "Chhattisgarh" },
+  { name: "Rohini Kulkarni", city: "Solapur", state: "Maharashtra" },
+  { name: "Vikas Dhillon", city: "Bathinda", state: "Punjab" },
+  { name: "Aparna Namboodiri", city: "Kollam", state: "Kerala" },
+  { name: "Pankaj Vats", city: "Panipat", state: "Haryana" },
+  { name: "Madhavi Latha", city: "Vijayawada", state: "Andhra Pradesh" },
+  { name: "Hemant Rawal", city: "Ujjain", state: "Madhya Pradesh" },
+  { name: "Nandini Ghosh", city: "Durgapur", state: "West Bengal" },
+  { name: "Suresh Konduru", city: "Tirupati", state: "Andhra Pradesh" },
+  { name: "Vasudha Iyengar", city: "Bengaluru", state: "Karnataka" },
+  { name: "Lalit Mathur", city: "Alwar", state: "Rajasthan" },
+  { name: "Archana Pillai", city: "Alappuzha", state: "Kerala" },
 ];
+
+const INDIAN_RUNNERS_ROSTER = DIVERSE_INDIAN_RUNNERS;
 
 function parseDistanceKm(distanceStr: string): number {
   if (!distanceStr) return 5;
@@ -689,52 +761,124 @@ function hashSeed(str: string): number {
   return Math.abs(hash);
 }
 
-function getBasePacesForDistance(km: number): number[] {
-  // Base pace in seconds per km scaled realistically by race distance
-  // Sprints (1.5k - 3k) are faster (~3:20 to 7:20/km), while 20k - 30k are endurance paces (~4:30 to 8:40/km)
-  let startPace = 215; // ~3:35/km for 5k
-  if (km <= 2) startPace = 200; // ~3:20/km
-  else if (km <= 3) startPace = 210; // ~3:30/km
-  else if (km <= 5) startPace = 225; // ~3:45/km
-  else if (km <= 10) startPace = 245; // ~4:05/km
-  else if (km <= 15) startPace = 265; // ~4:25/km
-  else if (km <= 21.1) startPace = 275; // ~4:35/km
-  else if (km <= 25) startPace = 285; // ~4:45/km
-  else startPace = 295; // ~4:55/km for 30k+
+function getEventBibPrefix(eventSlug: string, eventTitle = ""): string {
+  const s = eventSlug.toLowerCase();
+  if (s.includes("cancer")) return "NCAD";
+  if (s.includes("air-force") || s.includes("iaf")) return "IAF";
+  if (s.includes("monsoon") || s.includes("mountain")) return "MMM";
+  if (s.includes("himalayan") || s.includes("winter")) return "HWS";
+  if (s.includes("endurance")) return "IER";
+  if (s.includes("independence")) return "IDR";
+  if (s.includes("spring") || s.includes("valley")) return "SVD";
+  if (s.includes("holi")) return "HCVR";
+  if (s.includes("new-year") || s.includes("night-miles")) return "NYNM";
+  
+  const words = eventTitle.replace(/[^a-zA-Z\s]/g, "").trim().split(/\s+/);
+  if (words.length >= 2) {
+    return words.map((w) => w[0].toUpperCase()).join("").slice(0, 4);
+  }
+  return "RU";
+}
 
-  // Progressive distribution from Rank 1 to Rank 35+
-  return Array.from({ length: 40 }, (_, i) => {
-    const spread = Math.round(startPace + Math.pow(i, 1.35) * 2.8);
-    return spread;
+function generateEventLeaderboard(eventSlug: string, eventTitle: string, distance: string, count = 60) {
+  const km = parseDistanceKm(distance);
+  const seed = hashSeed(`${eventSlug}-${distance}`);
+  const prefix = getEventBibPrefix(eventSlug, eventTitle);
+  const cleanCode = distance.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase() || "5K";
+
+  // Deterministically shuffle roster using seed so each event and distance has distinct winners & ranks
+  const rosterCopy = [...DIVERSE_INDIAN_RUNNERS];
+  const shuffled: typeof DIVERSE_INDIAN_RUNNERS = [];
+  let currentSeed = seed;
+
+  while (rosterCopy.length > 0 && shuffled.length < count) {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    const rndIndex = Math.floor((currentSeed / 233280) * rosterCopy.length);
+    shuffled.push(rosterCopy.splice(rndIndex, 1)[0]);
+  }
+
+  // Base pace scaled realistically by km
+  let basePace = 220; // ~3:40/km for 5k
+  if (km <= 2) basePace = 195;
+  else if (km <= 3) basePace = 210;
+  else if (km <= 5) basePace = 225;
+  else if (km <= 10) basePace = 240;
+  else if (km <= 15) basePace = 260;
+  else if (km <= 21.1) basePace = 270;
+  else if (km <= 25) basePace = 285;
+  else basePace = 295;
+
+  let currentFinishTime = Math.round(km * (basePace + (seed % 10)));
+
+  return shuffled.map((runner, idx) => {
+    if (idx > 0) {
+      // Natural ascending gap
+      const stepSeed = (seed + idx * 37) % 100;
+      const gapSec = idx < 5 ? 4 + (stepSeed % 8) : idx < 20 ? 7 + (stepSeed % 16) : 12 + (stepSeed % 28);
+      currentFinishTime += gapSec;
+    }
+
+    const bibNum = 101 + idx;
+    const bibNumber = `${prefix}-${cleanCode}-${String(bibNum).padStart(3, "0")}`;
+
+    return {
+      rank: idx + 1,
+      runnerName: runner.name,
+      city: runner.city,
+      state: runner.state,
+      distance,
+      finishTimeSeconds: currentFinishTime,
+      bibNumber,
+      status: "Verified" as const,
+      isPadded: true,
+      userId: `dummy-${eventSlug}-${idx}`,
+      clerkId: null,
+    };
+  });
+}
+
+function generateEventRoster(eventSlug: string, eventTitle: string, distance: string, count = 75) {
+  const km = parseDistanceKm(distance);
+  const seed = hashSeed(`${eventSlug}-${distance}-roster`);
+  const prefix = getEventBibPrefix(eventSlug, eventTitle);
+  const cleanCode = distance.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase() || "5K";
+
+  const rosterCopy = [...DIVERSE_INDIAN_RUNNERS];
+  const shuffled: typeof DIVERSE_INDIAN_RUNNERS = [];
+  let currentSeed = seed;
+
+  while (rosterCopy.length > 0 && shuffled.length < count) {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    const rndIndex = Math.floor((currentSeed / 233280) * rosterCopy.length);
+    shuffled.push(rosterCopy.splice(rndIndex, 1)[0]);
+  }
+
+  return shuffled.map((runner, idx) => {
+    const bibNum = 1001 + idx;
+    const bibNumber = `${prefix}-${cleanCode}-${bibNum}`;
+    const paceSpread = 230 + ((seed + idx * 13) % 90);
+    const finishTimeSeconds = Math.round(km * paceSpread);
+
+    return {
+      rosterNumber: idx + 1,
+      runnerName: runner.name,
+      city: runner.city,
+      state: runner.state,
+      distance,
+      bibNumber,
+      status: "Verified Finisher" as const,
+      proofStatus: "APPROVED" as const,
+      registrationStatus: "CONFIRMED" as const,
+      registeredAt: new Date(Date.now() - (idx + 1) * 3600000 * 4),
+      finishTimeSeconds,
+      userId: `dummy-roster-${eventSlug}-${idx}`,
+      clerkId: null,
+    };
   });
 }
 
 function generatePaddedLeaderboard(eventSlug: string, distance: string, minCount = 35) {
-  const km = parseDistanceKm(distance);
-  const seed = hashSeed(`${eventSlug}-${distance}`);
-  const cleanCode = distance.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase() || "RUN";
-  const basePaces = getBasePacesForDistance(km);
-
-  return INDIAN_RUNNERS_ROSTER.slice(0, Math.max(minCount, basePaces.length)).map((profile, idx) => {
-    const variance = ((seed + idx * 7) % 7) - 3;
-    const paceSec = Math.max(190, basePaces[idx % basePaces.length] + variance);
-    const finishSeconds = Math.round(km * paceSec);
-    const bibNum = 101 + idx;
-    const bibNumber = `MR-${cleanCode}-${String(bibNum).padStart(3, "0")}`;
-
-    return {
-      runnerName: profile.name,
-      city: profile.city,
-      state: profile.state,
-      distance: distance,
-      finishTimeSeconds: finishSeconds,
-      bibNumber,
-      status: "Verified" as const,
-      isPadded: true,
-      userId: `dummy-${idx}`,
-      clerkId: null,
-    };
-  });
+  return generateEventLeaderboard(eventSlug, eventSlug, distance, minCount);
 }
 
 export async function getLeaderboard(request: AuthenticatedRequest, response: Response) {
@@ -994,70 +1138,92 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     };
   });
 
-  // Generate deterministic realistic padding if real finishers are under 100
-  const paddedRows = generatePaddedLeaderboard(event.slug, activeDistance, 100);
+  // If the event has no real paid/approved registrations (dummy past events), generate full bespoke leaderboard & roster
+  let rankedLeaderboard: Array<{
+    rank: number;
+    runnerName: string;
+    city: string;
+    state: string;
+    distance: string;
+    finishTimeSeconds: number;
+    bibNumber: string;
+    status: "Verified";
+    isPadded: boolean;
+    userId: string;
+    clerkId: string | null;
+  }> = [];
 
-  // Merge real + padded (prioritizing real users)
-  const mergedRows = [...realLeaderboardRows];
-  for (const dummy of paddedRows) {
-    if (mergedRows.length >= 100) break;
-    if (!mergedRows.some((r) => r.runnerName.toLowerCase() === dummy.runnerName.toLowerCase())) {
-      mergedRows.push(dummy);
+  let participantRoster: Array<{
+    rosterNumber: number;
+    runnerName: string;
+    city: string;
+    state: string;
+    distance: string;
+    bibNumber: string;
+    status: "Verified Finisher";
+    proofStatus: "APPROVED";
+    registrationStatus: string;
+    registeredAt: Date | string;
+    finishTimeSeconds: number | null;
+    userId: string;
+    clerkId: string | null;
+  }> = [];
+
+  if (realLeaderboardRows.length === 0) {
+    // 100% Dummy Event: Generate deterministic bespoke leaderboard and roster with event-specific bibs and unique runners
+    rankedLeaderboard = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
+    participantRoster = generateEventRoster(event.slug, event.title, activeDistance, 75);
+  } else {
+    // Real Event (e.g. IAF or Cancer Challenge): prioritize real users, pad only if necessary
+    const eventPrefix = getEventBibPrefix(event.slug, event.title);
+    const paddedRows = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
+
+    const mergedRows = [...realLeaderboardRows];
+    for (const dummy of paddedRows) {
+      if (mergedRows.length >= 80) break;
+      if (!mergedRows.some((r) => r.runnerName.toLowerCase() === dummy.runnerName.toLowerCase())) {
+        mergedRows.push(dummy);
+      }
     }
+
+    // Sort strictly by finish time ascending
+    mergedRows.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
+
+    // Compute ranks
+    rankedLeaderboard = mergedRows.map((row, index) => ({
+      rank: index + 1,
+      ...row,
+    }));
+
+    // Real participants first, then event-prefixed padded roster if needed
+    const eventRoster = generateEventRoster(event.slug, event.title, activeDistance, 50);
+    participantRoster = [
+      ...allParticipants.map((p, idx) => ({
+        rosterNumber: idx + 1,
+        runnerName: p.user.name,
+        city: p.shippingCity || "India",
+        state: p.shippingState || "",
+        distance: p.distance,
+        bibNumber: p.bibNumber,
+        status: "Verified Finisher" as const,
+        proofStatus: "APPROVED" as const,
+        registrationStatus: p.status,
+        registeredAt: p.registeredAt,
+        finishTimeSeconds: p.finishTimeSeconds,
+        userId: p.user.id,
+        clerkId: p.user.clerkId,
+      })),
+      ...eventRoster.slice(0, Math.max(0, 75 - allParticipants.length)).map((p, idx) => ({
+        ...p,
+        rosterNumber: allParticipants.length + idx + 1,
+      })),
+    ];
   }
 
-  // Sort strictly by finish time ascending
-  mergedRows.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
-
-  // Compute ranks
-  const rankedLeaderboard = mergedRows.map((row, index) => ({
-    rank: index + 1,
-    ...row,
-  }));
-
-  // Generate realistic social proof padded participant roster for national virtual run
-  const paddedRosterEntries = INDIAN_RUNNERS_ROSTER.map((profile, idx) => {
-    const cleanCode = activeDistance.replace(/[^a-zA-Z0-9.]/g, "").toUpperCase() || "5K";
-    const bibNum = 1200 + idx;
-    return {
-      rosterNumber: allParticipants.length + idx + 1,
-      runnerName: profile.name,
-      city: profile.city,
-      state: profile.state,
-      distance: activeDistance,
-      bibNumber: `NCAD-${cleanCode}-${bibNum}`,
-      status: "Verified Finisher" as const,
-      proofStatus: "APPROVED" as const,
-      registrationStatus: "CONFIRMED" as const,
-      registeredAt: new Date(Date.now() - (idx + 1) * 3600000 * 3),
-      finishTimeSeconds: Math.round(activeKm * (240 + (idx % 80))),
-      userId: `dummy-roster-${idx}`,
-      clerkId: null,
-    };
-  });
-
-  // Transform participants list (real participants first, padded next)
-  const participantRoster = [
-    ...allParticipants.map((p, idx) => ({
-      rosterNumber: idx + 1,
-      runnerName: p.user.name,
-      city: p.shippingCity || "India",
-      state: p.shippingState || "",
-      distance: p.distance,
-      bibNumber: p.bibNumber,
-      status: "Verified Finisher" as const,
-      proofStatus: "APPROVED" as const,
-      registrationStatus: p.status,
-      registeredAt: p.registeredAt,
-      finishTimeSeconds: p.finishTimeSeconds,
-      userId: p.user.id,
-      clerkId: p.user.clerkId,
-    })),
-    ...paddedRosterEntries,
-  ];
-
-  const totalEventParticipants = event.slug.includes("cancer") ? 1480 : 2150;
-  const totalVerifiedFinishers = event.slug.includes("cancer") ? 1260 : 1890;
+  const totalEventParticipants =
+    event.finishers || (event.slug.includes("cancer") ? 1480 : event.slug.includes("air-force") ? 1480 : 1850);
+  const totalVerifiedFinishers =
+    event.verifiedResults || (event.slug.includes("cancer") ? 1260 : event.slug.includes("air-force") ? 1420 : 1620);
 
   const meta = {
     eventId: event.id,
