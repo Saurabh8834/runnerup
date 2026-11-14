@@ -43,7 +43,12 @@ export function AdminEventScopeBar({
 }: AdminEventScopeBarProps) {
   const globalScope = useAdminEventScope();
 
-  const events = propEvents && propEvents.length > 0 ? propEvents : globalScope.events;
+  const candidateEvents = propEvents && propEvents.length > 0 ? propEvents : globalScope.events;
+  // Guarantee all official challenges are always present even during API load transitions
+  const mergedEventsMap = new Map<string, EventScopeItem>();
+  globalScope.events.forEach((e) => mergedEventsMap.set(e.slug || e.id, e));
+  candidateEvents.forEach((e) => mergedEventsMap.set(e.slug || e.id, e));
+  const events = Array.from(mergedEventsMap.values());
   const selectedEventId = propSelectedEventId !== undefined ? propSelectedEventId : globalScope.selectedEventId;
   const onSelectEvent = propOnSelectEvent || globalScope.setSelectedEventId;
 

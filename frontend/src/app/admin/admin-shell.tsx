@@ -709,8 +709,9 @@ function SidebarNav({
   onNavClick?: () => void;
   onSignOut?: () => void;
 }) {
-  const { events, selectedEventId, setSelectedEventId, isCancer, isAirForce, isCombined } = useAdminEventScope();
+  const { events, selectedEventId, setSelectedEventId, isKinetic, isCancer, isAirForce, isCombined } = useAdminEventScope();
 
+  const kineticEvent = events.find((e) => e.slug.includes("kinetic") || e.title.toLowerCase().includes("kinetic"));
   const cancerEvent = events.find((e) => e.slug.includes("cancer") || e.title.toLowerCase().includes("cancer"));
   const iafEvent = events.find((e) => e.slug.includes("air-force") || e.title.toLowerCase().includes("air force"));
 
@@ -736,11 +737,39 @@ function SidebarNav({
             <span>Event Scope</span>
           </span>
           <span className="text-[0.6rem] font-mono font-bold px-1.5 py-0.5 rounded border bg-black/40 border-white/10 text-[var(--foreground)]">
-            {isCombined ? "ALL" : isCancer ? "CANCER" : "IAF"}
+            {isCombined ? "ALL" : isKinetic ? "KINETIC" : isCancer ? "CANCER" : "IAF"}
           </span>
         </div>
 
         <div className="space-y-1">
+          {/* Kinetic Run Virtual Challenge 2026 */}
+          <button
+            type="button"
+            onClick={() => {
+              if (kineticEvent) {
+                setSelectedEventId(kineticEvent.id);
+              } else {
+                setSelectedEventId("kinetic-run-virtual-challenge-2026");
+              }
+            }}
+            className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs transition-all flex items-center justify-between cursor-pointer ${
+              isKinetic
+                ? "bg-amber-500/20 border border-amber-500/50 text-amber-300 font-bold shadow-xs"
+                : "border border-transparent text-[var(--sidebar-muted)] hover:text-[var(--foreground)] hover:bg-white/5"
+            }`}
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="text-sm">⚡</span>
+              <div className="min-w-0">
+                <p className="truncate font-bold leading-tight text-white">Kinetic Run</p>
+                <p className="text-[0.62rem] text-amber-400/90 font-mono">10–15 Dec · Live</p>
+              </div>
+            </div>
+            <span className="text-[0.6rem] font-black uppercase tracking-wider bg-amber-500/25 text-amber-400 px-1.5 py-0.5 rounded shrink-0 border border-amber-500/30">
+              OPEN
+            </span>
+          </button>
+
           {/* Cancer Awareness Day 2026 */}
           <button
             type="button"

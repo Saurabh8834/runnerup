@@ -32,7 +32,7 @@ const STORAGE_KEY = "ru_admin_active_event_id";
 
 export const DEFAULT_REAL_EVENTS: EventScopeItem[] = [
   {
-    id: "kinetic-run-virtual-challenge-2026",
+    id: "cmwh12lp60000dhrgnrnkiqfp",
     title: "Kinetic Run Virtual Challenge 2026",
     slug: "kinetic-run-virtual-challenge-2026",
     status: "OPEN",
@@ -41,7 +41,7 @@ export const DEFAULT_REAL_EVENTS: EventScopeItem[] = [
     proofClosesAt: "2026-12-17T23:59:59.000Z",
   },
   {
-    id: "virtual-cancer-day-2026",
+    id: "cmvy7nj4o0000dhwgu9iwpjvq",
     title: "National Cancer Awareness Day Virtual Challenge 2026",
     slug: "national-cancer-awareness-day-virtual-run-2026",
     status: "OPEN",
@@ -50,7 +50,7 @@ export const DEFAULT_REAL_EVENTS: EventScopeItem[] = [
     proofClosesAt: "2026-11-20T23:59:59.000Z",
   },
   {
-    id: "indian-air-force-day-virtual-challenge",
+    id: "cmuwyg5m20000dhi8ie9tlmec",
     title: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
     status: "CLOSED",

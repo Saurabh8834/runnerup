@@ -178,16 +178,14 @@ function Timeline({ stages }: { stages: TimelineStage[] }) {
           const Icon = stageIcons[stage.stage] ?? Clock;
           return (
             <div key={stage.stage} className="flex flex-col items-center text-center">
-              <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs transition-all duration-500 ${
-                stage.done
+              <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs transition-all duration-500 ${stage.done
                   ? "bg-(--sage) text-white shadow-sm"
                   : "bg-(--panel-soft) text-(--muted-soft)"
-              }`}>
+                }`}>
                 {stage.done ? <BadgeCheck className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
               </span>
-              <p className={`mt-1.5 text-[0.55rem] font-semibold uppercase leading-tight tracking-wider ${
-                stage.done ? "text-(--sage)" : "text-(--muted-soft)"
-              }`}>
+              <p className={`mt-1.5 text-[0.55rem] font-semibold uppercase leading-tight tracking-wider ${stage.done ? "text-(--sage)" : "text-(--muted-soft)"
+                }`}>
                 {stage.label.split(" ")[0]}
               </p>
               <p className="text-[0.45rem] text-(--muted-soft) leading-tight">
@@ -254,7 +252,7 @@ export default function PrizeBibPage() {
             dataUrl = c.toDataURL("image/jpeg", 0.8);
           }
         }
-      } catch {}
+      } catch { }
 
       if (!dataUrl) {
         dataUrl = await new Promise<string>((resolve, reject) => {
@@ -273,7 +271,7 @@ export default function PrizeBibPage() {
       let token: string | null = null;
       try {
         token = await getToken();
-      } catch {}
+      } catch { }
 
       if (!token && !runnerPhone.trim()) {
         setProofSubmitError("Please enter your registered mobile number for verification.");

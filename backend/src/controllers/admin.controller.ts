@@ -221,6 +221,7 @@ async function getPaymentStats(): Promise<CachedPaymentStats> {
 
 // Only real official challenges (dummy seeded events permanently excluded)
 export const REAL_EVENT_SLUGS = [
+  "kinetic-run-virtual-challenge-2026",
   "national-cancer-awareness-day-virtual-challenge-2026",
   "national-cancer-awareness-day-virtual-run-2026",
   "indian-air-force-day-virtual-challenge",
