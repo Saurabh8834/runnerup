@@ -15,7 +15,38 @@ export type CertRenderData = {
   runnerName: string;
   distance: string;
   dateStr?: string;
+  isCancerEvent?: boolean;
 };
+
+/**
+ * Format runner name for Cancer certificate:
+ * If the name is too long (>22 chars or >=3 words), cleanly take the First Name and Last Name
+ * so it looks balanced and never overflows the designated field.
+ */
+export function formatCertificateRunnerName(fullName: string): string {
+  if (!fullName) return "Runner";
+  const trimmed = fullName.trim().replace(/\s+/g, " ");
+  if (trimmed.length <= 22) {
+    return toTitleCase(trimmed);
+  }
+  const parts = trimmed.split(" ");
+  if (parts.length >= 3) {
+    const abbreviated = `${parts[0]} ${parts[parts.length - 1]}`;
+    if (abbreviated.length <= 22) {
+      return toTitleCase(abbreviated);
+    }
+    return toTitleCase(`${parts[0]} ${parts[1]}`);
+  }
+  return toTitleCase(trimmed.slice(0, 22));
+}
+
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 let fontLoadPromise: Promise<void> | null = null;
 
@@ -114,6 +145,49 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
  */
 export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvasElement> {
   await ensureCanvasFonts();
+
+  if (data.isCancerEvent) {
+    const baseImg = await loadImage("/cancer-cert-clean-base.jpg?v=20261114_v1");
+    const canvas = document.createElement("canvas");
+    canvas.width = 1024;
+    canvas.height = 682;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not acquire 2D canvas context");
+
+    // Draw clean base
+    ctx.drawImage(baseImg, 0, 0, 1024, 682);
+
+    // 1. Athlete Name in elegant AlexBrush script
+    const nameDisplay = formatCertificateRunnerName(data.runnerName);
+    let nameSize = 58;
+    if (nameDisplay.length > 22) nameSize = 44;
+    else if (nameDisplay.length > 16) nameSize = 50;
+
+    ctx.font = `${nameSize}px "AlexBrush", "Brush Script MT", "Segoe Script", cursive`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#581c87"; // Imperial deep purple
+    ctx.fillText(nameDisplay, 512, 360);
+
+    // 2. Distance Category under the Trophy icon
+    let distStr = (data.distance || "5 KM").toUpperCase().trim();
+    if (!distStr.endsWith("KM") && !distStr.endsWith("K")) distStr += " KM";
+    ctx.font = `900 16px "OfficialArialBlack", "Arial Black", "Arial", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#1e1b4b"; // Deep midnight navy
+    ctx.fillText(distStr, 635, 552);
+
+    // 3. Issue Date under TEAM RUNNERUP signature on bottom left
+    const issueDateStr = (data.dateStr || "15 Nov 2026").toUpperCase().trim();
+    ctx.font = `bold 10px "Arial", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#6b21a8";
+    ctx.fillText(`DATE: ${issueDateStr}`, 142, 650);
+
+    return canvas;
+  }
 
   const baseImg = await loadImage("/iaf-cert-clean-base.jpg?v=20261031_v3");
   const canvas = document.createElement("canvas");

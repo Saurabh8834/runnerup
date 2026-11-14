@@ -292,6 +292,10 @@ export function DashboardClient() {
   const handleDownloadCert = async (reg: Registration) => {
     setDownloadingCertId(reg.id);
     try {
+      const slugLower = (reg.event?.slug || "").toLowerCase();
+      const titleLower = (reg.event?.title || "").toLowerCase();
+      const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
+
       const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
       const official = getVerifiedRunnerByBib(cleanBib);
       const runnerName = official?.name || dbUser?.name || user?.fullName || user?.firstName || "Runner";
@@ -299,10 +303,11 @@ export function DashboardClient() {
       const canvas = await renderCertCanvas({
         runnerName,
         distance,
-        dateStr: "31  /  10  /  2026",
+        dateStr: isCancer ? "15 Nov 2026" : "31  /  10  /  2026",
+        isCancerEvent: isCancer,
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
-      await triggerCanvasDownload(canvas, `RunnerUp_Certificate_${safeName}.jpg`);
+      await triggerCanvasDownload(canvas, `RunnerUp_Certificate_${safeName}_${isCancer ? "Cancer2026" : "IAF"}.jpg`);
       sendDownloadTelemetry("CERTIFICATE", reg.certificate?.certificateNumber || reg.bibNumber);
     } catch (e) {
       console.error("Failed to download certificate", e);
@@ -509,6 +514,10 @@ export function DashboardClient() {
     dbUser?.role === "SUPER_ADMIN" ||
     userEmail === "sourav06556@gmail.com" ||
     userEmail === "realblack009@gmail.com";
+  const isAdminDemoUser =
+    userEmail === "sourav06556@gmail.com" ||
+    dbUser?.email?.toLowerCase() === "sourav06556@gmail.com" ||
+    dbUser?.role === "SUPER_ADMIN";
 
 
   // Categorize registrations for clean tabs
@@ -1055,8 +1064,8 @@ export function DashboardClient() {
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
                   const isProofRejected = reg.proofStatus === "REJECTED";
-                  // Certificates are only ready for the concluded IAF challenge; Cancer event is active and unlocked only post-event verification
-                  const isCertReady = isIafEvent && isPaid;
+                  // Certificates are only ready for the concluded IAF challenge; for Cancer event, only admin demo user sourav06556@gmail.com has preview unlocked
+                  const isCertReady = (isIafEvent && isPaid) || (isCancerEvent && isPaid && isAdminDemoUser);
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
 
@@ -1224,11 +1233,15 @@ export function DashboardClient() {
                               >
                                 4
                               </span>
-                              <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider truncate">{isCancerEvent ? "Finisher Medal" : "Rewards Kit"}</span>
+                              <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider truncate">
+                                {isCancerEvent ? (isCertReady ? "E-Certificate" : "Finisher Medal") : "Rewards Kit"}
+                              </span>
                             </div>
                             <p className="mt-1 text-[0.65rem] sm:text-[0.7rem] text-slate-300 font-medium truncate">
                               {isCancerEvent
-                                ? isVerified
+                                ? isCertReady
+                                  ? "Certificate Ready"
+                                  : isVerified
                                   ? "Medal Verified"
                                   : "Dispatches Post-Event (15 Nov)"
                                 : isCertReady
@@ -1365,8 +1378,8 @@ export function DashboardClient() {
                             Leaderboard <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                           </Link>
 
-                          {/* Concluded IAF challenge participants can download certificate/bib. For newly started Cancer event, option is removed */}
-                          {isPaid && isIafEvent && isVerified && (
+                          {/* Concluded IAF challenge participants can download certificate/bib. For admin demo user sourav06556@gmail.com on cancer event, preview is also enabled */}
+                          {isPaid && ((isIafEvent && isVerified) || (isCancerEvent && isAdminDemoUser)) && (
                             <div className="inline-flex items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleDownloadBib(reg)}
@@ -1387,6 +1400,17 @@ export function DashboardClient() {
                                 <Download className="h-3 w-3" />
                                 <span>{downloadingCertId === reg.id ? "Cert..." : "Certificate"}</span>
                               </button>
+
+                              {reg.certificate?.certificateNumber && (
+                                <Link
+                                  href={`/certificates/${reg.certificate.certificateNumber}`}
+                                  className="rounded-full border border-purple-400/50 bg-purple-500/15 hover:bg-purple-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
+                                  title="Preview Official Certificate on-screen"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  <span>Preview</span>
+                                </Link>
+                              )}
                             </div>
                           )}
 
@@ -1773,7 +1797,7 @@ export function DashboardClient() {
                           </div>
                       </div>
 
-                      {isIaf && (
+                      {(isIaf || (isCancerEvent && isAdminDemoUser)) && (
                         <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
                           <button
                             onClick={() => handleDownloadCert(reg)}
@@ -1783,6 +1807,17 @@ export function DashboardClient() {
                             <Download className="h-3.5 w-3.5" />
                             <span>{downloadingCertId === reg.id ? "Generating Certificate..." : "Download Certificate (HD)"}</span>
                           </button>
+
+                          {reg.certificate?.certificateNumber && (
+                            <Link
+                              href={`/certificates/${reg.certificate.certificateNumber}`}
+                              className="rounded-full border border-purple-400/50 bg-purple-500/20 hover:bg-purple-500/30 px-4 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                              title="Preview Official Certificate on-screen"
+                            >
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>Preview</span>
+                            </Link>
+                          )}
 
                           <button
                             onClick={() => handleDownloadBib(reg)}

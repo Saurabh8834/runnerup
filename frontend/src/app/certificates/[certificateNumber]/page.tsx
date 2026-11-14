@@ -97,10 +97,16 @@ export default function CertificateVerifyPage() {
 
     async function draw() {
       try {
+        const isCancer =
+          (data?.event || "").toLowerCase().includes("cancer") ||
+          certificateNumber.toLowerCase().includes("ncad") ||
+          certificateNumber.toLowerCase().includes("cancer");
+
         const generatedCanvas = await renderCertCanvas({
           runnerName: data?.runnerName || "RUNNER",
           distance: data?.distance || "5 KM",
-          dateStr: "31  /  10  /  2026",
+          dateStr: isCancer ? "15 Nov 2026" : "31  /  10  /  2026",
+          isCancerEvent: isCancer,
         });
 
         if (cancelled || !canvasRef.current) return;
@@ -128,12 +134,18 @@ export default function CertificateVerifyPage() {
     if (!data) return;
     setDownloading(true);
     try {
+      const isCancer =
+        (data.event || "").toLowerCase().includes("cancer") ||
+        certificateNumber.toLowerCase().includes("ncad") ||
+        certificateNumber.toLowerCase().includes("cancer");
+
       let canvas = canvasRef.current;
       if (!canvas || !canvasReady) {
         canvas = await renderCertCanvas({
           runnerName: data.runnerName,
           distance: data.distance,
-          dateStr: "31  /  10  /  2026",
+          dateStr: isCancer ? "15 Nov 2026" : "31  /  10  /  2026",
+          isCancerEvent: isCancer,
         });
       }
       const safeName = data.runnerName.replace(/[^a-zA-Z0-9]/g, "_");
