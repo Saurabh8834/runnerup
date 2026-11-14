@@ -137,6 +137,7 @@ export function parseKmNumber(distStr: string): number {
 
 export function getEventBibPrefix(eventSlug: string, eventTitle = ""): string {
   const s = eventSlug.toLowerCase();
+  if (s.includes("kinetic") || s.includes("krun")) return "KRUN";
   if (s.includes("cancer")) return "NCAD";
   if (s.includes("air-force") || s.includes("iaf")) return "IAF";
   if (s.includes("monsoon") || s.includes("mountain")) return "MMM";

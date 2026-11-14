@@ -24,20 +24,22 @@ type HomeHeroProps = {
 
 export function HomeHero({ featuredEvent }: HomeHeroProps) {
   const router = useRouter();
-  const isEventOpen = Boolean(featuredEvent && featuredEvent.status === "upcoming");
-  const [vaultTab, setVaultTab] = useState<"current" | "hallOfFame">("current");
-  const [nextMedalSide, setNextMedalSide] = useState<"front" | "back">("front");
+  const [vaultTab, setVaultTab] = useState<"current" | "kinetic" | "hallOfFame">("current");
+  const [cancerMedalSide, setCancerMedalSide] = useState<"front" | "back">("front");
+  const [kineticMedalSide, setKineticMedalSide] = useState<"front" | "back">("front");
   const [iafMedalSide, setIafMedalSide] = useState<"front" | "back">("front");
 
-  const eventSlug = featuredEvent?.slug || "national-cancer-awareness-day-virtual-run-2026";
-  const medalImages = getEventMedalImages(eventSlug);
-  const front4k = featuredEvent?.medalImageUrl || medalImages.front;
-  const back4k = medalImages.back;
+  // Tab 1: Current Live Challenge (Cancer Awareness, live till 17 Nov)
+  const cancerTitle = "National Cancer Awareness Day Virtual Challenge 2026";
+  const cancerSlug = "national-cancer-awareness-day-virtual-run-2026";
+  const cancerDistances = "1.5K • 3K • 5K • 10K • 21K Half Marathon";
+  const cancerImages = getEventMedalImages(cancerSlug);
 
-  const currentTitle = featuredEvent?.name || "National Cancer Awareness Day Virtual Challenge 2026";
-  const currentSlug = featuredEvent?.slug || "national-cancer-awareness-day-virtual-run-2026";
-  const currentDistances = featuredEvent?.distance || "1.5K • 3K • 5K • 10K • 21K Half Marathon";
-  const currentMedalImg = nextMedalSide === "front" ? front4k : back4k;
+  // Tab 2: Next Upcoming Challenge (Kinetic Run, 10–15 Dec)
+  const kineticTitle = "Kinetic Run Virtual Challenge 2026";
+  const kineticSlug = "kinetic-run-virtual-challenge-2026";
+  const kineticDistances = "1.5K • 3K • 5K • 10K • 21K Half Marathon";
+  const kineticImages = getEventMedalImages(kineticSlug);
 
   const handleTrophyCardClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
@@ -45,7 +47,9 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
       return;
     }
     if (vaultTab === "current") {
-      router.push(`/events/${currentSlug}`);
+      router.push(`/events/${cancerSlug}`);
+    } else if (vaultTab === "kinetic") {
+      router.push(`/events/${kineticSlug}`);
     } else {
       router.push("/leaderboard");
     }
@@ -214,45 +218,59 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                 <button
                   type="button"
                   onClick={() => setVaultTab("current")}
-                  className={`flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${vaultTab === "current"
-                      ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-sm"
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
+                    vaultTab === "current"
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
                       : "text-slate-400 hover:text-white"
-                    }`}
+                  }`}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>{isEventOpen ? "Live Challenge" : "Next Trophy"}</span>
+                  <span>🎗️ Live Event</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setVaultTab("kinetic")}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
+                    vaultTab === "kinetic"
+                      ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <span>⚡ Next Trophy</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setVaultTab("hallOfFame")}
-                  className={`flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${vaultTab === "hallOfFame"
-                      ? "bg-gradient-to-r from-[#ff4b26] to-[#ff7844] text-white shadow-sm"
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
+                    vaultTab === "hallOfFame"
+                      ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-sm"
                       : "text-slate-400 hover:text-white"
-                    }`}
+                  }`}
                 >
                   <Trophy className="h-3 w-3 text-amber-400" />
                   <span>Hall of Fame</span>
                 </button>
               </div>
 
-              {/* TAB 1: CURRENT / ACTIVE CHALLENGE (DYNAMIC FROM DATABASE) */}
+              {/* TAB 1: CURRENT LIVE CHALLENGE (CANCER AWARENESS - RUNNING TILL 17 NOV) */}
               {vaultTab === "current" ? (
                 <>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2.5 h-6">
                     <span className="flex items-center gap-1.5 text-emerald-400">
                       <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>Live Challenge Trophy</span>
+                      <span>Live Event · Till 17 Nov</span>
                     </span>
-                    <span className="text-orange-400 font-mono text-[11px] bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full">
+                    <span className="text-purple-400 font-mono text-[11px] bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
                       100% Solid Metal
                     </span>
                   </div>
 
                   <div className="relative overflow-hidden rounded-2xl bg-black/60 p-4 pb-12 border border-white/10 flex items-center justify-center h-[310px]">
-                    {/* Subtle Glow */}
+                    {/* Subtle Purple Glow */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-                      <div className={`h-52 w-52 rounded-full ${nextMedalSide === "front" ? "bg-amber-500/20" : "bg-purple-600/25"} blur-3xl transition-colors duration-500`} />
+                      <div className="h-52 w-52 rounded-full bg-purple-600/25 blur-3xl transition-colors duration-500" />
                     </div>
 
                     {/* 3D Flip Container */}
@@ -263,7 +281,7 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                       <div
                         style={{
                           transformStyle: "preserve-3d",
-                          transform: nextMedalSide === "back" ? "rotateY(180deg)" : "rotateY(0deg)",
+                          transform: cancerMedalSide === "back" ? "rotateY(180deg)" : "rotateY(0deg)",
                           transition: "transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1)",
                         }}
                         className="relative w-full h-full flex items-center justify-center"
@@ -275,8 +293,111 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={front4k}
-                            alt="Upcoming Finisher Medal - Front"
+                            src={cancerImages.front}
+                            alt="Cancer Awareness Finisher Medal - Front"
+                            fetchPriority="high"
+                            loading="eager"
+                            decoding="async"
+                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(168,85,247,0.45)] select-none scale-[1.04] transition-transform duration-300"
+                          />
+                        </div>
+
+                        {/* Back Face */}
+                        <div
+                          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                          className="absolute inset-0 flex items-center justify-center p-1"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={cancerImages.back}
+                            alt="Cancer Awareness Finisher Medal - Back"
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(168,85,247,0.45)] select-none scale-[1.04] transition-transform duration-300"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating Toggle */}
+                    <div data-prevent-card-nav className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => setCancerMedalSide("front")}
+                        className={`rounded-full px-4 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                          cancerMedalSide === "front"
+                            ? "bg-purple-600 text-white shadow-md"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        Front
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCancerMedalSide("back")}
+                        className={`rounded-full px-4 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                          cancerMedalSide === "back"
+                            ? "bg-indigo-600 text-white shadow-md"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        Back
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="mt-3.5 space-y-1 h-12 flex flex-col justify-center">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-black text-white truncate">{cancerTitle}</h4>
+                      <span className="text-xs font-black text-amber-400 shrink-0">₹499</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="truncate">{cancerDistances}</span>
+                      <span className="text-[10px] font-bold text-emerald-400 shrink-0">Open till 17 Nov</span>
+                    </div>
+                  </div>
+                </>
+              ) : vaultTab === "kinetic" ? (
+                /* TAB 2: NEXT CHALLENGE PREVIEW (KINETIC RUN 2026 - 10-15 DEC) */
+                <>
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2.5 h-6">
+                    <span className="flex items-center gap-1.5 text-amber-400">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span>Next Trophy · 10–15 Dec</span>
+                    </span>
+                    <span className="text-orange-400 font-mono text-[11px] bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full">
+                      3D Sculpted Wings
+                    </span>
+                  </div>
+
+                  <div className="relative overflow-hidden rounded-2xl bg-black/60 p-4 pb-12 border border-white/10 flex items-center justify-center h-[310px]">
+                    {/* Fiery Athletic Glow */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+                      <div className="h-52 w-52 rounded-full bg-orange-600/25 blur-3xl transition-colors duration-500" />
+                    </div>
+
+                    {/* 3D Flip Container */}
+                    <div
+                      style={{ perspective: "1000px" }}
+                      className="relative z-10 w-full h-68 flex items-center justify-center select-none"
+                    >
+                      <div
+                        style={{
+                          transformStyle: "preserve-3d",
+                          transform: kineticMedalSide === "back" ? "rotateY(180deg)" : "rotateY(0deg)",
+                          transition: "transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1)",
+                        }}
+                        className="relative w-full h-full flex items-center justify-center"
+                      >
+                        {/* Front Face */}
+                        <div
+                          style={{ backfaceVisibility: "hidden" }}
+                          className="absolute inset-0 flex items-center justify-center p-1"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={kineticImages.front}
+                            alt="Kinetic Run Finisher Medal - Front"
                             fetchPriority="high"
                             loading="eager"
                             decoding="async"
@@ -291,24 +412,24 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={back4k}
-                            alt="Upcoming Finisher Medal - Back"
+                            src={kineticImages.back}
+                            alt="Kinetic Run Finisher Medal - Back"
                             loading="lazy"
                             decoding="async"
-                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(168,85,247,0.45)] select-none scale-[1.04] transition-transform duration-300"
+                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(255,100,50,0.45)] select-none scale-[1.04] transition-transform duration-300"
                           />
                         </div>
                       </div>
                     </div>
 
-                    {/* Clean Floating Centered Pill Toggle */}
+                    {/* Floating Toggle */}
                     <div data-prevent-card-nav className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 rounded-full border border-white/20 bg-black/85 backdrop-blur-md p-1 shadow-xl whitespace-nowrap">
                       <button
                         type="button"
-                        onClick={() => setNextMedalSide("front")}
+                        onClick={() => setKineticMedalSide("front")}
                         className={`rounded-full px-4 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                          nextMedalSide === "front"
-                            ? "bg-[#e64833] text-white shadow-md"
+                          kineticMedalSide === "front"
+                            ? "bg-[#ff4b26] text-white shadow-md"
                             : "text-slate-400 hover:text-white"
                         }`}
                       >
@@ -316,10 +437,10 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setNextMedalSide("back")}
+                        onClick={() => setKineticMedalSide("back")}
                         className={`rounded-full px-4 py-1 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                          nextMedalSide === "back"
-                            ? "bg-purple-600 text-white shadow-md"
+                          kineticMedalSide === "back"
+                            ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md"
                             : "text-slate-400 hover:text-white"
                         }`}
                       >
@@ -329,12 +450,18 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                   </div>
 
                   <div className="mt-3.5 space-y-1 h-12 flex flex-col justify-center">
-                    <h4 className="text-sm font-black text-white truncate">{currentTitle}</h4>
-                    <p className="text-xs text-slate-400 truncate">Distances: {currentDistances}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-black text-white truncate">{kineticTitle}</h4>
+                      <span className="text-xs font-black text-amber-400 shrink-0">₹499</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="truncate">{kineticDistances}</span>
+                      <span className="text-[10px] font-bold text-amber-400 shrink-0">Early Bird Open</span>
+                    </div>
                   </div>
                 </>
               ) : (
-                /* TAB 2: HALL OF FAME / DELIVERED FINISHER PROOF (IAF DAY 2026) */
+                /* TAB 3: HALL OF FAME / DELIVERED FINISHER PROOF (IAF DAY 2026) */
                 <>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2.5 h-6">
                     <span className="flex items-center gap-1.5 text-amber-400">
@@ -435,12 +562,23 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
             {/* Bottom Link (Uniform Height & Alignment) */}
             {vaultTab === "current" ? (
               <Link
-                href={`/events/${currentSlug}`}
+                href={`/events/${cancerSlug}`}
                 className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs h-9 group/link"
               >
                 <span className="text-slate-400">Guaranteed Pan-India Finisher Kit</span>
+                <span className="text-purple-400 font-bold group-hover/link:translate-x-0.5 transition-transform flex items-center gap-1">
+                  <span>Register for Live Challenge</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </Link>
+            ) : vaultTab === "kinetic" ? (
+              <Link
+                href={`/events/${kineticSlug}`}
+                className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs h-9 group/link"
+              >
+                <span className="text-slate-400">Limited Edition 3D Metal Medal</span>
                 <span className="text-[#ff4b26] font-bold group-hover/link:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>View Challenge Details</span>
+                  <span>View Kinetic Challenge</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>

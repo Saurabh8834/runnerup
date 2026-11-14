@@ -35,5 +35,9 @@
     "typescript": "^5.9.2",
     "xlsx": "^0.18.5",
     "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6",
+    "qrcode": "^1.5.4"
   }
 }

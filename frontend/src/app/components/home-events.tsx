@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { PublicEvent } from "../data/events";
-import { publicEvents as staticUpcoming, cancerAwarenessEvent } from "../data/events";
+import { publicEvents as staticUpcoming, cancerAwarenessEvent, kineticRunEvent } from "../data/events";
 
 // Deterministic realistic slot scarcity calculation based on event slug & date
 function getEventScarcity(slug: string, isClosed?: boolean) {
@@ -36,6 +36,10 @@ function getEventScarcity(slug: string, isClosed?: boolean) {
 }
 
 function EventCard({ event, index }: { event: PublicEvent; index: number }) {
+  const isKineticRun =
+    event.slug.includes("kinetic") ||
+    event.name.toLowerCase().includes("kinetic");
+
   const isAirForce =
     event.slug.includes("air-force") ||
     event.name.toLowerCase().includes("air force");
@@ -44,9 +48,10 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
     event.slug.includes("cancer") ||
     event.name.toLowerCase().includes("cancer");
 
-  const isMedalCard = isAirForce || isCancerAwareness;
+  const isMedalCard = isAirForce || isCancerAwareness || isKineticRun;
 
   const resolvePoster = (slug: string, bannerUrl?: string) => {
+    if (isKineticRun) return "/images/kinetic-run-medal-front.webp";
     if (isCancerAwareness) return "/images/cancer-awareness-medal-front-card.webp";
     if (isAirForce) return "/images/iaf-medal-front-card.webp";
     if (bannerUrl && !bannerUrl.includes("res.cloudinary.com") && !bannerUrl.endsWith("-4k.png")) return bannerUrl;
@@ -57,13 +62,13 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
-  const isClosed = !isCancerAwareness && (event.status === "closed" || event.status === "past" || isAirForce);
+  const isClosed = !isCancerAwareness && !isKineticRun && (event.status === "closed" || event.status === "past" || isAirForce);
   const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
 
   useEffect(() => {
     setImgSrc(resolvePoster(event.slug, event.bannerImageUrl));
     setImgFailed(false);
-  }, [event.bannerImageUrl, event.slug, isAirForce, isCancerAwareness]);
+  }, [event.bannerImageUrl, event.slug, isAirForce, isCancerAwareness, isKineticRun]);
 
   const router = useRouter();
 
@@ -115,7 +120,9 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
                 onError={() => {
-                  if (isCancerAwareness) {
+                  if (isKineticRun) {
+                    setImgSrc("/images/kinetic-run-medal-front.png");
+                  } else if (isCancerAwareness) {
                     setImgSrc("/images/cancer-awareness-medal-front-card.webp");
                   } else {
                     setImgSrc("/images/iaf-medal-front-card.webp");
@@ -164,7 +171,16 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
         {/* Top Badges */}
         <div className="absolute top-0 inset-x-0 z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 pointer-events-none">
-          {isCancerAwareness ? (
+          {isKineticRun ? (
+            <>
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-amber-500/50 bg-[#1e1308]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-amber-300 shadow-md shrink-0">
+                <span>⚡ Kinetic Run</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-emerald-300 shadow-md shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live &amp; Open
+              </span>
+            </>
+          ) : isCancerAwareness ? (
             <>
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
                 <span>🎗️ Cancer Awareness</span>
@@ -354,18 +370,32 @@ export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
   const combined = useMemo(() => {
     const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [];
 
+    // Ensure Cancer Awareness is present as the active live event (running till 17 Nov)
+    if (!list.some((ev) => ev.slug.includes("cancer"))) {
+      list.unshift(cancerAwarenessEvent);
+    }
+
+    // Ensure Kinetic Run is present as the upcoming 10–15 Dec event
+    if (!list.some((ev) => ev.slug.includes("kinetic"))) {
+      list.push(kineticRunEvent);
+    }
+
     // Always include the IAF challenge in the card list
     if (!list.some((ev) => ev.slug.includes("air-force"))) {
       const iaf = staticUpcoming.find((s) => s.slug.includes("air-force"));
       if (iaf) list.push(iaf);
     }
 
-    // Deduplicate permanently by slug, canonical IAF event key, and normalized name
+    // Deduplicate permanently by slug, canonical event key, and normalized name
     const seenKeys = new Set<string>();
     const seenNames = new Set<string>();
     const deduplicated: PublicEvent[] = [];
 
     for (const ev of list) {
+      const isKinetic =
+        ev.slug.includes("kinetic") ||
+        (ev.name && ev.name.toLowerCase().includes("kinetic"));
+
       const isAirForce =
         ev.slug.includes("air-force") ||
         ev.slug.includes("airforce") ||
@@ -376,7 +406,13 @@ export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
         ev.slug.includes("cancer") ||
         (ev.name && ev.name.toLowerCase().includes("cancer"));
 
-      const key = isAirForce ? "canonical-iaf-event" : isCancer ? "canonical-cancer-event" : ev.slug;
+      const key = isKinetic
+        ? "canonical-kinetic-event"
+        : isAirForce
+        ? "canonical-iaf-event"
+        : isCancer
+        ? "canonical-cancer-event"
+        : ev.slug;
       const nameKey = ev.name ? ev.name.toLowerCase().trim().replace(/\s+/g, " ") : key;
       if (seenKeys.has(key) || seenNames.has(nameKey)) continue;
       seenKeys.add(key);
@@ -384,6 +420,7 @@ export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
 
       const match =
         staticUpcoming.find((s) => s.slug === ev.slug) ||
+        (isKinetic ? kineticRunEvent : undefined) ||
         (isAirForce ? staticUpcoming.find((s) => s.slug.includes("air-force")) : undefined) ||
         (isCancer ? cancerAwarenessEvent : undefined);
 

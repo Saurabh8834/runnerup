@@ -35,6 +35,7 @@ import { PremiumTrustedBrandsCard } from "./payment-badges";
 import { authHeaders, getApiUrl, readApiError, resilientFetch } from "../../lib/api";
 import { cn } from "../../lib/cn";
 import { INDIAN_STATES, normalizeIndianState } from "../../lib/indian-states";
+import { ScratchRevealCard } from "../components/scratch-reveal-card";
 import {
   asString,
   type FieldErrors,
@@ -89,6 +90,14 @@ const TSHIRT_SIZES = [
 ];
 
 const fallbackEvents: RegisterEventOption[] = [
+  {
+    label: "Kinetic Run Virtual Challenge 2026",
+    value: "kinetic-run-virtual-challenge-2026",
+    amount: "₹499",
+    priceInPaise: 49900,
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+    activityTypes: ["running", "cycling", "walking"],
+  },
   {
     label: "National Cancer Awareness Day Virtual Challenge 2026",
     value: "national-cancer-awareness-day-virtual-run-2026",
@@ -448,12 +457,17 @@ function PaymentRegistrationFormInner() {
           });
 
         if (cancelled) return;
-        const hasCancerEvent = open.some((e) => e.value.includes("cancer"));
-        const combined = hasCancerEvent ? open : [fallbackEvents[0], ...open];
+        const hasKineticEvent = open.some((e) => e.value.includes("kinetic"));
+        const combined = hasKineticEvent ? open : [fallbackEvents[0], ...open];
         setEvents(combined);
         setSelectedEvent((prev) => {
           if (eventFromQuery && !eventFromQuery.includes("air-force") && !eventFromQuery.includes("airforce")) {
-            const matched = combined.find((e) => e.value === eventFromQuery || (eventFromQuery.includes("cancer") && e.value.includes("cancer")));
+            const matched = combined.find(
+              (e) =>
+                e.value === eventFromQuery ||
+                (eventFromQuery.includes("kinetic") && e.value.includes("kinetic")) ||
+                (eventFromQuery.includes("cancer") && e.value.includes("cancer")),
+            );
             return matched ? matched.value : combined[0].value;
           }
           return combined.some((e) => e.value === prev) ? prev : combined[0].value;
@@ -1106,45 +1120,33 @@ function PaymentRegistrationFormInner() {
       {/* ── SUCCESS MODAL OVERLAY ────────────────────────── */}
       {status === "paid" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-lg rounded-3xl border border-emerald-500/30 bg-[#0d141d] p-6 sm:p-8 shadow-2xl text-center space-y-5">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
-              <Check className="h-8 w-8 stroke-[3]" />
+          <div className="relative w-full max-w-lg rounded-3xl border border-emerald-500/30 bg-[#0d141d] p-6 sm:p-8 shadow-2xl text-center space-y-4 max-h-[95vh] overflow-y-auto">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+              <Check className="h-7 w-7 stroke-[3]" />
             </div>
 
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300 uppercase tracking-wider">
-                ✓ Official Race Bib Confirmed
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-0.5 text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                ✓ Registration &amp; Slot Confirmed
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
                 You&apos;re Officially Registered!
               </h2>
-              <p className="text-sm text-slate-300 max-w-sm mx-auto">
-                Welcome to <strong className="text-white">{activeEvent.label}</strong>. Your slot and solid metal finisher medal are reserved.
+              <p className="text-xs sm:text-sm text-slate-300 max-w-sm mx-auto">
+                Welcome to <strong className="text-white">{activeEvent.label}</strong>. Scratch below to reveal your official Race Bib &amp; lucky perks!
               </p>
             </div>
 
-            {/* Official Digital Race Bib Card */}
-            <div className="mx-auto max-w-xs rounded-2xl border-2 border-dashed border-amber-400/40 bg-gradient-to-b from-[#172c34] to-[#0f1f25] p-5 shadow-xl relative overflow-hidden">
-              <div className="absolute top-2 right-2 text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded">
-                OFFICIAL BIB
-              </div>
-              <p className="text-[10px] font-mono tracking-widest uppercase text-slate-400 text-left">
-                RUNNERUP VIRTUAL RUN
-              </p>
-              <div className="my-2 text-3xl font-black font-mono tracking-wider text-amber-400">
-                {confirmedBib || previewBibNumber}
-              </div>
-              <div className="flex items-center justify-between border-t border-white/10 pt-2 text-xs text-left">
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase">Athlete</span>
-                  <span className="font-bold text-white break-words">{runnerName || defaultName || "Athlete"}</span>
-                  {username && <span className="text-[10px] text-amber-400 font-mono block">@{username}</span>}
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block uppercase">Category</span>
-                  <span className="font-bold text-emerald-400">{selectedDistance}</span>
-                </div>
-              </div>
+            {/* Interactive Scratch to Reveal Card */}
+            <div className="py-1">
+              <ScratchRevealCard
+                bibNumber={confirmedBib || previewBibNumber}
+                runnerName={runnerName || defaultName || "Athlete"}
+                category={`${selectedDistance} • ${selectedActivity}`}
+                eventTitle={activeEvent.label}
+                luckyPerk="⚡ Wave 1 Priority Seed · VIP Leaderboard Flame Badge Unlocked!"
+                accentColor={(activeEvent.value || "").includes("kinetic") ? "orange" : "purple"}
+              />
             </div>
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">

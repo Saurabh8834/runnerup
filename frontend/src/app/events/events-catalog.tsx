@@ -92,6 +92,10 @@ const FALLBACK_EVENT_IMAGES: Record<string, string> = {
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
+  const isKineticRun =
+    event.slug.includes("kinetic") ||
+    event.name.toLowerCase().includes("kinetic");
+
   const isAirForce =
     event.slug.includes("air-force") ||
     event.name.toLowerCase().includes("air force");
@@ -100,34 +104,38 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
     event.slug.includes("cancer") ||
     event.name.toLowerCase().includes("cancer");
 
-  const isMedalCard = isAirForce || isCancerAwareness;
+  const isMedalCard = isAirForce || isCancerAwareness || isKineticRun;
 
   const defaultPoster =
-    (isCancerAwareness
-      ? "/images/cancer-awareness-medal-front-card.webp"
-      : isAirForce
-        ? "/images/iaf-medal-front-card.webp"
-        : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
-          ? event.bannerImageUrl
-          : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
-  const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
-  const [imgFailed, setImgFailed] = useState(false);
-  const hasBannerImage = Boolean(imgSrc) && !imgFailed;
-  const isClosed = !isCancerAwareness && (event.status === "closed" || event.status === "past" || isAirForce);
-  const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
-
-  useEffect(() => {
-    const nextPoster =
-      (isCancerAwareness
+    (isKineticRun
+      ? "/images/kinetic-run-medal-front.webp"
+      : isCancerAwareness
         ? "/images/cancer-awareness-medal-front-card.webp"
         : isAirForce
           ? "/images/iaf-medal-front-card.webp"
           : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
             ? event.bannerImageUrl
             : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
+  const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
+  const [imgFailed, setImgFailed] = useState(false);
+  const hasBannerImage = Boolean(imgSrc) && !imgFailed;
+  const isClosed = !isCancerAwareness && !isKineticRun && (event.status === "closed" || event.status === "past" || isAirForce);
+  const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
+
+  useEffect(() => {
+    const nextPoster =
+      (isKineticRun
+        ? "/images/kinetic-run-medal-front.webp"
+        : isCancerAwareness
+          ? "/images/cancer-awareness-medal-front-card.webp"
+          : isAirForce
+            ? "/images/iaf-medal-front-card.webp"
+            : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
+              ? event.bannerImageUrl
+              : FALLBACK_EVENT_IMAGES[event.slug]) || `/events/${event.slug}.webp`;
     setImgSrc(nextPoster);
     setImgFailed(false);
-  }, [event.bannerImageUrl, event.slug, isAirForce, isCancerAwareness]);
+  }, [event.bannerImageUrl, event.slug, isAirForce, isCancerAwareness, isKineticRun]);
 
   const router = useRouter();
 
@@ -179,7 +187,9 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
                 onError={() => {
-                  if (isCancerAwareness) {
+                  if (isKineticRun) {
+                    setImgSrc("/images/kinetic-run-medal-front.png");
+                  } else if (isCancerAwareness) {
                     setImgSrc("/images/cancer-awareness-medal-front-card.webp");
                   } else {
                     setImgSrc("/images/iaf-medal-front-card.webp");
@@ -229,7 +239,16 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
 
         {/* Top Badges */}
         <div className="absolute top-0 inset-x-0 z-10 p-3 sm:p-4 flex items-start justify-between gap-1.5 sm:gap-2 pointer-events-none">
-          {isCancerAwareness ? (
+          {isKineticRun ? (
+            <>
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-amber-500/50 bg-[#1e1308]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-amber-300 shadow-md shrink-0">
+                <span>⚡ Kinetic Run</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-emerald-300 shadow-md shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live &amp; Open
+              </span>
+            </>
+          ) : isCancerAwareness ? (
             <>
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-black/80 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
                 <span>Cancer Awareness</span>
@@ -300,7 +319,15 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         )}
 
         {/* Pricing & Early-Bird Status Badge (Replaces Scarcity Bar per User Request) */}
-        {isCancerAwareness ? (
+        {isKineticRun ? (
+          <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
+            <span className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+              <span>Limited Edition 3D Metal Medal</span>
+            </span>
+            <span className="font-mono text-emerald-400 font-extrabold">Official Finisher Kit</span>
+          </div>
+        ) : isCancerAwareness ? (
           <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
             <span className="flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />

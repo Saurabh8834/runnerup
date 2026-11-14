@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PageShell } from "../../components/app-shell";
 import { getApiUrl, readApiError, resilientFetch } from "../../../lib/api";
@@ -14,6 +14,7 @@ import {
   Share2,
   CheckCircle2,
   Award,
+  Lock,
 } from "lucide-react";
 import { renderBibCanvas, triggerCanvasDownload } from "../../../lib/asset-canvas";
 import { sendDownloadTelemetry } from "../../../lib/track-download";
@@ -31,6 +32,7 @@ type BibData = {
 
 export default function DigitalBibPage() {
   const params = useParams<{ bibNumber: string }>();
+  const searchParams = useSearchParams();
   const rawBib = decodeURIComponent(params.bibNumber ?? "");
   const bibNumber = rawBib.trim();
 
@@ -40,6 +42,26 @@ export default function DigitalBibPage() {
   const [downloading, setDownloading] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const isKinetic =
+    bibNumber.toUpperCase().startsWith("KRUN") ||
+    bibNumber.toUpperCase().startsWith("KRVC") ||
+    (data?.eventTitle || "").toLowerCase().includes("kinetic");
+
+  const isCancer =
+    !isKinetic &&
+    (bibNumber.toUpperCase().startsWith("NCAD") ||
+      (data?.eventTitle || "").toLowerCase().includes("cancer"));
+
+  const isIaf = !isKinetic && !isCancer;
+
+  const isAdminDemo =
+    bibNumber.includes("1999") ||
+    (data?.runnerName || "").toUpperCase().includes("SAURABH") ||
+    searchParams.get("admin") === "true";
+
+  const isLocked = !isIaf && !isAdminDemo;
+  const unlockDateStr = isKinetic ? "15 December 2026" : "17 November 2026";
 
   useEffect(() => {
     if (!bibNumber) return;
@@ -100,11 +122,19 @@ export default function DigitalBibPage() {
             runnerName: runnerNameUpper,
             bibNumber: payload.runner?.bibNumber || bibNumber,
             distance: distStr,
-            eventTitle: payload.event?.title || (bibNumber.startsWith("NCAD") ? "National Cancer Awareness Day Virtual Challenge 2026" : "Indian Air Force Day Virtual Challenge 2026"),
+            eventTitle:
+              payload.event?.title ||
+              (bibNumber.toUpperCase().startsWith("NCAD")
+                ? "National Cancer Awareness Day Virtual Challenge 2026"
+                : bibNumber.toUpperCase().startsWith("KRUN") || bibNumber.toUpperCase().startsWith("KRVC")
+                  ? "Kinetic Run Virtual Challenge 2026"
+                  : "Indian Air Force Day Virtual Challenge 2026"),
             rankNumber: positionStr,
-            certificateNumber: bibNumber.startsWith("NCAD")
+            certificateNumber: bibNumber.toUpperCase().startsWith("NCAD")
               ? `CERT-NCAD-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
-              : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
+              : bibNumber.toUpperCase().startsWith("KRUN") || bibNumber.toUpperCase().startsWith("KRVC")
+                ? `CERT-KRUN-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
+                : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
             isPaid: true,
           });
         }
@@ -130,17 +160,28 @@ export default function DigitalBibPage() {
 
     async function draw() {
       try {
+        const isCancer =
+          bibNumber.toUpperCase().startsWith("NCAD") ||
+          (data?.eventTitle || "").toLowerCase().includes("cancer");
+
+        const isKinetic =
+          bibNumber.toUpperCase().startsWith("KRUN") ||
+          bibNumber.toUpperCase().startsWith("KRVC") ||
+          (data?.eventTitle || "").toLowerCase().includes("kinetic");
+
         const generatedCanvas = await renderBibCanvas({
           runnerName: data?.runnerName || "RUNNER",
           distance: data?.distance || "5 KM",
           positionStr: data?.bibNumber || "1001",
+          isCancerEvent: isCancer,
+          isKineticEvent: isKinetic,
         });
 
         if (cancelled || !canvasRef.current) return;
 
         const targetCanvas = canvasRef.current;
         targetCanvas.width = 1024;
-        targetCanvas.height = 682;
+        targetCanvas.height = isCancer ? 686 : isKinetic ? 686 : 682;
         const ctx = targetCanvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(generatedCanvas, 0, 0);
@@ -227,8 +268,53 @@ export default function DigitalBibPage() {
             </div>
           )}
 
-          {/* ══════ ACTIVE OFFICIAL DIGITAL BIB VIEW ══════ */}
-          {data && (
+          {/* ══════ LOCKED STATE: CHALLENGE IN PROGRESS ══════ */}
+          {data && isLocked ? (
+            <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-black/60 p-8 sm:p-12 text-center shadow-2xl space-y-6 backdrop-blur-xl">
+              <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-lg">
+                <Lock className="h-8 w-8" />
+              </div>
+
+              <div className="space-y-2 max-w-lg mx-auto">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-300">
+                  <span>Challenge In Progress · Digital Bib Locked</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                  {data.runnerName}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 font-medium">
+                  {data.eventTitle} · {data.distance} Virtual Run
+                </p>
+                <p className="text-xs text-amber-200/80 font-mono">
+                  Assigned Bib: {data.bibNumber}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-black/40 p-5 max-w-md mx-auto text-left space-y-3">
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  ⏳ <strong>Official Digital Race Bib and E-Certificate unlock automatically after the challenge concludes on {unlockDateStr}.</strong>
+                </p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Your registration is verified and your physical 3D Finisher Medal is reserved. Track and record your run, then submit proof from your Athlete Dashboard during the challenge window.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-[#e64833] px-8 py-3 text-xs sm:text-sm font-black uppercase tracking-wider text-white shadow-lg transition-transform hover:scale-105"
+                >
+                  Go to Athlete Dashboard
+                </Link>
+                <Link
+                  href="/leaderboard"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-6 py-3 text-xs sm:text-sm font-bold text-slate-300 transition-colors"
+                >
+                  View Leaderboard
+                </Link>
+              </div>
+            </div>
+          ) : data && (
             <div className="space-y-6">
               {/* Header Badge */}
               <div className="text-center">

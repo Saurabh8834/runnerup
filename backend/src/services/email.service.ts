@@ -26,69 +26,98 @@ function formatRupees(amountInPaise: number) {
 }
 
 export function buildConfirmationHtml(payload: RegistrationEmailPayload) {
+  const isKinetic =
+    /kinetic/i.test(payload.eventTitle || "") ||
+    /KRUN|KRVC/i.test(payload.bibNumber || "");
   const isExplicitIaf =
     /air.?force/i.test(payload.eventTitle || "") &&
     Boolean(payload.bibNumber) &&
     /^IAF/i.test(payload.bibNumber);
-  const isCancerEvent = !isExplicitIaf;
+  const isCancerEvent = !isExplicitIaf && !isKinetic && /cancer/i.test(payload.eventTitle || "");
 
-  const DARK_GREEN = isCancerEvent ? "#1e293b" : "#1a3a2e";
-  const GOLD = isCancerEvent ? "#f59e0b" : "#c9a227";
+  const DARK_GREEN = isKinetic ? "#090d12" : isCancerEvent ? "#1e293b" : "#1a3a2e";
+  const GOLD = isKinetic ? "#ea580c" : isCancerEvent ? "#f59e0b" : "#c9a227";
   const CREAM = "#fcfaf5";
   const MUTED = "#7a6e5a";
-  const BORDER_COLOR = "#e2d9c2";
+  const BORDER_COLOR = isKinetic ? "#fed7aa" : "#e2d9c2";
 
   const firstName = payload.runnerName.trim().split(" ")[0] || payload.runnerName;
-  const eventTitle = isCancerEvent
-    ? (payload.eventTitle || "National Cancer Awareness Day Virtual Challenge 2026")
-    : (payload.eventTitle || "Indian Air Force Day Virtual Challenge 2026");
-  const eventDates = isCancerEvent
-    ? "7–15 November 2026"
-    : (payload.eventDates || "25–30 October 2026");
+  const eventTitle = isKinetic
+    ? (payload.eventTitle || "Kinetic Run Virtual Challenge 2026")
+    : isCancerEvent
+      ? (payload.eventTitle || "National Cancer Awareness Day Virtual Challenge 2026")
+      : (payload.eventTitle || "Indian Air Force Day Virtual Challenge 2026");
+  const eventDates = isKinetic
+    ? (payload.eventDates || "10–15 December 2026")
+    : isCancerEvent
+      ? (payload.eventDates || "7–17 November 2026")
+      : (payload.eventDates || "25–30 October 2026");
   const activity = payload.activityType || "Running / Walking / Cycling";
   const orderId = payload.orderId || payload.bibNumber;
-  const eventUrl = isCancerEvent
-    ? (payload.eventUrl || "https://www.runnerup.in/events/national-cancer-awareness-day-virtual-run-2026")
-    : (payload.eventUrl || "https://www.runnerup.in/events/indian-air-force-day-virtual-challenge");
+  const eventUrl = isKinetic
+    ? (payload.eventUrl || "https://www.runnerup.in/events/kinetic-run-virtual-challenge-2026")
+    : isCancerEvent
+      ? (payload.eventUrl || "https://www.runnerup.in/events/national-cancer-awareness-day-virtual-run-2026")
+      : (payload.eventUrl || "https://www.runnerup.in/events/indian-air-force-day-virtual-challenge");
 
-  const headerBadge = isCancerEvent
-    ? "🎗️ RUNNER UP · CANCER AWARENESS CHALLENGE"
-    : "🏃 RUNNER UP · VIRTUAL CHALLENGE";
-  const headerTitle = isCancerEvent
-    ? `🎗️ ${eventTitle}`
-    : `🇮🇳 ${eventTitle} ✈️`;
+  const headerBadge = isKinetic
+    ? "⚡ RUNNER UP · KINETIC RUN VIRTUAL CHALLENGE"
+    : isCancerEvent
+      ? "🎗️ RUNNER UP · CANCER AWARENESS CHALLENGE"
+      : "🏃 RUNNER UP · VIRTUAL CHALLENGE";
+  const headerTitle = isKinetic
+    ? `⚡ ${eventTitle}`
+    : isCancerEvent
+      ? `🎗️ ${eventTitle}`
+      : `🇮🇳 ${eventTitle} ✈️`;
 
-  const congratulationsPara = isCancerEvent
-    ? `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
-         Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🎗️
+  const congratulationsPara = isKinetic
+    ? `<p style="margin:0 0 8px;font-size:15px;color:#c2410c;font-weight:700;line-height:1.5;">
+         Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅⚡
        </p>
-       <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
-         We're honoured to have you join us in running, walking, or cycling to raise vital awareness and support cancer survivors across India.
+       <p style="margin:0;font-size:13.5px;color:#431407;line-height:1.6;">
+         Turn your potential into pure momentum! Run, walk, or cycle to conquer your distance and claim your exclusive 3D Sculpted Kinetic Finisher Medal.
        </p>`
-    : `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
-         Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🇮🇳
-       </p>
-       <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
-         We're excited to have you join us in celebrating the courage, commitment, and spirit of our Indian Air Force heroes.
-       </p>`;
+    : isCancerEvent
+      ? `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
+           Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🎗️
+         </p>
+         <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
+           We're honoured to have you join us in running, walking, or cycling to raise vital awareness and support cancer survivors across India.
+         </p>`
+      : `<p style="margin:0 0 8px;font-size:15px;color:#0f5132;font-weight:700;line-height:1.5;">
+           Congratulations! 🎉 Your payment has been received successfully, and your registration for the <strong>${eventTitle}</strong> is confirmed! 🏅🇮🇳
+         </p>
+         <p style="margin:0;font-size:13.5px;color:#1e4620;line-height:1.6;">
+           We're excited to have you join us in celebrating the courage, commitment, and spirit of our Indian Air Force heroes.
+         </p>`;
 
-  const rewardPara = isCancerEvent
-    ? "Once the event concludes (15 Nov) and your activity proof is verified, your authentic 3D Die-Cast Metal Medal with commemorative lanyard will be delivered directly to your doorstep with free pan-India courier."
-    : "Once the event concludes and your activity proof is verified, your applicable finisher kit will be delivered to your doorstep, as per the event terms and conditions.";
+  const rewardPara = isKinetic
+    ? "Once the event concludes (15 Dec) and your activity proof is verified, your exclusive 3D sculpted Kinetic Finisher Medal with premium strap will be delivered directly to your doorstep with free pan-India courier."
+    : isCancerEvent
+      ? "Once the event concludes (17 Nov) and your activity proof is verified, your authentic 3D Die-Cast Metal Medal with commemorative lanyard will be delivered directly to your doorstep with free pan-India courier."
+      : "Once the event concludes and your activity proof is verified, your applicable finisher kit will be delivered to your doorstep, as per the event terms and conditions.";
 
-  const signoffText = isCancerEvent
+  const signoffText = isKinetic
     ? `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
-         Thank you for choosing <strong>RunnerUp.in</strong>. Every kilometer you complete spreads hope and honors the fighters, survivors, and families affected by cancer across our nation. 🎗️
+         Thank you for choosing <strong>RunnerUp.in</strong>. Turn your potential into pure momentum and challenge your limits! ⚡
        </p>
        <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
-         Run with purpose. Run with hope. Make every step count!
+         Ignite Your Momentum. Challenge Your Limits! Make every stride count.
        </p>`
-    : `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
-         Thank you for choosing <strong>RunnerUp.in</strong>. Every step you take is a tribute to the brave hearts who protect our nation. 🇮🇳✈️
-       </p>
-       <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
-         Run with purpose. Honour our heroes. Make every step count!
-       </p>`;
+    : isCancerEvent
+      ? `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
+           Thank you for choosing <strong>RunnerUp.in</strong>. Every kilometer you complete spreads hope and honors the fighters, survivors, and families affected by cancer across our nation. 🎗️
+         </p>
+         <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
+           Run with purpose. Run with hope. Make every step count!
+         </p>`
+      : `<p style="margin:0 0 10px;font-size:13.5px;color:#475569;line-height:1.6;">
+           Thank you for choosing <strong>RunnerUp.in</strong>. Every step you take is a tribute to the brave hearts who protect our nation. 🇮🇳✈️
+         </p>
+         <p style="margin:0 0 14px;font-size:14px;font-weight:800;color:${DARK_GREEN};letter-spacing:0.05em;">
+           Run with purpose. Honour our heroes. Make every step count!
+         </p>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -270,15 +299,22 @@ export async function sendRegistrationConfirmationEmail(
 
   try {
     const from = env.resendFromEmail;
+    const isKinetic =
+      /kinetic/i.test(payload.eventTitle || "") ||
+      /KRUN|KRVC/i.test(payload.bibNumber || "");
     const isExplicitIaf =
       /air.?force/i.test(payload.eventTitle || "") &&
       Boolean(payload.bibNumber) &&
       /^IAF/i.test(payload.bibNumber);
-    const isCancer = !isExplicitIaf;
+    const isCancer = !isExplicitIaf && !isKinetic && /cancer/i.test(payload.eventTitle || "");
 
-    const subject = isCancer
-      ? `Registration Confirmed: National Cancer Awareness Day Challenge — Bib ${payload.bibNumber}`
-      : `Registration Confirmed: Indian Air Force Day Challenge — Bib ${payload.bibNumber}`;
+    const subject = isKinetic
+      ? `Registration Confirmed: Kinetic Run Virtual Challenge 2026 — Bib ${payload.bibNumber} ⚡`
+      : isCancer
+        ? `Registration Confirmed: National Cancer Awareness Day Challenge — Bib ${payload.bibNumber}`
+        : isExplicitIaf
+          ? `Registration Confirmed: Indian Air Force Day Challenge — Bib ${payload.bibNumber}`
+          : `Registration Confirmed: ${payload.eventTitle || "Runner Up Challenge"} — Bib ${payload.bibNumber}`;
 
     const result = await resend.emails.send({
       from,

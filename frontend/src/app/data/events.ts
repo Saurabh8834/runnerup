@@ -40,15 +40,46 @@ export type PublicEvent = {
   registrations?: number;
 };
 
+// Set to true after "JAI MATA DI" to make Kinetic Run live for all users.
+export const IS_KINETIC_RUN_LIVE = true;
+
+export const kineticRunEvent: PublicEvent = {
+  name: "Kinetic Run Virtual Challenge 2026",
+  slug: "kinetic-run-virtual-challenge-2026",
+  date: "10–15 December 2026",
+  distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
+  price: "Rs. 499",
+  description:
+    "Turn your energy into unstoppable momentum. Challenge your limits across India, conquer your distance, and claim your exclusive 3D sculpted Kinetic Finisher Medal.",
+  highlight: "National Virtual Challenge · 10–15 Dec · Limited Edition 3D Winged Kinetic Medal",
+  banner: "Kinetic Run Virtual Challenge",
+  bannerImageUrl: "/images/kinetic-run-medal-front.webp",
+  medalImageUrl: "/images/kinetic-run-medal-front.webp",
+  reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
+  showCouponOnCard: false,
+  status: "upcoming",
+  compareAtPrice: "Rs. 799",
+  activityTypes: ["running", "walking", "cycling"],
+  startsAt: "2026-12-10T00:00:00.000Z",
+  endsAt: "2026-12-15T23:59:59.000Z",
+  benefits: [
+    "Die-Cast Solid Metal Kinetic Finisher Ribbon Medal with 3D Wings",
+    "Official Digital Race Bib with Unique KRUN Number",
+    "100% Free Doorstep Courier Delivery Across India",
+    "Works with Strava, Garmin, Apple & NRC",
+    "Official Verifiable E-Certificate with Instant QR Verification",
+  ],
+};
+
 export const cancerAwarenessEvent: PublicEvent = {
   name: "National Cancer Awareness Day Virtual Challenge 2026",
   slug: "national-cancer-awareness-day-virtual-run-2026",
-  date: "7–15 November 2026",
+  date: "7–17 November 2026",
   distance: "1.5 km / 3 km / 5 km / 10 km / 21 km",
   price: "Rs. 499",
   description:
     "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
-  highlight: "National Virtual Challenge · 7–15 Nov · Limited Edition 3D Metal Medal",
+  highlight: "National Virtual Challenge · Open till 17 Nov · Limited Edition 3D Metal Medal",
   banner: "Cancer Awareness Challenge",
   bannerImageUrl: "/images/cancer-awareness-medal-front-card.webp",
   medalImageUrl: "/images/cancer-awareness-medal-front.webp",
@@ -58,7 +89,7 @@ export const cancerAwarenessEvent: PublicEvent = {
   compareAtPrice: "Rs. 799",
   activityTypes: ["running", "walking", "cycling"],
   startsAt: "2026-11-07T00:00:00.000Z",
-  endsAt: "2026-11-15T23:59:59.000Z",
+  endsAt: "2026-11-17T23:59:59.000Z",
   benefits: [
     "Die-Cast Solid Metal Finisher Ribbon Medal",
     "Official Digital Race Bib with Unique Number",
@@ -70,6 +101,7 @@ export const cancerAwarenessEvent: PublicEvent = {
 
 export const allPublicEvents: PublicEvent[] = [
   cancerAwarenessEvent,
+  kineticRunEvent,
   {
     name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
@@ -263,6 +295,12 @@ export const pastEvents = allPublicEvents.filter((event) => event.status === "pa
 export const upcomingEvents = publicEvents;
 
 export function getEventMedalImages(slug: string): { front: string; back: string } {
+  if (slug.includes("kinetic") || slug.includes("krun")) {
+    return {
+      front: "/images/kinetic-run-medal-front.webp",
+      back: "/images/kinetic-run-medal-back.webp",
+    };
+  }
   if (
     slug.includes("cancer") ||
     slug.includes("national-cancer-awareness-day")
@@ -289,6 +327,9 @@ export function getEventMedalImages(slug: string): { front: string; back: string
 }
 
 export function getEventMedalImage(slug: string): string {
+  if (slug.includes("kinetic") || slug.includes("krun")) {
+    return "/images/kinetic-run-medal-front.webp";
+  }
   if (
     slug.includes("cancer") ||
     slug.includes("national-cancer-awareness-day")
@@ -317,6 +358,13 @@ export function getEventMedalImage(slug: string): string {
 }
 
 export function getEventBySlug(slug: string) {
+  if (
+    slug === "kinetic-run-virtual-challenge-2026" ||
+    slug === "kinetic-run" ||
+    slug.includes("kinetic")
+  ) {
+    return kineticRunEvent;
+  }
   if (
     slug === "indian-air-force-day" ||
     slug === "iaf-2026" ||

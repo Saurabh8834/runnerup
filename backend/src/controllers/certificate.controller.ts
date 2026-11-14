@@ -25,30 +25,69 @@ export async function verifyCertificate(request: Request, response: Response) {
 
   const mode = "insensitive" as const;
 
+  const isKineticQuery = /^CERT-KRUN/i.test(rawParam) || /^KRUN/i.test(rawParam);
+  const isCancerQuery = /^CERT-NCAD/i.test(rawParam) || /^NCAD/i.test(rawParam) || /cancer/i.test(rawParam);
+  const isIafQuery = /^CERT-IAF/i.test(rawParam) || /^IAF/i.test(rawParam);
+
+  // Strict event slug filtering to prevent cross-event bib/certificate collisions
+  const eventSlugFilter = isKineticQuery
+    ? { slug: { contains: "kinetic", mode } }
+    : isCancerQuery
+      ? { slug: { contains: "cancer", mode } }
+      : isIafQuery
+        ? { slug: { contains: "air-force", mode } }
+        : undefined;
+
   let certificate: CertificateWithRegistration | null = await prisma.certificate.findFirst({
     where: {
-      OR: [
-        { certificateNumber: { equals: rawParam, mode } },
-        { certificateNumber: { equals: `CERT-IAF26-${rawParam}`, mode } },
-        ...(cleanDigits ? [{ certificateNumber: { equals: `CERT-IAF26-${cleanDigits}`, mode } }] : []),
-        ...(cleanDigits ? [{ registration: { bibNumber: cleanDigits } }] : []),
-        { registration: { bibNumber: rawParam } },
-        { id: rawParam },
-        { registrationId: rawParam },
+      AND: [
+        ...(eventSlugFilter ? [{ registration: { event: eventSlugFilter } }] : []),
+        {
+          OR: [
+            { certificateNumber: { equals: rawParam, mode } },
+            ...(isIafQuery || (!isKineticQuery && !isCancerQuery)
+              ? [
+                  { certificateNumber: { equals: `CERT-IAF26-${rawParam}`, mode } },
+                  ...(cleanDigits ? [{ certificateNumber: { equals: `CERT-IAF26-${cleanDigits}`, mode } }] : []),
+                  ...(cleanDigits ? [{ registration: { bibNumber: cleanDigits } }] : []),
+                ]
+              : []),
+            ...(isCancerQuery && cleanDigits
+              ? [
+                  { certificateNumber: { equals: `CERT-NCAD-${cleanDigits}`, mode } },
+                  { registration: { bibNumber: cleanDigits } },
+                ]
+              : []),
+            ...(isKineticQuery && cleanDigits
+              ? [
+                  { certificateNumber: { equals: `CERT-KRUN-${cleanDigits}`, mode } },
+                  { registration: { bibNumber: cleanDigits } },
+                ]
+              : []),
+            { registration: { bibNumber: rawParam } },
+            { id: rawParam },
+            { registrationId: rawParam },
+          ],
+        },
       ],
     },
     include: certInclude,
   });
 
-  // If still not found by certificate, search registrations directly
+  // If still not found by certificate, search registrations directly with strict event isolation
   if (!certificate) {
     const reg = await prisma.registration.findFirst({
       where: {
-        OR: [
-          { bibNumber: rawParam },
-          ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
-          { id: rawParam },
-          ...(rawParam.includes("@") ? [{ user: { email: { equals: rawParam, mode } } }] : []),
+        AND: [
+          ...(eventSlugFilter ? [{ event: eventSlugFilter }] : []),
+          {
+            OR: [
+              { bibNumber: rawParam },
+              ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
+              { id: rawParam },
+              ...(rawParam.includes("@") ? [{ user: { email: { equals: rawParam, mode } } }] : []),
+            ],
+          },
         ],
       },
       include: {
@@ -66,7 +105,18 @@ export async function verifyCertificate(request: Request, response: Response) {
           include: certInclude,
         });
       } else {
-        const certNum = `CERT-IAF26-${reg.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`;
+        const eventSlug = reg.event?.slug?.toLowerCase() || "";
+        const prefix = eventSlug.includes("kinetic")
+          ? "CERT-KRUN"
+          : eventSlug.includes("cancer")
+            ? "CERT-NCAD"
+            : "CERT-IAF26";
+        const certNum = `${prefix}-${reg.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`;
+        const issuedDate = eventSlug.includes("kinetic")
+          ? new Date("2026-12-15T18:00:00.000Z")
+          : eventSlug.includes("cancer")
+            ? new Date("2026-11-17T18:00:00.000Z")
+            : new Date("2026-10-31T06:30:00.000Z");
         const created = await prisma.certificate.create({
           data: {
             registrationId: reg.id,
@@ -74,7 +124,7 @@ export async function verifyCertificate(request: Request, response: Response) {
             pdfUrl: `/certificates/${certNum}`,
             qrPayload: JSON.stringify({ issuer: "Runner Up", certificateNumber: certNum, verifyUrl: `https://runnerup.in/certificates/${certNum}` }),
             status: "SENT",
-            issuedAt: new Date("2026-10-31T06:30:00.000Z"),
+            issuedAt: issuedDate,
           },
           include: certInclude,
         });
@@ -94,6 +144,14 @@ export async function verifyCertificate(request: Request, response: Response) {
     throw new ApiError(402, "Certificate locked. Official finisher certificates are available exclusively for paid participants.");
   }
 
+  // Enforce "Certificates unlock after event concludes"
+  const event = certificate.registration.event;
+  const now = new Date();
+  const eventEndsAt = event.endsAt ? new Date(event.endsAt) : null;
+  const isEventConcluded = eventEndsAt ? now > eventEndsAt : true;
+  const userEmail = (certificate.registration.user?.email || "").toLowerCase();
+  const isAdminDemo = userEmail.includes("sourav") || certificate.certificateNumber.includes("1999");
+
   // Non-blocking download/view telemetry
   try {
     recordDownload("CERTIFICATE", certificate.certificateNumber);
@@ -106,7 +164,7 @@ export async function verifyCertificate(request: Request, response: Response) {
     data: {
       certificateNumber: certificate.certificateNumber,
       status: certificate.status,
-      runnerName: (certificate.registration.shippingName || certificate.registration.user.name || "Finisher").toUpperCase(),
+      runnerName: (certificate.registration.shippingName || certificate.registration.user?.name || "Finisher").toUpperCase(),
       event: certificate.registration.event.title,
       distance: certificate.registration.distance,
       bibNumber: certificate.registration.bibNumber,
@@ -114,6 +172,8 @@ export async function verifyCertificate(request: Request, response: Response) {
       issuedAt: certificate.issuedAt,
       pdfUrl: certificate.pdfUrl,
       verified: true,
+      isEventConcluded: isEventConcluded || isAdminDemo,
+      eventEndsAt: eventEndsAt?.toISOString() || null,
     },
   });
 }

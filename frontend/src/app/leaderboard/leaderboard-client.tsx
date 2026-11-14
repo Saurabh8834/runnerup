@@ -645,7 +645,7 @@ export function LeaderboardClient({
               THE FINISHERS&apos; <span className="text-[#ff4b26]">BOARD</span>
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-400 max-w-lg mx-auto font-medium">
-              Chip-verified results &amp; standings across all distance categories · {events.find((e) => e.slug === selectedSlug)?.name || "National Cancer Awareness Day Virtual Challenge 2026"}
+              Chip-verified results &amp; standings across all distance categories · {events.find((e) => e.slug === selectedSlug)?.name || (selectedSlug.includes("kinetic") ? "Kinetic Run Virtual Challenge 2026" : "National Cancer Awareness Day Virtual Challenge 2026")}
             </p>
           </div>
 

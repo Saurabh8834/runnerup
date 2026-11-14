@@ -26,12 +26,41 @@ export type DefaultEvent = {
 
 export const defaultEvents: DefaultEvent[] = [
   {
+    title: "Kinetic Run Virtual Challenge 2026",
+    slug: "kinetic-run-virtual-challenge-2026",
+    description:
+      "Turn your energy into unstoppable momentum. Challenge your limits across India, conquer your distance, and claim your exclusive 3D sculpted Kinetic Finisher Medal.",
+    startsAt: new Date("2026-12-10T00:00:00.000Z"),
+    endsAt: new Date("2026-12-15T23:59:59.000Z"),
+    proofClosesAt: new Date("2026-12-17T23:59:59.000Z"),
+    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+    priceInPaise: 49900, // ₹499
+    status: "OPEN",
+    city: "Virtual (All India)",
+    featured: true,
+    medalIncluded: true,
+    activityTypes: ["running", "cycling", "walking"],
+    bannerImageUrl: "/images/kinetic-run-medal-front.webp",
+    medalImageUrl: "/images/kinetic-run-medal-front.webp",
+    banner: "Kinetic Run Virtual Challenge 2026",
+    reward: "Die-Cast Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
+    highlight: "Run, Walk or Cycle Pan-India · 10–15 Dec 2026",
+    benefits: [
+      "100% Solid Metal Kinetic Finisher Medal Included",
+      "Official Digital Race Bib with Unique Number",
+      "Free Doorstep Delivery Across India",
+      "Works with Strava, Garmin, NRC, Smartwatch",
+      "Official Verifiable E-Certificate",
+      "Live GPS-Verified Leaderboard Ranking",
+    ],
+  },
+  {
     title: "National Cancer Awareness Day Virtual Challenge 2026",
     slug: "national-cancer-awareness-day-virtual-run-2026",
     description:
       "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
     startsAt: new Date("2026-11-07T00:00:00.000Z"),
-    endsAt: new Date("2026-11-15T23:59:59.000Z"),
+    endsAt: new Date("2026-11-17T23:59:59.000Z"),
     proofClosesAt: new Date("2026-11-20T23:59:59.000Z"),
     distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
     priceInPaise: 49900, // ₹499
@@ -44,7 +73,7 @@ export const defaultEvents: DefaultEvent[] = [
     medalImageUrl: "/images/cancer-awareness-medal-front.webp",
     banner: "National Cancer Awareness Day 2026",
     reward: "100% Solid Metal Finisher Medal + Digital Race Bib + E-Certificate",
-    highlight: "Run, Walk or Cycle Pan-India · 7–15 Nov 2026",
+    highlight: "Run, Walk or Cycle Pan-India · 7–17 Nov 2026",
     benefits: [
       "100% Solid Metal Finisher Medal Included",
       "Official Digital Race Bib with Unique Number",

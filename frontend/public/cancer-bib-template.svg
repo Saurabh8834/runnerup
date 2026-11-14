@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 682" width="1024" height="682">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#080410"/>
+      <stop offset="45%" stop-color="#190a2a"/>
+      <stop offset="100%" stop-color="#080410"/>
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#581c87"/>
+      <stop offset="50%" stop-color="#831843"/>
+      <stop offset="100%" stop-color="#581c87"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF5C2"/>
+      <stop offset="40%" stop-color="#F6D365"/>
+      <stop offset="70%" stop-color="#DDA73A"/>
+      <stop offset="100%" stop-color="#9E6B0F"/>
+    </linearGradient>
+    <linearGradient id="ribbonGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F472B6"/>
+      <stop offset="50%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1024" height="682" rx="20" fill="url(#bgGrad)"/>
+  
+  <!-- Subtle Carbon Grid Pattern -->
+  <g opacity="0.05" stroke="#ffffff" stroke-width="1">
+    <path d="M0 50 L1024 50 M0 100 L1024 100 M0 150 L1024 150 M0 200 L1024 200 M0 250 L1024 250 M0 300 L1024 300 M0 350 L1024 350 M0 400 L1024 400 M0 450 L1024 450 M0 500 L1024 500 M0 550 L1024 550 M0 600 L1024 600"/>
+    <path d="M50 0 L50 682 M100 0 L100 682 M150 0 L150 682 M200 0 L200 682 M250 0 L250 682 M300 0 L300 682 M350 0 L350 682 M400 0 L400 682 M450 0 L450 682 M500 0 L500 682 M550 0 L550 682 M600 0 L600 682 M650 0 L650 682 M700 0 L700 682 M750 0 L750 682 M800 0 L800 682 M850 0 L850 682 M900 0 L900 682 M950 0 L950 682"/>
+  </g>
+
+  <!-- Watermark Awareness Ribbon Background -->
+  <path d="M880 180 C840 80 760 60 700 120 C640 180 620 280 660 380 L520 540 C500 560 520 600 550 590 L710 490 C760 540 820 560 880 520 C940 480 960 400 940 320 Z" fill="none" stroke="url(#ribbonGrad)" stroke-width="18" opacity="0.12" stroke-linecap="round"/>
+
+  <!-- Top Header Strip -->
+  <rect x="0" y="0" width="1024" height="96" fill="url(#headerGrad)"/>
+  <line x1="0" y1="96" x2="1024" y2="96" stroke="#ec4899" stroke-width="2" opacity="0.6"/>
+
+  <!-- Top Left: RunnerUp Brand -->
+  <rect x="36" y="24" width="48" height="48" rx="10" fill="#ffffff"/>
+  <text x="60" y="55" font-family="Georgia, serif" font-weight="900" font-size="24" fill="#080410" text-anchor="middle">RU</text>
+  <text x="96" y="44" font-family="Arial, sans-serif" font-weight="900" font-size="16" fill="#ffffff" letter-spacing="3">RUNNERUP</text>
+  <text x="96" y="62" font-family="Arial, sans-serif" font-weight="700" font-size="10" fill="#fbcfe8" letter-spacing="2">OFFICIAL MARATHONS</text>
+
+  <!-- Top Center: Event Title -->
+  <text x="512" y="44" font-family="Georgia, serif" font-weight="700" font-size="18" fill="#FDE047" text-anchor="middle" letter-spacing="2">NATIONAL CANCER AWARENESS DAY</text>
+  <text x="512" y="66" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#E9D5FF" text-anchor="middle" letter-spacing="3">VIRTUAL CHALLENGE 2026 • PAN-INDIA</text>
+
+  <!-- Top Right: Badge -->
+  <rect x="880" y="32" width="108" height="32" rx="6" fill="#ec4899" fill-opacity="0.25" stroke="#f472b6" stroke-width="1.5"/>
+  <text x="934" y="52" font-family="Arial, sans-serif" font-weight="900" font-size="10" fill="#ffffff" text-anchor="middle" letter-spacing="2">DIGITAL BIB</text>
+
+  <!-- 4 Corner Brass Safety Pin Grommets -->
+  <g fill="#0b0f19" stroke="#94a3b8" stroke-width="3">
+    <circle cx="28" cy="28" r="9"/>
+    <circle cx="996" cy="28" r="9"/>
+    <circle cx="28" cy="654" r="9"/>
+    <circle cx="996" cy="654" r="9"/>
+  </g>
+
+  <!-- Distance Category Pill Placeholder -->
+  <rect x="362" y="130" width="300" height="44" rx="22" fill="#581c87" fill-opacity="0.3" stroke="#c084fc" stroke-width="2"/>
+  <text x="512" y="158" font-family="Georgia, serif" font-weight="900" font-size="17" fill="#FDE047" text-anchor="middle" letter-spacing="3">5 KM FITNESS CHALLENGE</text>
+
+  <!-- Center BIB Hero Area (Coordinates: x=512, y=320) -->
+  <text x="512" y="340" font-family="Impact, Arial Black, sans-serif" font-weight="900" font-size="130" fill="#ffffff" text-anchor="middle" letter-spacing="4" filter="url(#glow)">NCAD-1999</text>
+  <text x="512" y="375" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#c084fc" text-anchor="middle" letter-spacing="4">HONORING CANCER WARRIORS &amp; SURVIVORS</text>
+
+  <!-- Athlete Name Banner Box -->
+  <rect x="212" y="440" width="600" height="58" rx="8" fill="#3b0764" fill-opacity="0.8" stroke="#ec4899" stroke-width="2"/>
+  <text x="512" y="477" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle" letter-spacing="3">— SAURABH SINGH —</text>
+
+  <!-- Bottom Navigation Strip -->
+  <rect x="0" y="622" width="1024" height="60" fill="#090d16"/>
+  <line x1="0" y1="622" x2="1024" y2="622" stroke="#334155" stroke-width="1.5"/>
+  <text x="48" y="658" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#94a3b8" letter-spacing="2">DATES: 7–17 NOV 2026   •   VERIFIED ATHLETE</text>
+  <text x="976" y="658" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#c084fc" text-anchor="end" letter-spacing="2">WWW.RUNNERUP.IN</text>
+</svg>

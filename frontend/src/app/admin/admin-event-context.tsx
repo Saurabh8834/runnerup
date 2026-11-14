@@ -20,6 +20,7 @@ interface AdminEventContextValue {
   selectedEventId: string;
   setSelectedEventId: (id: string) => void;
   selectedEvent: EventScopeItem | null;
+  isKinetic: boolean;
   isCancer: boolean;
   isAirForce: boolean;
   isCombined: boolean;
@@ -31,16 +32,31 @@ const STORAGE_KEY = "ru_admin_active_event_id";
 
 export const DEFAULT_REAL_EVENTS: EventScopeItem[] = [
   {
+    id: "kinetic-run-virtual-challenge-2026",
+    title: "Kinetic Run Virtual Challenge 2026",
+    slug: "kinetic-run-virtual-challenge-2026",
+    status: "OPEN",
+    startsAt: "2026-12-10T00:00:00.000Z",
+    endsAt: "2026-12-15T23:59:59.000Z",
+    proofClosesAt: "2026-12-17T23:59:59.000Z",
+  },
+  {
     id: "virtual-cancer-day-2026",
     title: "National Cancer Awareness Day Virtual Challenge 2026",
     slug: "national-cancer-awareness-day-virtual-run-2026",
     status: "OPEN",
+    startsAt: "2026-11-07T00:00:00.000Z",
+    endsAt: "2026-11-17T23:59:59.000Z",
+    proofClosesAt: "2026-11-20T23:59:59.000Z",
   },
   {
     id: "indian-air-force-day-virtual-challenge",
     title: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",
     status: "CLOSED",
+    startsAt: "2026-10-25T00:00:00.000Z",
+    endsAt: "2026-10-30T23:59:59.000Z",
+    proofClosesAt: "2026-11-01T23:59:59.000Z",
   },
 ];
 
@@ -82,13 +98,15 @@ export function AdminEventProvider({ children }: { children: React.ReactNode }) 
         token
       );
       const rawList = res.data || [];
-      // Filter strictly to the 2 real official challenges (dummy seeded events permanently excluded)
+      // Filter strictly to the 3 real official challenges (dummy seeded events permanently excluded)
       const filtered = rawList.filter((ev) => {
         const s = (ev.slug || "").toLowerCase();
         const t = (ev.title || "").toLowerCase();
         return (
+          s.includes("kinetic") ||
           s.includes("cancer") ||
           s.includes("air-force") ||
+          t.includes("kinetic") ||
           t.includes("cancer") ||
           t.includes("air force")
         );
@@ -116,6 +134,16 @@ export function AdminEventProvider({ children }: { children: React.ReactNode }) 
       ) || null
     );
   }, [events, selectedEventId]);
+
+  const isKinetic = useMemo(() => {
+    if (!selectedEventId || selectedEventId === "all") return false;
+    if (selectedEvent) {
+      const s = (selectedEvent.slug || "").toLowerCase();
+      const t = (selectedEvent.title || "").toLowerCase();
+      return s.includes("kinetic") || t.includes("kinetic");
+    }
+    return selectedEventId.toLowerCase().includes("kinetic");
+  }, [selectedEvent, selectedEventId]);
 
   const isCancer = useMemo(() => {
     if (!selectedEventId || selectedEventId === "all") return false;
@@ -148,13 +176,14 @@ export function AdminEventProvider({ children }: { children: React.ReactNode }) 
       selectedEventId,
       setSelectedEventId,
       selectedEvent,
+      isKinetic,
       isCancer,
       isAirForce,
       isCombined,
       loading,
       refreshEvents: loadEvents,
     }),
-    [events, selectedEventId, selectedEvent, isCancer, isAirForce, isCombined, loading]
+    [events, selectedEventId, selectedEvent, isKinetic, isCancer, isAirForce, isCombined, loading]
   );
 
   return (

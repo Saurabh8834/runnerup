@@ -35,6 +35,7 @@ import {
   Settings,
   Download,
   Eye,
+  Smartphone,
 } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -1809,14 +1810,25 @@ export function DashboardClient() {
                           </button>
 
                           {reg.certificate?.certificateNumber && (
-                            <Link
-                              href={`/certificates/${reg.certificate.certificateNumber}`}
-                              className="rounded-full border border-purple-400/50 bg-purple-500/20 hover:bg-purple-500/30 px-4 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-                              title="Preview Official Certificate on-screen"
-                            >
-                              <Eye className="h-3.5 w-3.5" />
-                              <span>Preview</span>
-                            </Link>
+                            <>
+                              <Link
+                                href={`/certificates/${reg.certificate.certificateNumber}`}
+                                className="rounded-full border border-purple-400/50 bg-purple-500/20 hover:bg-purple-500/30 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                                title="Preview Official Certificate on-screen"
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>Preview</span>
+                              </Link>
+
+                              <Link
+                                href={`/certificates/${reg.certificate.certificateNumber}`}
+                                className="rounded-full bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md shadow-pink-500/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                                title="Share Instagram & WhatsApp 9:16 Story"
+                              >
+                                <Smartphone className="h-3.5 w-3.5" />
+                                <span>Story (9:16)</span>
+                              </Link>
+                            </>
                           )}
 
                           <button

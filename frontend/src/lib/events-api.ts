@@ -82,6 +82,10 @@ export function mapApiEventToPublic(
     ["COMPLETED", "CLOSED", "CANCELLED"].includes(event.status);
 
   const title = event.title || (event as any).name || "";
+  const isKineticRun =
+    event.slug.includes("kinetic") ||
+    title.toLowerCase().includes("kinetic");
+
   const isAirForce =
     event.slug.includes("air-force") ||
     title.toLowerCase().includes("air force") ||
@@ -94,6 +98,7 @@ export function mapApiEventToPublic(
 
   const staticMatch =
     allPublicEvents.find((item) => item.slug === event.slug) ||
+    (isKineticRun ? allPublicEvents.find((item) => item.slug.includes("kinetic")) : undefined) ||
     (isAirForce ? allPublicEvents.find((item) => item.slug.includes("air-force")) : undefined) ||
     (isCancerAwareness ? allPublicEvents.find((item) => item.slug.includes("cancer")) : undefined);
 
@@ -123,14 +128,19 @@ export function mapApiEventToPublic(
     bannerImageUrl:
       event.bannerImageUrl ??
       staticMatch?.bannerImageUrl ??
+      (isKineticRun ? "/images/kinetic-run-medal-front.webp" : undefined) ??
       (isCancerAwareness ? "/images/cancer-awareness-medal-front-4k.png" : undefined) ??
       (isAirForce ? "/images/event-medal.webp" : undefined),
     medalImageUrl:
       (event as { medalImageUrl?: string }).medalImageUrl ??
       staticMatch?.medalImageUrl ??
+      (isKineticRun ? "/images/kinetic-run-medal-front.webp" : undefined) ??
       (isCancerAwareness ? "/images/cancer-awareness-medal-front-4k.png" : undefined) ??
       (isAirForce ? "/images/event-medal.webp" : undefined),
     reward:
+      (isKineticRun
+        ? "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate"
+        : undefined) ??
       (isCancerAwareness
         ? "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate"
         : undefined) ??
@@ -145,7 +155,7 @@ export function mapApiEventToPublic(
       event.activityTypes?.length ? event.activityTypes : staticMatch?.activityTypes ?? ["running", "cycling", "walking"],
     benefits: event.benefits ?? staticMatch?.benefits ?? [],
     status:
-      isCancerAwareness
+      isKineticRun || isCancerAwareness
         ? "upcoming"
         : event.status === "CLOSED" || event.status === "closed"
         ? "closed"
@@ -222,10 +232,34 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
       const json = (await response.json()) as { data: ApiEvent[] };
       if (Array.isArray(json.data) && json.data.length > 0) {
         const rows = [...json.data];
+        // Ensure Kinetic Run is included locally for preview & testing
+        if (!rows.some((r) => r.slug.includes("kinetic"))) {
+          rows.unshift({
+            id: "kinetic-run-virtual-challenge-2026",
+            title: "Kinetic Run Virtual Challenge 2026",
+            slug: "kinetic-run-virtual-challenge-2026",
+            description:
+              "Turn your energy into unstoppable momentum. Challenge your limits across India, conquer your distance, and claim your exclusive 3D sculpted Kinetic Finisher Medal.",
+            status: "OPEN",
+            startsAt: "2026-12-10T00:00:00.000Z",
+            endsAt: "2026-12-15T23:59:59.000Z",
+            distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+            priceInPaise: 49900,
+            paymentRequired: true,
+            medalIncluded: true,
+            featured: true,
+            phase: "upcoming",
+            registrationOpen: true,
+            bannerImageUrl: "/images/kinetic-run-medal-front.webp",
+          } as ApiEvent);
+        }
         rows.sort((a, b) => {
           const aCancer = a.slug.includes("cancer") ? 1 : 0;
           const bCancer = b.slug.includes("cancer") ? 1 : 0;
           if (aCancer !== bCancer) return bCancer - aCancer;
+          const aKinetic = a.slug.includes("kinetic") ? 1 : 0;
+          const bKinetic = b.slug.includes("kinetic") ? 1 : 0;
+          if (aKinetic !== bKinetic) return bKinetic - aKinetic;
           return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
         });
         const mapped = rows.map((event) => mapApiEventToPublic(event, "upcoming"));

@@ -18,27 +18,31 @@ const items = [
   },
   {
     icon: Shirt,
-    title: "Top 3 Podium T-Shirt",
+    title: "Podium T-Shirt",
     desc: "Exclusive athletic DRI-FIT performance t-shirt for top 3 finishers.",
   },
   {
     icon: FileBadge,
-    title: "Verifiable E-Certificate",
+    title: "E-Certificate",
     desc: "Official QR-verified certificate with your distance and finish time.",
   },
   {
     icon: Trophy,
-    title: "Hall of Fame Ranking",
-    desc: "Nationwide leaderboard ranking with verified pace stats.",
+    title: "Hall of Fame",
+    desc: "Nationwide leaderboard ranking with verified finish badge.",
   },
   {
     icon: Truck,
-    title: "Free Doorstep Delivery",
+    title: "Free Delivery",
     desc: "100% free tracked courier delivery across all pincodes in India.",
   },
 ];
 
 export function EventRewards({ event }: { event?: PublicEvent }) {
+  const isKinetic =
+    event?.slug?.includes("kinetic") ||
+    event?.name?.toLowerCase().includes("kinetic");
+
   const isAirForce =
     event?.slug?.includes("air-force") ||
     event?.name?.toLowerCase().includes("air force");
@@ -47,9 +51,11 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
     {
       icon: Medal,
       title: "Finisher Medal",
-      desc: isAirForce
-        ? "100% Solid Metal Finisher Medal delivered right to your doorstep."
-        : "Authentic heavyweight die-cast metal medal with custom ribbon.",
+      desc: isKinetic
+        ? "Exclusive 3D Sculpted Kinetic Finisher Medal delivered to your door."
+        : isAirForce
+          ? "100% Solid Metal Finisher Medal delivered right to your doorstep."
+          : "Authentic heavyweight die-cast metal medal with custom ribbon.",
     },
     ...items.slice(1),
   ];
@@ -68,19 +74,19 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
           lead="Every verified finisher receives a complete official kit — delivered free across India."
         />
 
-        {/* 2 in a single row grid — compact, concise, zero extra scrolling */}
-        <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-2 sm:gap-3.5">
+        {/* 2 in a single row grid — perfectly uniform & equal card heights */}
+        <div className="mt-8 sm:mt-10 grid grid-cols-2 gap-2.5 sm:gap-4 items-stretch">
           {dynamicItems.map(({ icon: Icon, title, desc }, i) => (
-            <Reveal key={title} delay={i * 0.05}>
-              <article className="flex items-center gap-3.5 rounded-2xl border border-white/10 bg-[#12161a] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-lg">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-400 shadow-sm">
+            <Reveal key={title} delay={i * 0.05} className="h-full flex flex-col">
+              <article className="h-full min-h-[92px] sm:min-h-[96px] flex items-center gap-3 sm:gap-3.5 rounded-2xl border border-white/10 bg-[#12161a] p-3 sm:p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-lg">
+                <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 text-amber-400 shadow-sm">
                   <Icon className="h-5 w-5" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-bold tracking-tight text-white">
+                  <h3 className="text-xs sm:text-sm font-bold tracking-tight text-white truncate">
                     {title}
                   </h3>
-                  <p className="mt-0.5 text-xs text-zinc-400 leading-snug line-clamp-2">
+                  <p className="mt-0.5 text-[0.72rem] sm:text-xs text-zinc-400 leading-snug line-clamp-2">
                     {desc}
                   </p>
                 </div>

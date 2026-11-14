@@ -51,12 +51,20 @@ export function AdminEventScopeBar({
   const realEvents = events.filter((ev) => {
     const s = (ev.slug || "").toLowerCase();
     const t = (ev.title || "").toLowerCase();
-    return s.includes("cancer") || s.includes("air-force") || t.includes("cancer") || t.includes("air force");
+    return (
+      s.includes("kinetic") ||
+      s.includes("cancer") ||
+      s.includes("air-force") ||
+      t.includes("kinetic") ||
+      t.includes("cancer") ||
+      t.includes("air force")
+    );
   });
 
   const isCombined = !selectedEventId || selectedEventId === "all";
   const activeEvent = !isCombined ? realEvents.find((e) => e.id === selectedEventId) : null;
 
+  const isKinetic = activeEvent?.slug?.includes("kinetic") || activeEvent?.title?.toLowerCase()?.includes("kinetic");
   const isCancer = activeEvent?.slug?.includes("cancer") || activeEvent?.title?.toLowerCase()?.includes("cancer");
   const isAirForce = activeEvent?.slug?.includes("air-force") || activeEvent?.title?.toLowerCase()?.includes("air force");
 
@@ -91,6 +99,7 @@ export function AdminEventScopeBar({
             {/* Primary Events Quick Tabs */}
             {realEvents.map((ev) => {
               const isSelected = selectedEventId === ev.id;
+              const evIsKinetic = ev.slug.includes("kinetic") || ev.title.toLowerCase().includes("kinetic");
               const evIsCancer = ev.slug.includes("cancer") || ev.title.toLowerCase().includes("cancer");
               const evIsAirForce = ev.slug.includes("air-force") || ev.title.toLowerCase().includes("air force");
               const isOpen = ev.status === "OPEN";
@@ -106,7 +115,7 @@ export function AdminEventScopeBar({
                       : "border border-(--line) bg-(--panel-soft) text-(--muted) hover:border-amber-500/40 hover:text-(--foreground)"
                   }`}
                 >
-                  <span>{evIsCancer ? "🎗️" : evIsAirForce ? "🇮🇳" : "🏁"}</span>
+                  <span>{evIsKinetic ? "⚡" : evIsCancer ? "🎗️" : evIsAirForce ? "🇮🇳" : "🏁"}</span>
                   <span className="truncate max-w-[200px]">{ev.title}</span>
                   <span
                     className={`text-[9px] px-1.5 py-0.2 rounded-full font-extrabold uppercase ${
@@ -154,7 +163,7 @@ export function AdminEventScopeBar({
               </div>
 
               <h2 className="text-base sm:text-lg font-black text-(--foreground) flex items-center gap-2">
-                <span>{isCancer ? "🎗️" : isAirForce ? "🇮🇳" : "🏁"}</span>
+                <span>{isKinetic ? "⚡" : isCancer ? "🎗️" : isAirForce ? "🇮🇳" : "🏁"}</span>
                 <span>{activeEvent.title}</span>
               </h2>
 

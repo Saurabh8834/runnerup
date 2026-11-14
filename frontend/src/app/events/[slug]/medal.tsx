@@ -40,6 +40,10 @@ export function Medal3DViewer({
   const [hasInteracted, setHasInteracted] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const isKineticRun =
+    slug.includes("kinetic") ||
+    eventName.toLowerCase().includes("kinetic");
+
   const isCancerAwareness =
     slug.includes("cancer") ||
     eventName.toLowerCase().includes("cancer");
@@ -54,7 +58,7 @@ export function Medal3DViewer({
   const isPastEvent =
     isPast !== undefined
       ? isPast
-      : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || (!isAirForce && !isCancerAwareness));
+      : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || (!isAirForce && !isCancerAwareness && !isKineticRun));
 
   // Preload images once per session to prevent repeated decodes
   useEffect(() => {
@@ -123,9 +127,9 @@ export function Medal3DViewer({
   // Size specific dimensions & styling
   const sizeConfig = {
     mobile: {
-      maxH: "max-h-[300px] xs:max-h-[340px] sm:max-h-[380px]",
-      containerMaxW: "max-w-[280px] xs:max-w-[320px] sm:max-w-[360px]",
-      haloSize: "h-[260px] w-[260px] sm:h-[320px] sm:w-[320px]",
+      maxH: "max-h-[220px] xs:max-h-[250px] sm:max-h-[280px]",
+      containerMaxW: "max-w-[210px] xs:max-w-[240px] sm:max-w-[270px]",
+      haloSize: "h-[220px] w-[220px] sm:h-[260px] sm:w-[260px]",
     },
     desktop: {
       maxH: "max-h-[380px] lg:max-h-[420px] xl:max-h-[460px]",
@@ -169,9 +173,23 @@ export function Medal3DViewer({
     { label: "Deep-Relief Crest", icon: Award },
   ];
 
-  const activeFeatures = isCancerAwareness
-    ? (isBack ? cancerBackFeatures : cancerFrontFeatures)
-    : (isBack ? backFeatures : frontFeatures);
+  const kineticFrontFeatures = [
+    { label: "High-Relief Sprint Runner", icon: Sparkles },
+    { label: "Sculpted Wing & Shoe Sole", icon: Award },
+    { label: "Solid Antique Bronze Metal", icon: ShieldCheck },
+  ];
+
+  const kineticBackFeatures = [
+    { label: '"Challenge Your Limits" Arch', icon: ShieldCheck },
+    { label: "Finisher & Legend Rings", icon: Flame },
+    { label: "GPS Verified Athlete Badge", icon: Award },
+  ];
+
+  const activeFeatures = isKineticRun
+    ? (isBack ? kineticBackFeatures : kineticFrontFeatures)
+    : isCancerAwareness
+      ? (isBack ? cancerBackFeatures : cancerFrontFeatures)
+      : (isBack ? backFeatures : frontFeatures);
 
   // ════════ PAST EVENT CLEAN STATIC SHOWCASE (Zero Cloudinary, Zero Flip / 360) ════════
   if (isPastEvent) {
@@ -407,18 +425,32 @@ export function Medal3DViewer({
           </button>
         </div>
 
-        {/* ── Active Face Descriptor Caption ── */}
-        <div className="mt-3 text-center max-w-sm px-2">
+        {/* ── Active Face Descriptor Caption (Stable height - zero layout jump) ── */}
+        <div className="mt-3 text-center max-w-sm px-2 h-11 min-h-[44px] flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeFace}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="w-full text-center"
             >
-              <p className="text-[0.78rem] sm:text-xs font-semibold text-zinc-300 leading-snug">
-                {isCancerAwareness ? (
+              <p className="text-[0.78rem] sm:text-xs font-semibold text-zinc-300 leading-snug line-clamp-2">
+                {isKineticRun ? (
+                  isBack ? (
+                    <>
+                      <span className="text-amber-400 font-bold">Reverse Face: </span>
+                      &ldquo;Challenge Your Limits&rdquo; Arch &amp;{" "}
+                      <span className="text-amber-200 italic font-normal">&ldquo;Congratulations Finisher! GPS Verified Athlete&rdquo;</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-orange-400 font-bold">Front Face: </span>
+                      Sculpted Sprint Runner, Aerodynamic Wings &amp; Antique Bronze Relief
+                    </>
+                  )
+                ) : isCancerAwareness ? (
                   isBack ? (
                     <>
                       <span className="text-purple-400 font-bold">Reverse Face: </span>
@@ -448,18 +480,31 @@ export function Medal3DViewer({
           </AnimatePresence>
         </div>
 
-        {/* ── Micro Feature Badges Under Medal (Responsive Wrapping) ── */}
+        {/* ── Micro Feature Badges Under Medal (2 in a single line on mobile to minimize vertical scroll) ── */}
         {showBadges && (
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg px-2">
-            {activeFeatures.map(({ label, icon: Icon }) => (
-              <span
+          <div className="mt-2.5 w-full max-w-md px-1 grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
+            {activeFeatures.slice(0, 2).map(({ label, icon: Icon }) => (
+              <div
                 key={label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 sm:px-3 py-1 text-[0.68rem] sm:text-xs font-semibold text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300"
+                className="w-full h-7.5 sm:h-9 flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 text-[0.68rem] sm:text-xs font-semibold text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300 text-center"
               >
                 <Icon className="h-3 w-3 text-amber-400 shrink-0" />
-                <span>{label}</span>
-              </span>
+                <span className="truncate">{label}</span>
+              </div>
             ))}
+            {activeFeatures[2] && (
+              <div className="hidden sm:flex w-full h-9 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 text-xs font-semibold text-zinc-300 backdrop-blur-md transition-colors hover:border-amber-400/30 hover:text-amber-300 text-center">
+                {(() => {
+                  const Icon = activeFeatures[2].icon;
+                  return (
+                    <>
+                      <Icon className="h-3 w-3 text-amber-400 shrink-0" />
+                      <span className="truncate">{activeFeatures[2].label}</span>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         )}
       </div>

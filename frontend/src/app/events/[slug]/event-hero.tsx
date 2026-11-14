@@ -88,7 +88,11 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Determine if this is the Air Force or Cancer Awareness event
+  // Determine event type
+  const isKineticRun =
+    event.slug.includes("kinetic") ||
+    event.name.toLowerCase().includes("kinetic");
+
   const isCancerAwareness =
     event.slug.includes("cancer") ||
     event.name.toLowerCase().includes("cancer");
@@ -104,13 +108,15 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
   )}&distance=${encodeURIComponent(selectedDistance)}&activity=${encodeURIComponent(selectedActivity)}`;
 
   // Date eyebrow text
-  const eyebrowDate = isAirForce
-    ? "25-30 OCTOBER 2026"
-    : isCancerAwareness
-      ? "7–15 NOVEMBER 2026"
-      : event.date
-        ? event.date.toUpperCase()
-        : "7–15 NOVEMBER 2026";
+  const eyebrowDate = isKineticRun
+    ? (event.date ? event.date.toUpperCase() : "10–15 DECEMBER 2026")
+    : isAirForce
+      ? "25-30 OCTOBER 2026"
+      : isCancerAwareness
+        ? (event.date ? event.date.toUpperCase() : "7–17 NOVEMBER 2026")
+        : event.date
+          ? event.date.toUpperCase()
+          : "UPCOMING CHALLENGE";
 
   // Medal image source - dynamically matches each event's authentic physical finisher medal
   const medalImageSrc = event.medalImageUrl || getEventMedalImage(event.slug);
@@ -169,7 +175,21 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               transition={{ duration: 0.5, delay: 0.1 }}
               className="font-display font-black tracking-tight uppercase leading-[1.05] drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)] mb-3"
             >
-              {isAirForce ? (
+              {isKineticRun ? (
+                <div className="flex flex-col gap-1.5 sm:gap-2">
+                  <div className="flex items-center justify-center lg:justify-start">
+                    <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.25em] uppercase text-amber-400 whitespace-nowrap">
+                      ⚡ RUNNERUP PRESENTS
+                    </span>
+                  </div>
+                  <span className="block text-3xl xs:text-4xl sm:text-5xl lg:text-[3.35rem] font-black uppercase tracking-tight leading-[1.02] drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+                    <span className="text-white">KINETIC RUN </span>
+                    <span className="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15] drop-shadow-[0_4px_16px_rgba(255,75,38,0.35)]">
+                      VIRTUAL CHALLENGE
+                    </span>
+                  </span>
+                </div>
+              ) : isAirForce ? (
                 <>
                   <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-white">INDIAN AIR FORCE DAY</span>
                   <span className="block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] text-transparent bg-clip-text bg-gradient-to-r from-[#ff4b26] via-[#ff7844] to-[#facc15]">
@@ -205,7 +225,11 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               transition={{ duration: 0.5, delay: 0.2 }}
               className="mt-1 max-w-xl text-xs sm:text-sm lg:text-[0.95rem] text-zinc-300 font-medium leading-relaxed space-y-2.5 mb-2 sm:mb-4"
             >
-              {isAirForce ? (
+              {isKineticRun ? (
+                <p className="text-zinc-200 font-semibold leading-relaxed text-sm sm:text-base">
+                  Turn your energy into unstoppable momentum. Challenge your limits across India, conquer your distance, and claim your exclusive 3D sculpted Kinetic Finisher Medal.
+                </p>
+              ) : isAirForce ? (
                 <>
                   <p className="text-zinc-200 font-semibold leading-relaxed">
                     Run with courage, rise with pride, and salute the heroes who guard our skies. Every kilometre is a tribute to their bravery and dedication.
@@ -226,22 +250,15 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
               )}
             </motion.div>
 
-            {/* ── MOBILE-FIRST 3D MEDAL FLIP SHOWCASE ── */}
+            {/* ── MOBILE-FIRST 3D MEDAL FLIP SHOWCASE (Space-optimized so Category & Register are immediately in view) ── */}
             {!isDesktop && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.22 }}
-                className="lg:hidden my-6 w-full flex flex-col items-center justify-center relative"
+                className="lg:hidden my-2.5 sm:my-4 w-full flex flex-col items-center justify-center relative"
               >
                 <Medal3DViewer slug={event.slug} eventName={event.name} size="mobile" isPast={isPast} />
-
-                {/* Live Mobile Social Proof Counter */}
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-center text-[0.7rem] sm:text-[0.72rem] text-zinc-400 font-semibold bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-md max-w-full">
-                  <span className="text-amber-400 font-bold">⚡ Limited Edition 3D Metal Medal</span>
-                  <span>·</span>
-                  <span className="text-emerald-400 font-bold">100% Solid Metal Finisher Medal ⭐</span>
-                </div>
               </motion.div>
             )}
 
@@ -252,7 +269,7 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.25 }}
-                  className="mt-5 w-full max-w-xl rounded-2xl border border-white/15 bg-gradient-to-b from-[#121820]/90 to-[#0a0f14]/90 p-4 sm:p-5 backdrop-blur-xl shadow-2xl flex flex-col gap-3.5 text-left"
+                  className="mt-3.5 sm:mt-5 w-full max-w-xl rounded-2xl border border-white/15 bg-gradient-to-b from-[#121820]/90 to-[#0a0f14]/90 p-3.5 sm:p-5 backdrop-blur-xl shadow-2xl flex flex-col gap-3.5 text-left"
                 >
                   {/* Category 1: Mode (Run / Walk / Cycle) */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
