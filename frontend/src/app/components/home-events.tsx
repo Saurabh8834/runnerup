@@ -103,7 +103,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d141d]/95 text-[#f8fafc] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ff4b26]/60 hover:shadow-[0_16px_50px_rgba(255,75,38,0.25)] shadow-2xl cursor-pointer"
     >
       {/* Banner / Poster */}
-      <div className={`relative overflow-hidden ${isMedalCard ? "h-48 sm:h-52 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
+      <div className={`relative overflow-hidden ${isMedalCard ? "h-56 xs:h-60 sm:h-56 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
         {isMedalCard && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
             <div className={`h-48 w-48 rounded-full ${isCancerAwareness ? "bg-purple-600/20" : "bg-[#ff4b26]/15"} blur-3xl`} />
@@ -111,11 +111,11 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
         )}
         {imgSrc && !imgFailed ? (
           isMedalCard ? (
-            <div className="absolute inset-0 flex items-center justify-center p-3.5 sm:p-5 z-[2]">
+            <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3.5 z-[2]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={event.name}
-                className={`h-full w-full object-contain  transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none`}
+                className={`h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none`}
                 src={imgSrc}
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
@@ -249,31 +249,41 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
             <span className="truncate">{event.reward}</span>
           </div>
         )}
-        {/* Scarcity Progress Bar */}
-        <div className="mb-3 space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#ff4b26] flex items-center gap-1">
-              {isClosed ? (
-                <>
-                  <Lock className="h-3.5 w-3.5 text-[#ff4b26]" /> Registrations Closed
-                </>
-              ) : (
-                <>
-                  <Zap className="h-3.5 w-3.5 fill-[#ff4b26]" /> Only {scarcity.bibsLeft} Bibs Remaining
-                </>
-              )}
+        {/* Scarcity / Official Status Bar (Seats Fill Bar Removed for Kinetic Run per User Request) */}
+        {isKineticRun ? (
+          <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
+            <span className="flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+              <span>Official 3D Metal Finisher Trophy</span>
             </span>
-            <span className="text-slate-400 font-mono text-[0.72rem]">
-              {scarcity.percent}% filled
-            </span>
+            <span className="font-mono text-emerald-400 font-extrabold">Open Challenge</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full p-0.5 border bg-black/40 border-white/10">
-            <div
-              style={{ width: `${scarcity.percent}%` }}
-              className="h-full rounded-full bg-gradient-to-r from-orange-600 to-[#ff4b26] transition-all duration-500"
-            />
+        ) : (
+          <div className="mb-3 space-y-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-[#ff4b26] flex items-center gap-1">
+                {isClosed ? (
+                  <>
+                    <Lock className="h-3.5 w-3.5 text-[#ff4b26]" /> Registrations Closed
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-3.5 w-3.5 fill-[#ff4b26]" /> Only {scarcity.bibsLeft} Bibs Remaining
+                  </>
+                )}
+              </span>
+              <span className="text-slate-400 font-mono text-[0.72rem]">
+                {scarcity.percent}% filled
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full p-0.5 border bg-black/40 border-white/10">
+              <div
+                style={{ width: `${scarcity.percent}%` }}
+                className="h-full rounded-full bg-gradient-to-r from-orange-600 to-[#ff4b26] transition-all duration-500"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Title */}
         <h3 className="font-display font-extrabold text-xl sm:text-2xl leading-tight transition-colors uppercase tracking-tight text-white group-hover:text-[#ff4b26] min-h-[3.6rem] sm:min-h-[4.2rem] flex items-center">

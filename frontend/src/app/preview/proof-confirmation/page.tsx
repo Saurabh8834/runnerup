@@ -174,7 +174,7 @@ export default function ProofConfirmationPreviewPage() {
                     <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider">Finisher Medal</span>
                   </div>
                   <p className="mt-1 text-[0.65rem] sm:text-[0.7rem] text-slate-300 font-medium">
-                    Dispatches Post-Event (15 Nov)
+                    Dispatches Post-Event (17 Nov)
                   </p>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export default function ProofConfirmationPreviewPage() {
                         </span>
                       </div>
                       <p className="text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed">
-                        ✅ <strong>You are all set!</strong> Your GPS activity screenshot is verified and queued for arbiter review. When the event window closes on <strong>15 November</strong>, our team verifies all results, and your official Finisher Certificate and 3D Medal will be prepared!
+                        ✅ <strong>You are all set!</strong> Your GPS activity screenshot is verified and queued for arbiter review. When the event window closes on <strong>17 November</strong>, our team verifies all results, and your official Finisher Certificate and 3D Medal will be prepared!
                       </p>
                     </div>
                   </div>
@@ -386,7 +386,7 @@ export default function ProofConfirmationPreviewPage() {
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Audit Timeline</span>
-                  <span className="font-bold text-amber-300">Audited Post-Event (15 Nov)</span>
+                  <span className="font-bold text-amber-300">Audited Post-Event (17 Nov)</span>
                 </div>
               </div>
 
@@ -394,7 +394,7 @@ export default function ProofConfirmationPreviewPage() {
               <div className="mt-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
                 <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <p>
-                  Your activity screenshot is securely saved in our database. You don&apos;t need to take any further action until the event audit completes on <strong>15 November</strong>!
+                  Your activity screenshot is securely saved in our database. You don&apos;t need to take any further action until the event audit completes on <strong>17 November</strong>!
                 </p>
               </div>
 

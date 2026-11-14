@@ -525,7 +525,7 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
       ctx.fillText(catDisplay, 235, 530);
 
       // Issue Date (directly below Issue Date label, center x=445.5, y=530)
-      const dateDisplay = data.dateStr || "15 Nov 2026";
+      const dateDisplay = data.dateStr || "17 Nov 2026";
       ctx.fillText(dateDisplay, 445.5, 530);
 
       // Achievement Distance (directly below Achievement Distance label, center x=654, y=530)

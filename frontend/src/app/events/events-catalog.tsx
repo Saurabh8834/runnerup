@@ -170,7 +170,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d141d]/95 text-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ff4b26] hover:shadow-[0_12px_40px_rgba(255,75,38,0.25)] shadow-2xl cursor-pointer"
     >
       {/* Banner / Poster */}
-      <div className={`relative overflow-hidden ${isMedalCard ? "h-48 sm:h-52 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
+      <div className={`relative overflow-hidden ${isMedalCard ? "h-56 xs:h-60 sm:h-56 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
         {isMedalCard && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
             <div className={`h-48 w-48 rounded-full ${isCancerAwareness ? "bg-purple-600/20" : "bg-[#f59e0b]/15"} blur-3xl`} />
@@ -178,7 +178,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
         )}
         {imgSrc && !imgFailed ? (
           isMedalCard ? (
-            <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+            <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3.5 z-[2]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={event.name}

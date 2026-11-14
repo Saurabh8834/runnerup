@@ -304,7 +304,7 @@ export function DashboardClient() {
       const canvas = await renderCertCanvas({
         runnerName,
         distance,
-        dateStr: isCancer ? "15 Nov 2026" : "31  /  10  /  2026",
+        dateStr: isCancer ? "17 Nov 2026" : "31  /  10  /  2026",
         isCancerEvent: isCancer,
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -544,7 +544,7 @@ export function DashboardClient() {
       }
 
       // Live / Ongoing events (e.g. National Cancer Awareness Day Challenge):
-      // The event is active (7–15 Nov). It must NEVER show in Trophy Cabinet while ongoing.
+      // The event is active (7–17 Nov). It must NEVER show in Trophy Cabinet while ongoing.
       // Only moves to Trophy Cabinet AFTER the event ends AND proof is APPROVED with certificate/dispatch.
       if (isCancer) {
         return (
@@ -1183,7 +1183,7 @@ export function DashboardClient() {
                                 ? "Proof Approved"
                                 : isProofSubmitted
                                   ? isCancerEvent
-                                    ? "Audited Post-Event (15 Nov)"
+                                    ? "Audited Post-Event (17 Nov)"
                                     : "Audited Post-Event (30 Oct)"
                                   : isProofRejected
                                     ? "Re-upload Required"
@@ -1244,7 +1244,7 @@ export function DashboardClient() {
                                   ? "Certificate Ready"
                                   : isVerified
                                   ? "Medal Verified"
-                                  : "Dispatches Post-Event (15 Nov)"
+                                  : "Dispatches Post-Event (17 Nov)"
                                 : isCertReady
                                 ? isMedalDispatched
                                   ? "Medal Dispatched"
@@ -1319,7 +1319,7 @@ export function DashboardClient() {
                                 </div>
                                 <p className="text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed">
                                   {isCancerEvent
-                                    ? "✅ You are all set! Your GPS activity screenshot is verified and queued for arbiter review. When the event closes on 15 November, all proofs are audited, and your official Finisher Certificate and 3D Medal will be prepared!"
+                                    ? "✅ You are all set! Your GPS activity screenshot is verified and queued for arbiter review. When the event closes on 17 November, all proofs are audited, and your official Finisher Certificate and 3D Medal will be prepared!"
                                     : "✅ Your GPS activity screenshot is verified and queued for post-event arbiter review. No further action needed!"}
                                 </p>
                               </div>
@@ -1350,11 +1350,11 @@ export function DashboardClient() {
                             <Truck className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
                             <div className="space-y-0.5">
                               <p className="font-bold text-amber-300 text-xs sm:text-sm">
-                                {isCancerEvent ? "Finisher Medal: Dispatches Post-Event (15 Nov)" : "Finisher Medal: Dispatching Soon"}
+                                {isCancerEvent ? "Finisher Medal: Dispatches Post-Event (17 Nov)" : "Finisher Medal: Dispatching Soon"}
                               </p>
                               <p className="text-slate-300 text-[0.72rem] sm:text-xs leading-relaxed">
                                 {isCancerEvent
-                                  ? "Your GPS run activity will be reviewed after the event window closes on 15 November. Official 3D medals will be dispatched to your delivery address following verification."
+                                  ? "Your GPS run activity will be reviewed after the event window closes on 17 November. Official 3D medals will be dispatched to your delivery address following verification."
                                   : "Address verification details have been sent to your registered email. Once handed over to our express courier partner, your live tracking link will be delivered directly via Email."}
                               </p>
                             </div>
@@ -1733,7 +1733,7 @@ export function DashboardClient() {
                                 : reg.medalDelivery?.status === "DISPATCHED"
                                 ? "On The Way"
                                 : isCancerEvent
-                                ? "Post-Event Dispatch (15 Nov)"
+                                ? "Post-Event Dispatch (17 Nov)"
                                 : "Dispatch Soon"}
                             </span>
                           </p>
@@ -1788,7 +1788,7 @@ export function DashboardClient() {
                               </div>
                             ) : isCancerEvent ? (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
-                                🎗️ Finisher medals will be dispatched to your delivery address following event conclusion on 15 November and activity verification.
+                                🎗️ Finisher medals will be dispatched to your delivery address following event conclusion on 17 November and activity verification.
                               </p>
                             ) : (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
@@ -2000,7 +2000,7 @@ export function DashboardClient() {
 
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">Audit Timeline</span>
-                <span className="font-bold text-amber-300">Audited Post-Event (15 Nov)</span>
+                <span className="font-bold text-amber-300">Audited Post-Event (17 Nov)</span>
               </div>
             </div>
 
@@ -2008,7 +2008,7 @@ export function DashboardClient() {
             <div className="mt-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
               <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <p>
-                Your activity screenshot is securely saved in our database. You don&apos;t need to take any further action until the event audit completes on <strong>15 November</strong>!
+                Your activity screenshot is securely saved in our database. You don&apos;t need to take any further action until the event audit completes on <strong>17 November</strong>!
               </p>
             </div>
 

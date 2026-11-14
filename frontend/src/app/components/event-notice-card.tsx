@@ -16,11 +16,11 @@ export function EventNoticeCard({
   const titleLower = (eventTitle || "").toLowerCase();
   const isCancerEvent = titleLower.includes("cancer");
 
-  // Cancer event: proof window is 7–15 November 2026 (same as event window)
+  // Cancer event: proof window is 7–17 November 2026 (same as event window)
   // IAF event: proof window was 30 October 2026
   let displayDate = endDateFormatted;
   if (isCancerEvent) {
-    displayDate = "15 November 2026";
+    displayDate = "17 November 2026";
   } else if (!displayDate && endsAt) {
     try {
       displayDate = new Date(endsAt).toLocaleDateString("en-IN", {
@@ -38,7 +38,7 @@ export function EventNoticeCard({
 
   const badgeColor = isCancerEvent ? "bg-[#059669]" : "bg-[#dc2626]";
   const bodyText = isCancerEvent
-    ? `Activity proofs can be submitted anytime during the event window (7–15 November 2026). Your GPS proof will be reviewed after the event closes on `
+    ? `Activity proofs can be submitted anytime during the event window (7–17 November 2026). Your GPS proof will be reviewed after the event closes on `
     : `Activity proofs will be reviewed after the event ends on `;
   const footerText = isCancerEvent
     ? ` to ensure fair rankings. Your Die-Cast Medal will be dispatched after successful verification. Thank you for running for a cause! 🎗️`

@@ -482,7 +482,7 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                     {/* 3D Flip Container */}
                     <div
                       style={{ perspective: "1000px" }}
-                      className="relative z-10 w-full h-68 flex items-center justify-center select-none"
+                      className="relative z-10 w-full h-80 sm:h-84 flex items-center justify-center select-none"
                     >
                       <div
                         style={{
@@ -501,9 +501,9 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                           <img
                             src="/images/iaf-medal-front.webp"
                             alt="Indian Air Force Day Finisher Medal - Front"
-                            loading="lazy"
+                            loading="eager"
                             decoding="async"
-                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.04] transition-transform duration-300"
+                            className="h-full w-auto max-h-[305px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.08] transition-transform duration-300"
                           />
                         </div>
 
@@ -516,9 +516,9 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                           <img
                             src="/images/iaf-medal-back.webp"
                             alt="Indian Air Force Day Finisher Medal - Back"
-                            loading="lazy"
+                            loading="eager"
                             decoding="async"
-                            className="h-full w-auto max-h-[265px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.04] transition-transform duration-300"
+                            className="h-full w-auto max-h-[305px] object-contain drop-shadow-[0_20px_45px_rgba(250,204,21,0.45)] select-none scale-[1.08] transition-transform duration-300"
                           />
                         </div>
                       </div>

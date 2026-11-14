@@ -365,8 +365,8 @@ export function buildCancerCorrectionEmailHtml(payload: CancerCorrectionEmailPay
 
   const firstName = payload.runnerName.trim().split(" ")[0] || payload.runnerName;
   const eventTitle = "National Cancer Awareness Day Virtual Challenge 2026";
-  const eventDates = "7–15 November 2026";
-  const proofWindow = "7–15 November 2026";
+  const eventDates = "7–17 November 2026";
+  const proofWindow = "7–17 November 2026";
   const activity = payload.activityType || "Running / Walking / Cycling";
   const orderId = payload.orderId || payload.bibNumber;
   const eventUrl = "https://www.runnerup.in/events/national-cancer-awareness-day-virtual-run-2026";
@@ -497,10 +497,10 @@ export function buildCancerCorrectionEmailHtml(payload: CancerCorrectionEmailPay
                   🏃 How to Complete Your Challenge:
                 </h3>
                 <ol style="margin:0;padding-left:20px;font-size:13.5px;color:#334155;line-height:1.75;">
-                  <li style="margin-bottom:8px;"><strong>Activity Dates:</strong> Complete your registered distance (${payload.distance}) anytime between <strong>7 November and 15 November 2026</strong>.</li>
+                  <li style="margin-bottom:8px;"><strong>Activity Dates:</strong> Complete your registered distance (${payload.distance}) anytime between <strong>7 November and 17 November 2026</strong>.</li>
                   <li style="margin-bottom:8px;"><strong>Location:</strong> Run, walk, or cycle anywhere in India — outdoors, roads, parks, or treadmill.</li>
                   <li style="margin-bottom:8px;"><strong>Tracking Apps:</strong> Track your activity using Strava, Garmin, Nike Run Club, Apple Fitness, Samsung Health, or any fitness app.</li>
-                  <li style="margin-bottom:0;"><strong>Submit Proof:</strong> Upload a screenshot of your completed activity on your RunnerUp.in Athlete Dashboard anytime between <strong>7 Nov and 15 Nov 2026</strong>.</li>
+                  <li style="margin-bottom:0;"><strong>Submit Proof:</strong> Upload a screenshot of your completed activity on your RunnerUp.in Athlete Dashboard anytime between <strong>7 Nov and 17 Nov 2026</strong>.</li>
                 </ol>
               </div>
 
@@ -510,7 +510,7 @@ export function buildCancerCorrectionEmailHtml(payload: CancerCorrectionEmailPay
                   🎁 Your Official Finisher Reward Package
                 </p>
                 <p style="margin:0;font-size:13px;color:#634a17;line-height:1.6;">
-                  Once the challenge concludes (15 Nov) and your activity proof is approved, your authentic <strong>Heavyweight Die-Cast 3D Metal Medal</strong> with premium commemorative ribbon lanyard will be dispatched directly to your doorstep with <strong>100% free pan-India courier delivery</strong>.
+                  Once the challenge concludes (17 Nov) and your activity proof is approved, your authentic <strong>Heavyweight Die-Cast 3D Metal Medal</strong> with premium commemorative ribbon lanyard will be dispatched directly to your doorstep with <strong>100% free pan-India courier delivery</strong>.
                 </p>
               </div>
 
@@ -571,7 +571,7 @@ export async function sendCancerCorrectionEmail(
 
   try {
     const from = env.resendFromEmail;
-    const subject = `Important Event Update: National Cancer Awareness Day Challenge (Dates: 7–15 Nov) — Bib ${payload.bibNumber} 🎗️`;
+    const subject = `Important Event Update: National Cancer Awareness Day Challenge (Dates: 7–17 Nov) — Bib ${payload.bibNumber} 🎗️`;
 
     const result = await resend.emails.send({
       from,

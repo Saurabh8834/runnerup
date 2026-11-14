@@ -123,6 +123,7 @@ export default function AdminOverviewPage() {
     events: scopedEvents,
     selectedEventId,
     setSelectedEventId,
+    isKinetic,
     isCancer,
     isAirForce,
     isCombined,
@@ -260,15 +261,78 @@ export default function AdminOverviewPage() {
         totalCount={data?.stats.registrations}
       />
 
-      {/* ── CONCEPT 2 (SPLIT PULSE): DUAL REAL CHALLENGE RADAR ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Card 1: National Cancer Awareness Day 2026 */}
-        <div className="rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-5 relative overflow-hidden shadow-sm">
+      {/* ── CONCEPT 2: TRIPLE OFFICIAL CHALLENGE RADAR ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Card 1: Kinetic Run Virtual Challenge 2026 */}
+        <div className={`rounded-2xl border-2 p-5 relative overflow-hidden shadow-sm transition-all ${
+          isKinetic
+            ? "border-amber-500 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent ring-2 ring-amber-500/30"
+            : "border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent"
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              ⚡ Live &amp; Open
+            </span>
+            <span className="text-xs font-mono text-(--muted)">10–15 Dec 2026</span>
+          </div>
+
+          <h3 className="text-base font-black text-(--foreground) mt-3 flex items-center gap-2">
+            <span>⚡</span> Kinetic Run Virtual Challenge 2026
+          </h3>
+          <p className="text-xs text-(--muted) mt-0.5">Momentum &amp; Endurance · Official ₹499</p>
+
+          <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-(--line)">
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Revenue</div>
+              <div className="text-base sm:text-lg font-black text-amber-400 font-mono">
+                {formatInrFromPaise(
+                  data?.eventBreakdown.find((e) => e.slug.includes("kinetic"))?.revenueInPaise ?? 0,
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Paid Runners</div>
+              <div className="text-base sm:text-lg font-black text-(--foreground) font-mono">
+                {data?.eventBreakdown.find((e) => e.slug.includes("kinetic"))?.paidCount ?? 0}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-(--muted) uppercase font-bold">Registrations</div>
+              <div className="text-base sm:text-lg font-black text-emerald-400 font-mono">
+                {data?.eventBreakdown.find((e) => e.slug.includes("kinetic"))?.totalRegistrations ?? 0}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const ev = data?.allEvents.find((e) => e.slug.includes("kinetic")) || scopedEvents.find((e) => e.slug.includes("kinetic"));
+              if (ev) setSelectedEventId(ev.id);
+            }}
+            className={`w-full mt-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider cursor-pointer shadow-sm transition-all ${
+              isKinetic
+                ? "bg-amber-400 text-slate-950 font-black"
+                : "bg-amber-500 hover:bg-amber-400 text-slate-950"
+            }`}
+          >
+            {isKinetic
+              ? "✓ Currently Focused (Isolated)"
+              : "Focus Kinetic Challenge Data →"}
+          </button>
+        </div>
+
+        {/* Card 2: National Cancer Awareness Day 2026 */}
+        <div className={`rounded-2xl border-2 p-5 relative overflow-hidden shadow-sm transition-all ${
+          isCancer
+            ? "border-emerald-500 bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent ring-2 ring-emerald-500/30"
+            : "border-emerald-500/40 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent"
+        }`}>
           <div className="flex items-center justify-between">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              🟢 Live &amp; Open
+              🟢 Extended · Open
             </span>
-            <span className="text-xs font-mono text-(--muted)">7–15 Nov 2026</span>
+            <span className="text-xs font-mono text-(--muted)">7–17 Nov 2026</span>
           </div>
 
           <h3 className="text-base font-black text-(--foreground) mt-3 flex items-center gap-2">
@@ -305,7 +369,11 @@ export default function AdminOverviewPage() {
               const ev = data?.allEvents.find((e) => e.slug.includes("cancer")) || scopedEvents.find((e) => e.slug.includes("cancer"));
               if (ev) setSelectedEventId(ev.id);
             }}
-            className="w-full mt-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider cursor-pointer shadow-sm transition-all"
+            className={`w-full mt-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider cursor-pointer shadow-sm transition-all ${
+              isCancer
+                ? "bg-emerald-400 text-slate-950 font-black"
+                : "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
+            }`}
           >
             {isCancer
               ? "✓ Currently Focused (Isolated)"
@@ -313,8 +381,12 @@ export default function AdminOverviewPage() {
           </button>
         </div>
 
-        {/* Card 2: Indian Air Force Day 2026 */}
-        <div className="rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-800/30 via-slate-800/10 to-transparent p-5 relative overflow-hidden shadow-sm">
+        {/* Card 3: Indian Air Force Day 2026 */}
+        <div className={`rounded-2xl border p-5 relative overflow-hidden shadow-sm transition-all ${
+          isAirForce
+            ? "border-sky-500 bg-gradient-to-br from-sky-500/15 via-sky-500/5 to-transparent ring-2 ring-sky-500/30"
+            : "border-slate-700 bg-gradient-to-br from-slate-800/30 via-slate-800/10 to-transparent"
+        }`}>
           <div className="flex items-center justify-between">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
               ⚪ Concluded &amp; Closed
@@ -356,7 +428,11 @@ export default function AdminOverviewPage() {
               const ev = data?.allEvents.find((e) => e.slug.includes("air-force")) || scopedEvents.find((e) => e.slug.includes("air-force"));
               if (ev) setSelectedEventId(ev.id);
             }}
-            className="w-full mt-4 py-2 rounded-xl bg-(--panel-soft) hover:bg-(--panel) text-(--foreground) border border-(--line) font-black text-xs uppercase tracking-wider cursor-pointer transition-all"
+            className={`w-full mt-4 py-2 rounded-xl border border-(--line) font-black text-xs uppercase tracking-wider cursor-pointer transition-all ${
+              isAirForce
+                ? "bg-sky-400 text-slate-950 font-black"
+                : "bg-(--panel-soft) hover:bg-(--panel) text-(--foreground)"
+            }`}
           >
             {isAirForce
               ? "✓ Currently Focused (Isolated)"

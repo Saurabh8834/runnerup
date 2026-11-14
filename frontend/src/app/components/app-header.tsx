@@ -590,7 +590,7 @@ export function AppHeader() {
                           Cancer Awareness 2026
                         </p>
                         <p className="text-[11px] text-amber-300 font-semibold truncate leading-tight mt-0.5">
-                          Active Challenge · 7–15 Nov
+                          Active Challenge · 7–17 Nov
                         </p>
                       </div>
                     </div>

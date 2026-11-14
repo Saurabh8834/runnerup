@@ -118,7 +118,7 @@ export function LeaderboardCountdown({
                 <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs sm:text-sm font-bold text-amber-300">
-                    Challenge Active (7–15 Nov 2026) · GPS Proof Pending
+                    Challenge Active (7–17 Nov 2026) · GPS Proof Pending
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
                     Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — Complete your run, walk, or cycling activity and upload your GPS screenshot to secure your official rank.

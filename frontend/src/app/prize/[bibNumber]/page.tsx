@@ -126,7 +126,7 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
           ) : prize.type === "medal" ? (
             isCancer ? (
               <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
-                <span className="font-semibold text-purple-300">🎗️ Finisher Medal:</span> Your official handcrafted 3D medal will dispatch following GPS proof verification after the challenge closes on 15 November 2026. Live courier tracking will be delivered directly via Email.
+                <span className="font-semibold text-purple-300">🎗️ Finisher Medal:</span> Your official handcrafted 3D medal will dispatch following GPS proof verification after the challenge closes on 17 November 2026. Live courier tracking will be delivered directly via Email.
               </div>
             ) : (
               <div className="mt-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-200/90 leading-relaxed">
@@ -135,7 +135,7 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
             )
           ) : prize.type === "certificate" && isCancer ? (
             <div className="mt-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-xs text-emerald-200/90 leading-relaxed">
-              <span className="font-semibold text-emerald-300">🏆 Available After 15 Nov:</span> Your official QR-verified Finisher E-Certificate will be unlocked for instant HD download once the challenge concludes on <strong>15 November 2026</strong> and your GPS run/walk proof is verified by our team.
+              <span className="font-semibold text-emerald-300">🏆 Available After 17 Nov:</span> Your official QR-verified Finisher E-Certificate will be unlocked for instant HD download once the challenge concludes on <strong>17 November 2026</strong> and your GPS run/walk proof is verified by our team.
             </div>
           ) : null}
 

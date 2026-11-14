@@ -354,12 +354,12 @@ export function LeaderboardClient({
   }, []);
 
   // Event-specific Leaderboard reveal target timestamp:
-  // - National Cancer Awareness Day Challenge (7–15 Nov 2026): Reveals 17 Nov 2026, 12:00 AM IST (Midnight 16/17 Nov)
+  // - National Cancer Awareness Day Challenge (7–17 Nov 2026): Reveals 18 Nov 2026, 12:00 AM IST (Midnight 17/18 Nov)
   // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
   const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
   const targetRevealTime = useMemo(() => {
     if (isCancerEvent) {
-      return new Date("2026-11-17T00:00:00+05:30").getTime();
+      return new Date("2026-11-18T00:00:00+05:30").getTime();
     }
     return new Date("2026-10-31T12:00:00+05:30").getTime();
   }, [isCancerEvent]);
@@ -881,7 +881,7 @@ export function LeaderboardClient({
                         </h3>
                         <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
                           {isCancerEvent
-                            ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–15 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 16 November at 12:00 PM IST after the event concludes."
+                            ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–17 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 18 November at 12:00 PM IST after the event concludes."
                             : "All activity proofs uploaded before the event cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock at 12:00 PM IST."}
                         </p>
                       </div>

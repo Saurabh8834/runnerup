@@ -127,9 +127,9 @@ export function Medal3DViewer({
   // Size specific dimensions & styling
   const sizeConfig = {
     mobile: {
-      maxH: "max-h-[220px] xs:max-h-[250px] sm:max-h-[280px]",
-      containerMaxW: "max-w-[210px] xs:max-w-[240px] sm:max-w-[270px]",
-      haloSize: "h-[220px] w-[220px] sm:h-[260px] sm:w-[260px]",
+      maxH: "max-h-[320px] xs:max-h-[350px] sm:max-h-[380px]",
+      containerMaxW: "max-w-[300px] xs:max-w-[330px] sm:max-w-[360px]",
+      haloSize: "h-[300px] w-[300px] sm:h-[350px] sm:w-[350px]",
     },
     desktop: {
       maxH: "max-h-[380px] lg:max-h-[420px] xl:max-h-[460px]",

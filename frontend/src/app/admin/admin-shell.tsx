@@ -761,7 +761,7 @@ function SidebarNav({
               <span className="text-sm">🎗️</span>
               <div className="min-w-0">
                 <p className="truncate font-bold leading-tight text-white">Cancer Challenge</p>
-                <p className="text-[0.62rem] text-emerald-400/90 font-mono">7–15 Nov · Live</p>
+                <p className="text-[0.62rem] text-emerald-400/90 font-mono">7–17 Nov · Live</p>
               </div>
             </div>
             <span className="text-[0.6rem] font-black uppercase tracking-wider bg-emerald-500/25 text-emerald-400 px-1.5 py-0.5 rounded shrink-0 border border-emerald-500/30">
