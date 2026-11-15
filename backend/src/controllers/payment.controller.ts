@@ -42,15 +42,14 @@ export async function resolveCouponDiscount(
   if (code === "KINETIC100" || code === "KINETIC50") {
     const isKinetic =
       Boolean(event.slug && event.slug.toLowerCase().includes("kinetic")) ||
-      Boolean(event.title && event.title.toLowerCase().includes("kinetic")) ||
-      Boolean(event.couponCode && event.couponCode.toUpperCase().includes("KINETIC"));
+      Boolean(event.title && event.title.toLowerCase().includes("kinetic"));
 
     if (!isKinetic) {
       return {
         valid: false,
         code,
         discountPaise: 0,
-        message: "Coupon KINETIC100 is valid exclusively for the Kinetic Run Virtual Challenge 2026.",
+        message: `Coupon ${code} is valid exclusively for the Kinetic Run Virtual Challenge 2026.`,
       };
     }
   }
@@ -140,21 +139,29 @@ export async function validateCoupon(request: Request, response: Response) {
   let event = payload.eventSlug
     ? await prisma.event.findFirst({
         where: {
-          slug: payload.eventSlug,
+          OR: [
+            { slug: payload.eventSlug },
+            { slug: { contains: payload.eventSlug, mode: "insensitive" } },
+          ],
         },
       })
     : null;
 
   if (!event) {
-    event = await prisma.event.findFirst({
-      where: {
-        OR: [
-          { status: "OPEN" },
-          { slug: { contains: "cancer", mode: "insensitive" } },
-        ],
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    if (!payload.eventSlug) {
+      event = await prisma.event.findFirst({
+        where: { status: "OPEN" },
+        orderBy: { createdAt: "desc" },
+      });
+    } else {
+      event = {
+        id: "custom-event",
+        title: payload.eventSlug,
+        slug: payload.eventSlug,
+        priceInPaise: 49900,
+        couponCode: null,
+      } as any;
+    }
   }
 
   const activeEvent = event || {

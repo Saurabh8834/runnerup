@@ -635,6 +635,21 @@ function PaymentRegistrationFormInner() {
       return;
     }
 
+    // Kinetic Run exclusive coupon restriction
+    if (raw === "KINETIC100" || raw === "KINETIC50") {
+      const isKinetic =
+        Boolean(selectedEvent && selectedEvent.toLowerCase().includes("kinetic")) ||
+        Boolean(activeEvent?.slug && activeEvent.slug.toLowerCase().includes("kinetic")) ||
+        Boolean(activeEvent?.title && activeEvent.title.toLowerCase().includes("kinetic"));
+
+      if (!isKinetic) {
+        setAppliedCoupon(null);
+        setCouponError("Coupon KINETIC100 is valid exclusively for the Kinetic Run Virtual Challenge 2026.");
+        setCouponLoading(false);
+        return;
+      }
+    }
+
     try {
       const res = await resilientFetch("/api/payments/validate-coupon", {
         method: "POST",
