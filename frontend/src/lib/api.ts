@@ -84,7 +84,7 @@ export async function resilientFetch(path: string, init: ResilientFetchOptions =
     }
   }
 
-  const perCandidateTimeoutMs = init.timeoutMs ?? 7000;
+  const perCandidateTimeoutMs = init.timeoutMs ?? 15000;
   let lastError: unknown = null;
   let lastResponse: Response | null = null;
 

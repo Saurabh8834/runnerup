@@ -55,6 +55,8 @@ type Registration = {
   proofStatus: string;
   finishTimeSeconds?: number | null;
   registeredAt: string;
+  shippingPhone?: string | null;
+  user?: { email?: string | null; phone?: string | null } | null;
   event: { title: string; slug: string; benefits?: string[]; endsAt?: string };
   payment: { status: string; amountInPaise: number } | null;
   proofUpload?: {
@@ -169,28 +171,37 @@ async function fileToPayload(file: File): Promise<string> {
     throw new Error("Image file is too large (maximum 25 MB). Please choose a smaller image or screenshot.");
   }
 
+  const compressCanvas = (img: CanvasImageSource, width: number, height: number, maxDim = 1280, quality = 0.76): string => {
+    const scale = Math.min(1, maxDim / Math.max(width, height));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(width * scale));
+    c.height = Math.max(1, Math.round(height * scale));
+    const ctx = c.getContext("2d");
+    if (!ctx) throw new Error("Could not get canvas context");
+    // White background to prevent black PNG transparency artifacts
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", quality);
+  };
+
   // 1. Hardware-accelerated compression via createImageBitmap
   try {
     if (typeof window !== "undefined" && typeof createImageBitmap === "function") {
       const bmp = await createImageBitmap(file);
-      const maxDim = 1600;
-      const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
-      const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(bmp.width * scale));
-      c.height = Math.max(1, Math.round(bmp.height * scale));
-      const ctx = c.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(bmp, 0, 0, c.width, c.height);
+      try {
+        const compressed = compressCanvas(bmp, bmp.width, bmp.height, 1280, 0.76);
         bmp.close();
-        return c.toDataURL("image/jpeg", 0.82);
+        return compressed;
+      } catch {
+        bmp.close();
       }
-      bmp.close();
     }
   } catch {
     // Non-blocking: proceed to standard HTMLImageElement compression
   }
 
-  // 2. HTMLImageElement fallback (works on iOS Safari and webviews where createImageBitmap may fail)
+  // 2. HTMLImageElement fallback (works across iOS Safari, Android Webview, and all mobile browsers)
   try {
     if (typeof window !== "undefined" && typeof URL !== "undefined" && typeof Image !== "undefined") {
       const objectUrl = URL.createObjectURL(file);
@@ -198,21 +209,13 @@ async function fileToPayload(file: File): Promise<string> {
         const img = new Image();
         img.onload = () => {
           try {
-            const maxDim = 1600;
-            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-            const c = document.createElement("canvas");
-            c.width = Math.max(1, Math.round(img.width * scale));
-            c.height = Math.max(1, Math.round(img.height * scale));
-            const ctx = c.getContext("2d");
-            if (ctx) {
-              ctx.drawImage(img, 0, 0, c.width, c.height);
-              URL.revokeObjectURL(objectUrl);
-              resolve(c.toDataURL("image/jpeg", 0.82));
-              return;
-            }
-          } catch {}
-          URL.revokeObjectURL(objectUrl);
-          reject(new Error("Canvas draw failed"));
+            const compressed = compressCanvas(img, img.naturalWidth || img.width, img.naturalHeight || img.height, 1280, 0.76);
+            URL.revokeObjectURL(objectUrl);
+            resolve(compressed);
+          } catch (e) {
+            URL.revokeObjectURL(objectUrl);
+            reject(e);
+          }
         };
         img.onerror = () => {
           URL.revokeObjectURL(objectUrl);
@@ -223,17 +226,34 @@ async function fileToPayload(file: File): Promise<string> {
       return dataUrl;
     }
   } catch {
-    // Non-blocking: proceed to raw FileReader
+    // Non-blocking: proceed to FileReader compression
   }
 
+  // 3. Raw FileReader fallback with secondary canvas compression
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-      } else {
+      const rawResult = typeof reader.result === "string" ? reader.result : "";
+      if (!rawResult) {
         reject(new Error("Could not read image file."));
+        return;
       }
+      try {
+        if (typeof Image !== "undefined") {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              resolve(compressCanvas(img, img.naturalWidth || img.width, img.naturalHeight || img.height, 1280, 0.76));
+            } catch {
+              resolve(rawResult);
+            }
+          };
+          img.onerror = () => resolve(rawResult);
+          img.src = rawResult;
+          return;
+        }
+      } catch {}
+      resolve(rawResult);
     };
     reader.onerror = () => reject(new Error("Failed to read image file."));
     reader.readAsDataURL(file);
@@ -406,12 +426,12 @@ export function DashboardClient() {
     try {
       const token = await getToken();
       if (!token) throw new Error("Could not get session token.");
-      // Only sync if not already synced in this session to eliminate redundant DB writes
+      // Fire-and-forget sync in background so dashboard load is immediate and never delayed
       const hasSynced = typeof window !== "undefined" && user?.id ? sessionStorage.getItem(`ru_synced_${user.id}`) : null;
       if (!hasSynced && user?.id) {
-        await resilientFetch("/api/users/sync", {
+        resilientFetch("/api/users/sync", {
           method: "POST",
-          headers: authHeaders(token),
+          headers: authHeaders(token, { "x-user-email": user?.primaryEmailAddress?.emailAddress || "" }),
           body: JSON.stringify({
             clerkId: user?.id,
             email: user?.primaryEmailAddress?.emailAddress,
@@ -424,8 +444,11 @@ export function DashboardClient() {
           try { sessionStorage.setItem(`ru_synced_${user.id}`, "1"); } catch {}
         }
       }
-      const res = await resilientFetch("/api/users/me", {
-        headers: authHeaders(token),
+      const emailParam = user?.primaryEmailAddress?.emailAddress ? `?email=${encodeURIComponent(user.primaryEmailAddress.emailAddress)}` : "";
+      const res = await resilientFetch(`/api/users/me${emailParam}`, {
+        headers: authHeaders(token, {
+          "x-user-email": user?.primaryEmailAddress?.emailAddress || "",
+        }),
       });
       if (!res.ok) throw new Error(await readApiError(res, "Could not load dashboard"));
       const json = await res.json();
@@ -433,15 +456,18 @@ export function DashboardClient() {
         setDbUser(json.data as DbUser);
         setError(null);
         try {
-          if (typeof window !== "undefined" && user?.id) {
-            localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+          if (typeof window !== "undefined") {
+            if (user?.id) localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+            if (user?.primaryEmailAddress?.emailAddress) {
+              localStorage.setItem(`ru_cached_user_${user.primaryEmailAddress.emailAddress.toLowerCase()}`, JSON.stringify(json.data));
+            }
           }
         } catch {}
       }
     } catch (err: any) {
-      // Auto-retry once after 1.5s on transient network lag
-      if (retryCount < 1) {
-        setTimeout(() => void load(retryCount + 1), 1500);
+      // Auto-retry with backoff on transient network lag
+      if (retryCount < 2) {
+        setTimeout(() => void load(retryCount + 1), 1500 * (retryCount + 1));
         return;
       }
       if (seq.current === id) {
@@ -462,26 +488,36 @@ export function DashboardClient() {
     try {
       const token = await getToken();
       if (!token) return;
-      const res = await resilientFetch("/api/users/me", { headers: authHeaders(token) });
+      const emailParam = user?.primaryEmailAddress?.emailAddress ? `?email=${encodeURIComponent(user.primaryEmailAddress.emailAddress)}` : "";
+      const res = await resilientFetch(`/api/users/me${emailParam}`, {
+        headers: authHeaders(token, {
+          "x-user-email": user?.primaryEmailAddress?.emailAddress || "",
+        }),
+      });
       if (!res.ok) return;
       const json = await res.json();
       if (seq.current === id && json?.data) {
         setDbUser(json.data as DbUser);
         try {
-          if (typeof window !== "undefined" && user?.id) {
-            localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+          if (typeof window !== "undefined") {
+            if (user?.id) localStorage.setItem(`ru_cached_user_${user.id}`, JSON.stringify(json.data));
+            if (user?.primaryEmailAddress?.emailAddress) {
+              localStorage.setItem(`ru_cached_user_${user.primaryEmailAddress.emailAddress.toLowerCase()}`, JSON.stringify(json.data));
+            }
           }
         } catch {}
       }
     } catch {
       // keep last known state
     }
-  }, [getToken, isSignedIn, user?.id]);
+  }, [getToken, isSignedIn, user?.id, user?.primaryEmailAddress?.emailAddress]);
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && user?.id) {
+    if (isLoaded && isSignedIn) {
       try {
-        const cached = localStorage.getItem(`ru_cached_user_${user.id}`);
+        const idKey = user?.id ? localStorage.getItem(`ru_cached_user_${user.id}`) : null;
+        const emailKey = user?.primaryEmailAddress?.emailAddress ? localStorage.getItem(`ru_cached_user_${user.primaryEmailAddress.emailAddress.toLowerCase()}`) : null;
+        const cached = idKey || emailKey;
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && Array.isArray(parsed.registrations) && parsed.registrations.length > 0) {
@@ -491,7 +527,7 @@ export function DashboardClient() {
         }
       } catch {}
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, user?.primaryEmailAddress?.emailAddress]);
 
   useEffect(() => {
     // Safety watchdog: ensure athlete dashboard is never stuck in loading spinner under any network condition
@@ -666,12 +702,16 @@ export function DashboardClient() {
             const up = await resilientFetch("/api/uploads/image", {
               method: "POST",
               timeoutMs: 40000,
-              headers: authHeaders(token),
+              headers: authHeaders(token, {
+                "x-user-email": user?.primaryEmailAddress?.emailAddress || dbUser?.email || activeReg?.user?.email || "",
+              }),
               body: JSON.stringify({ file: url, folder: "runnerup/proofs" }),
             });
             if (up.ok) {
               const upJson = await up.json();
-              url = upJson.data?.url || url;
+              if (upJson.data?.url) {
+                url = upJson.data.url;
+              }
             }
           } catch (uploadErr) {
             // Non-blocking: If Cloudinary or upload proxy has an issue, proceed with submitting the inline compressed proof!
@@ -698,13 +738,15 @@ export function DashboardClient() {
       const res = await resilientFetch(`/api/registrations/${proofRegId}/proof`, {
         method: "POST",
         timeoutMs: 40000,
-        headers: authHeaders(token),
+        headers: authHeaders(token, {
+          "x-user-email": user?.primaryEmailAddress?.emailAddress || dbUser?.email || activeReg?.user?.email || "",
+        }),
         body: JSON.stringify({
           activityImageUrl: url,
           sourceApp: sourceApp.trim() || "Strava",
           finishTimeSeconds: secs,
-          phone: user?.primaryPhoneNumber?.phoneNumber || dbUser?.phone || undefined,
-          email: user?.primaryEmailAddress?.emailAddress || dbUser?.email || undefined,
+          phone: user?.primaryPhoneNumber?.phoneNumber || dbUser?.phone || activeReg?.shippingPhone || undefined,
+          email: user?.primaryEmailAddress?.emailAddress || dbUser?.email || activeReg?.user?.email || undefined,
         }),
       });
 

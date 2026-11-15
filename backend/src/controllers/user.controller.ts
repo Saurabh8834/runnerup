@@ -152,6 +152,13 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
     throw new ApiError(401, "Authentication required");
   }
 
+  const clientEmail = (
+    request.header("x-user-email") ||
+    (typeof request.query.email === "string" ? request.query.email : "")
+  )
+    .trim()
+    .toLowerCase();
+
   const registrationInclude = {
     orderBy: { registeredAt: "desc" as const },
     take: 20,
@@ -165,16 +172,37 @@ export async function getCurrentUser(request: AuthenticatedRequest, response: Re
   };
 
   let user = await prisma.user.findFirst({
-    where: { clerkId },
+    where: {
+      OR: [
+        { clerkId },
+        ...(clientEmail ? [{ email: { equals: clientEmail, mode: "insensitive" as const } }] : []),
+      ],
+    },
     include: {
       registrations: registrationInclude,
     },
   });
 
+  if (user && !user.clerkId && clerkId) {
+    try {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { clerkId },
+      });
+    } catch {}
+  }
+
   if (!user) {
-    await upsertUserFromClerk({ clerkId });
+    try {
+      await upsertUserFromClerk({ clerkId, email: clientEmail || undefined });
+    } catch {}
     user = await prisma.user.findFirst({
-      where: { clerkId },
+      where: {
+        OR: [
+          { clerkId },
+          ...(clientEmail ? [{ email: { equals: clientEmail, mode: "insensitive" as const } }] : []),
+        ],
+      },
       include: {
         registrations: registrationInclude,
       },

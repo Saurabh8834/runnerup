@@ -58,7 +58,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
   const isMedalCard = true; // Every RunnerUp challenge awards a handcrafted die-cast metal medal
 
   const resolvePoster = (slug: string, bannerUrl?: string) => {
-    if (isKineticRun) return "/images/kinetic-run-medal-front.webp";
+    if (isKineticRun) return "/images/kinetic-run-medal-card.webp";
     if (isCancerAwareness) return "/images/cancer-awareness-medal-front.webp";
     if (isAirForce) return "/images/iaf-medal-front-card.webp";
     if (bannerUrl && !bannerUrl.includes("res.cloudinary.com") && !bannerUrl.endsWith("-4k.png")) return bannerUrl;
@@ -110,23 +110,23 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d141d]/95 text-[#f8fafc] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ff4b26]/60 hover:shadow-[0_16px_50px_rgba(255,75,38,0.25)] shadow-2xl cursor-pointer"
     >
       {/* Banner / Poster - Generous Height with 100% Unclipped Medal Display */}
-      <div className="relative overflow-hidden h-64 sm:h-72 bg-gradient-to-b from-[#141d29]/80 via-[#0d141d] to-[#080c10]">
+      <div className="relative overflow-hidden h-72 sm:h-80 bg-gradient-to-b from-[#141d29]/80 via-[#0d141d] to-[#080c10]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-          <div className={`h-52 w-52 rounded-full ${isCancerAwareness ? "bg-purple-600/25" : isKineticRun ? "bg-orange-500/20" : "bg-amber-500/15"} blur-3xl`} />
+          <div className={`h-56 w-56 rounded-full ${isCancerAwareness ? "bg-purple-600/25" : isKineticRun ? "bg-orange-500/20" : "bg-amber-500/15"} blur-3xl`} />
         </div>
 
         {imgSrc && !imgFailed ? (
-          <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+          <div className="absolute inset-0 flex items-center justify-center p-2.5 sm:p-4 z-[2]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={event.name}
-              className="h-full w-auto max-h-full max-w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none"
+              className={`h-full w-auto max-h-full max-w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none ${isKineticRun ? "scale-105 sm:scale-100" : ""}`}
               src={imgSrc}
               loading={index < 3 ? "eager" : "lazy"}
               decoding="async"
               onError={() => {
                 if (isKineticRun) {
-                  setImgSrc("/images/kinetic-run-medal-front.png");
+                  setImgSrc("/images/kinetic-run-medal-card.png");
                 } else if (isCancerAwareness) {
                   setImgSrc("/images/cancer-awareness-medal-front.png");
                 } else {
