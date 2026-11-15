@@ -300,13 +300,15 @@ export function LeaderboardClient({
   const currentClerkId = user?.id ?? null;
 
   const [events, setEvents] = useState<EventOption[]>(
-    publicEvents.map((e) => ({
-      slug: e.slug,
-      name: e.name,
-      distances: e.distance
-        ? e.distance.split("/").map((d) => d.trim()).filter(Boolean)
-        : ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
-    })),
+    publicEvents
+      .filter((e) => !e.slug.includes("kinetic") && !e.slug.includes("krun"))
+      .map((e) => ({
+        slug: e.slug,
+        name: e.name,
+        distances: e.distance
+          ? e.distance.split("/").map((d) => d.trim()).filter(Boolean)
+          : ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
+      })),
   );
 
   const defaultSlug = initialEventParam || initialData?.selectedSlug || "national-cancer-awareness-day-virtual-run-2026";
@@ -354,15 +356,20 @@ export function LeaderboardClient({
   }, []);
 
   // Event-specific Leaderboard reveal target timestamp:
+  // - Kinetic Run Virtual Challenge (10–15 Dec 2026): Strictly locked / under seal until 18 Dec 2026
   // - National Cancer Awareness Day Challenge (7–17 Nov 2026): Reveals 18 Nov 2026, 12:00 AM IST (Midnight 17/18 Nov)
   // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
   const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
+  const isKineticEvent = selectedSlug.toLowerCase().includes("kinetic") || selectedSlug.toLowerCase().includes("krun");
   const targetRevealTime = useMemo(() => {
+    if (isKineticEvent) {
+      return new Date("2026-12-18T12:00:00+05:30").getTime();
+    }
     if (isCancerEvent) {
       return new Date("2026-11-18T00:00:00+05:30").getTime();
     }
     return new Date("2026-10-31T12:00:00+05:30").getTime();
-  }, [isCancerEvent]);
+  }, [isCancerEvent, isKineticEvent]);
 
   const [isRevealed, setIsRevealed] = useState(() => Date.now() >= targetRevealTime);
 
@@ -400,14 +407,16 @@ export function LeaderboardClient({
         distances: string[];
       }>;
       if (list.length > 0) {
-        const mapped = list.map((e) => ({
-          id: e.id,
-          slug: e.slug,
-          name: e.title,
-          distances: e.distances?.length
-            ? e.distances
-            : ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
-        }));
+        const mapped = list
+          .filter((e) => !e.slug.includes("kinetic") && !e.slug.includes("krun"))
+          .map((e) => ({
+            id: e.id,
+            slug: e.slug,
+            name: e.title,
+            distances: e.distances?.length
+              ? e.distances
+              : ["1.5 km", "1.6 km", "3 km", "5 km", "10 km", "21 km"],
+          }));
         setEvents(mapped);
         if (initialEventParam && mapped.some((e) => e.slug === initialEventParam)) {
           setSelectedSlug(initialEventParam);
@@ -877,9 +886,9 @@ export function LeaderboardClient({
                   {!isRevealed ? (
                     <div className="space-y-8">
                       <LeaderboardCountdown
-                        eventName={events.find((e) => e.slug === selectedSlug)?.name}
+                        eventName={events.find((e) => e.slug === selectedSlug)?.name || (isKineticEvent ? "Kinetic Run Virtual Challenge 2026" : undefined)}
                         targetTimestamp={targetRevealTime}
-                        revealLabel={isCancerEvent ? "17 Nov, 12:00 AM IST" : "31 Oct, 12:00 PM IST"}
+                        revealLabel={isKineticEvent ? "18 Dec, 12:00 PM IST" : isCancerEvent ? "17 Nov, 12:00 AM IST" : "31 Oct, 12:00 PM IST"}
                         isCancerEvent={isCancerEvent}
                         userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
                         onTimerComplete={() => setIsRevealed(true)}
@@ -893,9 +902,11 @@ export function LeaderboardClient({
                           Leaderboard Standings Under Seal
                         </h3>
                         <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
-                          {isCancerEvent
-                            ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–17 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 18 November at 12:00 PM IST after the event concludes."
-                            : "All activity proofs uploaded before the event cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock at 12:00 PM IST."}
+                          {isKineticEvent
+                            ? "Registrations are currently active! The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. The official GPS-verified leaderboard and category standings will unlock on 18 December at 12:00 PM IST after all activity proofs are audited."
+                            : isCancerEvent
+                              ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–17 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 18 November at 12:00 PM IST after the event concludes."
+                              : "All activity proofs uploaded before the event cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock at 12:00 PM IST."}
                         </p>
                       </div>
                     </div>

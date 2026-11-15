@@ -891,7 +891,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       : undefined;
 
   const clerkUserId = request.auth?.userId;
-  const cacheKey = `lb:v3:${eventKey}:${distanceQuery || "all"}`;
+  const cacheKey = `lb:v4:${eventKey}:${distanceQuery || "all"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
@@ -1196,7 +1196,29 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     clerkId: string | null;
   }> = [];
 
-  if (realLeaderboardRows.length === 0) {
+  const isKineticEvent = event.slug.includes("kinetic") || event.slug.includes("krun");
+
+  if (isKineticEvent) {
+    // Kinetic Run Virtual Challenge is an upcoming event (race takes place 10–15 Dec).
+    // The verified leaderboard is strictly closed / empty until the race concludes and proofs are audited!
+    rankedLeaderboard = [];
+    const rosterList = allParticipants.length > 0 ? allParticipants : [];
+    participantRoster = rosterList.map((p, idx) => ({
+      rosterNumber: idx + 1,
+      runnerName: (p.shippingName || p.user?.name || "Runner").trim(),
+      city: p.shippingCity || "India",
+      state: p.shippingState || "",
+      distance: p.distance,
+      bibNumber: p.bibNumber,
+      status: "Verified Finisher" as const,
+      proofStatus: "APPROVED" as const,
+      registrationStatus: p.status,
+      registeredAt: p.registeredAt,
+      finishTimeSeconds: p.finishTimeSeconds,
+      userId: p.user.id,
+      clerkId: p.user.clerkId,
+    }));
+  } else if (realLeaderboardRows.length === 0) {
     // 100% Dummy Event: Generate deterministic bespoke leaderboard and roster with event-specific bibs and unique runners
     rankedLeaderboard = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
     participantRoster = generateEventRoster(event.slug, event.title, activeDistance, 75);
@@ -1208,8 +1230,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     // Sort strictly by finish time ascending
     mergedRows.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
 
-    // Pad ONLY if real participants are very few (< 15) for niche test events (NEVER for real official IAF or Cancer events)
-    if (mergedRows.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf")) {
+    // Pad ONLY if real participants are very few (< 15) for niche test events (NEVER for real official IAF, Cancer, or Kinetic events)
+    if (mergedRows.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf") && !isKineticEvent) {
       const paddedRows = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
       const lastTime = mergedRows[mergedRows.length - 1]?.finishTimeSeconds || Math.round(activeKm * 320);
       let nextTime = lastTime + 15;
@@ -1250,7 +1272,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       clerkId: p.user.clerkId,
     }));
 
-    if (participantRoster.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf")) {
+    if (participantRoster.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf") && !isKineticEvent) {
       const eventRoster = generateEventRoster(event.slug, event.title, activeDistance, 40);
       const remaining = Math.max(0, 40 - participantRoster.length);
       eventRoster.slice(0, remaining).forEach((p) => {

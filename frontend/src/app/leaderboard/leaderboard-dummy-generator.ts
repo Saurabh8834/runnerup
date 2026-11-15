@@ -157,7 +157,7 @@ export function getEventBibPrefix(eventSlug: string, eventTitle = ""): string {
 
 export function isDummyEvent(slug: string): boolean {
   const s = slug.toLowerCase();
-  return !s.includes("cancer") && !s.includes("air-force") && !s.includes("iaf");
+  return !s.includes("cancer") && !s.includes("air-force") && !s.includes("iaf") && !s.includes("kinetic") && !s.includes("krun");
 }
 
 export function generateClientDummyLeaderboard(
