@@ -639,8 +639,8 @@ function PaymentRegistrationFormInner() {
     if (raw === "KINETIC100" || raw === "KINETIC50") {
       const isKinetic =
         Boolean(selectedEvent && selectedEvent.toLowerCase().includes("kinetic")) ||
-        Boolean(activeEvent?.slug && activeEvent.slug.toLowerCase().includes("kinetic")) ||
-        Boolean(activeEvent?.title && activeEvent.title.toLowerCase().includes("kinetic"));
+        Boolean(activeEvent?.value && activeEvent.value.toLowerCase().includes("kinetic")) ||
+        Boolean(activeEvent?.label && activeEvent.label.toLowerCase().includes("kinetic"));
 
       if (!isKinetic) {
         setAppliedCoupon(null);
