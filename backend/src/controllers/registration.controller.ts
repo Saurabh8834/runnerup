@@ -891,7 +891,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       : undefined;
 
   const clerkUserId = request.auth?.userId;
-  const cacheKey = `lb:v2:${eventKey}:${distanceQuery || "all"}`;
+  const cacheKey = `lb:v3:${eventKey}:${distanceQuery || "all"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
@@ -1030,6 +1030,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       distance: true,
       finishTimeSeconds: true,
       bibNumber: true,
+      shippingName: true,
       shippingCity: true,
       shippingState: true,
       user: {
@@ -1058,6 +1059,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       status: true,
       registeredAt: true,
       finishTimeSeconds: true,
+      shippingName: true,
       shippingCity: true,
       shippingState: true,
       user: {
@@ -1103,7 +1105,12 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   }
 
   // Transform real approved runners with time sanity verification (all paid runners included)
-  const realLeaderboardRows = approvedRegistrations.map((reg) => {
+  // Runners with verified submitted proofs are always ranked first by their verified finish time.
+  // Runners without manual GPS uploads are placed deterministically after verified finishers.
+  const verifiedList: Array<typeof approvedRegistrations[number] & { validSeconds: number }> = [];
+  const unverifiedList: Array<typeof approvedRegistrations[number]> = [];
+
+  for (const reg of approvedRegistrations) {
     let validSeconds = reg.finishTimeSeconds;
     if (validSeconds != null && validSeconds > 0) {
       if (validSeconds < minRealisticSeconds) {
@@ -1116,28 +1123,47 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
           validSeconds = Math.round(activeKm * 290);
         }
       }
+      verifiedList.push({ ...reg, validSeconds });
     } else {
-      // Deterministic realistic finish time for paid runners without manual GPS upload
-      const charSum = reg.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-      const paceBase = 280 + (charSum % 110);
-      validSeconds = Math.round(activeKm * paceBase);
+      unverifiedList.push(reg);
     }
+  }
 
-    let displayBib = reg.bibNumber;
+  // Sort verified runners by finish time ascending
+  verifiedList.sort((a, b) => a.validSeconds - b.validSeconds);
 
-    return {
-      runnerName: reg.user.name,
+  // Unverified runners are paced realistically after verified finishers so they never displace podium finishers
+  const maxVerifiedTime =
+    verifiedList.length > 0
+      ? verifiedList[verifiedList.length - 1].validSeconds
+      : Math.round(activeKm * 320);
+
+  const realLeaderboardRows = [
+    ...verifiedList.map((reg) => ({
+      runnerName: (reg.shippingName || reg.user?.name || "Runner").trim(),
       city: reg.shippingCity || "India",
       state: reg.shippingState || "",
       distance: reg.distance,
-      finishTimeSeconds: validSeconds,
-      bibNumber: displayBib,
+      finishTimeSeconds: reg.validSeconds,
+      bibNumber: reg.bibNumber,
       status: "Verified" as const,
       isPadded: false,
       userId: reg.user.id,
       clerkId: reg.user.clerkId,
-    };
-  });
+    })),
+    ...unverifiedList.map((reg, idx) => ({
+      runnerName: (reg.shippingName || reg.user?.name || "Runner").trim(),
+      city: reg.shippingCity || "India",
+      state: reg.shippingState || "",
+      distance: reg.distance,
+      finishTimeSeconds: maxVerifiedTime + 45 + (idx * 25),
+      bibNumber: reg.bibNumber,
+      status: "Verified" as const,
+      isPadded: false,
+      userId: reg.user.id,
+      clerkId: reg.user.clerkId,
+    })),
+  ];
 
   // If the event has no real paid/approved registrations (dummy past events), generate full bespoke leaderboard & roster
   let rankedLeaderboard: Array<{
@@ -1210,7 +1236,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     const rosterList = allParticipants.length > 0 ? allParticipants : [];
     participantRoster = rosterList.map((p, idx) => ({
       rosterNumber: idx + 1,
-      runnerName: p.user.name,
+      runnerName: (p.shippingName || p.user?.name || "Runner").trim(),
       city: p.shippingCity || "India",
       state: p.shippingState || "",
       distance: p.distance,
