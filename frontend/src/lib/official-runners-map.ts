@@ -1,3 +1,5 @@
+import { getLegacyIafRunner } from "./legacy-iaf-map";
+
 // Generated Official Verified Runners Registry for 100% Zero-Error Fallback
 export type VerifiedRunnerInfo = {
   name: string;
@@ -1571,5 +1573,16 @@ export const OFFICIAL_RUNNERS_MAP: Record<string, VerifiedRunnerInfo> = {
 export function getVerifiedRunnerByBib(bib: string): VerifiedRunnerInfo | null {
   if (!bib) return null;
   const clean = bib.replace(/\D/g, "");
-  return OFFICIAL_RUNNERS_MAP[bib] || OFFICIAL_RUNNERS_MAP[clean] || null;
+  const direct = OFFICIAL_RUNNERS_MAP[bib] || OFFICIAL_RUNNERS_MAP[clean];
+  if (direct) return direct;
+
+  const legacy = getLegacyIafRunner(bib);
+  if (legacy) {
+    return {
+      name: legacy.name,
+      distance: legacy.distance,
+      bibNumber: legacy.currentBib,
+    };
+  }
+  return null;
 }

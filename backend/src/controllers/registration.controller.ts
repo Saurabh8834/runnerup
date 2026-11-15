@@ -891,7 +891,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       : undefined;
 
   const clerkUserId = request.auth?.userId;
-  const cacheKey = `lb:${eventKey}:${distanceQuery || "all"}`;
+  const cacheKey = `lb:v2:${eventKey}:${distanceQuery || "all"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
@@ -1175,50 +1175,65 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     rankedLeaderboard = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
     participantRoster = generateEventRoster(event.slug, event.title, activeDistance, 75);
   } else {
-    // Real Event (e.g. IAF or Cancer Challenge): prioritize real users, pad only if necessary
-    const eventPrefix = getEventBibPrefix(event.slug, event.title);
-    const paddedRows = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
-
+    // Real Event (e.g. IAF Day Virtual Challenge or Cancer Awareness Run):
+    // All real paid & confirmed participants are verified runners.
     const mergedRows = [...realLeaderboardRows];
-    for (const dummy of paddedRows) {
-      if (mergedRows.length >= 80) break;
-      if (!mergedRows.some((r) => r.runnerName.toLowerCase() === dummy.runnerName.toLowerCase())) {
-        mergedRows.push(dummy);
-      }
-    }
 
     // Sort strictly by finish time ascending
     mergedRows.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
 
-    // Compute ranks
+    // Pad ONLY if real participants are very few (< 15) for niche test events (NEVER for real official IAF or Cancer events)
+    if (mergedRows.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf")) {
+      const paddedRows = generateEventLeaderboard(event.slug, event.title, activeDistance, 60);
+      const lastTime = mergedRows[mergedRows.length - 1]?.finishTimeSeconds || Math.round(activeKm * 320);
+      let nextTime = lastTime + 15;
+      for (const dummy of paddedRows) {
+        if (mergedRows.length >= 40) break;
+        if (!mergedRows.some((r) => r.runnerName.toLowerCase() === dummy.runnerName.toLowerCase())) {
+          nextTime += 8 + (Math.floor(Math.random() * 12));
+          mergedRows.push({
+            ...dummy,
+            finishTimeSeconds: nextTime,
+          });
+        }
+      }
+    }
+
+    // Compute strictly sequential ranks (1, 2, 3, 4...) with zero duplicates or gaps
+    // IMPORTANT: Spread `row` first, then assign `rank: index + 1` so it is NEVER overwritten by any existing `row.rank`!
     rankedLeaderboard = mergedRows.map((row, index) => ({
-      rank: index + 1,
       ...row,
+      rank: index + 1,
     }));
 
-    // Real participants first, then event-prefixed padded roster if needed
-    const eventRoster = generateEventRoster(event.slug, event.title, activeDistance, 50);
-    participantRoster = [
-      ...allParticipants.map((p, idx) => ({
-        rosterNumber: idx + 1,
-        runnerName: p.user.name,
-        city: p.shippingCity || "India",
-        state: p.shippingState || "",
-        distance: p.distance,
-        bibNumber: p.bibNumber,
-        status: "Verified Finisher" as const,
-        proofStatus: "APPROVED" as const,
-        registrationStatus: p.status,
-        registeredAt: p.registeredAt,
-        finishTimeSeconds: p.finishTimeSeconds,
-        userId: p.user.id,
-        clerkId: p.user.clerkId,
-      })),
-      ...eventRoster.slice(0, Math.max(0, 75 - allParticipants.length)).map((p, idx) => ({
-        ...p,
-        rosterNumber: allParticipants.length + idx + 1,
-      })),
-    ];
+    // Real participants first for the Roster tab
+    const rosterList = allParticipants.length > 0 ? allParticipants : [];
+    participantRoster = rosterList.map((p, idx) => ({
+      rosterNumber: idx + 1,
+      runnerName: p.user.name,
+      city: p.shippingCity || "India",
+      state: p.shippingState || "",
+      distance: p.distance,
+      bibNumber: p.bibNumber,
+      status: "Verified Finisher" as const,
+      proofStatus: "APPROVED" as const,
+      registrationStatus: p.status,
+      registeredAt: p.registeredAt,
+      finishTimeSeconds: p.finishTimeSeconds,
+      userId: p.user.id,
+      clerkId: p.user.clerkId,
+    }));
+
+    if (participantRoster.length < 15 && !event.slug.includes("air-force") && !event.slug.includes("cancer") && !event.slug.includes("iaf")) {
+      const eventRoster = generateEventRoster(event.slug, event.title, activeDistance, 40);
+      const remaining = Math.max(0, 40 - participantRoster.length);
+      eventRoster.slice(0, remaining).forEach((p) => {
+        participantRoster.push({
+          ...p,
+          rosterNumber: participantRoster.length + 1,
+        });
+      });
+    }
   }
 
   const totalEventParticipants =

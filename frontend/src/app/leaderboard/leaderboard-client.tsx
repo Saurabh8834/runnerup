@@ -456,7 +456,13 @@ export function LeaderboardClient({
 
     if (cached && Date.now() - cached.timestamp < 120000) {
       const json = cached.json;
-      setEntries((json.data ?? []) as LeaderboardEntry[]);
+      let cachedEntries = (json.data ?? []) as LeaderboardEntry[];
+      cachedEntries.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
+      cachedEntries = cachedEntries.map((row, idx) => ({
+        ...row,
+        rank: idx + 1,
+      }));
+      setEntries(cachedEntries);
       setParticipants((json.participants ?? []) as ParticipantEntry[]);
       setUserRegistrations((json.userRegistrations ?? []) as UserReg[]);
       if (json.meta?.availableDistances?.length) {
@@ -525,6 +531,13 @@ export function LeaderboardClient({
           rosterData = generateClientDummyRoster(selectedSlug, currentEventName, targetDist, 75);
         }
       }
+
+      // Strictly sort by finish time ascending and ensure sequential ranks (1..N) without duplicates or gaps
+      rankedData.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
+      rankedData = rankedData.map((row, idx) => ({
+        ...row,
+        rank: idx + 1,
+      }));
 
       setEntries(rankedData);
       setParticipants(rosterData);

@@ -5,6 +5,7 @@ import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
 import { memoryCache } from "../utils/cache.js";
 import { recordDownload } from "../services/download-tracker.service.js";
+import { resolveLegacyBib } from "../services/legacy-bib.service.js";
 
 type PrizeStatus = "pending" | "processing" | "ready" | "sent" | "dispatched" | "delivered" | "not_eligible";
 
@@ -147,10 +148,19 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     return response.json(cached);
   }
 
+  const legacy = resolveLegacyBib(query);
+
   // Fast-path indexed lookups based on query pattern to prevent 3-second full table scans
   let whereClause: any;
 
-  if (query.includes("@")) {
+  if (legacy) {
+    whereClause = {
+      OR: [
+        { id: legacy.registrationId },
+        { bibNumber: legacy.currentBib },
+      ],
+    };
+  } else if (query.includes("@")) {
     whereClause = {
       user: { email: query.toLowerCase() },
     };
@@ -164,6 +174,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
       OR: [
         { shippingPhone: { contains: tenDigits } },
         { user: { phone: { contains: tenDigits } } },
+        { adminNote: { contains: tenDigits } },
       ],
     };
   } else {

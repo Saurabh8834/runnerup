@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { ApiError } from "../utils/api-error.js";
 import { routeParam } from "../utils/params.js";
 import { recordDownload } from "../services/download-tracker.service.js";
+import { resolveLegacyBib } from "../services/legacy-bib.service.js";
 
 const certInclude = {
   registration: {
@@ -25,9 +26,12 @@ export async function verifyCertificate(request: Request, response: Response) {
 
   const mode = "insensitive" as const;
 
+  // Resolve legacy IAF bib / certificate mapping (e.g. CERT-IAF26-IAFD495096, IAFD-495096, 495096, 7839427810)
+  const legacyEntry = resolveLegacyBib(rawParam);
+
   const isKineticQuery = /^CERT-KRUN/i.test(rawParam) || /^KRUN/i.test(rawParam);
   const isCancerQuery = /^CERT-NCAD/i.test(rawParam) || /^NCAD/i.test(rawParam) || /cancer/i.test(rawParam);
-  const isIafQuery = /^CERT-IAF/i.test(rawParam) || /^IAF/i.test(rawParam);
+  const isIafQuery = Boolean(legacyEntry) || /^CERT-IAF/i.test(rawParam) || /^IAF/i.test(rawParam);
 
   // Strict event slug filtering to prevent cross-event bib/certificate collisions
   const eventSlugFilter = isKineticQuery
@@ -38,6 +42,8 @@ export async function verifyCertificate(request: Request, response: Response) {
         ? { slug: { contains: "air-force", mode } }
         : undefined;
 
+  const phoneFilter = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : null;
+
   let certificate: CertificateWithRegistration | null = await prisma.certificate.findFirst({
     where: {
       AND: [
@@ -45,6 +51,22 @@ export async function verifyCertificate(request: Request, response: Response) {
         {
           OR: [
             { certificateNumber: { equals: rawParam, mode } },
+            ...(legacyEntry
+              ? [
+                  { registrationId: legacyEntry.registrationId },
+                  { id: legacyEntry.registrationId },
+                  { registration: { bibNumber: legacyEntry.currentBib } },
+                  { certificateNumber: { equals: legacyEntry.certNumber, mode } },
+                  { certificateNumber: { equals: `CERT-IAF26-${legacyEntry.currentBib}`, mode } },
+                ]
+              : []),
+            ...(phoneFilter
+              ? [
+                  { registration: { shippingPhone: { contains: phoneFilter } } },
+                  { registration: { user: { phone: { contains: phoneFilter } } } },
+                  { registration: { adminNote: { contains: phoneFilter } } },
+                ]
+              : []),
             ...(isIafQuery || (!isKineticQuery && !isCancerQuery)
               ? [
                   { certificateNumber: { equals: `CERT-IAF26-${rawParam}`, mode } },
@@ -82,6 +104,19 @@ export async function verifyCertificate(request: Request, response: Response) {
           ...(eventSlugFilter ? [{ event: eventSlugFilter }] : []),
           {
             OR: [
+              ...(legacyEntry
+                ? [
+                    { id: legacyEntry.registrationId },
+                    { bibNumber: legacyEntry.currentBib },
+                  ]
+                : []),
+              ...(phoneFilter
+                ? [
+                    { shippingPhone: { contains: phoneFilter } },
+                    { user: { phone: { contains: phoneFilter } } },
+                    { adminNote: { contains: phoneFilter } },
+                  ]
+                : []),
               { bibNumber: rawParam },
               ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
               { id: rawParam },

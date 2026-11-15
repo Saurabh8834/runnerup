@@ -564,7 +564,7 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
     return canvas;
   }
 
-  const baseImg = await loadImage("/iaf-cert-clean-base.jpg?v=20261031_v3");
+  const baseImg = await loadImage("/iaf-cert-clean-base.jpg?v=20261115_v4");
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 682;
@@ -590,31 +590,82 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
   ctx.fillStyle = "#f6d791";
   ctx.fillText(nameClean, 512, 307);
 
-  // 2. Distance number (e.g. "10" or "5")
+  // 2. Distance number (e.g. "10" or "5") - clean elevation at y=471 to preserve unbroken gold underline
   const distVal = data.distance.toUpperCase().replace("KM", "").replace("K", "").trim() || "5";
-  ctx.font = `bold 22px "OfficialTimesBold", "Times New Roman", Times, serif`;
+  ctx.font = `bold 20px "OfficialTimesBold", "Times New Roman", Times, serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#050a14";
-  ctx.fillText(distVal, 331, 477);
   ctx.fillStyle = "#f6d791";
-  ctx.fillText(distVal, 330, 476);
+  ctx.fillText(distVal, 330, 471);
 
-  // 3. Date
+  // 3. Date - clean elevation at y=471 with generous clearance above y=478 underline
   const dateStr = data.dateStr || "31  /  10  /  2026";
-  ctx.fillStyle = "#050a14";
-  ctx.fillText(dateStr, 523, 477);
-  ctx.fillStyle = "#f6d791";
-  ctx.fillText(dateStr, 522, 476);
+  ctx.fillText(dateStr, 522, 471);
 
-  // 4. Delicate Signature
-  ctx.font = `28px "AlexBrush", "Brush Script MT", "Segoe Script", cursive`;
+  // 4. Delicate Signature - professional cursive signature cleanly embedded directly into certificate artwork
+  ctx.font = `30px "AlexBrush", "Brush Script MT", "Segoe Script", cursive`;
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
-  ctx.fillStyle = "#050a14";
-  ctx.fillText("Runnerup", 696, 473);
+  // Subtle dark micro-depth for crisp legibility against sky
+  ctx.fillStyle = "rgba(6, 12, 22, 0.85)";
+  ctx.fillText("Runnerup", 696, 467);
+  // Rich royal metallic gold
   ctx.fillStyle = "#f6d791";
-  ctx.fillText("Runnerup", 695, 472);
+  ctx.fillText("Runnerup", 695, 466);
+
+  // 5. Official IAF Leaderboard QR Code Badge (Pure QR display - no text labels, luxury dark gold card)
+  try {
+    const qrImg = await loadImage("/iaf-leaderboard-10k-gold-qr.png");
+    const qx = 834, qy = 418, qw = 78, qh = 78, r = 8;
+    ctx.save();
+    
+    // Outer Obsidian Glass with Antique Gold border
+    ctx.beginPath();
+    ctx.moveTo(qx + r, qy);
+    ctx.arcTo(qx + qw, qy, qx + qw, qy + qh, r);
+    ctx.arcTo(qx + qw, qy + qh, qx, qy + qh, r);
+    ctx.arcTo(qx, qy + qh, qx, qy, r);
+    ctx.arcTo(qx, qy, qx + qw, qy, r);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(8, 16, 28, 0.94)";
+    ctx.fill();
+    ctx.strokeStyle = "#d4af37";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Inner Luminous Gold Hairline
+    const ir = 6, ix = qx + 3, iy = qy + 3, iw = qw - 6, ih = qh - 6;
+    ctx.beginPath();
+    ctx.moveTo(ix + ir, iy);
+    ctx.arcTo(ix + iw, iy, ix + iw, iy + ih, ir);
+    ctx.arcTo(ix + iw, iy + ih, ix, iy + ih, ir);
+    ctx.arcTo(ix, iy + ih, ix, iy, ir);
+    ctx.arcTo(ix, iy, ix + iw, iy, ir);
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(246, 215, 145, 0.6)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Four Gold Corner Accent Dots
+    ctx.fillStyle = "rgba(246, 215, 145, 0.9)";
+    for (const [dotX, dotY] of [
+      [qx + 6, qy + 6],
+      [qx + qw - 6, qy + 6],
+      [qx + 6, qy + qh - 6],
+      [qx + qw - 6, qy + qh - 6],
+    ]) {
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Centered Gold QR Code (Clean QR only - no text labels)
+    const qrSize = 62;
+    ctx.drawImage(qrImg, qx + (qw - qrSize) / 2, qy + (qh - qrSize) / 2, qrSize, qrSize);
+    ctx.restore();
+  } catch (e) {
+    // Graceful fallback if QR asset fails to load
+  }
 
   return canvas;
 }

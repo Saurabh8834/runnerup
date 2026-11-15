@@ -71,7 +71,7 @@ export default function DigitalBibPage() {
       setLoading(true);
       setError(null);
       const cleanBib = bibNumber.replace(/\D/g, "");
-      const officialRunner = getVerifiedRunnerByBib(cleanBib);
+      const officialRunner = getVerifiedRunnerByBib(bibNumber) || getVerifiedRunnerByBib(cleanBib);
 
       try {
         const res = await resilientFetch(`/api/prizes/${encodeURIComponent(bibNumber)}`);

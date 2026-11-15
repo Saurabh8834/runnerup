@@ -85,7 +85,7 @@ export default function CertificateVerifyPage() {
         .replace(/[^0-9]/g, "") || "1001";
 
       // CRITICAL: Only use IAF static map if this is actually an IAF certificate!
-      const officialRunner = isIafCert ? getVerifiedRunnerByBib(bibGuess) : null;
+      const officialRunner = isIafCert ? (getVerifiedRunnerByBib(certificateNumber) || getVerifiedRunnerByBib(bibGuess)) : null;
 
       try {
         const response = await resilientFetch(
