@@ -10,11 +10,29 @@ async function main() {
       slug: true,
       startsAt: true,
       endsAt: true,
+      proofClosesAt: true,
       status: true,
-      bannerImageUrl: true,
+      highlight: true,
     },
   });
-  console.log(JSON.stringify(events, null, 2));
+  console.log("EVENTS:", JSON.stringify(events, null, 2));
+
+  const kineticRegs = await prisma.registration.findMany({
+    where: {
+      OR: [
+        { event: { slug: { contains: "kinetic" } } },
+        { event: { title: { contains: "Kinetic" } } },
+        { bibNumber: { startsWith: "KRUN" } }
+      ]
+    },
+    include: {
+      user: { select: { id: true, email: true, name: true } },
+      event: { select: { id: true, title: true, slug: true } },
+      payment: true,
+      certificate: true
+    }
+  });
+  console.log("KINETIC REGS:", JSON.stringify(kineticRegs, null, 2));
 }
 
 main()

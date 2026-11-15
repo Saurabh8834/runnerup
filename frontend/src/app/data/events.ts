@@ -55,7 +55,7 @@ export const kineticRunEvent: PublicEvent = {
   banner: "Kinetic Run Virtual Challenge",
   bannerImageUrl: "/images/kinetic-run-medal-front.webp",
   medalImageUrl: "/images/kinetic-run-medal-front.webp",
-  reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
+  reward: "Die-Cast Solid Metal Finisher Medal + Premium Podium Hoodie + Digital Bib + Certificate",
   showCouponOnCard: false,
   status: "upcoming",
   compareAtPrice: "Rs. 799",
@@ -65,6 +65,7 @@ export const kineticRunEvent: PublicEvent = {
   benefits: [
     "Die-Cast Solid Metal Kinetic Finisher Ribbon Medal with 3D Wings",
     "Official Digital Race Bib with Unique KRUN Number",
+    "Exclusive Premium Hoodie Award for Top 3 Podium Finishers",
     "100% Free Doorstep Courier Delivery Across India",
     "Works with Strava, Garmin, Apple & NRC",
     "Official Verifiable E-Certificate with Instant QR Verification",

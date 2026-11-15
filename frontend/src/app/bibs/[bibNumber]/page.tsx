@@ -43,24 +43,27 @@ export default function DigitalBibPage() {
   const [canvasReady, setCanvasReady] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const eventTitleLower = (data?.eventTitle || "").toLowerCase();
   const isKinetic =
     bibNumber.toUpperCase().startsWith("KRUN") ||
     bibNumber.toUpperCase().startsWith("KRVC") ||
-    (data?.eventTitle || "").toLowerCase().includes("kinetic");
+    eventTitleLower.includes("kinetic");
 
   const isCancer =
     !isKinetic &&
     (bibNumber.toUpperCase().startsWith("NCAD") ||
-      (data?.eventTitle || "").toLowerCase().includes("cancer"));
+      eventTitleLower.includes("cancer"));
 
   const isIaf = !isKinetic && !isCancer;
 
   const isAdminDemo =
     bibNumber.includes("1999") ||
-    (data?.runnerName || "").toUpperCase().includes("SAURABH") ||
     searchParams.get("admin") === "true";
 
-  const isLocked = !isIaf && !isAdminDemo;
+  // Kinetic Run: Strictly locked until event concludes on 15 Dec 2026.
+  // Cancer Run: Locked until 17 Nov 2026.
+  // IAF: Concluded race -> Unlocked.
+  const isLocked = isKinetic || (!isIaf && !isAdminDemo);
   const unlockDateStr = isKinetic ? "15 December 2026" : "17 November 2026";
 
   useEffect(() => {
@@ -71,7 +74,6 @@ export default function DigitalBibPage() {
       setLoading(true);
       setError(null);
       const cleanBib = bibNumber.replace(/\D/g, "");
-      const officialRunner = getVerifiedRunnerByBib(bibNumber) || getVerifiedRunnerByBib(cleanBib);
 
       try {
         const res = await resilientFetch(`/api/prizes/${encodeURIComponent(bibNumber)}`);
@@ -86,6 +88,15 @@ export default function DigitalBibPage() {
           throw new Error("Payment pending. Official digital race bib and finisher certificate are available exclusively for confirmed, paid participants.");
         }
 
+        const evSlug = (payload.event?.slug || "").toLowerCase();
+        const evTitle = (payload.event?.title || "").toLowerCase();
+        const isPayloadKinetic = evSlug.includes("kinetic") || evTitle.includes("kinetic");
+        const isPayloadCancer = !isPayloadKinetic && (evSlug.includes("cancer") || evTitle.includes("cancer"));
+        const isPayloadIaf = !isPayloadKinetic && !isPayloadCancer;
+
+        // CRITICAL: Only check legacy IAF static map if the event is actually IAF! Prevent cross-event data leakage.
+        const officialRunner = isPayloadIaf ? (getVerifiedRunnerByBib(bibNumber) || getVerifiedRunnerByBib(cleanBib)) : null;
+
         const runnerNameUpper = (payload.runner?.name || officialRunner?.name || "RUNNER").toUpperCase().trim();
 
         let rawDist = payload.event?.distance || payload.runner?.distance || payload.distance || officialRunner?.distance || "5 KM";
@@ -95,11 +106,11 @@ export default function DigitalBibPage() {
         }
 
         let positionStr = payload.runner?.rankFormatted || (payload.runner?.rank ? String(payload.runner.rank).padStart(4, "0") : null);
-        if (runnerNameUpper.includes("ANJALI") || runnerNameUpper.includes("ARSALAN") || runnerNameUpper.includes("SAURABH")) {
+        if (isPayloadIaf && (runnerNameUpper.includes("ANJALI") || runnerNameUpper.includes("ARSALAN") || runnerNameUpper.includes("SAURABH"))) {
           positionStr = "0001";
-        } else if (runnerNameUpper.includes("YASHAS") || runnerNameUpper.includes("SAI PRAJYUN")) {
+        } else if (isPayloadIaf && (runnerNameUpper.includes("YASHAS") || runnerNameUpper.includes("SAI PRAJYUN"))) {
           positionStr = "0002";
-        } else if (runnerNameUpper.includes("VIRENDRASINH") || (payload.runner?.bibNumber || bibNumber).includes("370377")) {
+        } else if (isPayloadIaf && (runnerNameUpper.includes("VIRENDRASINH") || (payload.runner?.bibNumber || bibNumber).includes("370377"))) {
           positionStr = "0010";
         }
 
@@ -199,7 +210,10 @@ export default function DigitalBibPage() {
   }, [data]);
 
   async function handleDownload() {
-    if (!data) return;
+    if (!data || isLocked) {
+      alert(`Digital bib is locked. It will unlock automatically on ${unlockDateStr}.`);
+      return;
+    }
     setDownloading(true);
     try {
       let canvas = canvasRef.current;

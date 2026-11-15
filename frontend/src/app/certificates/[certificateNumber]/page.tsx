@@ -198,7 +198,10 @@ export default function CertificateVerifyPage() {
   }, [data, isKineticCert, isCancerCert]);
 
   async function handleDownload() {
-    if (!data) return;
+    if (!data || isLocked) {
+      alert(`Certificate is locked. Official finisher certificates unlock automatically after the challenge concludes on ${unlockDateStr}.`);
+      return;
+    }
     setDownloading(true);
     try {
       const eventTitle = (data.event || "").toLowerCase();
@@ -397,7 +400,7 @@ export default function CertificateVerifyPage() {
   // IAF: Concluded (31 Oct 2026) -> Unlocked
   // Cancer: Ongoing until 17 Nov 2026 -> Locked unless admin demo
   // Kinetic: Upcoming (10-15 Dec 2026) -> Locked unless admin preview
-  const isLocked = !isIaf && !isAdminDemo;
+  const isLocked = isKinetic || (!isIaf && !isAdminDemo);
   const unlockDateStr = isKinetic ? "15 December 2026" : "17 November 2026";
 
   return (

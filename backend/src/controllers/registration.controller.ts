@@ -958,7 +958,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     },
   });
 
-  if (!event) {
+  if (!event && (!eventKey || eventKey === "all" || eventKey === "default")) {
     event = await prisma.event.findFirst({
       where: {
         OR: [

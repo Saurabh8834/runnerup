@@ -260,10 +260,16 @@ export async function createPaymentOrder(request: Request, response: Response) {
               .catch(() => null);
           }
 
+          const evSlug = registration.event?.slug?.toLowerCase() || "";
+          const isKineticEv = evSlug.includes("kinetic") || registration.event?.title?.toLowerCase().includes("kinetic");
+          const isCancerEv = !isKineticEv && (evSlug.includes("cancer") || registration.event?.title?.toLowerCase().includes("cancer"));
+          const eventDates = isKineticEv ? "10–15 December 2026" : isCancerEv ? "7–17 November 2026" : "25–30 October 2026";
+
           await sendRegistrationConfirmationEmail({
             to: registration.user.email,
             runnerName: registration.user.name,
             eventTitle: registration.event.title,
+            eventDates,
             distance: registration.distance,
             bibNumber: registration.bibNumber,
             amountInPaise: registration.payment?.amountInPaise ?? registration.event.priceInPaise,
@@ -503,10 +509,16 @@ export async function verifyPayment(request: Request, response: Response) {
           .catch(() => null);
       }
 
+      const evSlug = registration.event?.slug?.toLowerCase() || "";
+      const isKineticEv = evSlug.includes("kinetic") || registration.event?.title?.toLowerCase().includes("kinetic");
+      const isCancerEv = !isKineticEv && (evSlug.includes("cancer") || registration.event?.title?.toLowerCase().includes("cancer"));
+      const eventDates = isKineticEv ? "10–15 December 2026" : isCancerEv ? "7–17 November 2026" : "25–30 October 2026";
+
       const emailResult = await sendRegistrationConfirmationEmail({
         to: registration.user.email,
         runnerName: registration.shippingName || registration.user.name,
         eventTitle: registration.event.title,
+        eventDates,
         distance: registration.distance,
         bibNumber: registration.bibNumber,
         amountInPaise: payment.amountInPaise,
@@ -639,10 +651,16 @@ export async function getPaymentStatus(request: Request, response: Response) {
               .catch(() => null);
           }
 
+          const evSlug = updatedReg.event?.slug?.toLowerCase() || "";
+          const isKineticEv = evSlug.includes("kinetic") || updatedReg.event?.title?.toLowerCase().includes("kinetic");
+          const isCancerEv = !isKineticEv && (evSlug.includes("cancer") || updatedReg.event?.title?.toLowerCase().includes("cancer"));
+          const eventDates = isKineticEv ? "10–15 December 2026" : isCancerEv ? "7–17 November 2026" : "25–30 October 2026";
+
           await sendRegistrationConfirmationEmail({
             to: updatedReg.user.email,
             runnerName: updatedReg.shippingName || updatedReg.user.name,
             eventTitle: updatedReg.event.title,
+            eventDates,
             distance: updatedReg.distance,
             bibNumber: updatedReg.bibNumber,
             amountInPaise: updatedPayment.amountInPaise,
@@ -792,10 +810,16 @@ export async function handleRazorpayWebhook(request: Request, response: Response
             .catch(() => null);
         }
 
+        const evSlug = registration.event?.slug?.toLowerCase() || "";
+        const isKineticEv = evSlug.includes("kinetic") || registration.event?.title?.toLowerCase().includes("kinetic");
+        const isCancerEv = !isKineticEv && (evSlug.includes("cancer") || registration.event?.title?.toLowerCase().includes("cancer"));
+        const eventDates = isKineticEv ? "10–15 December 2026" : isCancerEv ? "7–17 November 2026" : "25–30 October 2026";
+
         await sendRegistrationConfirmationEmail({
           to: registration.user.email,
           runnerName: registration.shippingName || registration.user.name,
           eventTitle: registration.event.title,
+          eventDates,
           distance: registration.distance,
           bibNumber: registration.bibNumber,
           amountInPaise: payment.amountInPaise,

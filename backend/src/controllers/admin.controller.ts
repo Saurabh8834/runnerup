@@ -1005,10 +1005,16 @@ export async function adminMarkRegistrationPaid(
     },
   });
 
+  const evSlug1 = registration.event?.slug?.toLowerCase() || "";
+  const isKinetic1 = evSlug1.includes("kinetic") || registration.event?.title?.toLowerCase().includes("kinetic");
+  const isCancer1 = !isKinetic1 && (evSlug1.includes("cancer") || registration.event?.title?.toLowerCase().includes("cancer"));
+  const dates1 = isKinetic1 ? "10–15 December 2026" : isCancer1 ? "7–17 November 2026" : "25–30 October 2026";
+
   const emailResult = await sendRegistrationConfirmationEmail({
     to: registration.user.email,
     runnerName: registration.user.name,
     eventTitle: registration.event.title,
+    eventDates: dates1,
     distance: registration.distance,
     bibNumber: registration.bibNumber,
     amountInPaise: registration.payment!.amountInPaise,
@@ -1464,10 +1470,16 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
       include: { user: true, event: true, payment: true },
     });
 
+    const evSlug2 = registration.event?.slug?.toLowerCase() || "";
+    const isKinetic2 = evSlug2.includes("kinetic") || registration.event?.title?.toLowerCase().includes("kinetic");
+    const isCancer2 = !isKinetic2 && (evSlug2.includes("cancer") || registration.event?.title?.toLowerCase().includes("cancer"));
+    const dates2 = isKinetic2 ? "10–15 December 2026" : isCancer2 ? "7–17 November 2026" : "25–30 October 2026";
+
     await sendRegistrationConfirmationEmail({
       to: registration.user.email,
       runnerName: registration.user.name,
       eventTitle: registration.event.title,
+      eventDates: dates2,
       distance: registration.distance,
       bibNumber: registration.bibNumber,
       amountInPaise: registration.payment!.amountInPaise,

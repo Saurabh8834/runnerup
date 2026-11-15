@@ -544,6 +544,12 @@ function PaymentRegistrationFormInner() {
     [events, selectedEvent],
   );
 
+  const isKinetic = useMemo(() => {
+    const slug = (selectedEvent || activeEvent?.value || "").toLowerCase();
+    const label = (activeEvent?.label || "").toLowerCase();
+    return slug.includes("kinetic") || label.includes("kinetic");
+  }, [selectedEvent, activeEvent]);
+
   const distanceOptions = activeEvent?.distances ?? ["1.5 km", "3 km", "5 km", "10 km", "21 km"];
   const activityOptions =
     activeEvent?.activityTypes?.length ? activeEvent.activityTypes : ["running", "cycling", "walking"];
@@ -637,11 +643,6 @@ function PaymentRegistrationFormInner() {
 
     // Kinetic Run exclusive coupon restriction
     if (raw === "KINETIC100" || raw === "KINETIC50") {
-      const isKinetic =
-        Boolean(selectedEvent && selectedEvent.toLowerCase().includes("kinetic")) ||
-        Boolean(activeEvent?.value && activeEvent.value.toLowerCase().includes("kinetic")) ||
-        Boolean(activeEvent?.label && activeEvent.label.toLowerCase().includes("kinetic"));
-
       if (!isKinetic) {
         setAppliedCoupon(null);
         setCouponError("Coupon KINETIC100 is valid exclusively for the Kinetic Run Virtual Challenge 2026.");
@@ -1587,18 +1588,20 @@ function PaymentRegistrationFormInner() {
                   <FieldError message={errors.distance} />
                 </div>
 
-                {/* T-Shirt Size Selector - Top 3 Finishers Podium Award */}
+                {/* Apparel Size Selector - Top 3 Finishers Podium Award (Premium Hoodie for Kinetic / Dri-Fit T-Shirt for Others) */}
                 <div className="border-t border-white/10 pt-3.5">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[11.5px] font-bold text-slate-300 flex items-center gap-1.5">
-                      <Shirt className="h-3.5 w-3.5 text-amber-400" /> Dri-Fit T-Shirt Size
+                      <Shirt className="h-3.5 w-3.5 text-amber-400" /> {isKinetic ? "Premium Hoodie Size" : "Dri-Fit T-Shirt Size"}
                     </span>
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                       🏆 Top 3 Finishers Award
                     </span>
                   </div>
                   <p className="text-[10.5px] text-slate-400 mb-2">
-                    Allocated if you finish on the podium for your category.
+                    {isKinetic
+                      ? "Allocated if you finish on the podium (Top 3) for Kinetic Run."
+                      : "Allocated if you finish on the podium for your category."}
                   </p>
                   <div className="grid grid-cols-5 gap-2">
                     {TSHIRT_SIZES.map((t) => (

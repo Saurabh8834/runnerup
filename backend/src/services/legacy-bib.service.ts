@@ -49,10 +49,22 @@ function loadLegacyMap(): Record<string, LegacyBibEntry> {
  */
 export function resolveLegacyBib(rawQuery: string): LegacyBibEntry | null {
   if (!rawQuery) return null;
-  const map = loadLegacyMap();
 
   const trimmed = rawQuery.trim();
   const upper = trimmed.toUpperCase();
+
+  // Strict isolation: Never resolve legacy IAF records for Kinetic Run or Cancer Awareness queries
+  if (
+    upper.includes("KRUN") ||
+    upper.includes("KINETIC") ||
+    upper.includes("KRVC") ||
+    upper.includes("NCAD") ||
+    upper.includes("CANCER")
+  ) {
+    return null;
+  }
+
+  const map = loadLegacyMap();
 
   // Direct lookup
   if (map[trimmed]) return map[trimmed];

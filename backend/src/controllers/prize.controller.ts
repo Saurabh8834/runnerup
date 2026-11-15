@@ -63,12 +63,23 @@ function buildPrizeItems(
   certificateStatus: string | null,
   medalTracking: { courier: string | null; trackingNumber: string | null; trackingUrl: string | null } | null,
   certificateNumber: string | null,
-  isCancer = false,
+  opts: { isCancer?: boolean; isKinetic?: boolean } | boolean = false,
 ): PrizeItem[] {
+  const isCancer = typeof opts === "boolean" ? opts : Boolean(opts?.isCancer);
+  const isKinetic = typeof opts === "object" ? Boolean(opts?.isKinetic) : false;
   const items: PrizeItem[] = [];
 
-  // Certificate logic: For cancer challenge, certificate unlocks post-event after verification
-  if (isCancer) {
+  // Certificate logic: For ongoing/upcoming challenges (Kinetic 10-15 Dec, Cancer 7-17 Nov), certificate unlocks post-event after audit
+  if (isKinetic) {
+    items.push({
+      type: "certificate",
+      name: "E-Certificate",
+      icon: "certificate",
+      status: "processing",
+      statusLabel: "Unlocks 15 Dec",
+      action: null,
+    });
+  } else if (isCancer) {
     items.push({
       type: "certificate",
       name: "E-Certificate",
@@ -93,7 +104,17 @@ function buildPrizeItems(
   // Medal if in benefits or medalIncluded
   const hasMedal = benefits.some((b) => b.toLowerCase().includes("medal")) || medalStatus !== null;
   if (hasMedal) {
-    if (isCancer && medalStatus !== "DELIVERED" && medalStatus !== "DISPATCHED") {
+    if (isKinetic && medalStatus !== "DELIVERED" && medalStatus !== "DISPATCHED") {
+      items.push({
+        type: "medal",
+        name: "Kinetic Finisher Medal",
+        icon: "medal",
+        status: "processing",
+        statusLabel: "Dispatches Post-Event (15 Dec)",
+        tracking: null,
+        action: null,
+      });
+    } else if (isCancer && medalStatus !== "DELIVERED" && medalStatus !== "DISPATCHED") {
       items.push({
         type: "medal",
         name: "Finisher Medal",
@@ -212,9 +233,11 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
     registration.status === "CONFIRMED" ||
     registration.status === "COMPLETED";
 
-  const isCancer =
-    registration.event.slug.includes("cancer") ||
-    registration.event.title.toLowerCase().includes("cancer");
+  const slugLower = registration.event.slug.toLowerCase();
+  const titleLower = registration.event.title.toLowerCase();
+  const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+  const isCancer = !isKinetic && (slugLower.includes("cancer") || titleLower.includes("cancer"));
+  const isIaf = !isKinetic && !isCancer && (slugLower.includes("air-force") || slugLower.includes("iaf"));
 
   const prizes = isPaid
     ? buildPrizeItems(
@@ -229,7 +252,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
             }
           : null,
         registration.certificate?.certificateNumber ?? null,
-        isCancer,
+        { isCancer, isKinetic },
       )
     : [];
 
@@ -245,7 +268,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
   // Calculate runner's exact verified leaderboard rank position according to the leaderboard result
   let leaderboardRank = 1;
   const runnerUpper = registration.user.name.toUpperCase();
-  if (runnerUpper.includes("ANJALI") || runnerUpper.includes("ARSALAN") || runnerUpper.includes("SAURABH")) {
+  if (isIaf && (runnerUpper.includes("ANJALI") || runnerUpper.includes("ARSALAN") || runnerUpper.includes("SAURABH"))) {
     leaderboardRank = 1;
   } else {
     try {
@@ -311,9 +334,10 @@ export async function myPrizes(request: AuthenticatedRequest, response: Response
   });
 
   const data = registrations.map((reg) => {
-    const isCancer =
-      reg.event.slug.includes("cancer") ||
-      reg.event.title.toLowerCase().includes("cancer");
+    const slugLower = reg.event.slug.toLowerCase();
+    const titleLower = reg.event.title.toLowerCase();
+    const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+    const isCancer = !isKinetic && (slugLower.includes("cancer") || titleLower.includes("cancer"));
 
     const prizes = buildPrizeItems(
       reg.event.benefits,
@@ -323,7 +347,7 @@ export async function myPrizes(request: AuthenticatedRequest, response: Response
         ? { courier: reg.medalDelivery.courier, trackingNumber: reg.medalDelivery.trackingNumber, trackingUrl: reg.medalDelivery.trackingUrl }
         : null,
       reg.certificate?.certificateNumber ?? null,
-      isCancer,
+      { isCancer, isKinetic },
     );
 
     const hasPrizes = prizes.some((p) => p.status !== "pending" && p.status !== "not_eligible");

@@ -156,10 +156,16 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
             }
 
             if (paymentToUpdate.registration?.user?.email) {
+              const evSlug = paymentToUpdate.registration.event?.slug?.toLowerCase() || "";
+              const isKinetic = evSlug.includes("kinetic") || paymentToUpdate.registration.event?.title?.toLowerCase().includes("kinetic");
+              const isCancer = !isKinetic && (evSlug.includes("cancer") || paymentToUpdate.registration.event?.title?.toLowerCase().includes("cancer"));
+              const eventDates = isKinetic ? "10–15 December 2026" : isCancer ? "7–17 November 2026" : "25–30 October 2026";
+
               await sendRegistrationConfirmationEmail({
                 to: paymentToUpdate.registration.user.email,
                 runnerName: paymentToUpdate.registration.user.name,
                 eventTitle: paymentToUpdate.registration.event.title,
+                eventDates,
                 distance: paymentToUpdate.registration.distance,
                 bibNumber: paymentToUpdate.registration.bibNumber,
                 amountInPaise: paymentToUpdate.amountInPaise,
@@ -243,10 +249,16 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
         }
 
         if (payment.registration?.user?.email) {
+          const evSlug = payment.registration.event?.slug?.toLowerCase() || "";
+          const isKinetic = evSlug.includes("kinetic") || payment.registration.event?.title?.toLowerCase().includes("kinetic");
+          const isCancer = !isKinetic && (evSlug.includes("cancer") || payment.registration.event?.title?.toLowerCase().includes("cancer"));
+          const eventDates = isKinetic ? "10–15 December 2026" : isCancer ? "7–17 November 2026" : "25–30 October 2026";
+
           await sendRegistrationConfirmationEmail({
             to: payment.registration.user.email,
             runnerName: payment.registration.user.name,
             eventTitle: payment.registration.event.title,
+            eventDates,
             distance: payment.registration.distance,
             bibNumber: payment.registration.bibNumber,
             amountInPaise: payment.amountInPaise,

@@ -68,7 +68,7 @@ export async function checkReferralCode(request: AuthenticatedRequest, response:
     throw new ApiError(404, "Referral code not found");
   }
 
-  response.json({ data: { valid: true, referrer: referrer.name } });
+  response.json({ data: { valid: true } });
 }
 
 export async function applyReferralCode(request: AuthenticatedRequest, response: Response) {

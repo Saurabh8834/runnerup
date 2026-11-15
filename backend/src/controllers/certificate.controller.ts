@@ -29,9 +29,9 @@ export async function verifyCertificate(request: Request, response: Response) {
   // Resolve legacy IAF bib / certificate mapping (e.g. CERT-IAF26-IAFD495096, IAFD-495096, 495096, 7839427810)
   const legacyEntry = resolveLegacyBib(rawParam);
 
-  const isKineticQuery = /^CERT-KRUN/i.test(rawParam) || /^KRUN/i.test(rawParam);
+  const isKineticQuery = /^CERT-KRUN/i.test(rawParam) || /^KRUN/i.test(rawParam) || /kinetic/i.test(rawParam);
   const isCancerQuery = /^CERT-NCAD/i.test(rawParam) || /^NCAD/i.test(rawParam) || /cancer/i.test(rawParam);
-  const isIafQuery = Boolean(legacyEntry) || /^CERT-IAF/i.test(rawParam) || /^IAF/i.test(rawParam);
+  const isIafQuery = !isKineticQuery && !isCancerQuery && (Boolean(legacyEntry) || /^CERT-IAF/i.test(rawParam) || /^IAF/i.test(rawParam));
 
   // Strict event slug filtering to prevent cross-event bib/certificate collisions
   const eventSlugFilter = isKineticQuery
@@ -51,7 +51,7 @@ export async function verifyCertificate(request: Request, response: Response) {
         {
           OR: [
             { certificateNumber: { equals: rawParam, mode } },
-            ...(legacyEntry
+            ...(legacyEntry && isIafQuery
               ? [
                   { registrationId: legacyEntry.registrationId },
                   { id: legacyEntry.registrationId },
@@ -67,7 +67,7 @@ export async function verifyCertificate(request: Request, response: Response) {
                   { registration: { adminNote: { contains: phoneFilter } } },
                 ]
               : []),
-            ...(isIafQuery || (!isKineticQuery && !isCancerQuery)
+            ...(isIafQuery
               ? [
                   { certificateNumber: { equals: `CERT-IAF26-${rawParam}`, mode } },
                   ...(cleanDigits ? [{ certificateNumber: { equals: `CERT-IAF26-${cleanDigits}`, mode } }] : []),
@@ -134,24 +134,28 @@ export async function verifyCertificate(request: Request, response: Response) {
     });
 
     if (reg) {
+      const eventSlug = reg.event?.slug?.toLowerCase() || "";
+      const isKinetic = eventSlug.includes("kinetic");
+      if (isKinetic) {
+        throw new ApiError(
+          403,
+          "Certificate locked. The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. Official verified finisher certificates unlock automatically after the challenge concludes on 15 December.",
+        );
+      }
+
       if (reg.certificate) {
         certificate = await prisma.certificate.findUnique({
           where: { id: reg.certificate.id },
           include: certInclude,
         });
       } else {
-        const eventSlug = reg.event?.slug?.toLowerCase() || "";
-        const prefix = eventSlug.includes("kinetic")
-          ? "CERT-KRUN"
-          : eventSlug.includes("cancer")
-            ? "CERT-NCAD"
-            : "CERT-IAF26";
+        const prefix = eventSlug.includes("cancer")
+          ? "CERT-NCAD"
+          : "CERT-IAF26";
         const certNum = `${prefix}-${reg.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`;
-        const issuedDate = eventSlug.includes("kinetic")
-          ? new Date("2026-12-15T18:00:00.000Z")
-          : eventSlug.includes("cancer")
-            ? new Date("2026-11-17T18:00:00.000Z")
-            : new Date("2026-10-31T06:30:00.000Z");
+        const issuedDate = eventSlug.includes("cancer")
+          ? new Date("2026-11-17T18:00:00.000Z")
+          : new Date("2026-10-31T06:30:00.000Z");
         const created = await prisma.certificate.create({
           data: {
             registrationId: reg.id,
@@ -181,11 +185,18 @@ export async function verifyCertificate(request: Request, response: Response) {
 
   // Enforce "Certificates unlock after event concludes"
   const event = certificate.registration.event;
+  const eventSlug = (event.slug || "").toLowerCase();
+  const isKinetic = eventSlug.includes("kinetic");
   const now = new Date();
   const eventEndsAt = event.endsAt ? new Date(event.endsAt) : null;
   const isEventConcluded = eventEndsAt ? now > eventEndsAt : true;
-  const userEmail = (certificate.registration.user?.email || "").toLowerCase();
-  const isAdminDemo = userEmail.includes("sourav") || certificate.certificateNumber.includes("1999");
+
+  if (isKinetic || !isEventConcluded) {
+    throw new ApiError(
+      403,
+      "Certificate locked. Official finisher certificates unlock automatically after the event concludes.",
+    );
+  }
 
   // Non-blocking download/view telemetry
   try {
@@ -207,7 +218,7 @@ export async function verifyCertificate(request: Request, response: Response) {
       issuedAt: certificate.issuedAt,
       pdfUrl: certificate.pdfUrl,
       verified: true,
-      isEventConcluded: isEventConcluded || isAdminDemo,
+      isEventConcluded: isEventConcluded,
       eventEndsAt: eventEndsAt?.toISOString() || null,
     },
   });

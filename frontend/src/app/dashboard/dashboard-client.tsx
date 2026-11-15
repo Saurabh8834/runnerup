@@ -55,6 +55,7 @@ type Registration = {
   proofStatus: string;
   finishTimeSeconds?: number | null;
   registeredAt: string;
+  shippingName?: string | null;
   shippingPhone?: string | null;
   user?: { email?: string | null; phone?: string | null } | null;
   event: { title: string; slug: string; benefits?: string[]; endsAt?: string };
@@ -288,12 +289,21 @@ export function DashboardClient() {
   const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
 
   const handleDownloadBib = async (reg: Registration) => {
+    const slugLower = (reg.event?.slug || "").toLowerCase();
+    const titleLower = (reg.event?.title || "").toLowerCase();
+    const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+    if (isKinetic) {
+      alert("Digital race bibs will unlock automatically after the challenge concludes on 15 December 2026.");
+      return;
+    }
+
     setDownloadingBibId(reg.id);
     try {
+      const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
       const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
-      const official = getVerifiedRunnerByBib(cleanBib);
-      const runnerName = official?.name || dbUser?.name || user?.fullName || user?.firstName || "Runner";
-      const distance = official?.distance || reg.distance || "5 KM";
+      const official = isIaf ? getVerifiedRunnerByBib(cleanBib) : null;
+      const runnerName = (reg.shippingName || dbUser?.name || user?.fullName || user?.firstName || official?.name || "Runner").trim();
+      const distance = reg.distance || official?.distance || "5 KM";
       const canvas = await renderBibCanvas({
         runnerName,
         distance,
@@ -311,16 +321,23 @@ export function DashboardClient() {
   };
 
   const handleDownloadCert = async (reg: Registration) => {
+    const slugLower = (reg.event?.slug || "").toLowerCase();
+    const titleLower = (reg.event?.title || "").toLowerCase();
+    const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+    if (isKinetic) {
+      alert("Finisher certificates will unlock automatically after the challenge concludes on 15 December 2026.");
+      return;
+    }
+
     setDownloadingCertId(reg.id);
     try {
-      const slugLower = (reg.event?.slug || "").toLowerCase();
-      const titleLower = (reg.event?.title || "").toLowerCase();
       const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
+      const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
 
       const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
-      const official = getVerifiedRunnerByBib(cleanBib);
-      const runnerName = official?.name || dbUser?.name || user?.fullName || user?.firstName || "Runner";
-      const distance = official?.distance || reg.distance || "5 KM";
+      const official = isIaf ? getVerifiedRunnerByBib(cleanBib) : null;
+      const runnerName = (reg.shippingName || dbUser?.name || user?.fullName || user?.firstName || official?.name || "Runner").trim();
+      const distance = reg.distance || official?.distance || "5 KM";
       const canvas = await renderCertCanvas({
         runnerName,
         distance,
@@ -566,8 +583,14 @@ export function DashboardClient() {
     return registrations.filter((r) => {
       const slugLower = (r.event?.slug || "").toLowerCase();
       const titleLower = (r.event?.title || "").toLowerCase();
-      const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
-      const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
+      const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+      const isIaf = !isKinetic && (slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force"));
+      const isCancer = !isKinetic && (slugLower.includes("cancer") || titleLower.includes("cancer"));
+
+      // Kinetic Run Challenge (10–15 Dec 2026): Upcoming challenge, strictly locked from Trophy Cabinet
+      if (isKinetic) {
+        return false;
+      }
 
       // Concluded IAF event: confirmed/paid runners have trophies/certificates/medal tracking
       if (isIaf) {
@@ -590,7 +613,7 @@ export function DashboardClient() {
       }
 
       // Default for any other event
-      return r.proofStatus === "APPROVED" && Boolean(r.certificate);
+      return false;
     });
   }, [registrations]);
 
@@ -1100,15 +1123,16 @@ export function DashboardClient() {
                 activeRegistrations.map((reg) => {
                   const slugLower = (reg.event.slug || "").toLowerCase();
                   const titleLower = (reg.event.title || "").toLowerCase();
-                  const isIafEvent = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
-                  const isCancerEvent = slugLower.includes("cancer") || titleLower.includes("cancer");
+                  const isKineticEvent = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+                  const isIafEvent = !isKineticEvent && (slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force"));
+                  const isCancerEvent = !isKineticEvent && (slugLower.includes("cancer") || titleLower.includes("cancer"));
 
                   const isPaid = reg.payment?.status === "PAID" || reg.status === "CONFIRMED";
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
                   const isProofRejected = reg.proofStatus === "REJECTED";
-                  // Certificates are only ready for the concluded IAF challenge; for Cancer event, only admin demo user sourav06556@gmail.com has preview unlocked
-                  const isCertReady = (isIafEvent && isPaid) || (isCancerEvent && isPaid && isAdminDemoUser);
+                  // Certificates are only ready for the concluded IAF challenge; for ongoing/upcoming events (Kinetic, Cancer), certificates unlock post-event
+                  const isCertReady = isIafEvent && isPaid;
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
 
@@ -1277,11 +1301,15 @@ export function DashboardClient() {
                                 4
                               </span>
                               <span className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-wider truncate">
-                                {isCancerEvent ? (isCertReady ? "E-Certificate" : "Finisher Medal") : "Rewards Kit"}
+                                {isKineticEvent ? "Kinetic Medal" : isCancerEvent ? (isCertReady ? "E-Certificate" : "Finisher Medal") : "Rewards Kit"}
                               </span>
                             </div>
                             <p className="mt-1 text-[0.65rem] sm:text-[0.7rem] text-slate-300 font-medium truncate">
-                              {isCancerEvent
+                              {isKineticEvent
+                                ? isVerified
+                                  ? "Medal Verified"
+                                  : "Dispatches Post-Event (15 Dec)"
+                                : isCancerEvent
                                 ? isCertReady
                                   ? "Certificate Ready"
                                   : isVerified

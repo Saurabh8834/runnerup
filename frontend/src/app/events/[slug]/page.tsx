@@ -179,7 +179,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${event.name} — Finisher Medal & Runner Kit`,
-    description: `Official registration for ${event.name} (${event.distance}). Includes authentic 3D embossed solid metal medal, DRI-FIT runner t-shirt, GPS tracking verification, QR e-certificate, and free shipping across India.`,
+    description: `Official registration for ${event.name} (${event.distance}). Includes authentic 3D embossed solid metal medal, ${event.slug.includes("kinetic") ? "exclusive premium podium hoodie for top 3 finishers" : "DRI-FIT runner t-shirt"}, GPS tracking verification, QR e-certificate, and free shipping across India.`,
     image: eventImageUrl,
     sku: `RUNNERUP-${event.slug.toUpperCase()}`,
     brand: {

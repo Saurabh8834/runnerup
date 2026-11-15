@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FileBadge, Medal, Shirt, Sparkles, Ticket, Trophy, Truck, ArrowRight } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { Reveal, SectionHeader } from "./reveal";
@@ -39,9 +40,11 @@ const items = [
 ];
 
 export function EventRewards({ event }: { event?: PublicEvent }) {
+  const pathname = usePathname();
   const isKinetic =
-    event?.slug?.includes("kinetic") ||
-    event?.name?.toLowerCase().includes("kinetic");
+    Boolean(event?.slug?.toLowerCase().includes("kinetic")) ||
+    Boolean(event?.name?.toLowerCase().includes("kinetic")) ||
+    Boolean(pathname?.toLowerCase().includes("kinetic"));
 
   const isAirForce =
     event?.slug?.includes("air-force") ||
@@ -57,7 +60,15 @@ export function EventRewards({ event }: { event?: PublicEvent }) {
           ? "100% Solid Metal Finisher Medal delivered right to your doorstep."
           : "Authentic heavyweight die-cast metal medal with custom ribbon.",
     },
-    ...items.slice(1),
+    items[1],
+    {
+      icon: Shirt,
+      title: isKinetic ? "Premium Hoodie" : "Podium T-Shirt",
+      desc: isKinetic
+        ? "Exclusive premium heavyweight hoodie awarded to top 3 finishers."
+        : "Exclusive athletic DRI-FIT performance t-shirt for top 3 finishers.",
+    },
+    ...items.slice(3),
   ];
 
   return (

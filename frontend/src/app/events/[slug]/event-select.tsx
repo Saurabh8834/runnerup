@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Bike, FileBadge, Footprints, IndianRupee, Medal, Route, Shirt, Sparkles, Ticket, Timer, Trophy, Truck } from "lucide-react";
 import type { PublicEvent } from "../../data/events";
 import { RegisterCta } from "../../components/register-cta";
@@ -44,6 +45,11 @@ const activityKeyMap: Record<string, string> = {
 };
 
 export function EventSelect({ event }: { event: PublicEvent }) {
+  const pathname = usePathname();
+  const isKinetic =
+    Boolean(event.slug?.toLowerCase().includes("kinetic")) ||
+    Boolean(event.name?.toLowerCase().includes("kinetic")) ||
+    Boolean(pathname?.toLowerCase().includes("kinetic"));
   const [activity, setActivity] = useState(activities[0].key);
   const distances = event.distance.split(" / ");
   const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(`Hi! I'm interested in ${event.name}. Can you help me with registration?`)}`;
@@ -160,7 +166,7 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                     </li>
                   </ul>
 
-                  {/* Special Podium Trophy Award (Top 3 T-Shirt) */}
+                  {/* Special Podium Trophy Award (Top 3 Hoodie for Kinetic / T-Shirt for Others) */}
                   <div className="mt-4 pt-3.5 border-t border-white/10 flex items-start gap-2.5 rounded-xl bg-black/35 border border-amber-500/25 p-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-300">
                       <Shirt className="h-3.5 w-3.5" />
@@ -170,7 +176,9 @@ export function EventSelect({ event }: { event: PublicEvent }) {
                         🏆 Top 3 Podium Award
                       </span>
                       <p className="text-[0.72rem] text-[#fbe9d0] leading-tight mt-0.5">
-                        Exclusive athletic DRI-FIT performance T-shirt awarded to the top 3 leaderboard finishers.
+                        {isKinetic
+                          ? "Exclusive premium heavyweight hoodie awarded to the top 3 leaderboard finishers."
+                          : "Exclusive athletic DRI-FIT performance T-shirt awarded to the top 3 leaderboard finishers."}
                       </p>
                     </div>
                   </div>
