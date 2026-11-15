@@ -25,7 +25,7 @@ import {
 
 export async function resolveCouponDiscount(
   rawCode: string,
-  event: { priceInPaise: number; couponCode?: string | null },
+  event: { priceInPaise: number; couponCode?: string | null; slug?: string; title?: string },
 ): Promise<{
   valid: boolean;
   code: string;
@@ -36,6 +36,23 @@ export async function resolveCouponDiscount(
   const code = rawCode.trim().toUpperCase();
   if (!code) {
     return { valid: false, code, discountPaise: 0, message: "Please enter a coupon code" };
+  }
+
+  // Event-specific restriction: KINETIC100 & KINETIC50 valid exclusively for Kinetic Run Challenge
+  if (code === "KINETIC100" || code === "KINETIC50") {
+    const isKinetic =
+      Boolean(event.slug && event.slug.toLowerCase().includes("kinetic")) ||
+      Boolean(event.title && event.title.toLowerCase().includes("kinetic")) ||
+      Boolean(event.couponCode && event.couponCode.toUpperCase().includes("KINETIC"));
+
+    if (!isKinetic) {
+      return {
+        valid: false,
+        code,
+        discountPaise: 0,
+        message: "Coupon KINETIC100 is valid exclusively for the Kinetic Run Virtual Challenge 2026.",
+      };
+    }
   }
 
   // Expired campaign codes (VIP campaign has concluded)
@@ -123,10 +140,7 @@ export async function validateCoupon(request: Request, response: Response) {
   let event = payload.eventSlug
     ? await prisma.event.findFirst({
         where: {
-          OR: [
-            { slug: payload.eventSlug },
-            { slug: { contains: "cancer", mode: "insensitive" } },
-          ],
+          slug: payload.eventSlug,
         },
       })
     : null;
