@@ -6,7 +6,12 @@ import {
   type CertificateRenderData,
 } from "./certificate.service.js";
 
-const resend = env.resendApiKey ? new Resend(env.resendApiKey) : null;
+function getResendClient(): Resend | null {
+  const key = (process.env.RESEND_API_KEY || env.resendApiKey || "").trim();
+  return key ? new Resend(key) : null;
+}
+
+const resend = getResendClient();
 
 export type RegistrationEmailPayload = {
   to: string;
@@ -19,6 +24,8 @@ export type RegistrationEmailPayload = {
   activityType?: string;
   eventDates?: string;
   eventUrl?: string;
+  shippingAddress?: string;
+  shippingPhone?: string;
 };
 
 function formatRupees(amountInPaise: number) {
@@ -287,7 +294,8 @@ export type EmailSendResult = { sent: boolean; id?: string; error?: string };
 export async function sendRegistrationConfirmationEmail(
   payload: RegistrationEmailPayload,
 ): Promise<EmailSendResult> {
-  if (!resend) {
+  const client = getResendClient() || resend;
+  if (!client) {
     logger.warn("[email] RESEND_API_KEY is not set. Skipping confirmation email", { to: payload.to });
     logger.info("[email] Would send confirmation email", {
       to: payload.to,
@@ -316,7 +324,7 @@ export async function sendRegistrationConfirmationEmail(
           ? `Registration Confirmed: Indian Air Force Day Challenge — Bib ${payload.bibNumber}`
           : `Registration Confirmed: ${payload.eventTitle || "Runner Up Challenge"} — Bib ${payload.bibNumber}`;
 
-    const result = await resend.emails.send({
+    const result = await client.emails.send({
       from,
       to: payload.to,
       replyTo: "runnerupofficials@gmail.com",

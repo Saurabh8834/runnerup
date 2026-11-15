@@ -505,11 +505,23 @@ export async function verifyPayment(request: Request, response: Response) {
 
       const emailResult = await sendRegistrationConfirmationEmail({
         to: registration.user.email,
-        runnerName: registration.user.name,
+        runnerName: registration.shippingName || registration.user.name,
         eventTitle: registration.event.title,
         distance: registration.distance,
         bibNumber: registration.bibNumber,
         amountInPaise: payment.amountInPaise,
+        orderId: payment.razorpayOrderId ?? undefined,
+        activityType: registration.activityType ?? undefined,
+        shippingAddress: [
+          registration.shippingLine1,
+          registration.shippingLine2,
+          registration.shippingCity,
+          registration.shippingState,
+          registration.shippingPincode,
+        ]
+          .filter(Boolean)
+          .join(", "),
+        shippingPhone: registration.shippingPhone || registration.user.phone || undefined,
       });
 
       await prisma.notification.create({
@@ -616,32 +628,44 @@ export async function getPaymentStatus(request: Request, response: Response) {
           }),
         ]);
 
-        setImmediate(async () => {
-          try {
-            if (updatedReg.event?.medalIncluded) {
-              await prisma.medalDelivery
-                .upsert({
-                  where: { registrationId: updatedReg.id },
-                  create: { registrationId: updatedReg.id, status: "PENDING" },
-                  update: {},
-                })
-                .catch(() => null);
-            }
-
-            await sendRegistrationConfirmationEmail({
-              to: updatedReg.user.email,
-              runnerName: updatedReg.user.name,
-              eventTitle: updatedReg.event.title,
-              distance: updatedReg.distance,
-              bibNumber: updatedReg.bibNumber,
-              amountInPaise: updatedPayment.amountInPaise,
-            }).catch(() => null);
-
-            void ensureClerkAccountForDbUser(updatedReg.userId).catch(() => null);
-          } catch {
-            // non-blocking
+        try {
+          if (updatedReg.event?.medalIncluded) {
+            await prisma.medalDelivery
+              .upsert({
+                where: { registrationId: updatedReg.id },
+                create: { registrationId: updatedReg.id, status: "PENDING" },
+                update: {},
+              })
+              .catch(() => null);
           }
-        });
+
+          await sendRegistrationConfirmationEmail({
+            to: updatedReg.user.email,
+            runnerName: updatedReg.shippingName || updatedReg.user.name,
+            eventTitle: updatedReg.event.title,
+            distance: updatedReg.distance,
+            bibNumber: updatedReg.bibNumber,
+            amountInPaise: updatedPayment.amountInPaise,
+            orderId: updatedPayment.razorpayOrderId ?? undefined,
+            activityType: updatedReg.activityType ?? undefined,
+            shippingAddress: [
+              updatedReg.shippingLine1,
+              updatedReg.shippingLine2,
+              updatedReg.shippingCity,
+              updatedReg.shippingState,
+              updatedReg.shippingPincode,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            shippingPhone: updatedReg.shippingPhone || updatedReg.user.phone || undefined,
+          }).catch((err) => {
+            logger.error("[Webhook] Failed to send registration confirmation email", { error: err });
+          });
+
+          void ensureClerkAccountForDbUser(updatedReg.userId).catch(() => null);
+        } catch (postPayErr) {
+          logger.error("[Webhook] Post-payment task error", { error: postPayErr });
+        }
 
         return response.json({
           data: {
@@ -770,12 +794,26 @@ export async function handleRazorpayWebhook(request: Request, response: Response
 
         await sendRegistrationConfirmationEmail({
           to: registration.user.email,
-          runnerName: registration.user.name,
+          runnerName: registration.shippingName || registration.user.name,
           eventTitle: registration.event.title,
           distance: registration.distance,
           bibNumber: registration.bibNumber,
           amountInPaise: payment.amountInPaise,
-        }).catch(() => null);
+          orderId: payment.razorpayOrderId ?? undefined,
+          activityType: registration.activityType ?? undefined,
+          shippingAddress: [
+            registration.shippingLine1,
+            registration.shippingLine2,
+            registration.shippingCity,
+            registration.shippingState,
+            registration.shippingPincode,
+          ]
+            .filter(Boolean)
+            .join(", "),
+          shippingPhone: registration.shippingPhone || registration.user.phone || undefined,
+        }).catch((err) => {
+          logger.error("[Webhook] Failed to send confirmation email on order.paid", { error: err });
+        });
 
         logger.info("[Webhook] Confirmed registration via webhook", {
           registrationId: registration.id,

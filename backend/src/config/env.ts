@@ -1,4 +1,20 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "node:path";
+import fs from "node:fs";
+
+// Load environment variables reliably from backend/.env or cwd/.env
+const candidatePaths = [
+  path.resolve(process.cwd(), "backend/.env"),
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../.env"),
+];
+for (const p of candidatePaths) {
+  if (fs.existsSync(p)) {
+    dotenv.config({ path: p });
+  }
+}
+dotenv.config();
+
 import { logger } from "../utils/logger.js";
 
 function readEnv(name: string, fallback = "") {
