@@ -36,23 +36,30 @@ function getEventScarcity(slug: string, isClosed?: boolean) {
 }
 
 function EventCard({ event, index }: { event: PublicEvent; index: number }) {
+  const slug = (event.slug || "").toLowerCase();
+  const name = ((event.name || (event as any).title || "") as string).toLowerCase();
+
   const isKineticRun =
-    event.slug.includes("kinetic") ||
-    event.name.toLowerCase().includes("kinetic");
+    slug.includes("kinetic") ||
+    name.includes("kinetic") ||
+    slug.includes("krun");
 
   const isAirForce =
-    event.slug.includes("air-force") ||
-    event.name.toLowerCase().includes("air force");
+    slug.includes("air-force") ||
+    slug.includes("airforce") ||
+    slug.includes("iaf") ||
+    name.includes("air force");
 
   const isCancerAwareness =
-    event.slug.includes("cancer") ||
-    event.name.toLowerCase().includes("cancer");
+    slug.includes("cancer") ||
+    name.includes("cancer") ||
+    slug.includes("ncad");
 
-  const isMedalCard = isAirForce || isCancerAwareness || isKineticRun;
+  const isMedalCard = true; // Every RunnerUp challenge awards a handcrafted die-cast metal medal
 
   const resolvePoster = (slug: string, bannerUrl?: string) => {
     if (isKineticRun) return "/images/kinetic-run-medal-front.webp";
-    if (isCancerAwareness) return "/images/cancer-awareness-medal-front-card.webp";
+    if (isCancerAwareness) return "/images/cancer-awareness-medal-front.webp";
     if (isAirForce) return "/images/iaf-medal-front-card.webp";
     if (bannerUrl && !bannerUrl.includes("res.cloudinary.com") && !bannerUrl.endsWith("-4k.png")) return bannerUrl;
     return `/events/${slug}.webp`;
@@ -102,53 +109,32 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
       onClick={handleCardClick}
       className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d141d]/95 text-[#f8fafc] transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ff4b26]/60 hover:shadow-[0_16px_50px_rgba(255,75,38,0.25)] shadow-2xl cursor-pointer"
     >
-      {/* Banner / Poster */}
-      <div className={`relative overflow-hidden ${isMedalCard ? "h-56 xs:h-60 sm:h-56 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
-        {isMedalCard && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-            <div className={`h-48 w-48 rounded-full ${isCancerAwareness ? "bg-purple-600/20" : "bg-[#ff4b26]/15"} blur-3xl`} />
-          </div>
-        )}
+      {/* Banner / Poster - Generous Height with 100% Unclipped Medal Display */}
+      <div className="relative overflow-hidden h-64 sm:h-72 bg-gradient-to-b from-[#141d29]/80 via-[#0d141d] to-[#080c10]">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+          <div className={`h-52 w-52 rounded-full ${isCancerAwareness ? "bg-purple-600/25" : isKineticRun ? "bg-orange-500/20" : "bg-amber-500/15"} blur-3xl`} />
+        </div>
+
         {imgSrc && !imgFailed ? (
-          isMedalCard ? (
-            <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3.5 z-[2]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={event.name}
-                className={`h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none`}
-                src={imgSrc}
-                loading={index < 3 ? "eager" : "lazy"}
-                decoding="async"
-                onError={() => {
-                  if (isKineticRun) {
-                    setImgSrc("/images/kinetic-run-medal-front.png");
-                  } else if (isCancerAwareness) {
-                    setImgSrc("/images/cancer-awareness-medal-front-card.webp");
-                  } else {
-                    setImgSrc("/images/iaf-medal-front-card.webp");
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
+          <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={event.name}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+              className="h-full w-auto max-h-full max-w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_25px_50px_rgba(0,0,0,0.95)] select-none"
               src={imgSrc}
               loading={index < 3 ? "eager" : "lazy"}
               decoding="async"
               onError={() => {
-                if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
-                  setImgSrc(`/events/${event.slug}.webp`);
-                } else if (imgSrc && imgSrc.endsWith(".webp")) {
-                  setImgSrc(`/events/${event.slug}.jpg`);
+                if (isKineticRun) {
+                  setImgSrc("/images/kinetic-run-medal-front.png");
+                } else if (isCancerAwareness) {
+                  setImgSrc("/images/cancer-awareness-medal-front.png");
                 } else {
-                  setImgFailed(true);
+                  setImgSrc("/images/iaf-medal-front.png");
                 }
               }}
             />
-          )
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#141d29] to-[#080c10]">
             <div className="h-14 w-14 rounded-2xl bg-[#ff4b26]/15 border border-[#ff4b26]/30 flex items-center justify-center mb-3">
@@ -161,12 +147,6 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
               {event.distance}
             </span>
           </div>
-        )}
-        {!isMedalCard && (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-[#0d141d] via-[#0d141d]/40 to-transparent"
-          />
         )}
 
         {/* Top Badges */}
@@ -185,44 +165,22 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
                 <span>🎗️ Cancer Awareness</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/50 bg-emerald-950/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-emerald-300 shadow-md shrink-0">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live &amp; Open
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-black/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
+                <Flame className="h-3 w-3 text-amber-400" /> Open till 17 Nov
               </span>
             </>
           ) : (
             <>
-              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#ff4b26] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
-                <Flame className="h-3 w-3 fill-white" />
-                <span>{scarcity.percent}% Booked</span>
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-slate-300 shadow-md shrink-0">
+                <span>Indian Air Force Day</span>
               </span>
-
-              {isClosed ? (
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span>Closed</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                  </span>
-                  <span>Live</span>
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span>Closed</span>
+              </span>
             </>
           )}
         </div>
-
-        {/* Reward / Medal Highlight Strip */}
-        {!isMedalCard && (
-          <div className="absolute bottom-3 left-4 right-4 z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#080c10]/85 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-md max-w-full">
-              <Medal className="h-3.5 w-3.5 text-[#ff4b26] shrink-0" />
-              <span className="truncate">{event.reward}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Body Content */}

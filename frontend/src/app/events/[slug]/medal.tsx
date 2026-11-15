@@ -33,6 +33,8 @@ export function Medal3DViewer({
   isPast,
 }: Medal3DViewerProps) {
   const images = getEventMedalImages(slug);
+  const [frontImg, setFrontImg] = useState(images.front);
+  const [backImg, setBackImg] = useState(images.back);
   const [activeFace, setActiveFace] = useState<"front" | "back">("front");
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, glareX: 50, glareY: 50 });
@@ -59,6 +61,35 @@ export function Medal3DViewer({
     isPast !== undefined
       ? isPast
       : (allPublicEvents.find((e) => e.slug === slug)?.status === "past" || (!isAirForce && !isCancerAwareness && !isKineticRun));
+
+  useEffect(() => {
+    setFrontImg(images.front);
+    setBackImg(images.back);
+  }, [images.front, images.back]);
+
+  const handleFrontError = useCallback(() => {
+    if (isKineticRun) {
+      setFrontImg("/images/kinetic-run-medal-front.png");
+    } else if (isCancerAwareness) {
+      setFrontImg("/images/cancer-awareness-medal-front.png");
+    } else if (isAirForce) {
+      setFrontImg("/images/iaf-medal-front.png");
+    } else if (frontImg && frontImg.endsWith(".webp")) {
+      setFrontImg(frontImg.replace(".webp", ".png"));
+    }
+  }, [isKineticRun, isCancerAwareness, isAirForce, frontImg]);
+
+  const handleBackError = useCallback(() => {
+    if (isKineticRun) {
+      setBackImg("/images/kinetic-run-medal-back.png");
+    } else if (isCancerAwareness) {
+      setBackImg("/images/cancer-awareness-medal-back.png");
+    } else if (isAirForce) {
+      setBackImg("/images/iaf-medal-back.png");
+    } else if (backImg && backImg.endsWith(".webp")) {
+      setBackImg(backImg.replace(".webp", ".png"));
+    }
+  }, [isKineticRun, isCancerAwareness, isAirForce, backImg]);
 
   // Preload images once per session to prevent repeated decodes
   useEffect(() => {
@@ -124,27 +155,27 @@ export function Medal3DViewer({
 
   const isBack = activeFace === "back";
 
-  // Size specific dimensions & styling
+  // Size specific dimensions & styling (Mobile enlarged for razor-sharp clarity)
   const sizeConfig = {
     mobile: {
-      maxH: "max-h-[320px] xs:max-h-[350px] sm:max-h-[380px]",
-      containerMaxW: "max-w-[300px] xs:max-w-[330px] sm:max-w-[360px]",
-      haloSize: "h-[300px] w-[300px] sm:h-[350px] sm:w-[350px]",
+      maxH: "max-h-[380px] xs:max-h-[420px] sm:max-h-[460px]",
+      containerMaxW: "max-w-[340px] xs:max-w-[380px] sm:max-w-[420px]",
+      haloSize: "h-[340px] w-[340px] sm:h-[400px] sm:w-[400px]",
     },
     desktop: {
-      maxH: "max-h-[380px] lg:max-h-[420px] xl:max-h-[460px]",
-      containerMaxW: "max-w-[320px] sm:max-w-[350px] lg:max-w-[380px] xl:max-w-[420px]",
-      haloSize: "h-[360px] w-[360px] lg:h-[420px] lg:w-[420px]",
+      maxH: "max-h-[420px] lg:max-h-[460px] xl:max-h-[500px]",
+      containerMaxW: "max-w-[340px] sm:max-w-[380px] lg:max-w-[420px] xl:max-w-[460px]",
+      haloSize: "h-[380px] w-[380px] lg:h-[440px] lg:w-[440px]",
     },
     rewards: {
-      maxH: "max-h-[320px] sm:max-h-[380px]",
-      containerMaxW: "max-w-[260px] sm:max-w-[310px]",
-      haloSize: "h-[280px] w-[280px] sm:h-[320px] sm:w-[320px]",
+      maxH: "max-h-[340px] sm:max-h-[400px]",
+      containerMaxW: "max-w-[280px] sm:max-w-[330px]",
+      haloSize: "h-[300px] w-[300px] sm:h-[340px] sm:w-[340px]",
     },
     compact: {
-      maxH: "max-h-[220px]",
-      containerMaxW: "max-w-[200px]",
-      haloSize: "h-[180px] w-[180px]",
+      maxH: "max-h-[240px]",
+      containerMaxW: "max-w-[220px]",
+      haloSize: "h-[200px] w-[200px]",
     },
   }[size];
 
@@ -220,10 +251,11 @@ export function Medal3DViewer({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={images.front}
+            src={frontImg}
             alt={`${eventName} - Official Finisher Medal`}
             fetchPriority="high"
             decoding="async"
+            onError={handleFrontError}
             className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.65)] filter brightness-105 contrast-[1.03] transition-transform duration-300 group-hover:scale-105`}
           />
           {/* Hardware-safe ground shadow */}
@@ -328,11 +360,12 @@ export function Medal3DViewer({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={images.front}
+                src={frontImg}
                 alt={`${eventName} - Front Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH}  object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
+                onError={handleFrontError}
+                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
               {/* Ground Shadow */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
@@ -362,11 +395,12 @@ export function Medal3DViewer({
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={images.back}
+                src={backImg}
                 alt={`${eventName} - Back Crest Official Medal`}
                 fetchPriority="high"
                 decoding="async"
-                className={`w-full h-auto ${sizeConfig.maxH}  object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
+                onError={handleBackError}
+                className={`w-full h-auto ${sizeConfig.maxH} object-contain select-none drop-shadow-[0_12px_24px_rgba(0,0,0,0.68)] filter brightness-105 contrast-[1.03] transition-all`}
               />
               {/* Ground Shadow */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-5 bg-black/60 rounded-full blur-md pointer-events-none -z-10" />
@@ -557,8 +591,9 @@ export function Medal3DViewer({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={isBack ? images.back : images.front}
+                  src={isBack ? backImg : frontImg}
                   alt={isBack ? "Back Crest View" : "Front View"}
+                  onError={isBack ? handleBackError : handleFrontError}
                   className="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]"
                 />
               </div>

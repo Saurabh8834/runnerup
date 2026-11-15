@@ -39,6 +39,7 @@ import {
   pastEvents as staticPastEvents,
   publicEvents as staticUpcomingEvents,
   cancerAwarenessEvent,
+  kineticRunEvent,
   getEventMedalImage,
   type PublicEvent,
 } from "../data/events";
@@ -92,25 +93,32 @@ const FALLBACK_EVENT_IMAGES: Record<string, string> = {
 
 /* ─── Open Race Card (Dark #090d16 Theme) ─── */
 function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: number }) {
+  const slug = (event.slug || "").toLowerCase();
+  const name = ((event.name || (event as any).title || "") as string).toLowerCase();
+
   const isKineticRun =
-    event.slug.includes("kinetic") ||
-    event.name.toLowerCase().includes("kinetic");
+    slug.includes("kinetic") ||
+    name.includes("kinetic") ||
+    slug.includes("krun");
 
   const isAirForce =
-    event.slug.includes("air-force") ||
-    event.name.toLowerCase().includes("air force");
+    slug.includes("air-force") ||
+    slug.includes("airforce") ||
+    slug.includes("iaf") ||
+    name.includes("air force");
 
   const isCancerAwareness =
-    event.slug.includes("cancer") ||
-    event.name.toLowerCase().includes("cancer");
+    slug.includes("cancer") ||
+    name.includes("cancer") ||
+    slug.includes("ncad");
 
-  const isMedalCard = isAirForce || isCancerAwareness || isKineticRun;
+  const isMedalCard = true; // Every RunnerUp challenge awards a handcrafted die-cast metal medal
 
   const defaultPoster =
     (isKineticRun
       ? "/images/kinetic-run-medal-front.webp"
       : isCancerAwareness
-        ? "/images/cancer-awareness-medal-front-card.webp"
+        ? "/images/cancer-awareness-medal-front.webp"
         : isAirForce
           ? "/images/iaf-medal-front-card.webp"
           : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
@@ -127,7 +135,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
       (isKineticRun
         ? "/images/kinetic-run-medal-front.webp"
         : isCancerAwareness
-          ? "/images/cancer-awareness-medal-front-card.webp"
+          ? "/images/cancer-awareness-medal-front.webp"
           : isAirForce
             ? "/images/iaf-medal-front-card.webp"
             : event.bannerImageUrl && !event.bannerImageUrl.includes("res.cloudinary.com") && !event.bannerImageUrl.endsWith("-4k.png")
@@ -169,53 +177,32 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
       onClick={handleCardClick}
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0d141d]/95 text-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#ff4b26] hover:shadow-[0_12px_40px_rgba(255,75,38,0.25)] shadow-2xl cursor-pointer"
     >
-      {/* Banner / Poster */}
-      <div className={`relative overflow-hidden ${isMedalCard ? "h-56 xs:h-60 sm:h-56 bg-black" : "h-44 sm:h-48 bg-[#080c10]"}`}>
-        {isMedalCard && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
-            <div className={`h-48 w-48 rounded-full ${isCancerAwareness ? "bg-purple-600/20" : "bg-[#f59e0b]/15"} blur-3xl`} />
-          </div>
-        )}
+      {/* Banner / Poster - Generous Height with 100% Unclipped Medal Display */}
+      <div className="relative overflow-hidden h-64 sm:h-72 bg-gradient-to-b from-[#141d29]/80 via-[#0d141d] to-[#080c10]">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[1]">
+          <div className={`h-52 w-52 rounded-full ${isCancerAwareness ? "bg-purple-600/25" : isKineticRun ? "bg-orange-500/20" : "bg-amber-500/15"} blur-3xl`} />
+        </div>
+
         {imgSrc && !imgFailed ? (
-          isMedalCard ? (
-            <div className="absolute inset-0 flex items-center justify-center p-2 sm:p-3.5 z-[2]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={event.name}
-                className={`h-full w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_40px_rgba(0,0,0,0.95)] select-none`}
-                src={imgSrc}
-                loading={index < 3 ? "eager" : "lazy"}
-                decoding="async"
-                onError={() => {
-                  if (isKineticRun) {
-                    setImgSrc("/images/kinetic-run-medal-front.png");
-                  } else if (isCancerAwareness) {
-                    setImgSrc("/images/cancer-awareness-medal-front-card.webp");
-                  } else {
-                    setImgSrc("/images/iaf-medal-front-card.webp");
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
+          <div className="absolute inset-0 flex items-center justify-center p-3 sm:p-4 z-[2]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={event.name}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
+              className="h-full w-auto max-h-full max-w-full object-contain transition-all duration-500 group-hover:scale-105 drop-shadow-[0_20px_45px_rgba(0,0,0,0.95)] select-none"
               src={imgSrc}
               loading={index < 3 ? "eager" : "lazy"}
               decoding="async"
               onError={() => {
-                if (imgSrc && imgSrc.includes("res.cloudinary.com")) {
-                  setImgSrc(`/events/${event.slug}.webp`);
-                } else if (imgSrc && imgSrc.endsWith(".webp")) {
-                  setImgSrc(`/events/${event.slug}.jpg`);
+                if (isKineticRun) {
+                  setImgSrc("/images/kinetic-run-medal-front.png");
+                } else if (isCancerAwareness) {
+                  setImgSrc("/images/cancer-awareness-medal-front.png");
                 } else {
-                  setImgFailed(true);
+                  setImgSrc("/images/iaf-medal-front.png");
                 }
               }}
             />
-          )
+          </div>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-[#121820] via-[#0d141d] to-[#080c10]">
             <div className="h-14 w-14 rounded-2xl bg-[#ff4b26]/15 border border-[#ff4b26]/30 flex items-center justify-center mb-3">
@@ -228,13 +215,6 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
               {event.distance}
             </span>
           </div>
-        )}
-
-        {hasBannerImage && !isMedalCard && (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-t from-[#0d141d]/95 via-[#0d141d]/40 to-transparent"
-          />
         )}
 
         {/* Top Badges */}
@@ -250,90 +230,61 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
             </>
           ) : isCancerAwareness ? (
             <>
-              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-black/80 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
-                <span>Cancer Awareness</span>
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-black/85 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
+                <span>🎗️ Cancer Awareness</span>
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-black/80 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
-                <Flame className="h-3 w-3 text-amber-400" /> Limited Mint Edition
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-black/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
+                <Flame className="h-3 w-3 text-amber-400" /> Open till 17 Nov
               </span>
             </>
           ) : (
             <>
-              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-[#ff4b26] px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-white shadow-lg shrink-0">
-                <Flame className="h-3 w-3 fill-white" />
-                <span>{scarcity.percent}% Booked</span>
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-white/20 bg-black/80 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-slate-300 shadow-md shrink-0">
+                <span>Indian Air Force Day</span>
               </span>
-
-              {isClosed ? (
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span>Closed</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-emerald-400 shadow-md shrink-0">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                  </span>
-                  <span>Open</span>
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span>Closed</span>
+              </span>
             </>
           )}
         </div>
-
-        {/* Reward / Medal Highlight Strip (Only for non-medal cards so medals are never obscured) */}
-        {!isMedalCard && (
-          <div className="absolute bottom-3 sm:bottom-3.5 left-3 sm:left-4 right-3 sm:right-4 z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/80 backdrop-blur-md px-3 py-1 text-xs font-bold text-white shadow-lg max-w-full">
-              <Medal className="h-3.5 w-3.5 text-[#ff4b26] shrink-0" />
-              <span className="truncate">{event.reward}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Body Content */}
       <div className="flex flex-1 flex-col p-4 sm:p-5 bg-[#0d141d]">
-        {/* Reward Highlight Badges for Medal Cards */}
-        {isMedalCard ? (
-          <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300 shadow-sm">
-              <Medal className="h-3 w-3 text-amber-400 shrink-0" />
-              Solid Metal Medal
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-cyan-300 shadow-sm">
-              <Ticket className="h-3 w-3 text-cyan-400 shrink-0" />
-              Digital Race Bib
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-300 shadow-sm">
-              <FileBadge className="h-3 w-3 text-emerald-400 shrink-0" />
-              E-Certificate
-            </span>
-          </div>
-        ) : (
-          <div className="mb-3.5 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white shadow-sm">
-            <Medal className="h-4 w-4 text-[#ff4b26] shrink-0" />
-            <span className="truncate">{event.reward}</span>
-          </div>
-        )}
+        {/* Single Unified Clean Reward Row */}
+        <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[0.68rem] font-bold text-amber-300 shadow-sm">
+            <Medal className="h-3 w-3 text-amber-400 shrink-0" />
+            Solid Metal Medal
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-[0.68rem] font-bold text-cyan-300 shadow-sm">
+            <Ticket className="h-3 w-3 text-cyan-400 shrink-0" />
+            Digital Race Bib
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[0.68rem] font-bold text-emerald-300 shadow-sm">
+            <FileBadge className="h-3 w-3 text-emerald-400 shrink-0" />
+            E-Certificate
+          </span>
+        </div>
 
-        {/* Pricing & Early-Bird Status Badge (Replaces Scarcity Bar per User Request) */}
+        {/* Challenge Status Descriptor Bar */}
         {isKineticRun ? (
           <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
             <span className="flex items-center gap-1.5">
               <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-              <span>Limited Edition 3D Metal Medal</span>
+              <span>Official 3D Sculpted Finisher Kit</span>
             </span>
-            <span className="font-mono text-emerald-400 font-extrabold">Official Finisher Kit</span>
+            <span className="font-mono text-emerald-400 font-extrabold">10–15 Dec 2026</span>
           </div>
         ) : isCancerAwareness ? (
-          <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-amber-300 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-purple-300 shadow-sm">
             <span className="flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-              <span>Limited Edition 3D Metal Medal</span>
+              <Flame className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+              <span>Challenge Window Active</span>
             </span>
-            <span className="font-mono text-emerald-400 font-extrabold">Official Finisher Kit</span>
+            <span className="font-mono text-amber-300 font-extrabold">Open till 17 Nov</span>
           </div>
         ) : isClosed ? (
           <div className="mb-3 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-rose-400">
@@ -781,6 +732,7 @@ export function EventsCatalog() {
         const mappedUpcoming = deduplicateEvents([
           ...upcomingApi.map((event) => mapApiEventToPublic(event, "upcoming")),
           cancerAwarenessEvent,
+          kineticRunEvent,
         ]);
         const mappedPast = deduplicateEvents(pastApi.map((event) => mapApiEventToPublic(event, "past")));
 

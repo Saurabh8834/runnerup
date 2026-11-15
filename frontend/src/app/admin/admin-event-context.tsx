@@ -111,7 +111,11 @@ export function AdminEventProvider({ children }: { children: React.ReactNode }) 
           t.includes("air force")
         );
       });
-      setEvents(filtered);
+      // Merge with DEFAULT_REAL_EVENTS so all 3 official events (Kinetic, Cancer, IAF) are ALWAYS present
+      const map = new Map<string, EventScopeItem>();
+      DEFAULT_REAL_EVENTS.forEach((e) => map.set(e.slug, e));
+      filtered.forEach((e) => map.set(e.slug, e));
+      setEvents(Array.from(map.values()));
     } catch {
       // Fallback
     } finally {
