@@ -405,8 +405,8 @@ export default function CertificateVerifyPage() {
   // IAF: Concluded (31 Oct 2026) -> Unlocked
   // Cancer: Locked for all users pending official release announcement (unlock trigger: "JAI MATA DI")
   // Kinetic: Upcoming (10-15 Dec 2026) -> Locked unless admin preview
-  const isLocked = (isKinetic || isCancer) && !isAdminDemo;
-  const unlockDateStr = isKinetic ? "15 December 2026" : "Official Release Announcement";
+  const isLocked = isKinetic || isCancer;
+  const unlockDateStr = isKinetic ? "15 December 2026" : "Unlocking Soon";
 
   return (
     <PageShell>

@@ -904,25 +904,16 @@ export function LeaderboardClient({
               {/* ── TAB 1: VERIFIED LEADERBOARD ─────────────────────── */}
               {activeTab === "verified" && (
                 <div className="mt-8 space-y-10">
-                  {isKineticEvent && !isRevealed ? (
+                  {isKineticEvent ? (
                     <div className="space-y-8">
-                      <LeaderboardCountdown
-                        eventName={events.find((e) => e.slug === selectedSlug)?.name || "Kinetic Run Virtual Challenge 2026"}
-                        targetTimestamp={targetRevealTime}
-                        revealLabel="18 Dec, 12:00 PM IST"
-                        isCancerEvent={false}
-                        userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
-                        onTimerComplete={() => setIsRevealed(true)}
-                      />
-
-                      <div className="rounded-3xl border border-[#90aead]/30 bg-white p-8 sm:p-12 text-center shadow-lg">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-4 shadow">
+                      <div className="rounded-3xl border border-[#90aead]/30 bg-white p-8 sm:p-14 text-center shadow-lg">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/30 mb-4 shadow">
                           <Trophy className="h-7 w-7" />
                         </div>
                         <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#14242a]">
                           Leaderboard Standings Under Seal
                         </h3>
-                        <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
+                        <p className="mt-2 text-xs sm:text-sm text-[#244855] max-w-lg mx-auto leading-relaxed font-medium">
                           Registrations are currently active! The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. The official GPS-verified leaderboard and category standings will unlock on 18 December at 12:00 PM IST after all activity proofs are audited.
                         </p>
                       </div>
@@ -1142,7 +1133,22 @@ export function LeaderboardClient({
               {/* ── TAB 2: PARTICIPANTS ROSTER ─────────────────────── */}
               {activeTab === "participants" && (
                 <div className="mt-8 space-y-6">
-                  <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
+                  {isKineticEvent ? (
+                    <div className="space-y-8">
+                      <div className="rounded-3xl border border-[#90aead]/30 bg-white p-8 sm:p-14 text-center shadow-lg">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/30 mb-4 shadow">
+                          <Users className="h-7 w-7" />
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-[#14242a]">
+                          Participant Roster Under Seal
+                        </h3>
+                        <p className="mt-2 text-xs sm:text-sm text-[#244855] max-w-lg mx-auto leading-relaxed font-medium">
+                          Registrations are currently active! The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. The official challenge roster will unlock on 18 December after the event concludes.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
                     <div className="border-b border-[#90aead]/20 bg-[#f4ede1]/80 px-5 sm:px-6 py-4 flex items-center justify-between">
                       <div>
                         <h3 className="font-display font-black text-sm sm:text-base uppercase tracking-tight text-[#14242a]">
@@ -1295,6 +1301,7 @@ export function LeaderboardClient({
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               )}
             </>

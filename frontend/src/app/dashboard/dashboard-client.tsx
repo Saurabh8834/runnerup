@@ -297,7 +297,7 @@ export function DashboardClient() {
       alert("Digital race bibs will unlock automatically after the challenge concludes on 15 December 2026.");
       return;
     }
-    if (isCancer && !isAdminDemoUser) {
+    if (isCancer) {
       alert("Finisher certificates and digital bibs are Unlocking Soon.");
       return;
     }
@@ -334,7 +334,7 @@ export function DashboardClient() {
       alert("Finisher certificates will unlock automatically after the challenge concludes on 15 December 2026.");
       return;
     }
-    if (isCancer && !isAdminDemoUser) {
+    if (isCancer) {
       alert("Finisher certificates and digital bibs are Unlocking Soon.");
       return;
     }
@@ -1459,8 +1459,8 @@ export function DashboardClient() {
                             Leaderboard <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                           </Link>
 
-                          {/* Concluded IAF challenge participants can download certificate/bib. For admin demo user sourav06556@gmail.com on cancer event, preview is also enabled */}
-                          {isPaid && ((isIafEvent && isVerified) || (isCancerEvent && isAdminDemoUser)) && (
+                          {/* Concluded IAF challenge participants can download certificate/bib */}
+                          {isPaid && isIafEvent && isVerified && (
                             <div className="inline-flex items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleDownloadBib(reg)}
@@ -1495,7 +1495,7 @@ export function DashboardClient() {
                             </div>
                           )}
 
-                          {isPaid && isCancerEvent && !isAdminDemoUser && (
+                          {isPaid && isCancerEvent && (
                             <button
                               type="button"
                               onClick={() => {
@@ -1892,7 +1892,7 @@ export function DashboardClient() {
                           </div>
                       </div>
 
-                      {(isIaf || (isCancerEvent && isAdminDemoUser)) && (
+                      {isIaf && (
                         <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
                           <button
                             onClick={() => handleDownloadCert(reg)}
@@ -1936,7 +1936,7 @@ export function DashboardClient() {
                         </div>
                       )}
 
-                      {isCancerEvent && !isAdminDemoUser && (
+                      {isCancerEvent && (
                         <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center gap-2">
                           <button
                             type="button"
