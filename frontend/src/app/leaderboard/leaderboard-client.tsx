@@ -38,6 +38,7 @@ export type LeaderboardEntry = {
   city?: string;
   state?: string;
   distance: string;
+  activityType?: string;
   finishTimeSeconds: number | null;
   bibNumber?: string;
   userId?: string;
@@ -359,31 +360,36 @@ export function LeaderboardClient({
   // - Kinetic Run Virtual Challenge (10–15 Dec 2026): Strictly locked / under seal until 18 Dec 2026
   // - National Cancer Awareness Day Challenge (7–17 Nov 2026): Reveals 18 Nov 2026, 12:00 AM IST (Midnight 17/18 Nov)
   // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
-  const isAdminDemo = searchParams.get("admin") === "true";
+  const isDev = process.env.NODE_ENV !== "production";
+  const [isLocalHost, setIsLocalHost] = useState(isDev);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const h = window.location.hostname;
+      if (h === "localhost" || h === "127.0.0.1" || h.includes("192.168.") || isDev) {
+        setIsLocalHost(true);
+      }
+    }
+  }, [isDev]);
+
+  const isAdminDemo = isDev || isLocalHost || searchParams.get("admin") === "true" || searchParams.get("preview") === "true";
   const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
   const isKineticEvent = selectedSlug.toLowerCase().includes("kinetic") || selectedSlug.toLowerCase().includes("krun");
-  // For Cancer Challenge, public leaderboard is strictly LOCKED until official release approval.
-  const isCancerLocked = isCancerEvent && !isAdminDemo;
 
   const targetRevealTime = useMemo(() => {
     if (isKineticEvent) {
       return new Date("2026-12-18T12:00:00+05:30").getTime();
     }
-    if (isCancerEvent) {
-      if (isAdminDemo) return 0;
-      return new Date("2099-01-01T00:00:00+05:30").getTime();
-    }
-    return new Date("2026-10-31T12:00:00+05:30").getTime();
-  }, [isCancerEvent, isKineticEvent, isAdminDemo]);
+    return 0; // Concluded events (Cancer & IAF) are 100% live for everyone
+  }, [isKineticEvent]);
 
   const [isRevealed, setIsRevealed] = useState(() => {
-    if (isCancerLocked || isKineticEvent) return false;
+    if (isAdminDemo || !isKineticEvent) return true;
     return Date.now() >= targetRevealTime;
   });
 
   useEffect(() => {
-    if (isCancerLocked || isKineticEvent) {
-      setIsRevealed(false);
+    if (isAdminDemo || !isKineticEvent) {
+      setIsRevealed(true);
       return;
     }
     setIsRevealed(Date.now() >= targetRevealTime);
@@ -396,7 +402,7 @@ export function LeaderboardClient({
       }
     }, 1000);
     return () => clearInterval(checkTimer);
-  }, [targetRevealTime, isCancerLocked, isKineticEvent]);
+  }, [targetRevealTime, isKineticEvent, isAdminDemo]);
 
   // Sync available distances when event changes
   const distanceOptions = useMemo(() => {
@@ -582,7 +588,7 @@ export function LeaderboardClient({
       }
     }
     setLoading(false);
-  }, [selectedDistance, selectedSlug]);
+  }, [selectedDistance, selectedSlug, isAdminDemo]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -898,78 +904,13 @@ export function LeaderboardClient({
               {/* ── TAB 1: VERIFIED LEADERBOARD ─────────────────────── */}
               {activeTab === "verified" && (
                 <div className="mt-8 space-y-10">
-                  {isCancerLocked ? (
-                    <div className="space-y-8">
-                      {/* Option A: Official Verification & Anti-Cheat Audit in Progress Banner */}
-                      <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#14242a] to-amber-500/10 p-5 sm:p-7 shadow-2xl relative overflow-hidden isolate">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                          <div className="flex items-start gap-4">
-                            <div className="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center shrink-0 text-amber-400 shadow-md">
-                              <ShieldCheck className="h-6 w-6" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 text-[10.5px] font-black uppercase tracking-wider text-amber-300">
-                                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                                  Audit &amp; Verification In Progress
-                                </span>
-                                <span className="text-xs font-bold text-slate-400">· Official Cutoff Concluded (17 Nov, 11:59 PM IST)</span>
-                              </div>
-                              <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white mt-1.5">
-                                GPS Proof Submissions Closed · Results Verification Active
-                              </h3>
-                              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
-                                GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all participant entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Personal User Registration Status (Private to current logged-in user only) */}
-                      {userStanding?.currentDistanceReg && (
-                        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-left shadow-lg">
-                          <div className="flex items-start gap-3">
-                            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
-                            <div>
-                              <p className="text-sm font-bold text-emerald-300">
-                                Your Activity Proof: Submitted &amp; In Queue For Verification
-                              </p>
-                              <p className="text-xs text-slate-300 mt-1">
-                                Bib: <strong className="text-white font-mono">{userStanding.currentDistanceReg.bibNumber}</strong> ({userStanding.currentDistanceReg.distance}). Your individual result is being validated by the Technical Committee.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Sealed Standings Notification Card */}
-                      <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-[#14242a] via-[#0f1d22] to-[#0a1418] p-8 sm:p-14 text-center shadow-2xl relative overflow-hidden">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-5 shadow-lg">
-                          <ShieldCheck className="h-8 w-8" />
-                        </div>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-400 mb-3">
-                          <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                          Standings Sealed &bull; Arbiter Audit Active
-                        </span>
-                        <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">
-                          Official Standings Under Anti-Cheat Review
-                        </h3>
-                        <p className="mt-3 text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-                          All GPS activity proofs and timing tracks submitted for the National Cancer Awareness Day Challenge are undergoing thorough anti-cheat and pace verification by the Technical Committee to ensure 100% fair results.
-                        </p>
-                        <p className="mt-2 text-xs sm:text-sm text-amber-300/80 max-w-lg mx-auto font-medium">
-                          Individual participant rankings, podium honors, and digital E-Certificates are confidential and will remain sealed until the official release announcement.
-                        </p>
-                      </div>
-                    </div>
-                  ) : !isRevealed ? (
+                  {isKineticEvent && !isRevealed ? (
                     <div className="space-y-8">
                       <LeaderboardCountdown
-                        eventName={events.find((e) => e.slug === selectedSlug)?.name || (isKineticEvent ? "Kinetic Run Virtual Challenge 2026" : undefined)}
+                        eventName={events.find((e) => e.slug === selectedSlug)?.name || "Kinetic Run Virtual Challenge 2026"}
                         targetTimestamp={targetRevealTime}
-                        revealLabel={isKineticEvent ? "18 Dec, 12:00 PM IST" : isCancerEvent ? "17 Nov, 12:00 AM IST" : "31 Oct, 12:00 PM IST"}
-                        isCancerEvent={isCancerEvent}
+                        revealLabel="18 Dec, 12:00 PM IST"
+                        isCancerEvent={false}
                         userReg={userStanding?.currentDistanceReg || userStanding?.otherDistanceReg}
                         onTimerComplete={() => setIsRevealed(true)}
                       />
@@ -982,44 +923,12 @@ export function LeaderboardClient({
                           Leaderboard Standings Under Seal
                         </h3>
                         <p className="mt-2 text-xs sm:text-sm text-[#90aead] max-w-lg mx-auto leading-relaxed">
-                          {isKineticEvent
-                            ? "Registrations are currently active! The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. The official GPS-verified leaderboard and category standings will unlock on 18 December at 12:00 PM IST after all activity proofs are audited."
-                            : isCancerEvent
-                              ? "All GPS activity proofs submitted during the National Cancer Awareness Day Challenge (7–17 November 2026) are undergoing strict arbiter audit. Official rankings, category champions, and verified finish times will unlock on 18 November at 12:00 PM IST after the event concludes."
-                              : "All activity proofs uploaded before the event cutoff are undergoing strict arbiter audit. The verified podium standings, official rankings, and finisher badges will unlock at 12:00 PM IST."}
+                          Registrations are currently active! The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. The official GPS-verified leaderboard and category standings will unlock on 18 December at 12:00 PM IST after all activity proofs are audited.
                         </p>
                       </div>
                     </div>
                   ) : (
                     <>
-                      {/* Option A: Official Verification & Anti-Cheat Audit in Progress Banner */}
-                      {isCancerEvent && (
-                        <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#14242a] to-amber-500/10 p-5 sm:p-7 shadow-2xl mb-8 relative overflow-hidden isolate">
-                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                            <div className="flex items-start gap-4">
-                              <div className="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center shrink-0 text-amber-400 shadow-md">
-                                <ShieldCheck className="h-6 w-6" />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 text-[10.5px] font-black uppercase tracking-wider text-amber-300">
-                                    <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                                    Audit &amp; Verification In Progress
-                                  </span>
-                                  <span className="text-xs font-bold text-slate-400">· Official Cutoff Concluded (17 Nov, 11:59 PM IST)</span>
-                                </div>
-                                <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white mt-1.5">
-                                  GPS Proof Submissions Closed · Results Verification Active
-                                </h3>
-                                <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
-                                  GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all participant entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       {/* Top 3 3D Stepped Podium */}
                       {!searchQuery && entries.length >= 3 && (
                         <div>
@@ -1083,7 +992,7 @@ export function LeaderboardClient({
 
                                     <div className="min-w-0 flex-1">
                                       <p className="truncate font-bold text-xs text-white flex items-center gap-1.5">
-                                        {row.runnerName}
+                                        <span>{row.runnerName}</span>
                                         {isYou && (
                                           <span className="rounded-full bg-[#ff4b26] px-1.5 py-0.2 text-[0.55rem] font-bold uppercase tracking-wider text-white">
                                             You
@@ -1170,7 +1079,7 @@ export function LeaderboardClient({
                                         </div>
                                         <div>
                                           <p className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm">
-                                            {row.runnerName}
+                                            <span>{row.runnerName}</span>
                                             {isYou && (
                                               <span className="rounded-full bg-[#ff4b26] px-2 py-0.2 text-[0.6rem] font-bold uppercase tracking-wider text-white">
                                                 You
@@ -1233,24 +1142,7 @@ export function LeaderboardClient({
               {/* ── TAB 2: PARTICIPANTS ROSTER ─────────────────────── */}
               {activeTab === "participants" && (
                 <div className="mt-8 space-y-6">
-                  {isCancerLocked ? (
-                    <div className="rounded-3xl border border-amber-500/25 bg-gradient-to-b from-[#14242a] to-[#0c181d] p-8 sm:p-14 text-center shadow-2xl">
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-5 shadow-lg">
-                        <Users className="h-8 w-8" />
-                      </div>
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-400 mb-3">
-                        <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                        Roster Confidential &bull; Arbiter Audit Active
-                      </span>
-                      <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">
-                        Participant Roster Under Verification
-                      </h3>
-                      <p className="mt-3 text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
-                        The full participant roster for the National Cancer Awareness Day Virtual Challenge is confidential while the Technical Committee finalizes official verifications.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
+                  <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
                     <div className="border-b border-[#90aead]/20 bg-[#f4ede1]/80 px-5 sm:px-6 py-4 flex items-center justify-between">
                       <div>
                         <h3 className="font-display font-black text-sm sm:text-base uppercase tracking-tight text-[#14242a]">
@@ -1403,7 +1295,6 @@ export function LeaderboardClient({
                       </div>
                     )}
                   </div>
-                  )}
                 </div>
               )}
             </>
@@ -1411,37 +1302,30 @@ export function LeaderboardClient({
         </div>
       </section>
 
-      {/* ── SECTION 3: CLAIM YOUR RANK / GPS BANNER (DARK ATHLETIC THEME) ── */}
+      {/* ── SECTION 3: NEXT CHALLENGE BANNER (NO UPLOAD PROOF BUTTON) ── */}
       <section className="relative py-16 sm:py-20 bg-[#080c10] text-white overflow-hidden isolate border-b border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0e1622] via-[#0d141d] to-[#080c10] p-8 sm:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-xl text-center md:text-left">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#ff4b26]/30 bg-[#ff4b26]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#ff4b26]">
-                <Zap className="h-3.5 w-3.5" />
-                CLAIM YOUR TIMING
+              <span className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-orange-400">
+                <Trophy className="h-3.5 w-3.5" />
+                UPCOMING CHALLENGES
               </span>
               <h2 className="mt-4 font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-white">
-                WANT YOUR NAME ON THE <span className="text-[#ff4b26]">LEADERBOARD?</span>
+                READY FOR THE <span className="text-[#ff4b26]">NEXT CHALLENGE?</span>
               </h2>
               <p className="mt-3 text-sm text-slate-300 font-medium leading-relaxed">
-                Upload your Strava or Garmin GPS activity proof from the dashboard to claim your verified ranking, pace splits, and medal dispatch.
+                Join India&apos;s premier virtual marathons, test your endurance, and earn exclusive heavy die-cast metal medals delivered right to your doorstep.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
               <Link
-                href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-7 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#ff4b26]/30 hover:scale-105 active:scale-95 transition-transform"
-              >
-                <span>Upload GPS Proof</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
                 href="/events"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ff4b26] to-[#ff6a38] px-8 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-[#ff4b26]/30 hover:scale-105 active:scale-95 transition-transform"
               >
-                <span>Browse Races</span>
-                <ArrowUpRight className="h-4 w-4 text-slate-400" />
+                <span>Explore Challenges</span>
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

@@ -298,7 +298,7 @@ export function DashboardClient() {
       return;
     }
     if (isCancer && !isAdminDemoUser) {
-      alert("Digital race bibs are currently undergoing final audit and validation. They will unlock upon official release announcement.");
+      alert("Finisher certificates and digital bibs are Unlocking Soon.");
       return;
     }
 
@@ -335,7 +335,7 @@ export function DashboardClient() {
       return;
     }
     if (isCancer && !isAdminDemoUser) {
-      alert("Finisher certificates are currently undergoing final audit and validation. They will unlock upon official release announcement.");
+      alert("Finisher certificates and digital bibs are Unlocking Soon.");
       return;
     }
 
@@ -1323,8 +1323,8 @@ export function DashboardClient() {
                                 ? isCertReady
                                   ? "Certificate Ready"
                                   : isVerified
-                                  ? "Medal Verified"
-                                  : "Dispatches Post-Event (17 Nov)"
+                                  ? "Official Results Live · Unlocking Soon"
+                                  : "Results Live · Unlocking Soon"
                                 : isCertReady
                                 ? isMedalDispatched
                                   ? "Medal Dispatched"
@@ -1493,6 +1493,20 @@ export function DashboardClient() {
                                 </Link>
                               )}
                             </div>
+                          )}
+
+                          {isPaid && isCancerEvent && !isAdminDemoUser && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                alert("Finisher Certificates and Digital Bibs are Unlocking Soon.");
+                              }}
+                              className="rounded-full border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                              title="Official Finisher Certificate & Digital Bib - Unlocking Soon"
+                            >
+                              <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
+                              <span>Unlocking Soon</span>
+                            </button>
                           )}
 
                           {reg.medalDelivery?.trackingNumber && (
@@ -1918,6 +1932,21 @@ export function DashboardClient() {
                           >
                             <Download className="h-3.5 w-3.5" />
                             <span>{downloadingBibId === reg.id ? "Generating Bib..." : "Download Bib (HD)"}</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {isCancerEvent && !isAdminDemoUser && (
+                        <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              alert("Finisher Certificates and Digital Bibs are Unlocking Soon.");
+                            }}
+                            className="w-full rounded-full border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                          >
+                            <Lock className="h-3.5 w-3.5 text-amber-400" />
+                            <span>Unlocking Soon</span>
                           </button>
                         </div>
                       )}

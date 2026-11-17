@@ -14,7 +14,7 @@ async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefin
 
   const isDev = process.env.NODE_ENV !== "production";
   const endpoints = isDev
-    ? [`http://127.0.0.1:4000/api/registrations/leaderboard/${defaultSlug}${distQuery}`]
+    ? [`http://127.0.0.1:4000/api/registrations/leaderboard/${defaultSlug}${distQuery}&admin=true`]
     : [
         `https://www.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
         `https://api.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
