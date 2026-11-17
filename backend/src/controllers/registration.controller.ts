@@ -1015,8 +1015,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       eventTitle: event.title,
       availableDistances,
       selectedDistance: activeDistance,
-      totalVerified: 337,
-      totalParticipants: 353,
+      totalVerified: event.verifiedResults || 1260,
+      totalParticipants: event.finishers || 1480,
       isUnderAudit: true,
       status: "UNDER_VERIFICATION",
       message: "GPS proof verification is actively in progress. Results are confidential until official release.",
@@ -1327,12 +1327,10 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     }
   }
 
-  const totalEventParticipants = isCancerEvent
-    ? 353
-    : (event.finishers || (event.slug.includes("air-force") ? 1480 : 1850));
-  const totalVerifiedFinishers = isCancerEvent
-    ? 337
-    : (event.verifiedResults || (event.slug.includes("air-force") ? 1420 : 1620));
+  const totalEventParticipants =
+    event.finishers || (event.slug.includes("air-force") ? 1480 : 1850);
+  const totalVerifiedFinishers =
+    event.verifiedResults || (event.slug.includes("air-force") ? 1420 : 1620);
 
   const meta = {
     eventId: event.id,

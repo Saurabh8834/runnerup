@@ -919,15 +919,9 @@ export function LeaderboardClient({
                                 GPS Proof Submissions Closed · Results Verification Active
                               </h3>
                               <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
-                                GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all 337 paid finisher entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
+                                GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all participant entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
                               </p>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0 md:self-center">
-                            <span className="rounded-2xl border border-white/10 bg-black/40 px-4 py-2.5 text-center">
-                              <span className="block text-xs uppercase tracking-wider font-bold text-slate-400">Audited Finishers</span>
-                              <span className="block text-lg font-black text-white font-mono">337 Paid</span>
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -1018,15 +1012,9 @@ export function LeaderboardClient({
                                   GPS Proof Submissions Closed · Results Verification Active
                                 </h3>
                                 <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
-                                  GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all 337 paid finisher entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
+                                  GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all participant entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
                                 </p>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0 md:self-center">
-                              <span className="rounded-2xl border border-white/10 bg-black/40 px-4 py-2.5 text-center">
-                                <span className="block text-xs uppercase tracking-wider font-bold text-slate-400">Audited Finishers</span>
-                                <span className="block text-lg font-black text-white font-mono">337 Paid</span>
-                              </span>
                             </div>
                           </div>
                         </div>
