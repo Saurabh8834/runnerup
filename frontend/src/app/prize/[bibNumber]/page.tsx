@@ -134,8 +134,8 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
               </div>
             )
           ) : prize.type === "certificate" && isCancer ? (
-            <div className="mt-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-xs text-emerald-200/90 leading-relaxed">
-              <span className="font-semibold text-emerald-300">🏆 Available After 17 Nov:</span> Your official QR-verified Finisher E-Certificate will be unlocked for instant HD download once the challenge concludes on <strong>17 November 2026</strong> and your GPS run/walk proof is verified by our team.
+            <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
+              <span className="font-semibold text-purple-300">🔒 Locked Under Final Audit:</span> Official QR-verified Finisher E-Certificates and Digital Bibs are undergoing final activity audit and validation. They will unlock upon official release announcement.
             </div>
           ) : null}
 

@@ -25,6 +25,7 @@ type BibData = {
   distance: string;
   eventTitle: string;
   rankNumber: string;
+  category?: string;
   certificateNumber?: string | null;
   status?: string;
   isPaid?: boolean;
@@ -61,10 +62,10 @@ export default function DigitalBibPage() {
     searchParams.get("admin") === "true";
 
   // Kinetic Run: Strictly locked until event concludes on 15 Dec 2026.
-  // Cancer Run: Locked until 17 Nov 2026.
+  // Cancer Run: Locked for all users pending official release announcement (unlock trigger: "JAI MATA DI").
   // IAF: Concluded race -> Unlocked.
-  const isLocked = isKinetic || (!isIaf && !isAdminDemo);
-  const unlockDateStr = isKinetic ? "15 December 2026" : "17 November 2026";
+  const isLocked = (isKinetic || isCancer) && !isAdminDemo;
+  const unlockDateStr = isKinetic ? "15 December 2026" : "Official Release Announcement";
 
   useEffect(() => {
     if (!bibNumber) return;
@@ -184,6 +185,7 @@ export default function DigitalBibPage() {
           runnerName: data?.runnerName || "RUNNER",
           distance: data?.distance || "5 KM",
           positionStr: data?.bibNumber || "1001",
+          category: data?.category || "Running",
           isCancerEvent: isCancer,
           isKineticEvent: isKinetic,
         });
@@ -222,6 +224,9 @@ export default function DigitalBibPage() {
           runnerName: data.runnerName,
           distance: data.distance,
           positionStr: data.bibNumber,
+          category: data.category || "Running",
+          isCancerEvent: isCancer,
+          isKineticEvent: isKinetic,
         });
       }
       const safeName = data.runnerName.replace(/[^a-zA-Z0-9]/g, "_");

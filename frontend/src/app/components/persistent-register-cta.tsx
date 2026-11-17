@@ -105,7 +105,7 @@ export function PersistentRegisterCta() {
     return null;
   }
 
-  const targetHref = "/register?event=national-cancer-awareness-day-virtual-run-2026";
+  const targetHref = "/events/kinetic-run-virtual-challenge-2026";
 
   return (
     <>
@@ -125,10 +125,10 @@ export function PersistentRegisterCta() {
             </span>
             <div className="min-w-0 flex flex-col justify-center">
               <span className="text-[11px] font-black uppercase tracking-wider text-white truncate">
-                Cancer Awareness Run
+                Kinetic Run 2026
               </span>
               <p className="text-[9px] font-medium text-emerald-400 truncate">
-                3D Metal Medal · Free Delivery
+                3D Winged Medal · Free Delivery
               </p>
             </div>
           </div>
@@ -166,10 +166,10 @@ export function PersistentRegisterCta() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff4b26]" />
             </span>
             <span className="text-xs font-bold text-white tracking-wide">
-              Cancer Awareness Virtual Run
+              Kinetic Run Virtual Challenge
             </span>
             <span className="text-[10px] text-emerald-400 font-medium hidden lg:inline">
-              · Heavyweight 3D Medal Included
+              · Heavyweight 3D Winged Medal
             </span>
           </div>
 

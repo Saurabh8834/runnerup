@@ -128,10 +128,24 @@ function Start-BackendProcess {
     Clean-Port4000
     Start-Sleep -Milliseconds 500
 
-    # Prefer compiled production server dist/server.js for lower RAM and no watcher lag
+    # Ensure dist is fresh: recompile if missing or older than any file in src
     $serverDist = Join-Path $BackendDir "dist\server.js"
     $nodeCmd = Get-Command "node" -ErrorAction SilentlyContinue
     $nodeExe = if ($nodeCmd) { $nodeCmd.Source } else { "node.exe" }
+
+    $needsBuild = -not (Test-Path $serverDist)
+    if (-not $needsBuild) {
+        $distTime = (Get-Item $serverDist).LastWriteTime
+        $latestSrc = Get-ChildItem -Path (Join-Path $BackendDir "src") -Recurse -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($latestSrc -and $latestSrc.LastWriteTime -gt $distTime) {
+            $needsBuild = $true
+        }
+    }
+
+    if ($needsBuild) {
+        Write-DaemonLog "Backend source files are newer than dist. Auto-building backend (npm run build:tsc)..."
+        Start-Process -FilePath "cmd.exe" -ArgumentList @("/c npm run build:tsc") -WorkingDirectory $BackendDir -Wait -WindowStyle Hidden
+    }
 
     if (Test-Path $serverDist) {
         $proc = Start-Process -FilePath $nodeExe `

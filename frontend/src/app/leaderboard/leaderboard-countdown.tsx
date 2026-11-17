@@ -118,18 +118,18 @@ export function LeaderboardCountdown({
                 <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs sm:text-sm font-bold text-amber-300">
-                    Challenge Active (7–17 Nov 2026) · GPS Proof Pending
+                    Submission Window Closed · GPS Proof Not Submitted
                   </p>
                   <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">
-                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — Complete your run, walk, or cycling activity and upload your GPS screenshot to secure your official rank.
+                    Bib: <strong className="text-white font-mono">{userReg.bibNumber}</strong> ({userReg.distance}) — The GPS activity proof submission deadline for the National Cancer Awareness Day Challenge has concluded.
                   </p>
                 </div>
               </div>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#e64833] px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md transition hover:bg-[#c93b27] shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-slate-700/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-300 shadow-md transition hover:bg-slate-600 shrink-0"
               >
-                <span>Submit Proof</span>
+                <span>View Dashboard</span>
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>

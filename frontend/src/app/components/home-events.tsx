@@ -69,7 +69,7 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
 
   const [imgSrc, setImgSrc] = useState(initialImage);
   const [imgFailed, setImgFailed] = useState(false);
-  const isClosed = !isCancerAwareness && !isKineticRun && (event.status === "closed" || event.status === "past" || isAirForce);
+  const isClosed = !isKineticRun && (isCancerAwareness || event.status === "closed" || event.status === "past" || isAirForce);
   const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
 
   useEffect(() => {
@@ -165,8 +165,9 @@ function EventCard({ event, index }: { event: PublicEvent; index: number }) {
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-[#14242a]/90 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
                 <span>🎗️ Cancer Awareness</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-black/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
-                <Flame className="h-3 w-3 text-amber-400" /> Open till 17 Nov
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span>Closed</span>
               </span>
             </>
           ) : (
@@ -338,14 +339,14 @@ export function HomeEvents({ initial }: { initial?: PublicEvent[] }) {
   const combined = useMemo(() => {
     const list = Array.isArray(initial) && initial.length > 0 ? [...initial] : [];
 
-    // Ensure Cancer Awareness is present as the active live event (running till 17 Nov)
-    if (!list.some((ev) => ev.slug.includes("cancer"))) {
-      list.unshift(cancerAwarenessEvent);
+    // Ensure Kinetic Run is present as the active live event
+    if (!list.some((ev) => ev.slug.includes("kinetic"))) {
+      list.unshift(kineticRunEvent);
     }
 
-    // Ensure Kinetic Run is present as the upcoming 10–15 Dec event
-    if (!list.some((ev) => ev.slug.includes("kinetic"))) {
-      list.push(kineticRunEvent);
+    // Ensure Cancer Awareness is present as a concluded challenge
+    if (!list.some((ev) => ev.slug.includes("cancer"))) {
+      list.push(cancerAwarenessEvent);
     }
 
     // Always include the IAF challenge in the card list

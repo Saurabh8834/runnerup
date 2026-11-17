@@ -30,7 +30,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     event.status === "past" ||
     event.status === "closed" ||
     event.slug.includes("air-force") ||
-    event.slug.includes("airforce");
+    event.slug.includes("airforce") ||
+    event.slug.includes("cancer");
   const metaTitle = `${event.name} - ${event.distance} Virtual Run | RunnerUp`;
   const metaDescription = isPast
     ? `View results and recap for ${event.name}. Official GPS-verified results and finisher awards from across India.`
@@ -101,7 +102,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     event.status === "past" ||
     event.status === "closed" ||
     event.slug.includes("air-force") ||
-    event.slug.includes("airforce");
+    event.slug.includes("airforce") ||
+    event.slug.includes("cancer");
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",

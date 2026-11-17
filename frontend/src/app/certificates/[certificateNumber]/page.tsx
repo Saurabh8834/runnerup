@@ -39,6 +39,8 @@ type CertificateData = {
   runnerName: string;
   event: string;
   distance: string;
+  category?: string;
+  activityType?: string;
   bibNumber: string;
   finishTimeSeconds?: number | null;
   issuedAt: string | null;
@@ -99,6 +101,7 @@ export default function CertificateVerifyPage() {
             ...payload,
             runnerName: (payload.runnerName || officialRunner?.name || "RUNNER").toUpperCase().trim(),
             distance: (payload.distance || officialRunner?.distance || "5 KM").toUpperCase().trim(),
+            category: payload.category || (payload.activityType ? (payload.activityType.charAt(0).toUpperCase() + payload.activityType.slice(1).toLowerCase()) : "Running"),
             bibNumber: payload.bibNumber || officialRunner?.bibNumber || bibGuess,
           });
         }
@@ -170,10 +173,11 @@ export default function CertificateVerifyPage() {
           runnerName: data?.runnerName || "RUNNER",
           distance: data?.distance || "5 KM",
           dateStr: dateDisplay,
-          category: "Running",
+          category: data?.category || data?.activityType || "Running",
           isCancerEvent: isCancer,
           isKineticEvent: isKinetic,
           isAdminDemo: isAdminDemo,
+          certificateNumber: data?.certificateNumber || certificateNumber,
         });
 
         if (cancelled || !canvasRef.current) return;
@@ -226,10 +230,11 @@ export default function CertificateVerifyPage() {
           runnerName: data.runnerName,
           distance: data.distance,
           dateStr,
-          category: "Running",
+          category: data.category || data.activityType || "Running",
           isCancerEvent: isCancer,
           isKineticEvent: isKinetic,
           isAdminDemo: isAdminDemo,
+          certificateNumber: data.certificateNumber || certificateNumber,
         });
       }
       const safeName = data.runnerName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -398,10 +403,10 @@ export default function CertificateVerifyPage() {
     (data?.runnerName || "").toUpperCase().includes("SAURABH");
 
   // IAF: Concluded (31 Oct 2026) -> Unlocked
-  // Cancer: Ongoing until 17 Nov 2026 -> Locked unless admin demo
+  // Cancer: Locked for all users pending official release announcement (unlock trigger: "JAI MATA DI")
   // Kinetic: Upcoming (10-15 Dec 2026) -> Locked unless admin preview
-  const isLocked = isKinetic || (!isIaf && !isAdminDemo);
-  const unlockDateStr = isKinetic ? "15 December 2026" : "17 November 2026";
+  const isLocked = (isKinetic || isCancer) && !isAdminDemo;
+  const unlockDateStr = isKinetic ? "15 December 2026" : "Official Release Announcement";
 
   return (
     <PageShell>

@@ -912,6 +912,40 @@ export function LeaderboardClient({
                     </div>
                   ) : (
                     <>
+                      {/* Option A: Official Verification & Anti-Cheat Audit in Progress Banner */}
+                      {isCancerEvent && (
+                        <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#14242a] to-amber-500/10 p-5 sm:p-7 shadow-2xl mb-8 relative overflow-hidden isolate">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                            <div className="flex items-start gap-4">
+                              <div className="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center shrink-0 text-amber-400 shadow-md">
+                                <ShieldCheck className="h-6 w-6" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 text-[10.5px] font-black uppercase tracking-wider text-amber-300">
+                                    <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                                    Audit &amp; Verification In Progress
+                                  </span>
+                                  <span className="text-xs font-bold text-slate-400">· Official Cutoff Concluded (17 Nov, 11:59 PM IST)</span>
+                                </div>
+                                <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white mt-1.5">
+                                  GPS Proof Submissions Closed · Results Verification Active
+                                </h3>
+                                <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
+                                  GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all 337 paid finisher entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 md:self-center">
+                              <span className="rounded-2xl border border-white/10 bg-black/40 px-4 py-2.5 text-center">
+                                <span className="block text-xs uppercase tracking-wider font-bold text-slate-400">Audited Finishers</span>
+                                <span className="block text-lg font-black text-white font-mono">337 Paid</span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Top 3 3D Stepped Podium */}
                       {!searchQuery && entries.length >= 3 && (
                         <div>

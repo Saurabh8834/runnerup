@@ -80,13 +80,13 @@ export const cancerAwarenessEvent: PublicEvent = {
   price: "Rs. 499",
   description:
     "Honoring the brave fighters, celebrating the survivors, and remembering our loved ones. Run, walk, or jog pan-India to bring hope. Every step is dedicated to cancer awareness and courage.",
-  highlight: "National Virtual Challenge · Open till 17 Nov · Limited Edition 3D Metal Medal",
-  banner: "Cancer Awareness Challenge",
+  highlight: "National Virtual Challenge · Concluded · Limited Edition 3D Metal Medal",
+  banner: "Cancer Awareness Challenge · Concluded",
   bannerImageUrl: "/images/cancer-awareness-medal-front-card.webp",
   medalImageUrl: "/images/cancer-awareness-medal-front.webp",
   reward: "Die-Cast Solid Metal Finisher Medal + Digital Bib + Certificate",
   showCouponOnCard: false,
-  status: "upcoming",
+  status: "closed",
   compareAtPrice: "Rs. 799",
   activityTypes: ["running", "walking", "cycling"],
   startsAt: "2026-11-07T00:00:00.000Z",
@@ -101,8 +101,8 @@ export const cancerAwarenessEvent: PublicEvent = {
 };
 
 export const allPublicEvents: PublicEvent[] = [
-  cancerAwarenessEvent,
   kineticRunEvent,
+  cancerAwarenessEvent,
   {
     name: "Indian Air Force Day Virtual Challenge 2026",
     slug: "indian-air-force-day-virtual-challenge",

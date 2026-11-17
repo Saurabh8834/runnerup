@@ -78,15 +78,15 @@ export async function listEvents(request: Request, response: Response) {
     return response.json(groupResult);
   }
 
-  // For open/upcoming lists, prioritize active OPEN events, specifically current Cancer event
+  // For open/upcoming lists, prioritize active OPEN events, specifically Kinetic Run
   if (scope === "upcoming" || scope === "open" || scope === "live") {
     dedupedEnriched.sort((a, b) => {
       const aOpen = a.status === "OPEN" ? 1 : 0;
       const bOpen = b.status === "OPEN" ? 1 : 0;
       if (aOpen !== bOpen) return bOpen - aOpen;
-      const aCancer = a.slug.includes("cancer") ? 1 : 0;
-      const bCancer = b.slug.includes("cancer") ? 1 : 0;
-      if (aCancer !== bCancer) return bCancer - aCancer;
+      const aKinetic = a.slug.includes("kinetic") ? 1 : 0;
+      const bKinetic = b.slug.includes("kinetic") ? 1 : 0;
+      if (aKinetic !== bKinetic) return bKinetic - aKinetic;
       return a.startsAt.getTime() - b.startsAt.getTime();
     });
   }

@@ -127,7 +127,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
   const [imgSrc, setImgSrc] = useState<string | undefined>(defaultPoster);
   const [imgFailed, setImgFailed] = useState(false);
   const hasBannerImage = Boolean(imgSrc) && !imgFailed;
-  const isClosed = !isCancerAwareness && !isKineticRun && (event.status === "closed" || event.status === "past" || isAirForce);
+  const isClosed = !isKineticRun && (isCancerAwareness || event.status === "closed" || event.status === "past" || isAirForce);
   const scarcity = useMemo(() => getEventScarcity(event.slug, isClosed), [event.slug, isClosed]);
 
   useEffect(() => {
@@ -233,8 +233,9 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
               <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-purple-500/50 bg-black/85 backdrop-blur-md px-3 py-1 text-[0.65rem] sm:text-[0.7rem] font-black text-purple-300 shadow-md shrink-0">
                 <span>🎗️ Cancer Awareness</span>
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-black/85 backdrop-blur-md px-2.5 py-1 text-[0.65rem] sm:text-[0.68rem] font-bold text-amber-300 shrink-0">
-                <Flame className="h-3 w-3 text-amber-400" /> Open till 17 Nov
+              <span className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-rose-500/40 bg-rose-950/85 backdrop-blur-md px-2.5 sm:px-3 py-1 text-[0.62rem] sm:text-[0.68rem] font-black uppercase tracking-wider text-rose-300 shadow-md shrink-0">
+                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                <span>Closed</span>
               </span>
             </>
           ) : (
@@ -278,15 +279,7 @@ function OpenEventCard({ event, index = 0 }: { event: PublicEvent; index?: numbe
             </span>
             <span className="font-mono text-emerald-400 font-extrabold">10–15 Dec 2026</span>
           </div>
-        ) : isCancerAwareness ? (
-          <div className="mb-3 flex items-center justify-between gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-1.5 text-[0.72rem] font-bold text-purple-300 shadow-sm">
-            <span className="flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-              <span>Challenge Window Active</span>
-            </span>
-            <span className="font-mono text-amber-300 font-extrabold">Open till 17 Nov</span>
-          </div>
-        ) : isClosed ? (
+        ) : isCancerAwareness || isClosed ? (
           <div className="mb-3 inline-flex items-center gap-1.5 text-[0.72rem] font-semibold text-rose-400">
             <Lock className="h-3.5 w-3.5 text-rose-400 shrink-0" />
             <span>Registrations Closed · Official Finisher Board</span>

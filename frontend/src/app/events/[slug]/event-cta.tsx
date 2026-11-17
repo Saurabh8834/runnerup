@@ -9,6 +9,15 @@ import { Reveal } from "./reveal";
 const WHATSAPP_URL = "https://wa.me/918287831071";
 
 export function EventCta({ event }: { event: PublicEvent }) {
+  if (
+    event.status === "closed" ||
+    event.status === "past" ||
+    event.slug.includes("cancer") ||
+    event.slug.includes("air-force") ||
+    event.slug.includes("airforce")
+  ) {
+    return null;
+  }
   const whatsappUrl = `${WHATSAPP_URL}?text=${encodeURIComponent(
     `Hi! I have a question about ${event.name}. Can you help me?`,
   )}`;

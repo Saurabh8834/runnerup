@@ -22,7 +22,7 @@ export function EventStickyCta({
   slug: string;
   eventName?: string;
 }) {
-  if (slug.includes("air-force") || slug.includes("airforce")) {
+  if (slug.includes("air-force") || slug.includes("airforce") || slug.includes("cancer")) {
     return null;
   }
 

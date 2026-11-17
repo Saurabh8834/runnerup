@@ -75,12 +75,6 @@ export function mapApiEventToPublic(
   event: ApiEvent,
   forcePhase?: "upcoming" | "past",
 ): PublicEvent {
-  const isPast =
-    forcePhase === "past" ||
-    event.phase === "past" ||
-    event.registrationOpen === false ||
-    ["COMPLETED", "CLOSED", "CANCELLED"].includes(event.status);
-
   const title = event.title || (event as any).name || "";
   const isKineticRun =
     event.slug.includes("kinetic") ||
@@ -95,6 +89,13 @@ export function mapApiEventToPublic(
   const isCancerAwareness =
     event.slug.includes("cancer") ||
     title.toLowerCase().includes("cancer");
+
+  const isPast =
+    forcePhase === "past" ||
+    isCancerAwareness ||
+    event.phase === "past" ||
+    event.registrationOpen === false ||
+    ["COMPLETED", "CLOSED", "CANCELLED"].includes(event.status);
 
   const staticMatch =
     allPublicEvents.find((item) => item.slug === event.slug) ||
@@ -155,8 +156,10 @@ export function mapApiEventToPublic(
       event.activityTypes?.length ? event.activityTypes : staticMatch?.activityTypes ?? ["running", "cycling", "walking"],
     benefits: event.benefits ?? staticMatch?.benefits ?? [],
     status:
-      isKineticRun || isCancerAwareness
+      isKineticRun
         ? "upcoming"
+        : isCancerAwareness
+        ? "closed"
         : event.status === "CLOSED" || event.status === "closed"
         ? "closed"
         : isPast
@@ -253,16 +256,14 @@ export const fetchOpenEvents = cache(async function fetchOpenEvents(options?: {
             bannerImageUrl: "/images/kinetic-run-medal-front.webp",
           } as ApiEvent);
         }
-        rows.sort((a, b) => {
-          const aCancer = a.slug.includes("cancer") ? 1 : 0;
-          const bCancer = b.slug.includes("cancer") ? 1 : 0;
-          if (aCancer !== bCancer) return bCancer - aCancer;
+        const openRows = rows.filter((r) => !r.slug.includes("cancer") && !r.slug.includes("air-force"));
+        openRows.sort((a, b) => {
           const aKinetic = a.slug.includes("kinetic") ? 1 : 0;
           const bKinetic = b.slug.includes("kinetic") ? 1 : 0;
           if (aKinetic !== bKinetic) return bKinetic - aKinetic;
           return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
         });
-        const mapped = rows.map((event) => mapApiEventToPublic(event, "upcoming"));
+        const mapped = openRows.map((event) => mapApiEventToPublic(event, "upcoming"));
         const deduped = deduplicateOpenEvents(mapped);
         return limit != null ? deduped.slice(0, limit) : deduped;
       }

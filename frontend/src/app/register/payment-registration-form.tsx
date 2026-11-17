@@ -99,14 +99,6 @@ const fallbackEvents: RegisterEventOption[] = [
     activityTypes: ["running", "cycling", "walking"],
   },
   {
-    label: "National Cancer Awareness Day Virtual Challenge 2026",
-    value: "national-cancer-awareness-day-virtual-run-2026",
-    amount: "₹499",
-    priceInPaise: 49900,
-    distances: ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
-    activityTypes: ["running", "cycling", "walking"],
-  },
-  {
     label: "Monsoon Mountain Miles",
     value: "monsoon-mountain-miles",
     amount: "₹499",
@@ -265,11 +257,16 @@ function PaymentRegistrationFormInner() {
   const emailFromQuery = searchParams.get("email")?.trim() ?? "";
 
   const [events, setEvents] = useState<RegisterEventOption[]>(fallbackEvents);
+  const isCancerQuery = Boolean(eventFromQuery?.includes("cancer"));
   const [selectedEvent, setSelectedEvent] = useState(
-    eventFromQuery || fallbackEvents[0].value,
+    isCancerQuery ? fallbackEvents[0].value : (eventFromQuery || fallbackEvents[0].value),
   );
   const [status, setStatus] = useState<"idle" | "creating" | "paying" | "paid" | "error">("idle");
-  const [message, setMessage] = useState("Complete the steps below to secure your official race bib & medal.");
+  const [message, setMessage] = useState(
+    isCancerQuery
+      ? "Notice: National Cancer Awareness Day 2026 has concluded. You are registering for Kinetic Run Virtual Challenge 2026."
+      : "Complete the steps below to secure your official race bib & medal."
+  );
   const paidRef = useRef(false);
   const failedRef = useRef(false);
 
@@ -433,7 +430,8 @@ function PaymentRegistrationFormInner() {
             (row) =>
               row.registrationOpen !== false &&
               !row.slug.includes("air-force") &&
-              !row.slug.includes("airforce")
+              !row.slug.includes("airforce") &&
+              !row.slug.includes("cancer")
           )
           .map((row) => {
             const rawActs = (row as { activityTypes?: string[] }).activityTypes;
@@ -461,12 +459,16 @@ function PaymentRegistrationFormInner() {
         const combined = hasKineticEvent ? open : [fallbackEvents[0], ...open];
         setEvents(combined);
         setSelectedEvent((prev) => {
-          if (eventFromQuery && !eventFromQuery.includes("air-force") && !eventFromQuery.includes("airforce")) {
+          if (
+            eventFromQuery &&
+            !eventFromQuery.includes("air-force") &&
+            !eventFromQuery.includes("airforce") &&
+            !eventFromQuery.includes("cancer")
+          ) {
             const matched = combined.find(
               (e) =>
                 e.value === eventFromQuery ||
-                (eventFromQuery.includes("kinetic") && e.value.includes("kinetic")) ||
-                (eventFromQuery.includes("cancer") && e.value.includes("cancer")),
+                (eventFromQuery.includes("kinetic") && e.value.includes("kinetic")),
             );
             return matched ? matched.value : combined[0].value;
           }

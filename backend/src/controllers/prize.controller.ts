@@ -85,7 +85,7 @@ function buildPrizeItems(
       name: "E-Certificate",
       icon: "certificate",
       status: "processing",
-      statusLabel: "Available Soon",
+      statusLabel: "Locked · Final Audit",
       action: null,
     });
   } else {

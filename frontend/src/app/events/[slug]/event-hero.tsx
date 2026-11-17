@@ -408,10 +408,10 @@ export function EventHero({ event, isPast }: { event: PublicEvent; isPast: boole
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
-                    href="/events/national-cancer-awareness-day-virtual-run-2026"
+                    href="/events/kinetic-run-virtual-challenge-2026"
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#e64833] via-[#ff5e3a] to-[#d63b25] text-white font-black text-sm sm:text-base px-8 py-3.5 shadow-lg shadow-[#e64833]/30 active:scale-95 transition-all cursor-pointer"
                   >
-                    <span>Explore Live Cancer Challenge 🎗️</span>
+                    <span>Explore Kinetic Run Challenge ⚡</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>

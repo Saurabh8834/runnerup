@@ -9,6 +9,7 @@ export type BibRenderData = {
   runnerName: string;
   distance: string;
   positionStr: string;
+  category?: string;
   isCancerEvent?: boolean;
   isKineticEvent?: boolean;
 };
@@ -21,6 +22,7 @@ export type CertRenderData = {
   isCancerEvent?: boolean;
   isKineticEvent?: boolean;
   isAdminDemo?: boolean;
+  certificateNumber?: string;
 };
 
 export type StoryRenderData = {
@@ -38,24 +40,16 @@ export type StoryRenderData = {
 
 /**
  * Format runner name for Cancer certificate:
- * If the name is too long (>22 chars or >=3 words), cleanly take the First Name and Last Name
- * so it looks balanced and never overflows the designated field.
+ * Cleanly strips administrative suffixes and normalizes spacing while preserving
+ * the full actual registered name. Responsive font scaling ensures it never clips.
  */
 export function formatCertificateRunnerName(fullName: string): string {
   if (!fullName) return "Runner";
-  let cleaned = fullName.replace(/\((?:admin|runner|athlete|tester)\)/gi, "").trim().replace(/\s+/g, " ");
-  if (cleaned.length <= 22) {
-    return toTitleCase(cleaned);
-  }
-  const parts = cleaned.split(" ");
-  if (parts.length >= 3) {
-    const abbreviated = `${parts[0]} ${parts[parts.length - 1]}`;
-    if (abbreviated.length <= 22) {
-      return toTitleCase(abbreviated);
-    }
-    return toTitleCase(`${parts[0]} ${parts[1]}`);
-  }
-  return toTitleCase(cleaned.slice(0, 22));
+  const cleaned = fullName
+    .replace(/\((?:admin|runner|athlete|tester)\)/gi, "")
+    .trim()
+    .replace(/\s+/g, " ");
+  return toTitleCase(cleaned);
 }
 
 function toTitleCase(str: string): string {
@@ -266,42 +260,100 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
   }
 
   if (data.isCancerEvent || (data.positionStr && data.positionStr.toUpperCase().startsWith("NCAD"))) {
-    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261115_v4");
+    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261117_v5");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 686;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
-    // Draw clean base with empty white card (preserves corner ribbons and bottom borders)
+    // Draw pristine master base (preserves corner ribbons, borders, and bottom silhouette)
     ctx.drawImage(baseImg, 0, 0, 1024, 686);
 
-    // 1. Participant Name in commanding bold regal serif (enlarged font as requested)
-    const nameClean = (data.runnerName || "PARTICIPANT").toUpperCase().trim();
-    ctx.font = `bold 46px "Times New Roman", "Georgia", serif`;
+    // 1. Subtitle at top of white card
+    ctx.font = `bold 13px "Georgia", "Times New Roman", serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#2c124d"; // Royal deep purple
-    ctx.fillText(nameClean, 512, 202);
+    ctx.fillStyle = "#9333ea"; // Vibrant Purple
+    ctx.fillText("OFFICIAL ATHLETE · VIRTUAL CHALLENGE", 512, 195);
 
-    // 2. Bib Number (e.g. "NCAD-1999")
+    // 2. Participant Name in commanding bold regal serif typography
+    const nameClean = (data.runnerName || "PARTICIPANT").toUpperCase().trim();
+    let nameSize = 42;
+    if (nameClean.length > 25) nameSize = 30;
+    else if (nameClean.length > 18) nameSize = 36;
+    ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", serif`;
+    ctx.fillStyle = "#2c124d"; // Royal deep purple
+    ctx.fillText(nameClean, 512, 235);
+
+    // Subtle gold divider line with center diamond ornament
+    ctx.strokeStyle = "#daa520";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(340, 288);
+    ctx.lineTo(684, 288);
+    ctx.stroke();
+
+    ctx.fillStyle = "#daa520";
+    ctx.beginPath();
+    ctx.moveTo(512, 285);
+    ctx.lineTo(515, 288);
+    ctx.lineTo(512, 291);
+    ctx.lineTo(509, 288);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Giant Official Bib Number (e.g. "NCAD-1999")
     const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
-    let fontSize = 115;
-    if (bibDisplay.length > 10) fontSize = 85;
-    else if (bibDisplay.length > 8) fontSize = 100;
+    let fontSize = 88;
+    if (bibDisplay.length > 10) fontSize = 72;
+    else if (bibDisplay.length > 8) fontSize = 80;
 
     ctx.font = `900 ${fontSize}px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
 
-    // Gold bevel outline (stroke)
+    // 3D Gold bevel outline (stroke) centered at x=460 (providing 70px+ clearance to QR badge at x=805)
     ctx.strokeStyle = "#daa520";
-    ctx.lineWidth = 5;
-    ctx.strokeText(bibDisplay, 512, 380);
+    ctx.lineWidth = 4;
+    ctx.strokeText(bibDisplay, 460, 365);
 
     // Deep royal purple fill
     ctx.fillStyle = "#260a44";
-    ctx.fillText(bibDisplay, 512, 380);
+    ctx.fillText(bibDisplay, 460, 365);
+
+    // 4. Athlete Data Badges Bar at bottom of card
+    const distClean = (data.distance || "5 KM").toUpperCase().trim();
+    const distDisplay = distClean.endsWith("KM") || distClean.endsWith("K") ? distClean : `${distClean} KM`;
+    const catDisplay = (data.category || "RUNNING").toUpperCase().trim();
+    ctx.font = `bold 14px "Georgia", "Times New Roman", serif`;
+    ctx.fillStyle = "#4a1d6e";
+    ctx.fillText(`DISTANCE: ${distDisplay}`, 240, 472);
+    ctx.fillText(`CATEGORY: ${catDisplay}`, 490, 472);
+
+    // 5. Dedicated Leaderboard QR Code Card on the right of the bib (x=805, y=365)
+    try {
+      const qrFallback = await loadImage("/cancer-leaderboard-qr.png");
+      // White luxury card
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#b482dc";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(805, 365, 112, 125, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.drawImage(qrFallback, 816, 373, 90, 90);
+
+      ctx.font = `bold 8px "Arial", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#2e0854";
+      ctx.fillText("SCAN LEADERBOARD", 861, 474);
+
+      ctx.font = `bold 7px "Arial", sans-serif`;
+      ctx.fillStyle = "#9333ea";
+      ctx.fillText("LIVE RANKINGS", 861, 484);
+      ctx.restore();
+    } catch {}
 
     return canvas;
   }
@@ -466,101 +518,55 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
   }
 
   if (data.isCancerEvent) {
-    // Only apply the new master template to the admin demo user
-    if (data.isAdminDemo) {
-      const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261115_v4");
-      const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 682;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Could not acquire 2D canvas context");
-
-      // Draw pristine master base
-      ctx.drawImage(baseImg, 0, 0, 1024, 682);
-
-      // Draw crisp Leaderboard QR badge at bottom-left next to Team RunnerUp signature
-      // (Leaves the medal and medal ribbon 100% visible and unblocked)
-      try {
-        const qrImg = await loadImage("/cancer-leaderboard-qr.png");
-        const qx = 271, qy = 574, qs = 68, r = 6;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(qx + r, qy);
-        ctx.arcTo(qx + qs, qy, qx + qs, qy + qs, r);
-        ctx.arcTo(qx + qs, qy + qs, qx, qy + qs, r);
-        ctx.arcTo(qx, qy + qs, qx, qy, r);
-        ctx.arcTo(qx, qy, qx + qs, qy, r);
-        ctx.closePath();
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.strokeStyle = "#7e22ce";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.drawImage(qrImg, qx + 4, qy + 4, 60, 60);
-        ctx.restore();
-      } catch (e) {
-        // Fallback if qr not loaded
-      }
-
-      // A. Participant Name: exactly centered in name area (x=450, y=284) with prominent bold typography
-      const nameDisplay = formatCertificateRunnerName(data.runnerName);
-      let nameSize = 52;
-      if (nameDisplay.length > 25) nameSize = 36;
-      else if (nameDisplay.length > 18) nameSize = 44;
-
-      ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "#3b0764"; // Imperial Royal Purple
-      ctx.fillText(nameDisplay, 450, 284);
-
-      // B, C, D: The Three Detail Badges (fixed prominent 21px font size, center y=530)
-      ctx.font = `bold 21px "Georgia", "Times New Roman", serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "#2e104b"; // Deep Plum Purple
-
-      // Challenge Category (directly below Challenge Category label, center x=235, y=530)
-      const catDisplay = data.category || "Running";
-      ctx.fillText(catDisplay, 235, 530);
-
-      // Issue Date (directly below Issue Date label, center x=445.5, y=530)
-      const dateDisplay = data.dateStr || "17 Nov 2026";
-      ctx.fillText(dateDisplay, 445.5, 530);
-
-      // Achievement Distance (directly below Achievement Distance label, center x=654, y=530)
-      let distStr = (data.distance || "5 KM").toUpperCase().trim();
-      if (!distStr.endsWith("KM") && !distStr.endsWith("K")) distStr += " KM";
-      ctx.fillText(distStr, 654, 530);
-
-      return canvas;
-    }
-
-    // Default/fallback behavior for other non-admin users
-    const baseImg = await loadImage("/cancer-certificate-official-with-qr.jpg?v=20261114_legacy");
+    const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261117_master_v8");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 682;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
+    // Draw pristine master base (zero watermark, zero artifacts, verified ribbon QR embedded)
     ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
+    // 1. Participant Name: optically centered at (449, 281) above the gold divider
+    // Responsive auto-scaling prevents any layout break for multi-word or long names
     const nameDisplay = formatCertificateRunnerName(data.runnerName);
-    ctx.font = `50px "AlexBrush", "Brush Script MT", cursive`;
+    let nameSize = 52;
+    ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
+    let measuredWidth = ctx.measureText(nameDisplay).width;
+    while (measuredWidth > 580 && nameSize > 24) {
+      nameSize -= 1;
+      ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
+      measuredWidth = ctx.measureText(nameDisplay).width;
+    }
+
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#581c87";
-    ctx.fillText(nameDisplay, 512, 360);
+    ctx.fillStyle = "#2c0d48"; // Imperial Royal Plum
+    ctx.fillText(nameDisplay, 449, 281);
 
+    // 2. The Three Detail Badges: Mathematical precision aligned under their pill headers at y=537
+    ctx.font = `bold 15px "Georgia", "Times New Roman", Times, serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#2d193d"; // Deep Plum
+
+    // A. Challenge Category (Pill 1: Center x=225, y=537)
+    const rawCategory = data.category || "Running";
+    const catDisplay = toTitleCase(rawCategory.trim());
+    ctx.fillText(catDisplay, 225, 537);
+
+    // B. Issue Date (Pill 2: Center x=435, y=537)
+    const dateDisplay = (data.dateStr || "17 Nov 2026").trim();
+    ctx.fillText(dateDisplay, 435, 537);
+
+    // C. Achievement Distance (Pill 3: Center x=640, y=537)
     let distStr = (data.distance || "5 KM").toUpperCase().trim();
     if (!distStr.endsWith("KM") && !distStr.endsWith("K")) distStr += " KM";
-    ctx.font = `900 16px "OfficialArialBlack", "Arial", sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#1e1b4b";
-    ctx.fillText(distStr, 635, 552);
+    ctx.fillText(distStr, 640, 537);
 
+    // 3. Official Ribbon QR is already embedded in high resolution on the base artwork at (883, 149),
+    // redirecting 100% reliably to the cancer event leaderboard.
     return canvas;
   }
 

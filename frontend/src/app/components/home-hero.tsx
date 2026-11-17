@@ -24,32 +24,32 @@ type HomeHeroProps = {
 
 export function HomeHero({ featuredEvent }: HomeHeroProps) {
   const router = useRouter();
-  const [vaultTab, setVaultTab] = useState<"current" | "kinetic" | "hallOfFame">("current");
+  const [vaultTab, setVaultTab] = useState<"kinetic" | "cancer" | "hallOfFame">("kinetic");
   const [cancerMedalSide, setCancerMedalSide] = useState<"front" | "back">("front");
   const [kineticMedalSide, setKineticMedalSide] = useState<"front" | "back">("front");
   const [iafMedalSide, setIafMedalSide] = useState<"front" | "back">("front");
 
-  // Tab 1: Current Live Challenge (Cancer Awareness, live till 17 Nov)
-  const cancerTitle = "National Cancer Awareness Day Virtual Challenge 2026";
-  const cancerSlug = "national-cancer-awareness-day-virtual-run-2026";
-  const cancerDistances = "1.5K • 3K • 5K • 10K • 21K Half Marathon";
-  const cancerImages = getEventMedalImages(cancerSlug);
-
-  // Tab 2: Next Upcoming Challenge (Kinetic Run, 10–15 Dec)
+  // Tab 1: Next Active Live Challenge (Kinetic Run, 10–15 Dec)
   const kineticTitle = "Kinetic Run Virtual Challenge 2026";
   const kineticSlug = "kinetic-run-virtual-challenge-2026";
   const kineticDistances = "1.5K • 3K • 5K • 10K • 21K Half Marathon";
   const kineticImages = getEventMedalImages(kineticSlug);
+
+  // Tab 2: Concluded Challenge Under Verification (Cancer Awareness)
+  const cancerTitle = "National Cancer Awareness Day Virtual Challenge 2026";
+  const cancerSlug = "national-cancer-awareness-day-virtual-run-2026";
+  const cancerDistances = "1.5K • 3K • 5K • 10K • 21K Half Marathon";
+  const cancerImages = getEventMedalImages(cancerSlug);
 
   const handleTrophyCardClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
     if (target.closest("[data-prevent-card-nav]") || target.closest("button") || target.closest("a")) {
       return;
     }
-    if (vaultTab === "current") {
-      router.push(`/events/${cancerSlug}`);
-    } else if (vaultTab === "kinetic") {
+    if (vaultTab === "kinetic") {
       router.push(`/events/${kineticSlug}`);
+    } else if (vaultTab === "cancer") {
+      router.push(`/leaderboard?event=${cancerSlug}`);
     } else {
       router.push("/leaderboard");
     }
@@ -217,19 +217,6 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
               <div data-prevent-card-nav className="flex items-center gap-1.5 p-1 rounded-xl bg-black/50 border border-white/10 mb-3">
                 <button
                   type="button"
-                  onClick={() => setVaultTab("current")}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
-                    vaultTab === "current"
-                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>🎗️ Live Event</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setVaultTab("kinetic")}
                   className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
                     vaultTab === "kinetic"
@@ -237,7 +224,20 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <span>⚡ Next Trophy</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>⚡ Live Challenge</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setVaultTab("cancer")}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10.5px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap ${
+                    vaultTab === "cancer"
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <span>🎗️ Cancer Day</span>
                 </button>
 
                 <button
@@ -254,13 +254,13 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                 </button>
               </div>
 
-              {/* TAB 1: CURRENT LIVE CHALLENGE (CANCER AWARENESS - RUNNING TILL 17 NOV) */}
-              {vaultTab === "current" ? (
+              {/* TAB: CONCLUDED CHALLENGE (CANCER AWARENESS - UNDER AUDIT & VERIFICATION) */}
+              {vaultTab === "cancer" ? (
                 <>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2.5 h-6">
-                    <span className="flex items-center gap-1.5 text-emerald-400">
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>Live Event · Till 17 Nov</span>
+                    <span className="flex items-center gap-1.5 text-amber-400">
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span>Concluded · GPS Verification</span>
                     </span>
                     <span className="text-purple-400 font-mono text-[11px] bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
                       100% Solid Metal
@@ -349,21 +349,21 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                   <div className="mt-3.5 space-y-1 h-12 flex flex-col justify-center">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="text-sm font-black text-white truncate">{cancerTitle}</h4>
-                      <span className="text-xs font-black text-amber-400 shrink-0">₹499</span>
+                      <span className="text-xs font-black text-slate-400 shrink-0">Closed</span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span className="truncate">{cancerDistances}</span>
-                      <span className="text-[10px] font-bold text-emerald-400 shrink-0">Open till 17 Nov</span>
+                      <span className="text-[10px] font-bold text-amber-400 shrink-0">Registrations Closed</span>
                     </div>
                   </div>
                 </>
               ) : vaultTab === "kinetic" ? (
-                /* TAB 2: NEXT CHALLENGE PREVIEW (KINETIC RUN 2026 - 10-15 DEC) */
+                /* TAB: ACTIVE LIVE CHALLENGE (KINETIC RUN 2026 - 10-15 DEC) */
                 <>
                   <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2.5 h-6">
-                    <span className="flex items-center gap-1.5 text-amber-400">
-                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                      <span>Next Trophy · 10–15 Dec</span>
+                    <span className="flex items-center gap-1.5 text-emerald-400">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Open for Registration · 10–15 Dec</span>
                     </span>
                     <span className="text-orange-400 font-mono text-[11px] bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full">
                       3D Sculpted Wings
@@ -456,7 +456,7 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                     </div>
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span className="truncate">{kineticDistances}</span>
-                      <span className="text-[10px] font-bold text-amber-400 shrink-0">Early Bird Open</span>
+                      <span className="text-[10px] font-bold text-emerald-400 shrink-0">Open for Registration</span>
                     </div>
                   </div>
                 </>
@@ -560,14 +560,14 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
             </div>
 
             {/* Bottom Link (Uniform Height & Alignment) */}
-            {vaultTab === "current" ? (
+            {vaultTab === "cancer" ? (
               <Link
-                href={`/events/${cancerSlug}`}
+                href={`/leaderboard?event=${cancerSlug}`}
                 className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs h-9 group/link"
               >
-                <span className="text-slate-400">Guaranteed Pan-India Finisher Kit</span>
+                <span className="text-slate-400">Official Leaderboard Standings</span>
                 <span className="text-purple-400 font-bold group-hover/link:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>Register for Live Challenge</span>
+                  <span>View Finisher Board</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>
@@ -576,9 +576,9 @@ export function HomeHero({ featuredEvent }: HomeHeroProps) {
                 href={`/events/${kineticSlug}`}
                 className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs h-9 group/link"
               >
-                <span className="text-slate-400">Limited Edition 3D Metal Medal</span>
+                <span className="text-slate-400">Guaranteed Pan-India Finisher Kit</span>
                 <span className="text-[#ff4b26] font-bold group-hover/link:translate-x-0.5 transition-transform flex items-center gap-1">
-                  <span>View Kinetic Challenge</span>
+                  <span>Register for Challenge</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>

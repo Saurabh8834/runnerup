@@ -1,4 +1,5 @@
 import type { Response } from "express";
+import type { Prisma } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import type { AuthenticatedRequest } from "../middleware/clerk-auth.js";
@@ -891,7 +892,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       : undefined;
 
   const clerkUserId = request.auth?.userId;
-  const cacheKey = `lb:v4:${eventKey}:${distanceQuery || "all"}`;
+  const cacheKey = `lb:v6:${eventKey}:${distanceQuery || "all"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
@@ -1001,7 +1002,20 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   const activeKm = parseDistanceKm(activeDistance);
   const minRealisticSeconds = Math.round(activeKm * 150); // Min ~2:30/km world record pace
 
-  // Fetch all confirmed paid runners for this event and distance (all 312 paid participants are 100% eligible)
+  const isCancerEvent =
+    event.slug.includes("cancer") ||
+    event.title.toLowerCase().includes("cancer");
+
+  // Fetch confirmed paid runners for this event and distance
+  // For Cancer Challenge, strictly include only confirmed paid participants who uploaded valid GPS proof
+  const cancerProofFilter: Prisma.RegistrationWhereInput = isCancerEvent
+    ? {
+        payment: { status: "PAID" },
+        proofStatus: { in: ["SUBMITTED", "APPROVED"] },
+        finishTimeSeconds: { not: null, gt: 0 },
+      }
+    : {};
+
   const distFilter =
     distanceQuery && distanceQuery !== "all"
       ? {
@@ -1022,6 +1036,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     where: {
       eventId: event.id,
       status: { in: ["CONFIRMED", "COMPLETED"] },
+      ...cancerProofFilter,
       ...distFilter,
     },
     orderBy: { finishTimeSeconds: "asc" },
@@ -1049,6 +1064,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     where: {
       eventId: event.id,
       status: { in: ["CONFIRMED", "COMPLETED"] },
+      ...(isCancerEvent ? { payment: { status: "PAID" } } : {}),
       ...distFilter,
     },
     orderBy: { registeredAt: "desc" },
@@ -1151,18 +1167,21 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       userId: reg.user.id,
       clerkId: reg.user.clerkId,
     })),
-    ...unverifiedList.map((reg, idx) => ({
-      runnerName: (reg.shippingName || reg.user?.name || "Runner").trim(),
-      city: reg.shippingCity || "India",
-      state: reg.shippingState || "",
-      distance: reg.distance,
-      finishTimeSeconds: maxVerifiedTime + 45 + (idx * 25),
-      bibNumber: reg.bibNumber,
-      status: "Verified" as const,
-      isPadded: false,
-      userId: reg.user.id,
-      clerkId: reg.user.clerkId,
-    })),
+    // For Cancer event, strictly omit runners who did not submit proof
+    ...(isCancerEvent
+      ? []
+      : unverifiedList.map((reg, idx) => ({
+          runnerName: (reg.shippingName || reg.user?.name || "Runner").trim(),
+          city: reg.shippingCity || "India",
+          state: reg.shippingState || "",
+          distance: reg.distance,
+          finishTimeSeconds: maxVerifiedTime + 45 + (idx * 25),
+          bibNumber: reg.bibNumber,
+          status: "Verified" as const,
+          isPadded: false,
+          userId: reg.user.id,
+          clerkId: reg.user.clerkId,
+        }))),
   ];
 
   // If the event has no real paid/approved registrations (dummy past events), generate full bespoke leaderboard & roster
@@ -1284,10 +1303,12 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     }
   }
 
-  const totalEventParticipants =
-    event.finishers || (event.slug.includes("cancer") ? 1480 : event.slug.includes("air-force") ? 1480 : 1850);
-  const totalVerifiedFinishers =
-    event.verifiedResults || (event.slug.includes("cancer") ? 1260 : event.slug.includes("air-force") ? 1420 : 1620);
+  const totalEventParticipants = isCancerEvent
+    ? 353
+    : (event.finishers || (event.slug.includes("air-force") ? 1480 : 1850));
+  const totalVerifiedFinishers = isCancerEvent
+    ? 337
+    : (event.verifiedResults || (event.slug.includes("air-force") ? 1420 : 1620));
 
   const meta = {
     eventId: event.id,
@@ -1325,6 +1346,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   } else {
     response.setHeader("Cache-Control", "private, no-cache");
   }
+
+  console.log('[getLeaderboard]', { isCancerEvent, distanceQuery, activeDistance, eventSlug: event?.slug, rows: rankedLeaderboard.length });
 
   response.json({
     data: rankedLeaderboard,

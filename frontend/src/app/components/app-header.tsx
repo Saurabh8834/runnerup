@@ -577,7 +577,7 @@ export function AppHeader() {
 
                   {/* Primary Next Challenge Top Pill Banner */}
                   <Link
-                    href="/events/national-cancer-awareness-day-virtual-run-2026"
+                    href="/events/kinetic-run-virtual-challenge-2026"
                     onClick={() => setOpen(false)}
                     className="group flex items-center justify-between rounded-2xl bg-gradient-to-r from-[#ff4b26]/20 via-[#ff4b26]/10 to-transparent border border-[#ff4b26]/40 p-3 text-white transition-all hover:border-[#ff4b26] active:scale-[0.98] shrink-0"
                   >
@@ -587,10 +587,10 @@ export function AppHeader() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-xs font-black uppercase tracking-wide text-white truncate leading-tight">
-                          Cancer Awareness 2026
+                          Kinetic Run 2026
                         </p>
                         <p className="text-[11px] text-amber-300 font-semibold truncate leading-tight mt-0.5">
-                          Active Challenge · 7–17 Nov
+                          Active Challenge · 10–15 Dec
                         </p>
                       </div>
                     </div>

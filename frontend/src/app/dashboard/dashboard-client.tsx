@@ -292,8 +292,13 @@ export function DashboardClient() {
     const slugLower = (reg.event?.slug || "").toLowerCase();
     const titleLower = (reg.event?.title || "").toLowerCase();
     const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+    const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
     if (isKinetic) {
       alert("Digital race bibs will unlock automatically after the challenge concludes on 15 December 2026.");
+      return;
+    }
+    if (isCancer && !isAdminDemoUser) {
+      alert("Digital race bibs are currently undergoing final audit and validation. They will unlock upon official release announcement.");
       return;
     }
 
@@ -324,8 +329,13 @@ export function DashboardClient() {
     const slugLower = (reg.event?.slug || "").toLowerCase();
     const titleLower = (reg.event?.title || "").toLowerCase();
     const isKinetic = slugLower.includes("kinetic") || titleLower.includes("kinetic");
+    const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
     if (isKinetic) {
       alert("Finisher certificates will unlock automatically after the challenge concludes on 15 December 2026.");
+      return;
+    }
+    if (isCancer && !isAdminDemoUser) {
+      alert("Finisher certificates are currently undergoing final audit and validation. They will unlock upon official release announcement.");
       return;
     }
 
@@ -602,10 +612,10 @@ export function DashboardClient() {
         );
       }
 
-      // Live / Ongoing events (e.g. National Cancer Awareness Day Challenge):
-      // The event is active (7–17 Nov). It must NEVER show in Trophy Cabinet while ongoing.
-      // Only moves to Trophy Cabinet AFTER the event ends AND proof is APPROVED with certificate/dispatch.
+      // National Cancer Awareness Day Challenge:
+      // Locked for all users pending official release ("JAI MATA DI")
       if (isCancer) {
+        if (!isAdminDemoUser) return false;
         return (
           r.proofStatus === "APPROVED" &&
           (Boolean(r.certificate) || (Boolean(r.medalDelivery?.trackingNumber) && r.medalDelivery?.status !== "PENDING"))
