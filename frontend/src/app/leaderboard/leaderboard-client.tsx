@@ -359,21 +359,33 @@ export function LeaderboardClient({
   // - Kinetic Run Virtual Challenge (10–15 Dec 2026): Strictly locked / under seal until 18 Dec 2026
   // - National Cancer Awareness Day Challenge (7–17 Nov 2026): Reveals 18 Nov 2026, 12:00 AM IST (Midnight 17/18 Nov)
   // - Concluded events (e.g. Indian Air Force Day 25–31 Oct): Revealed 31 Oct 2026, 12:00 PM IST
+  const isAdminDemo = searchParams.get("admin") === "true";
   const isCancerEvent = selectedSlug.toLowerCase().includes("cancer");
   const isKineticEvent = selectedSlug.toLowerCase().includes("kinetic") || selectedSlug.toLowerCase().includes("krun");
+  // For Cancer Challenge, public leaderboard is strictly LOCKED until official release approval.
+  const isCancerLocked = isCancerEvent && !isAdminDemo;
+
   const targetRevealTime = useMemo(() => {
     if (isKineticEvent) {
       return new Date("2026-12-18T12:00:00+05:30").getTime();
     }
     if (isCancerEvent) {
-      return new Date("2026-11-18T00:00:00+05:30").getTime();
+      if (isAdminDemo) return 0;
+      return new Date("2099-01-01T00:00:00+05:30").getTime();
     }
     return new Date("2026-10-31T12:00:00+05:30").getTime();
-  }, [isCancerEvent, isKineticEvent]);
+  }, [isCancerEvent, isKineticEvent, isAdminDemo]);
 
-  const [isRevealed, setIsRevealed] = useState(() => Date.now() >= targetRevealTime);
+  const [isRevealed, setIsRevealed] = useState(() => {
+    if (isCancerLocked || isKineticEvent) return false;
+    return Date.now() >= targetRevealTime;
+  });
 
   useEffect(() => {
+    if (isCancerLocked || isKineticEvent) {
+      setIsRevealed(false);
+      return;
+    }
     setIsRevealed(Date.now() >= targetRevealTime);
     if (Date.now() >= targetRevealTime) return;
 
@@ -384,7 +396,7 @@ export function LeaderboardClient({
       }
     }, 1000);
     return () => clearInterval(checkTimer);
-  }, [targetRevealTime]);
+  }, [targetRevealTime, isCancerLocked, isKineticEvent]);
 
   // Sync available distances when event changes
   const distanceOptions = useMemo(() => {
@@ -459,7 +471,10 @@ export function LeaderboardClient({
       return;
     }
 
-    const distQuery = selectedDistance ? `?distance=${encodeURIComponent(selectedDistance)}` : "";
+    const adminParam = isAdminDemo ? `&admin=true` : "";
+    const distQuery = selectedDistance
+      ? `?distance=${encodeURIComponent(selectedDistance)}${adminParam}`
+      : (isAdminDemo ? `?admin=true` : "");
     const cacheKey = `${selectedSlug}${distQuery}`;
     const cached = cacheRef.current.get(cacheKey);
 
@@ -883,7 +898,78 @@ export function LeaderboardClient({
               {/* ── TAB 1: VERIFIED LEADERBOARD ─────────────────────── */}
               {activeTab === "verified" && (
                 <div className="mt-8 space-y-10">
-                  {!isRevealed ? (
+                  {isCancerLocked ? (
+                    <div className="space-y-8">
+                      {/* Option A: Official Verification & Anti-Cheat Audit in Progress Banner */}
+                      <div className="rounded-3xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#14242a] to-amber-500/10 p-5 sm:p-7 shadow-2xl relative overflow-hidden isolate">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                          <div className="flex items-start gap-4">
+                            <div className="h-12 w-12 rounded-2xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center shrink-0 text-amber-400 shadow-md">
+                              <ShieldCheck className="h-6 w-6" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 text-[10.5px] font-black uppercase tracking-wider text-amber-300">
+                                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                                  Audit &amp; Verification In Progress
+                                </span>
+                                <span className="text-xs font-bold text-slate-400">· Official Cutoff Concluded (17 Nov, 11:59 PM IST)</span>
+                              </div>
+                              <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-white mt-1.5">
+                                GPS Proof Submissions Closed · Results Verification Active
+                              </h3>
+                              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-3xl leading-relaxed">
+                                GPS proof submissions are now closed. The RunnerUp Technical Committee is conducting final anti-cheat and pace audits across all 337 paid finisher entries. Certified final rankings, podium honors, and downloadable E-Certificates will unlock once verification concludes.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 md:self-center">
+                            <span className="rounded-2xl border border-white/10 bg-black/40 px-4 py-2.5 text-center">
+                              <span className="block text-xs uppercase tracking-wider font-bold text-slate-400">Audited Finishers</span>
+                              <span className="block text-lg font-black text-white font-mono">337 Paid</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Personal User Registration Status (Private to current logged-in user only) */}
+                      {userStanding?.currentDistanceReg && (
+                        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-left shadow-lg">
+                          <div className="flex items-start gap-3">
+                            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-sm font-bold text-emerald-300">
+                                Your Activity Proof: Submitted &amp; In Queue For Verification
+                              </p>
+                              <p className="text-xs text-slate-300 mt-1">
+                                Bib: <strong className="text-white font-mono">{userStanding.currentDistanceReg.bibNumber}</strong> ({userStanding.currentDistanceReg.distance}). Your individual result is being validated by the Technical Committee.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Sealed Standings Notification Card */}
+                      <div className="rounded-3xl border border-amber-500/30 bg-gradient-to-b from-[#14242a] via-[#0f1d22] to-[#0a1418] p-8 sm:p-14 text-center shadow-2xl relative overflow-hidden">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-5 shadow-lg">
+                          <ShieldCheck className="h-8 w-8" />
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-400 mb-3">
+                          <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                          Standings Sealed &bull; Arbiter Audit Active
+                        </span>
+                        <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                          Official Standings Under Anti-Cheat Review
+                        </h3>
+                        <p className="mt-3 text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+                          All GPS activity proofs and timing tracks submitted for the National Cancer Awareness Day Challenge are undergoing thorough anti-cheat and pace verification by the Technical Committee to ensure 100% fair results.
+                        </p>
+                        <p className="mt-2 text-xs sm:text-sm text-amber-300/80 max-w-lg mx-auto font-medium">
+                          Individual participant rankings, podium honors, and digital E-Certificates are confidential and will remain sealed until the official release announcement.
+                        </p>
+                      </div>
+                    </div>
+                  ) : !isRevealed ? (
                     <div className="space-y-8">
                       <LeaderboardCountdown
                         eventName={events.find((e) => e.slug === selectedSlug)?.name || (isKineticEvent ? "Kinetic Run Virtual Challenge 2026" : undefined)}
@@ -1159,7 +1245,24 @@ export function LeaderboardClient({
               {/* ── TAB 2: PARTICIPANTS ROSTER ─────────────────────── */}
               {activeTab === "participants" && (
                 <div className="mt-8 space-y-6">
-                  <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
+                  {isCancerLocked ? (
+                    <div className="rounded-3xl border border-amber-500/25 bg-gradient-to-b from-[#14242a] to-[#0c181d] p-8 sm:p-14 text-center shadow-2xl">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-5 shadow-lg">
+                        <Users className="h-8 w-8" />
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-amber-400 mb-3">
+                        <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                        Roster Confidential &bull; Arbiter Audit Active
+                      </span>
+                      <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">
+                        Participant Roster Under Verification
+                      </h3>
+                      <p className="mt-3 text-xs sm:text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+                        The full participant roster for the National Cancer Awareness Day Virtual Challenge is confidential while the Technical Committee finalizes official verifications.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-3xl border border-[#90aead]/30 bg-white shadow-xl">
                     <div className="border-b border-[#90aead]/20 bg-[#f4ede1]/80 px-5 sm:px-6 py-4 flex items-center justify-between">
                       <div>
                         <h3 className="font-display font-black text-sm sm:text-base uppercase tracking-tight text-[#14242a]">
@@ -1312,6 +1415,7 @@ export function LeaderboardClient({
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
               )}
             </>

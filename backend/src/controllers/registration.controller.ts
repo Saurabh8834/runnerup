@@ -892,7 +892,8 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
       : undefined;
 
   const clerkUserId = request.auth?.userId;
-  const cacheKey = `lb:v6:${eventKey}:${distanceQuery || "all"}`;
+  const isAdminPreview = request.query.admin === "true";
+  const cacheKey = `lb:v7:${eventKey}:${distanceQuery || "all"}:${isAdminPreview ? "admin" : "public"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {
@@ -1005,6 +1006,29 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   const isCancerEvent =
     event.slug.includes("cancer") ||
     event.title.toLowerCase().includes("cancer");
+
+  // Strictly prevent exposing user data, rankings, names or podium publicly while under audit
+  if (isCancerEvent && !isAdminPreview) {
+    const meta = {
+      eventId: event.id,
+      eventSlug: event.slug,
+      eventTitle: event.title,
+      availableDistances,
+      selectedDistance: activeDistance,
+      totalVerified: 337,
+      totalParticipants: 353,
+      isUnderAudit: true,
+      status: "UNDER_VERIFICATION",
+      message: "GPS proof verification is actively in progress. Results are confidential until official release.",
+    };
+
+    response.json({
+      data: [],
+      participants: [],
+      meta,
+    });
+    return;
+  }
 
   // Fetch confirmed paid runners for this event and distance
   // For Cancer Challenge, strictly include only confirmed paid participants who uploaded valid GPS proof
