@@ -92,21 +92,34 @@ export function detectEventKind(payload: {
   eventUrl?: string;
 }): "kinetic" | "cancer" | "iaf" | "generic" {
   const text = `${payload.eventSlug || ""} ${payload.eventTitle || ""} ${payload.eventUrl || ""}`.toLowerCase();
-  const bib = (payload.bibNumber || "").toUpperCase();
+  const bib = (payload.bibNumber || "").trim().toUpperCase();
 
-  // 1. Kinetic Run check
-  if (text.includes("kinetic") || bib.startsWith("KRVC") || bib.startsWith("KRUN")) {
-    return "kinetic";
-  }
-
-  // 2. Cancer Awareness check
-  if (text.includes("cancer") || text.includes("ncad") || bib.startsWith("NCAD")) {
+  // 1. Authoritative Event Text Checks (Slug / Title / URL)
+  if (text.includes("cancer") || text.includes("ncad")) {
     return "cancer";
   }
-
-  // 3. Indian Air Force Day check
-  if (text.includes("air force") || text.includes("iaf") || bib.startsWith("IAF")) {
+  if (text.includes("kinetic")) {
+    return "kinetic";
+  }
+  if (text.includes("air force") || text.includes("iaf")) {
     return "iaf";
+  }
+
+  // 2. Bib Prefix Checks
+  if (bib.startsWith("NCAD")) {
+    return "cancer";
+  }
+  if (bib.startsWith("KRVC") || bib.startsWith("KRUN")) {
+    return "kinetic";
+  }
+  if (bib.startsWith("IAF")) {
+    return "iaf";
+  }
+
+  // 3. Fallback numeric ranges for legacy events
+  const numericBib = parseInt(bib, 10);
+  if (!isNaN(numericBib) && numericBib >= 2200 && numericBib < 5000) {
+    return "kinetic";
   }
 
   return "generic";

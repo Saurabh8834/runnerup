@@ -905,7 +905,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     request.hostname === "127.0.0.1" ||
     process.env.NODE_ENV !== "production";
   const isAdminPreview = request.query.admin === "true" || isLocalhost;
-  const cacheKey = `lb:v11:${eventKey}:${distanceQuery || "all"}:${isAdminPreview ? "admin" : "public"}`;
+  const cacheKey = `lb:v12:${eventKey}:${distanceQuery || "all"}:${isAdminPreview ? "admin" : "public"}`;
   const forceRefresh = request.query.refresh === "true" || request.headers["cache-control"]?.includes("no-cache") || request.headers["pragma"] === "no-cache";
 
   type CachedLeaderboard = {

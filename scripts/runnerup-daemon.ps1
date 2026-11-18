@@ -144,7 +144,12 @@ function Start-BackendProcess {
 
     if ($needsBuild) {
         Write-DaemonLog "Backend source files are newer than dist. Auto-building backend (npm run build:tsc)..."
-        Start-Process -FilePath "cmd.exe" -ArgumentList @("/c npm run build:tsc") -WorkingDirectory $BackendDir -Wait -WindowStyle Hidden
+        $buildProc = Start-Process -FilePath "cmd.exe" -ArgumentList @("/c npm run build:tsc") -WorkingDirectory $BackendDir -Wait -PassThru -WindowStyle Hidden
+        if ($buildProc.ExitCode -ne 0) {
+            Write-DaemonLog "WARNING: npm run build:tsc failed with exit code $($buildProc.ExitCode)."
+        } else {
+            Write-DaemonLog "Backend build succeeded."
+        }
     }
 
     if (Test-Path $serverDist) {

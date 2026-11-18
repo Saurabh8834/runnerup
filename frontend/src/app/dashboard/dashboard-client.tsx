@@ -1410,7 +1410,7 @@ export function DashboardClient() {
                                 </div>
                                 <p className="text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed">
                                   {isCancerEvent
-                                    ? "✅ You are all set! Your GPS activity screenshot is verified and queued for arbiter review. When the event closes on 17 November, all proofs are audited, and your official Finisher Certificate and 3D Medal will be prepared!"
+                                    ? "✅ You are all set! Your GPS activity screenshot is securely saved and verified. Official Finisher Certificates and 3D Sculpted Medals are being prepared following event conclusion!"
                                     : "✅ Your GPS activity screenshot is verified and queued for post-event arbiter review. No further action needed!"}
                                 </p>
                               </div>
@@ -1437,15 +1437,15 @@ export function DashboardClient() {
                       {/* Notice for Verified Runners awaiting Medal Dispatch */}
                       {isPaid && isVerified && !isMedalDispatched && (
                         <div className="p-3.5 sm:p-5 pb-0 bg-white/[0.02]">
-                          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-200 backdrop-blur-xl flex items-start gap-3 shadow-[0_0_15px_rgba(245,158,11,0.08)]">
-                            <Truck className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-200 backdrop-blur-xl flex items-start gap-3 shadow-[0_0_15px_rgba(16,185,129,0.08)]">
+                            <Truck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                             <div className="space-y-0.5">
-                              <p className="font-bold text-amber-300 text-xs sm:text-sm">
-                                {isCancerEvent ? "Finisher Medal: Dispatches Post-Event (17 Nov)" : "Finisher Medal: Dispatching Soon"}
+                              <p className="font-bold text-emerald-300 text-xs sm:text-sm">
+                                Finisher Medal: Preparing for Dispatch
                               </p>
                               <p className="text-slate-300 text-[0.72rem] sm:text-xs leading-relaxed">
                                 {isCancerEvent
-                                  ? "Your GPS run activity will be reviewed after the event window closes on 17 November. Official 3D medals will be dispatched to your delivery address following verification."
+                                  ? "Your GPS run activity has been officially verified and approved! Official 3D sculpted finisher medals are being prepared and packaged for doorstep dispatch. Live courier tracking will be delivered directly via Email."
                                   : "Address verification details have been sent to your registered email. Once handed over to our express courier partner, your live tracking link will be delivered directly via Email."}
                               </p>
                             </div>
@@ -1553,6 +1553,10 @@ export function DashboardClient() {
                               <span>Complete Payment</span>
                               <ArrowRight className="h-3.5 w-3.5" />
                             </Link>
+                          ) : isVerified ? (
+                            <span className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-300 backdrop-blur-xl shadow-sm">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Verified Finisher {reg.finishTimeSeconds ? `· ${formatDuration(reg.finishTimeSeconds)}` : ""}
+                            </span>
                           ) : isProofSubmitted ? (
                             <div className="flex items-center gap-2 w-full sm:w-auto">
                               <span className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/20 px-4 py-2 text-xs font-black uppercase tracking-wider text-emerald-300 backdrop-blur-xl shadow-sm">
@@ -1593,7 +1597,7 @@ export function DashboardClient() {
                             </button>
                           ) : isCancerEvent ? (
                             <span className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-300 backdrop-blur-xl">
-                              Submissions Closed (17 Nov)
+                              Submissions Closed · Event Concluded
                             </span>
                           ) : null}
                         </div>
@@ -1842,7 +1846,7 @@ export function DashboardClient() {
                                 : reg.medalDelivery?.status === "DISPATCHED"
                                 ? "On The Way"
                                 : isCancerEvent
-                                ? "Post-Event Dispatch (17 Nov)"
+                                ? "Preparing for Dispatch"
                                 : "Dispatch Soon"}
                             </span>
                           </p>
@@ -1897,7 +1901,7 @@ export function DashboardClient() {
                               </div>
                             ) : isCancerEvent ? (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
-                                🎗️ Finisher medals will be dispatched to your delivery address following event conclusion on 17 November and activity verification.
+                                🎗️ Official 3D sculpted medals are being prepared and packaged for doorstep courier dispatch following event conclusion.
                               </p>
                             ) : (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
@@ -2123,8 +2127,8 @@ export function DashboardClient() {
               </div>
 
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Audit Timeline</span>
-                <span className="font-bold text-amber-300">Audited Post-Event (17 Nov)</span>
+                <span className="text-slate-400">Audit Status</span>
+                <span className="font-bold text-emerald-300">Audited &amp; Confirmed</span>
               </div>
             </div>
 
@@ -2132,7 +2136,7 @@ export function DashboardClient() {
             <div className="mt-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-[0.72rem] sm:text-xs text-slate-300 leading-relaxed flex items-start gap-2.5">
               <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <p>
-                Your activity screenshot is securely saved in our database. You don&apos;t need to take any further action until the event audit completes on <strong>17 November</strong>!
+                Your activity screenshot is securely saved and verified in our database. Finisher medals are being prepared for doorstep courier dispatch!
               </p>
             </div>
 

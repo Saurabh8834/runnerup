@@ -260,100 +260,71 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
   }
 
   if (data.isCancerEvent || (data.positionStr && data.positionStr.toUpperCase().startsWith("NCAD"))) {
-    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261117_v5");
+    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261118_master_v11");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
-    canvas.height = 686;
+    canvas.height = 685;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
-    // Draw pristine master base (preserves corner ribbons, borders, and bottom silhouette)
-    ctx.drawImage(baseImg, 0, 0, 1024, 686);
+    // Draw pristine master base (matching media_1795020098403_680571eb.jpg 100%)
+    ctx.drawImage(baseImg, 0, 0, 1024, 685);
 
-    // 1. Subtitle at top of white card
-    ctx.font = `bold 13px "Georgia", "Times New Roman", serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#9333ea"; // Vibrant Purple
-    ctx.fillText("OFFICIAL ATHLETE · VIRTUAL CHALLENGE", 512, 195);
-
-    // 2. Participant Name in commanding bold regal serif typography
+    // 1. Participant Name in commanding bold regal serif typography (centered at x=456, y=248)
     const nameClean = (data.runnerName || "PARTICIPANT").toUpperCase().trim();
     let nameSize = 42;
-    if (nameClean.length > 25) nameSize = 30;
-    else if (nameClean.length > 18) nameSize = 36;
     ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", serif`;
-    ctx.fillStyle = "#2c124d"; // Royal deep purple
-    ctx.fillText(nameClean, 512, 235);
+    let nw = ctx.measureText(nameClean).width;
+    while (nw > 620 && nameSize > 20) {
+      nameSize -= 1;
+      ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", serif`;
+      nw = ctx.measureText(nameClean).width;
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#260a44";
+    ctx.fillText(nameClean, 456, 248);
 
-    // Subtle gold divider line with center diamond ornament
-    ctx.strokeStyle = "#daa520";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(340, 288);
-    ctx.lineTo(684, 288);
-    ctx.stroke();
-
-    ctx.fillStyle = "#daa520";
-    ctx.beginPath();
-    ctx.moveTo(512, 285);
-    ctx.lineTo(515, 288);
-    ctx.lineTo(512, 291);
-    ctx.lineTo(509, 288);
-    ctx.closePath();
-    ctx.fill();
-
-    // 3. Giant Official Bib Number (e.g. "NCAD-1999")
+    // 2. Giant Official Bib Number (centered at x=456, y=374)
     const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
-    let fontSize = 88;
-    if (bibDisplay.length > 10) fontSize = 72;
-    else if (bibDisplay.length > 8) fontSize = 80;
-
+    let fontSize = 82;
     ctx.font = `900 ${fontSize}px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
+    let numW = ctx.measureText(bibDisplay).width;
+    while (numW > 680 && fontSize > 42) {
+      fontSize -= 2;
+      ctx.font = `900 ${fontSize}px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
+      numW = ctx.measureText(bibDisplay).width;
+    }
 
-    // 3D Gold bevel outline (stroke) centered at x=460 (providing 70px+ clearance to QR badge at x=805)
+    // 3D Gold bevel outline
     ctx.strokeStyle = "#daa520";
     ctx.lineWidth = 4;
-    ctx.strokeText(bibDisplay, 460, 365);
+    ctx.strokeText(bibDisplay, 456, 374);
 
     // Deep royal purple fill
     ctx.fillStyle = "#260a44";
-    ctx.fillText(bibDisplay, 460, 365);
+    ctx.fillText(bibDisplay, 456, 374);
 
-    // 4. Athlete Data Badges Bar at bottom of card
+    // 3. Athlete Data Badges Bar at bottom of card (y=478)
     const distClean = (data.distance || "5 KM").toUpperCase().trim();
     const distDisplay = distClean.endsWith("KM") || distClean.endsWith("K") ? distClean : `${distClean} KM`;
     const catDisplay = (data.category || "RUNNING").toUpperCase().trim();
-    ctx.font = `bold 14px "Georgia", "Times New Roman", serif`;
-    ctx.fillStyle = "#4a1d6e";
-    ctx.fillText(`DISTANCE: ${distDisplay}`, 240, 472);
-    ctx.fillText(`CATEGORY: ${catDisplay}`, 490, 472);
+    ctx.font = `bold 17px "Georgia", "Times New Roman", serif`;
 
-    // 5. Dedicated Leaderboard QR Code Card on the right of the bib (x=805, y=365)
-    try {
-      const qrFallback = await loadImage("/cancer-leaderboard-qr.png");
-      // White luxury card
-      ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#b482dc";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(805, 365, 112, 125, 12);
-      ctx.fill();
-      ctx.stroke();
+    // Draw left: DISTANCE: 5 KM (right-aligned at x=400)
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#260a44";
+    ctx.fillText(`DISTANCE: ${distDisplay}`, 400, 478);
 
-      ctx.drawImage(qrFallback, 816, 373, 90, 90);
+    // Draw divider: gold | at x=420
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#daa520";
+    ctx.fillText("|", 420, 478);
 
-      ctx.font = `bold 8px "Arial", sans-serif`;
-      ctx.textAlign = "center";
-      ctx.fillStyle = "#2e0854";
-      ctx.fillText("SCAN LEADERBOARD", 861, 474);
-
-      ctx.font = `bold 7px "Arial", sans-serif`;
-      ctx.fillStyle = "#9333ea";
-      ctx.fillText("LIVE RANKINGS", 861, 484);
-      ctx.restore();
-    } catch {}
+    // Draw right: CATEGORY: RUNNING (left-aligned at x=440)
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#260a44";
+    ctx.fillText(`CATEGORY: ${catDisplay}`, 440, 478);
 
     return canvas;
   }
@@ -518,14 +489,14 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
   }
 
   if (data.isCancerEvent) {
-    const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261117_master_v8");
+    const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261118_master_v11");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 682;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
-    // Draw pristine master base (zero watermark, zero artifacts, verified ribbon QR embedded)
+    // Draw pristine master base (zero watermark, zero artifacts, ribbon QR 100% intact from master)
     ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
     // 1. Participant Name: optically centered at (449, 281) above the gold divider
@@ -534,7 +505,7 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
     let nameSize = 52;
     ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
     let measuredWidth = ctx.measureText(nameDisplay).width;
-    while (measuredWidth > 580 && nameSize > 24) {
+    while (measuredWidth > 540 && nameSize > 22) {
       nameSize -= 1;
       ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
       measuredWidth = ctx.measureText(nameDisplay).width;
@@ -545,28 +516,27 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
     ctx.fillStyle = "#2c0d48"; // Imperial Royal Plum
     ctx.fillText(nameDisplay, 449, 281);
 
-    // 2. The Three Detail Badges: Mathematical precision aligned under their pill headers at y=537
-    ctx.font = `bold 15px "Georgia", "Times New Roman", Times, serif`;
+    // 2. The Three Detail Badges: Single clean row aligned under their pill headers at y=565
+    ctx.font = `bold 17px "Georgia", "Times New Roman", Times, serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#2d193d"; // Deep Plum
+    ctx.fillStyle = "#2c124d"; // Deep Plum
 
-    // A. Challenge Category (Pill 1: Center x=225, y=537)
+    // A. Challenge Category (Pill 1: Center x=225, y=565)
     const rawCategory = data.category || "Running";
     const catDisplay = toTitleCase(rawCategory.trim());
-    ctx.fillText(catDisplay, 225, 537);
+    ctx.fillText(catDisplay, 225, 565);
 
-    // B. Issue Date (Pill 2: Center x=435, y=537)
+    // B. Issue Date (Pill 2: Center x=435, y=565)
     const dateDisplay = (data.dateStr || "17 Nov 2026").trim();
-    ctx.fillText(dateDisplay, 435, 537);
+    ctx.fillText(dateDisplay, 435, 565);
 
-    // C. Achievement Distance (Pill 3: Center x=640, y=537)
+    // C. Achievement Distance (Pill 3: Center x=640, y=565)
     let distStr = (data.distance || "5 KM").toUpperCase().trim();
     if (!distStr.endsWith("KM") && !distStr.endsWith("K")) distStr += " KM";
-    ctx.fillText(distStr, 640, 537);
+    ctx.fillText(distStr, 640, 565);
 
-    // 3. Official Ribbon QR is already embedded in high resolution on the base artwork at (883, 149),
-    // redirecting 100% reliably to the cancer event leaderboard.
+    // 3. Official Ribbon QR is 100% untouched master artwork on the lanyard ribbon
     return canvas;
   }
 
