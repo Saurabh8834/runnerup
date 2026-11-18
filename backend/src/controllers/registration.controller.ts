@@ -498,12 +498,19 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
       );
     }
 
+    if (isCancerEvent) {
+      throw new ApiError(
+        403,
+        "GPS proof submission window for National Cancer Awareness Day Challenge closed on 17 November 2026 at 11:59 PM IST. New proof submissions are no longer accepted.",
+      );
+    }
+
     const nowMs = Date.now();
     const proofClosesMs = existing.event.proofClosesAt
       ? new Date(existing.event.proofClosesAt).getTime()
       : null;
 
-    if (!isCancerEvent && proofClosesMs && nowMs > proofClosesMs) {
+    if (proofClosesMs && nowMs > proofClosesMs) {
       throw new ApiError(
         400,
         `GPS proof submission for ${existing.event.title} is officially closed.`,
@@ -522,7 +529,7 @@ export async function submitProof(request: AuthenticatedRequest, response: Respo
     throw new ApiError(422, "Complete payment before uploading GPS proof");
   }
 
-  if (existing.proofStatus === "APPROVED" && !isAdmin && !isCancerEvent) {
+  if (existing.proofStatus === "APPROVED" && !isAdmin) {
     throw new ApiError(409, "Proof already approved. Contact support to re-submit.");
   }
 
@@ -944,6 +951,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
     }
 
     return response.json({
+      success: true,
       data: cached.data,
       participants: cached.participants,
       userRegistrations,
@@ -1408,6 +1416,7 @@ export async function getLeaderboard(request: AuthenticatedRequest, response: Re
   console.log('[getLeaderboard]', { isCancerEvent, distanceQuery, activeDistance, eventSlug: event?.slug, rows: rankedLeaderboard.length });
 
   response.json({
+    success: true,
     data: rankedLeaderboard,
     participants: participantRoster,
     userRegistrations,

@@ -147,8 +147,10 @@ function canUpload(reg: Registration) {
     reg.event?.slug?.includes("cancer") ||
     reg.event?.title?.toLowerCase()?.includes("cancer");
 
-  // For active ongoing challenges (like Cancer Awareness Day), always allow athletes to update or replace proof
-  if (reg.proofStatus === "APPROVED" && !isCancerEvent) return false;
+  // Proof submission window for National Cancer Awareness Day Challenge closed on 17 Nov 11:59 PM IST
+  if (isCancerEvent) return false;
+
+  if (reg.proofStatus === "APPROVED") return false;
 
   return isEligible(reg);
 }
@@ -708,6 +710,15 @@ export function DashboardClient() {
 
     if (isOldAirForce) {
       setProofError("GPS proof submission for the Indian Air Force Day Virtual Marathon officially closed at 11:00 AM IST on 31 October 2026.");
+      return;
+    }
+
+    const isCancer =
+      activeReg?.event?.slug?.includes("cancer") ||
+      activeReg?.event?.title?.toLowerCase()?.includes("cancer");
+
+    if (isCancer) {
+      setProofError("GPS proof submission window for National Cancer Awareness Day Challenge closed on 17 November 2026 at 11:59 PM IST. New submissions are forbidden.");
       return;
     }
 
@@ -1580,12 +1591,16 @@ export function DashboardClient() {
                               <UploadCloud className="h-4 w-4" />
                               {formOpen ? "Close Uploader" : "Upload GPS Run Proof"}
                             </button>
+                          ) : isCancerEvent ? (
+                            <span className="inline-flex items-center justify-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-amber-300 backdrop-blur-xl">
+                              Submissions Closed (17 Nov)
+                            </span>
                           ) : null}
                         </div>
                       </div>
 
                       {/* GPS Proof Submission Drawer */}
-                      {formOpen && (
+                      {formOpen && canUpload(reg) && (
                         <form
                           className="border-t border-white/15 bg-[#14242a]/90 p-5 sm:p-7 backdrop-blur-2xl"
                           onSubmit={submitProof}

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PageShell } from "../components/app-shell";
 import { LeaderboardClient, type InitialLeaderboardData } from "./leaderboard-client";
+import cancerSnapshot from "@/data/cancer-leaderboard-snapshot.json";
 
 export const revalidate = 60;
 
@@ -16,6 +17,7 @@ async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefin
   const endpoints = isDev
     ? [`http://127.0.0.1:4000/api/registrations/leaderboard/${defaultSlug}${distQuery}&admin=true`]
     : [
+        `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
         `https://www.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
         `https://api.runnerup.in/api/registrations/leaderboard/${defaultSlug}${distQuery}`,
       ];
@@ -43,6 +45,20 @@ async function getInitialLeaderboard(): Promise<InitialLeaderboardData | undefin
       // try next resilient fallback
     }
   }
+
+  // Zero-downtime static snapshot fallback for Cancer Challenge
+  const snap = (cancerSnapshot as Record<string, any>)?.[defaultDist];
+  if (snap && Array.isArray(snap.data) && snap.data.length > 0) {
+    return {
+      entries: snap.data,
+      participants: snap.participants || [],
+      userRegistrations: [],
+      availableDistances: snap.meta?.availableDistances || ["1.5 km", "3 km", "5 km", "10 km", "21 km"],
+      selectedSlug: defaultSlug,
+      selectedDistance: defaultDist,
+    };
+  }
+
   return undefined;
 }
 

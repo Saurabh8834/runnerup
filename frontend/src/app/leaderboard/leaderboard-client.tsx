@@ -26,6 +26,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getApiUrl } from "../../lib/api";
 import { publicEvents } from "../data/events";
 import { LeaderboardCountdown, LEADERBOARD_REVEAL_TIMESTAMP } from "./leaderboard-countdown";
+import cancerSnapshot from "@/data/cancer-leaderboard-snapshot.json";
 import {
   generateClientDummyLeaderboard,
   generateClientDummyRoster,
@@ -406,6 +407,9 @@ export function LeaderboardClient({
 
   // Sync available distances when event changes
   const distanceOptions = useMemo(() => {
+    if (selectedSlug.includes("cancer")) {
+      return ["1.5 km", "3 km", "5 km", "10 km", "21 km"];
+    }
     if (availableDistances.length > 0) return availableDistances;
     const currentEv = events.find((e) => e.slug === selectedSlug);
     if (currentEv?.distances?.length) return currentEv.distances;
@@ -446,14 +450,17 @@ export function LeaderboardClient({
   }, [initialEventParam]);
 
   // Cache to prevent hammering the server when users flip between distances
-  const cacheRef = useRef<Map<string, { json: any; timestamp: number }>>(new Map());
-
-  // Seed cache with server initialData so instant back/forth switching is immediate
-  useEffect(() => {
-    if (initialData && initialData.entries.length > 0) {
-      const key = `${initialData.selectedSlug}?distance=${encodeURIComponent(initialData.selectedDistance)}`;
-      if (!cacheRef.current.has(key)) {
-        cacheRef.current.set(key, {
+  const cacheRef = useRef<Map<string, { json: any; timestamp: number }>>(
+    (() => {
+      const map = new Map<string, { json: any; timestamp: number }>();
+      if (initialData && initialData.entries.length > 0) {
+        const distClean = initialData.selectedDistance.toLowerCase().trim();
+        const keys = [
+          `${initialData.selectedSlug}?distance=${encodeURIComponent(initialData.selectedDistance)}`,
+          `${initialData.selectedSlug}:${distClean}`,
+          `${initialData.selectedSlug}:${initialData.selectedDistance}`,
+        ];
+        const payload = {
           json: {
             success: true,
             data: initialData.entries,
@@ -465,7 +472,58 @@ export function LeaderboardClient({
             },
           },
           timestamp: Date.now(),
-        });
+        };
+        for (const k of keys) map.set(k, payload);
+      }
+
+      if (cancerSnapshot && typeof cancerSnapshot === "object") {
+        for (const [distKey, snapVal] of Object.entries(cancerSnapshot as Record<string, any>)) {
+          const dClean = distKey.toLowerCase().trim();
+          const payload = {
+            json: {
+              success: true,
+              data: snapVal.data,
+              participants: snapVal.participants,
+              userRegistrations: [],
+              meta: snapVal.meta,
+            },
+            timestamp: Date.now(),
+          };
+          map.set(`national-cancer-awareness-day-virtual-run-2026?distance=${encodeURIComponent(distKey)}`, payload);
+          map.set(`national-cancer-awareness-day-virtual-run-2026:${dClean}`, payload);
+          map.set(`national-cancer-awareness-day-virtual-run-2026:${distKey}`, payload);
+        }
+      }
+      return map;
+    })(),
+  );
+
+  // Seed cache with server initialData so instant back/forth switching is immediate
+  useEffect(() => {
+    if (initialData && initialData.entries.length > 0) {
+      const distClean = initialData.selectedDistance.toLowerCase().trim();
+      const keys = [
+        `${initialData.selectedSlug}?distance=${encodeURIComponent(initialData.selectedDistance)}`,
+        `${initialData.selectedSlug}:${distClean}`,
+        `${initialData.selectedSlug}:${initialData.selectedDistance}`,
+      ];
+      const payload = {
+        json: {
+          success: true,
+          data: initialData.entries,
+          participants: initialData.participants,
+          userRegistrations: initialData.userRegistrations || [],
+          meta: {
+            availableDistances: initialData.availableDistances,
+            selectedDistance: initialData.selectedDistance,
+          },
+        },
+        timestamp: Date.now(),
+      };
+      for (const k of keys) {
+        if (!cacheRef.current.has(k)) {
+          cacheRef.current.set(k, payload);
+        }
       }
     }
   }, [initialData]);
@@ -478,13 +536,16 @@ export function LeaderboardClient({
     }
 
     const adminParam = isAdminDemo ? `&admin=true` : "";
+    const distClean = (selectedDistance || "3 km").toLowerCase().trim();
     const distQuery = selectedDistance
       ? `?distance=${encodeURIComponent(selectedDistance)}${adminParam}`
       : (isAdminDemo ? `?admin=true` : "");
-    const cacheKey = `${selectedSlug}${distQuery}`;
-    const cached = cacheRef.current.get(cacheKey);
 
-    if (cached && Date.now() - cached.timestamp < 120000) {
+    const cacheKey1 = `${selectedSlug}${distQuery}`;
+    const cacheKey2 = `${selectedSlug}:${distClean}`;
+    const cached = cacheRef.current.get(cacheKey1) || cacheRef.current.get(cacheKey2);
+
+    if (cached && Date.now() - cached.timestamp < 180000) {
       const json = cached.json;
       let cachedEntries = (json.data ?? []) as LeaderboardEntry[];
       cachedEntries.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
@@ -508,6 +569,7 @@ export function LeaderboardClient({
 
     const relativeUrl = getApiUrl(`/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`);
     const endpoints = [
+      `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
       relativeUrl,
       `https://www.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
       `https://api.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
@@ -519,7 +581,7 @@ export function LeaderboardClient({
     for (const endpoint of endpoints) {
       try {
         const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 6000);
+        const timer = setTimeout(() => ctrl.abort(), 8000);
         const response = await fetch(endpoint, {
           signal: ctrl.signal,
           headers: { Accept: "application/json" },
@@ -540,7 +602,8 @@ export function LeaderboardClient({
     }
 
     if (fetchSuccess && parsedJson) {
-      cacheRef.current.set(cacheKey, { json: parsedJson, timestamp: Date.now() });
+      cacheRef.current.set(cacheKey1, { json: parsedJson, timestamp: Date.now() });
+      cacheRef.current.set(cacheKey2, { json: parsedJson, timestamp: Date.now() });
 
       let rankedData = (parsedJson.data ?? []) as LeaderboardEntry[];
       let rosterData = (parsedJson.participants ?? []) as ParticipantEntry[];
@@ -577,7 +640,26 @@ export function LeaderboardClient({
       }
       setError(null);
     } else {
-      if (isDummyEvent(selectedSlug)) {
+      const isCancer = selectedSlug.toLowerCase().includes("cancer");
+      const matchedDistKey = Object.keys(cancerSnapshot).find(
+        (k) => k.toLowerCase().trim() === distClean
+      ) || (distClean.includes("1.6") ? "1.5 km" : "3 km");
+      const snap = (cancerSnapshot as Record<string, any>)[matchedDistKey];
+
+      if (isCancer && snap && Array.isArray(snap.data) && snap.data.length > 0) {
+        let snapEntries = snap.data as LeaderboardEntry[];
+        snapEntries.sort((a, b) => (a.finishTimeSeconds ?? 999999) - (b.finishTimeSeconds ?? 999999));
+        snapEntries = snapEntries.map((row, idx) => ({
+          ...row,
+          rank: idx + 1,
+        }));
+        setEntries(snapEntries);
+        setParticipants(snap.participants || []);
+        if (snap.meta?.availableDistances?.length) {
+          setAvailableDistances(snap.meta.availableDistances);
+        }
+        setError(null);
+      } else if (isDummyEvent(selectedSlug)) {
         const currentEventName = events.find((e) => e.slug === selectedSlug)?.name || selectedSlug;
         const curDist = selectedDistance || "5 km";
         setEntries(generateClientDummyLeaderboard(selectedSlug, currentEventName, curDist, 60));
