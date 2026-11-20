@@ -196,7 +196,7 @@ export async function verifyCertificate(request: Request, response: Response) {
     rawParam.toLowerCase().includes("sourav") ||
     certificate.certificateNumber.includes("1999");
 
-  if ((isKinetic || isCancer) && !isAdminDemo) {
+  if (isKinetic && !isAdminDemo) {
     throw new ApiError(
       403,
       "Certificate locked. Official finisher certificates are currently undergoing final audit and validation. They will unlock upon official release announcement.",

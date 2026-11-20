@@ -2117,6 +2117,28 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
 
   const downloadStats = getDownloadStats();
 
+  let cancerCertDownloads = 0;
+  let cancerBibDownloads = 0;
+  if (isCancerScoped) {
+    const cancerRegs = await prisma.registration.findMany({
+      where: baseEventWhere,
+      select: {
+        bibNumber: true,
+        certificate: { select: { certificateNumber: true } },
+      },
+    });
+    for (const reg of cancerRegs) {
+      const bibNum = reg.bibNumber?.trim();
+      const certNum = reg.certificate?.certificateNumber?.trim();
+      if (bibNum && (downloadStats.bibMap[bibNum] || downloadStats.bibMap[bibNum.replace(/\D/g, "")])) {
+        cancerBibDownloads++;
+      }
+      if (certNum && (downloadStats.certificateMap[certNum] || downloadStats.certificateMap[certNum.replace(/\D/g, "")])) {
+        cancerCertDownloads++;
+      }
+    }
+  }
+
   response.json({
     data: items,
     meta: {
@@ -2129,14 +2151,14 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       rejectedCount,
       notSubmittedCount,
       allCount,
-      certificatesCount: isCancerScoped ? 0 : approvedCount,
+      certificatesCount: approvedCount,
       downloadsCount: isCancerScoped
         ? {
-            certificates: 0,
-            bibs: 0,
-            certificateDownloads: {},
-            bibDownloads: {},
-            isReleased: false,
+            certificates: cancerCertDownloads,
+            bibs: cancerBibDownloads,
+            certificateDownloads: downloadStats.certificateMap,
+            bibDownloads: downloadStats.bibMap,
+            isReleased: true,
           }
         : {
             certificates: downloadStats.certificateCount,

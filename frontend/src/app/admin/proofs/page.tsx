@@ -816,26 +816,15 @@ export default function AdminProofsPage() {
               <span className="text-[0.68rem] font-bold uppercase tracking-wider">Digital Bibs</span>
               <Trophy className="h-4 w-4 text-slate-400" />
             </div>
-            {isCancer ? (
-              <>
-                <p className="mt-2 text-base font-bold text-amber-300/80 font-mono">Available Soon</p>
-                <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
-                  <span>Unlocks post-event (17 Nov)</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <p className="text-2xl font-black text-amber-300 font-mono">{counts.bibDownloads}</p>
-                  <span className="text-xs font-bold text-amber-300/80">
-                    / {counts.total} ({counts.total > 0 ? Math.round((counts.bibDownloads / counts.total) * 100) : 0}%)
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
-                  <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Claimed</span>
-                </div>
-              </>
-            )}
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <p className="text-2xl font-black text-amber-300 font-mono">{counts.bibDownloads}</p>
+              <span className="text-xs font-bold text-amber-300/80">
+                / {counts.total} ({counts.total > 0 ? Math.round((counts.bibDownloads / counts.total) * 100) : 0}%)
+              </span>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-amber-300/90 font-medium">
+              <span className="font-bold text-emerald-300">📥 {counts.bibDownloads} Claimed</span>
+            </div>
           </div>
 
           {/* Card 6: Certificates */}
@@ -844,26 +833,15 @@ export default function AdminProofsPage() {
               <span className="text-[0.68rem] font-bold uppercase tracking-wider">Certificates</span>
               <Award className="h-4 w-4 text-slate-400" />
             </div>
-            {isCancer ? (
-              <>
-                <p className="mt-2 text-base font-bold text-sky-300/80 font-mono">Available Soon</p>
-                <div className="mt-1 text-[0.68rem] text-slate-400 font-medium">
-                  <span>Unlocks post-event (17 Nov)</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mt-2 flex items-baseline gap-1.5">
-                  <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
-                  <span className="text-xs font-bold text-blue-300/80">
-                    / {counts.approved || counts.total} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
-                  </span>
-                </div>
-                <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
-                  <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Claimed</span>
-                </div>
-              </>
-            )}
+            <div className="mt-2 flex items-baseline gap-1.5">
+              <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
+              <span className="text-xs font-bold text-blue-300/80">
+                / {counts.approved || counts.total} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
+              </span>
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
+              <span className="font-bold text-emerald-300">📥 {counts.certDownloads} Claimed</span>
+            </div>
           </div>
         </div>
 
@@ -973,17 +951,10 @@ export default function AdminProofsPage() {
                 Failed Rate: <strong>{counts.failedRate}%</strong> ({counts.notSubmitted} unsubmitted)
               </span>
 
-              {!isCancer ? (
-                <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
-                  <Award className="h-3.5 w-3.5 text-emerald-400" />
-                  Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
-                </span>
-              ) : (
-                <span className="rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-400 flex items-center gap-1.5 shadow-xs">
-                  <Award className="h-3.5 w-3.5 text-sky-400" />
-                  Certificates &amp; Bibs: <strong>Pending Organizer Release</strong>
-                </span>
-              )}
+              <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
+                <Award className="h-3.5 w-3.5 text-emerald-400" />
+                Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
+              </span>
             </div>
 
             {/* Search result indicator */}
@@ -1183,20 +1154,19 @@ export default function AdminProofsPage() {
                         )}
 
                         {/* ── Finisher Assets: Certificate & Digital Bib Download Bar (PAID USERS ONLY) ── */}
-                        {isCancer || row.event.title.toLowerCase().includes("cancer") ? (
-                          <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/5 p-2.5 flex items-center justify-between text-xs text-amber-300/80">
-                            <span className="font-medium flex items-center gap-1.5">
-                              🎗️ Cancer Challenge Assets: Digital Bib &amp; Finisher Certificate unlock after event concludes (17 November).
-                            </span>
-                          </div>
-                        ) : row.payment?.status === "PAID" || row.proofStatus === "APPROVED" ? (
+                        {row.payment?.status === "PAID" || row.proofStatus === "APPROVED" ? (
                           (() => {
                             const isBibDownloaded = Boolean(
                               downloadMaps.bibs[row.bibNumber] ||
                               downloadMaps.bibs[row.bibNumber.replace(/\D/g, "")] ||
                               downloadMaps.bibs[row.id]
                             );
-                            const certKey = row.certificate?.certificateNumber || `CERT-IAF26-${row.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`;
+                            const isCancerRow = isCancer || row.event.title.toLowerCase().includes("cancer") || row.bibNumber.startsWith("NCAD");
+                            const certKey = row.certificate?.certificateNumber || (
+                              isCancerRow
+                                ? (row.bibNumber.startsWith("NCAD") ? `CERT-${row.bibNumber}` : `CERT-NCAD-${row.bibNumber.replace(/\D/g, "")}`)
+                                : `CERT-IAF26-${row.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`
+                            );
                             const isCertDownloaded = Boolean(
                               downloadMaps.certificates[certKey] ||
                               downloadMaps.certificates[row.bibNumber] ||

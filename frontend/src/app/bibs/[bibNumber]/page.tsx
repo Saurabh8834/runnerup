@@ -62,9 +62,9 @@ export default function DigitalBibPage() {
     searchParams.get("admin") === "true";
 
   // Kinetic Run: Strictly locked until event concludes on 15 Dec 2026.
-  // Cancer Run: Locked for all users pending official release announcement (unlock trigger: "JAI MATA DI").
+  // Cancer Run: Unlocked & Released
   // IAF: Concluded race -> Unlocked.
-  const isLocked = (isKinetic || isCancer) && !isAdminDemo;
+  const isLocked = isKinetic && !isAdminDemo;
   const unlockDateStr = isKinetic ? "15 December 2026" : "Official Release Announcement";
 
   useEffect(() => {

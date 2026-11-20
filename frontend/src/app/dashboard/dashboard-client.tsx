@@ -51,6 +51,7 @@ type Registration = {
   id: string;
   bibNumber: string;
   distance: string;
+  activityType?: string | null;
   status: string;
   proofStatus: string;
   finishTimeSeconds?: number | null;
@@ -299,10 +300,6 @@ export function DashboardClient() {
       alert("Digital race bibs will unlock automatically after the challenge concludes on 15 December 2026.");
       return;
     }
-    if (isCancer) {
-      alert("Finisher certificates and digital bibs are Unlocking Soon.");
-      return;
-    }
 
     setDownloadingBibId(reg.id);
     try {
@@ -315,6 +312,8 @@ export function DashboardClient() {
         runnerName,
         distance,
         positionStr: reg.bibNumber || "1001",
+        isCancerEvent: isCancer,
+        category: reg.activityType || "Running",
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       await triggerCanvasDownload(canvas, `RunnerUp_Bib_${safeName}_${reg.bibNumber}.jpg`);
@@ -336,29 +335,29 @@ export function DashboardClient() {
       alert("Finisher certificates will unlock automatically after the challenge concludes on 15 December 2026.");
       return;
     }
-    if (isCancer) {
-      alert("Finisher certificates and digital bibs are Unlocking Soon.");
-      return;
-    }
 
     setDownloadingCertId(reg.id);
     try {
-      const isCancer = slugLower.includes("cancer") || titleLower.includes("cancer");
       const isIaf = slugLower.includes("air-force") || slugLower.includes("airforce") || titleLower.includes("air force");
 
       const cleanBib = (reg.bibNumber || "").replace(/\D/g, "");
       const official = isIaf ? getVerifiedRunnerByBib(cleanBib) : null;
       const runnerName = (reg.shippingName || dbUser?.name || user?.fullName || user?.firstName || official?.name || "Runner").trim();
       const distance = reg.distance || official?.distance || "5 KM";
+      const certNum = reg.certificate?.certificateNumber || (isCancer ? `CERT-${reg.bibNumber}` : `CERT-IAF26-${cleanBib}`);
       const canvas = await renderCertCanvas({
         runnerName,
         distance,
-        dateStr: isCancer ? "17 Nov 2026" : "31  /  10  /  2026",
+        dateStr: isCancer ? "15 Nov 2026" : "31  /  10  /  2026",
         isCancerEvent: isCancer,
+        category: reg.activityType || "Running",
+        certificateNumber: certNum,
+        finishTimeSeconds: reg.finishTimeSeconds ?? undefined,
       });
       const safeName = runnerName.replace(/[^a-zA-Z0-9]/g, "_");
       await triggerCanvasDownload(canvas, `RunnerUp_Certificate_${safeName}_${isCancer ? "Cancer2026" : "IAF"}.jpg`);
-      sendDownloadTelemetry("CERTIFICATE", reg.certificate?.certificateNumber || reg.bibNumber);
+      sendDownloadTelemetry("CERTIFICATE", certNum);
+      if (reg.bibNumber) sendDownloadTelemetry("CERTIFICATE", reg.bibNumber);
     } catch (e) {
       console.error("Failed to download certificate", e);
       alert("Could not download certificate. Please try again.");
@@ -614,14 +613,9 @@ export function DashboardClient() {
         );
       }
 
-      // National Cancer Awareness Day Challenge:
-      // Locked for all users pending official release ("JAI MATA DI")
+      // National Cancer Awareness Day Challenge: Unlocked for all approved finishers
       if (isCancer) {
-        if (!isAdminDemoUser) return false;
-        return (
-          r.proofStatus === "APPROVED" &&
-          (Boolean(r.certificate) || (Boolean(r.medalDelivery?.trackingNumber) && r.medalDelivery?.status !== "PENDING"))
-        );
+        return r.proofStatus === "APPROVED";
       }
 
       // Default for any other event
@@ -1470,8 +1464,8 @@ export function DashboardClient() {
                             Leaderboard <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                           </Link>
 
-                          {/* Concluded IAF challenge participants can download certificate/bib */}
-                          {isPaid && isIafEvent && isVerified && (
+                          {/* Concluded IAF & Cancer challenge participants can download certificate/bib */}
+                          {isPaid && (isIafEvent || isCancerEvent) && (isVerified || reg.proofStatus === "APPROVED") && (
                             <div className="inline-flex items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleDownloadBib(reg)}
@@ -1493,31 +1487,15 @@ export function DashboardClient() {
                                 <span>{downloadingCertId === reg.id ? "Cert..." : "Certificate"}</span>
                               </button>
 
-                              {reg.certificate?.certificateNumber && (
-                                <Link
-                                  href={`/certificates/${reg.certificate.certificateNumber}`}
-                                  className="rounded-full border border-purple-400/50 bg-purple-500/15 hover:bg-purple-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
-                                  title="Preview Official Certificate on-screen"
-                                >
-                                  <Eye className="h-3 w-3" />
-                                  <span>Preview</span>
-                                </Link>
-                              )}
+                              <Link
+                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-${reg.bibNumber}` : reg.bibNumber)}`}
+                                className="rounded-full border border-purple-400/50 bg-purple-500/15 hover:bg-purple-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
+                                title="Preview Official Certificate on-screen"
+                              >
+                                <Eye className="h-3 w-3" />
+                                <span>Preview</span>
+                              </Link>
                             </div>
-                          )}
-
-                          {isPaid && isCancerEvent && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                alert("Finisher Certificates and Digital Bibs are Unlocking Soon.");
-                              }}
-                              className="rounded-full border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm transition-all inline-flex items-center gap-1.5 cursor-pointer"
-                              title="Official Finisher Certificate & Digital Bib - Unlocking Soon"
-                            >
-                              <Lock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
-                              <span>Unlocking Soon</span>
-                            </button>
                           )}
 
                           {reg.medalDelivery?.trackingNumber && (
@@ -1911,7 +1889,7 @@ export function DashboardClient() {
                           </div>
                       </div>
 
-                      {isIaf && (
+                      {(isIaf || isCancerEvent) && (
                         <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-wrap items-center gap-2">
                           <button
                             onClick={() => handleDownloadCert(reg)}
@@ -1922,10 +1900,10 @@ export function DashboardClient() {
                             <span>{downloadingCertId === reg.id ? "Generating Certificate..." : "Download Certificate (HD)"}</span>
                           </button>
 
-                          {reg.certificate?.certificateNumber && (
+                          {(reg.certificate?.certificateNumber || isCancerEvent) && (
                             <>
                               <Link
-                                href={`/certificates/${reg.certificate.certificateNumber}`}
+                                href={`/certificates/${reg.certificate?.certificateNumber || `CERT-${reg.bibNumber}`}`}
                                 className="rounded-full border border-purple-400/50 bg-purple-500/20 hover:bg-purple-500/30 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                                 title="Preview Official Certificate on-screen"
                               >
@@ -1934,7 +1912,7 @@ export function DashboardClient() {
                               </Link>
 
                               <Link
-                                href={`/certificates/${reg.certificate.certificateNumber}`}
+                                href={`/certificates/${reg.certificate?.certificateNumber || `CERT-${reg.bibNumber}`}`}
                                 className="rounded-full bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md shadow-pink-500/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                                 title="Share Instagram & WhatsApp 9:16 Story"
                               >
@@ -1951,21 +1929,6 @@ export function DashboardClient() {
                           >
                             <Download className="h-3.5 w-3.5" />
                             <span>{downloadingBibId === reg.id ? "Generating Bib..." : "Download Bib (HD)"}</span>
-                          </button>
-                        </div>
-                      )}
-
-                      {isCancerEvent && (
-                        <div className="mt-5 sm:mt-6 pt-3.5 sm:pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              alert("Finisher Certificates and Digital Bibs are Unlocking Soon.");
-                            }}
-                            className="w-full rounded-full border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
-                          >
-                            <Lock className="h-3.5 w-3.5 text-amber-400" />
-                            <span>Unlocking Soon</span>
                           </button>
                         </div>
                       )}

@@ -263,71 +263,43 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
   }
 
   if (data.isCancerEvent || (data.positionStr && data.positionStr.toUpperCase().startsWith("NCAD"))) {
-    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261118_master_v11");
+    const baseImg = await loadImage("/cancer-bib-clean-base-master.jpg?v=20261121_master_v12");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
-    canvas.height = 685;
+    canvas.height = 682;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
-    // Draw pristine master base (matching media_1795020098403_680571eb.jpg 100%)
-    ctx.drawImage(baseImg, 0, 0, 1024, 685);
+    // Draw pristine master base (matching media_1795206970222_13035be4.jpg 100%)
+    ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
-    // 1. Participant Name in commanding bold regal serif typography (centered at x=456, y=248)
-    const nameClean = (data.runnerName || "PARTICIPANT").toUpperCase().trim();
-    let nameSize = 42;
-    ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", serif`;
-    let nw = ctx.measureText(nameClean).width;
-    while (nw > 620 && nameSize > 20) {
-      nameSize -= 1;
-      ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", serif`;
-      nw = ctx.measureText(nameClean).width;
-    }
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#260a44";
-    ctx.fillText(nameClean, 456, 248);
-
-    // 2. Giant Official Bib Number (centered at x=456, y=374)
+    // 1. Giant Official Bib Number (centered at x=512, y=360)
     const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
-    let fontSize = 82;
-    ctx.font = `900 ${fontSize}px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
+    let fontSize = 130;
+    ctx.font = `bold ${fontSize}px "Arial", "Impact", "Segoe UI", sans-serif`;
     let numW = ctx.measureText(bibDisplay).width;
-    while (numW > 680 && fontSize > 42) {
+    while (numW > 890 && fontSize > 50) {
       fontSize -= 2;
-      ctx.font = `900 ${fontSize}px "OfficialArialBlack", "Arial Black", "Impact", "Arial", sans-serif`;
+      ctx.font = `bold ${fontSize}px "Arial", "Impact", "Segoe UI", sans-serif`;
       numW = ctx.measureText(bibDisplay).width;
     }
 
-    // 3D Gold bevel outline
-    ctx.strokeStyle = "#daa520";
-    ctx.lineWidth = 4;
-    ctx.strokeText(bibDisplay, 456, 374);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#310a66";
+    ctx.fillText(bibDisplay, 512, 360);
 
-    // Deep royal purple fill
-    ctx.fillStyle = "#260a44";
-    ctx.fillText(bibDisplay, 456, 374);
-
-    // 3. Athlete Data Badges Bar at bottom of card (y=478)
+    // 2. Athlete Data Badges Bar at bottom of card (centered at x=512, y=518)
     const distClean = (data.distance || "5 KM").toUpperCase().trim();
     const distDisplay = distClean.endsWith("KM") || distClean.endsWith("K") ? distClean : `${distClean} KM`;
     const catDisplay = (data.category || "RUNNING").toUpperCase().trim();
-    ctx.font = `bold 17px "Georgia", "Times New Roman", serif`;
+    const botText = `DISTANCE: ${distDisplay}    |    CATEGORY: ${catDisplay}`;
 
-    // Draw left: DISTANCE: 5 KM (right-aligned at x=400)
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#260a44";
-    ctx.fillText(`DISTANCE: ${distDisplay}`, 400, 478);
-
-    // Draw divider: gold | at x=420
+    ctx.font = `bold 22px "Arial", "Segoe UI", sans-serif`;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#daa520";
-    ctx.fillText("|", 420, 478);
-
-    // Draw right: CATEGORY: RUNNING (left-aligned at x=440)
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#260a44";
-    ctx.fillText(`CATEGORY: ${catDisplay}`, 440, 478);
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#291346";
+    ctx.fillText(botText, 512, 518);
 
     return canvas;
   }
@@ -521,7 +493,7 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
 
     // 2. The Three Detail Badges (Distance, Issue Date, Official Time)
     // Aligned mathematically dead-center inside the three white pill boxes at y=502
-    ctx.font = `bold 20px "Arial", sans-serif`;
+    ctx.font = `bold 18px "Segoe UI", "Arial", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#230f3c"; // Deep Plum
