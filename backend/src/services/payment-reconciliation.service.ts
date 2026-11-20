@@ -160,7 +160,7 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
 
               await sendRegistrationConfirmationEmail({
                 to: paymentToUpdate.registration.user.email,
-                runnerName: paymentToUpdate.registration.user.name,
+                runnerName: paymentToUpdate.registration.shippingName || paymentToUpdate.registration.user.name,
                 eventTitle: paymentToUpdate.registration.event.title,
                 eventSlug: paymentToUpdate.registration.event.slug,
                 eventDates,
@@ -252,7 +252,7 @@ export async function reconcilePaymentsWithRazorpay(options: { count?: number } 
 
           await sendRegistrationConfirmationEmail({
             to: payment.registration.user.email,
-            runnerName: payment.registration.user.name,
+            runnerName: payment.registration.shippingName || payment.registration.user.name,
             eventTitle: payment.registration.event.title,
             eventSlug: payment.registration.event.slug,
             eventDates,

@@ -1009,7 +1009,7 @@ export async function adminMarkRegistrationPaid(
 
   const emailResult = await sendRegistrationConfirmationEmail({
     to: registration.user.email,
-    runnerName: registration.user.name,
+    runnerName: registration.shippingName || registration.user.name,
     eventTitle: registration.event.title,
     eventSlug: registration.event.slug,
     eventDates: dates1,
@@ -1473,7 +1473,7 @@ export async function adminUpdatePayment(request: AuthenticatedRequest, response
 
     await sendRegistrationConfirmationEmail({
       to: registration.user.email,
-      runnerName: registration.user.name,
+      runnerName: registration.shippingName || registration.user.name,
       eventTitle: registration.event.title,
       eventSlug: registration.event.slug,
       eventDates: dates2,

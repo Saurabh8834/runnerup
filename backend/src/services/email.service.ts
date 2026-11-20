@@ -52,9 +52,15 @@ export function resolveEventMeta(event?: {
     eventKind = "iaf";
   }
 
-  // Format dates dynamically from database if available
+  // Format dates dynamically from database or lock to canonical event dates
   let eventDates = "";
-  if (event?.startsAt && event?.endsAt) {
+  if (eventKind === "kinetic") {
+    eventDates = "10–15 December 2026";
+  } else if (eventKind === "cancer") {
+    eventDates = "7–17 November 2026";
+  } else if (eventKind === "iaf") {
+    eventDates = "25–30 October 2026";
+  } else if (event?.startsAt && event?.endsAt) {
     const s = new Date(event.startsAt);
     const e = new Date(event.endsAt);
     if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
@@ -72,10 +78,7 @@ export function resolveEventMeta(event?: {
   }
 
   if (!eventDates) {
-    if (eventKind === "kinetic") eventDates = "10–15 December 2026";
-    else if (eventKind === "cancer") eventDates = "7–17 November 2026";
-    else if (eventKind === "iaf") eventDates = "25–30 October 2026";
-    else eventDates = "Check Athlete Dashboard";
+    eventDates = "Check Athlete Dashboard";
   }
 
   const eventUrl = event?.slug
@@ -94,31 +97,30 @@ export function detectEventKind(payload: {
   const text = `${payload.eventSlug || ""} ${payload.eventTitle || ""} ${payload.eventUrl || ""}`.toLowerCase();
   const bib = (payload.bibNumber || "").trim().toUpperCase();
 
-  // 1. Authoritative Event Text Checks (Slug / Title / URL)
+  // 1. Kinetic Run priority checks
+  if (text.includes("kinetic") || bib.startsWith("KRVC") || bib.startsWith("KRUN")) {
+    return "kinetic";
+  }
+
+  // 2. Authoritative Cancer / IAF Text Checks
   if (text.includes("cancer") || text.includes("ncad")) {
     return "cancer";
-  }
-  if (text.includes("kinetic")) {
-    return "kinetic";
   }
   if (text.includes("air force") || text.includes("iaf")) {
     return "iaf";
   }
 
-  // 2. Bib Prefix Checks
+  // 3. Bib Prefix Checks
   if (bib.startsWith("NCAD")) {
     return "cancer";
-  }
-  if (bib.startsWith("KRVC") || bib.startsWith("KRUN")) {
-    return "kinetic";
   }
   if (bib.startsWith("IAF")) {
     return "iaf";
   }
 
-  // 3. Fallback numeric ranges for legacy events
+  // 4. Fallback numeric ranges (Kinetic challenge allocated bibs from 2125 onwards)
   const numericBib = parseInt(bib, 10);
-  if (!isNaN(numericBib) && numericBib >= 2200 && numericBib < 5000) {
+  if (!isNaN(numericBib) && numericBib >= 2100 && numericBib < 5000 && !text.includes("cancer")) {
     return "kinetic";
   }
 
