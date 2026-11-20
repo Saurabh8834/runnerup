@@ -19,6 +19,9 @@ export type CertRenderData = {
   distance: string;
   dateStr?: string;
   category?: string;
+  officialTime?: string;
+  finishTimeStr?: string;
+  finishTimeSeconds?: number | null;
   isCancerEvent?: boolean;
   isKineticEvent?: boolean;
   isAdminDemo?: boolean;
@@ -489,7 +492,7 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
   }
 
   if (data.isCancerEvent) {
-    const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261118_master_v11");
+    const baseImg = await loadImage("/cancer-cert-clean-base-master.jpg?v=20261121_final_master_v1");
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 682;
@@ -499,13 +502,13 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
     // Draw pristine master base (zero watermark, zero artifacts, ribbon QR 100% intact from master)
     ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
-    // 1. Participant Name: optically centered at (449, 281) above the gold divider
-    // Responsive auto-scaling prevents any layout break for multi-word or long names
+    // 1. Participant Name: optically centered between "This is to certify that" and the gold diamond at (444, 278)
+    // Responsive auto-scaling prevents any clipping or overlap for multi-word or long names
     const nameDisplay = formatCertificateRunnerName(data.runnerName);
-    let nameSize = 52;
+    let nameSize = 44;
     ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
     let measuredWidth = ctx.measureText(nameDisplay).width;
-    while (measuredWidth > 540 && nameSize > 22) {
+    while (measuredWidth > 520 && nameSize > 22) {
       nameSize -= 1;
       ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
       measuredWidth = ctx.measureText(nameDisplay).width;
@@ -514,29 +517,39 @@ export async function renderCertCanvas(data: CertRenderData): Promise<HTMLCanvas
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#2c0d48"; // Imperial Royal Plum
-    ctx.fillText(nameDisplay, 449, 281);
+    ctx.fillText(nameDisplay, 444, 278);
 
-    // 2. The Three Detail Badges: Single clean row aligned under their pill headers at y=565
-    ctx.font = `bold 17px "Georgia", "Times New Roman", Times, serif`;
+    // 2. The Three Detail Badges (Distance, Issue Date, Official Time)
+    // Aligned mathematically dead-center inside the three white pill boxes at y=502
+    ctx.font = `bold 20px "Arial", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#2c124d"; // Deep Plum
+    ctx.fillStyle = "#230f3c"; // Deep Plum
 
-    // A. Challenge Category (Pill 1: Center x=225, y=565)
-    const rawCategory = data.category || "Running";
-    const catDisplay = toTitleCase(rawCategory.trim());
-    ctx.fillText(catDisplay, 225, 565);
-
-    // B. Issue Date (Pill 2: Center x=435, y=565)
-    const dateDisplay = (data.dateStr || "17 Nov 2026").trim();
-    ctx.fillText(dateDisplay, 435, 565);
-
-    // C. Achievement Distance (Pill 3: Center x=640, y=565)
+    // A. Pill 1: Distance (Center x=252, y=502)
     let distStr = (data.distance || "5 KM").toUpperCase().trim();
     if (!distStr.endsWith("KM") && !distStr.endsWith("K")) distStr += " KM";
-    ctx.fillText(distStr, 640, 565);
+    else if (distStr.endsWith("K")) distStr += "M";
+    ctx.fillText(distStr, 252, 502);
 
-    // 3. Official Ribbon QR is 100% untouched master artwork on the lanyard ribbon
+    // B. Pill 2: Issue Date (Center x=454, y=502)
+    const dateDisplay = (data.dateStr || "15 Nov 2026").trim();
+    ctx.fillText(dateDisplay, 454, 502);
+
+    // C. Pill 3: Official Time (Center x=652, y=502)
+    let timeDisplay = (data.finishTimeStr || data.officialTime || "").trim();
+    if (!timeDisplay && data.finishTimeSeconds && Number.isFinite(data.finishTimeSeconds)) {
+      const s = Math.round(data.finishTimeSeconds);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      timeDisplay = h > 0
+        ? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+        : `00:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+    }
+    if (!timeDisplay) timeDisplay = "Verified Finisher";
+    ctx.fillText(timeDisplay, 652, 502);
+
     return canvas;
   }
 

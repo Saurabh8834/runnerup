@@ -174,6 +174,7 @@ export default function CertificateVerifyPage() {
           distance: data?.distance || "5 KM",
           dateStr: dateDisplay,
           category: data?.category || data?.activityType || "Running",
+          finishTimeSeconds: data?.finishTimeSeconds,
           isCancerEvent: isCancer,
           isKineticEvent: isKinetic,
           isAdminDemo: isAdminDemo,
