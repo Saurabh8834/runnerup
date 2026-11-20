@@ -2151,7 +2151,7 @@ export async function adminListProofs(request: AuthenticatedRequest, response: R
       rejectedCount,
       notSubmittedCount,
       allCount,
-      certificatesCount: approvedCount,
+      certificatesCount: isCancerScoped ? allCount : approvedCount,
       downloadsCount: isCancerScoped
         ? {
             certificates: cancerCertDownloads,

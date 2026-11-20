@@ -836,7 +836,11 @@ export default function AdminProofsPage() {
             <div className="mt-2 flex items-baseline gap-1.5">
               <p className="text-2xl font-black text-blue-300 font-mono">{counts.certDownloads}</p>
               <span className="text-xs font-bold text-blue-300/80">
-                / {counts.approved || counts.total} ({counts.approved > 0 ? Math.round((counts.certDownloads / counts.approved) * 100) : 0}%)
+                / {isCancer ? counts.total : (counts.approved || counts.total)} ({
+                  (isCancer ? counts.total : counts.approved) > 0
+                    ? Math.round((counts.certDownloads / (isCancer ? counts.total : counts.approved)) * 100)
+                    : 0
+                }%)
               </span>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[0.68rem] text-blue-300/90 font-medium">
@@ -953,7 +957,7 @@ export default function AdminProofsPage() {
 
               <span className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 shadow-xs">
                 <Award className="h-3.5 w-3.5 text-emerald-400" />
-                Certificates: <strong>{counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
+                Certificates: <strong>{isCancer ? counts.total : counts.approved} Ready</strong> · <strong>{counts.certDownloads} Claimed</strong>
               </span>
             </div>
 
@@ -1191,7 +1195,7 @@ export default function AdminProofsPage() {
                                   </span>
 
                                   {/* Certificate Status */}
-                                  {currentStatus === "APPROVED" ? (
+                                  {isCancerRow || currentStatus === "APPROVED" ? (
                                     <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[11px] font-bold ${isCertDownloaded
                                         ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
                                         : "border-sky-500/30 bg-sky-500/10 text-sky-300"
