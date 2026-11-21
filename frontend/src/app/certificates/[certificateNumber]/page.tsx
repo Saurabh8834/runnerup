@@ -264,7 +264,23 @@ export default function CertificateVerifyPage() {
     async function drawStory() {
       try {
         const eventTitle = (data?.event || "").toLowerCase();
-        const isKinetic = eventTitle.includes("kinetic") || certificateNumber.toLowerCase().includes("krun");
+        const bib = (data?.bibNumber || "").toUpperCase();
+        const cert = certificateNumber.toUpperCase();
+
+        const isKinetic =
+          eventTitle.includes("kinetic") ||
+          cert.includes("KRUN") ||
+          bib.includes("KRUN") ||
+          isKineticCert;
+
+        const isCancer =
+          !isKinetic &&
+          (eventTitle.includes("cancer") ||
+            cert.includes("NCAD") ||
+            bib.includes("NCAD") ||
+            isCancerCert);
+
+        const isIaf = !isKinetic && !isCancer;
 
         // Auto-calculate time & pace from data.finishTimeSeconds or realistic default
         let timeStr = "00:52:14";
@@ -308,13 +324,16 @@ export default function CertificateVerifyPage() {
 
         const canvas = await renderStoryCanvas({
           runnerName: data?.runnerName || "VERIFIED ATHLETE",
-          distance: data?.distance || "10 KM",
+          distance: data?.distance || (isCancer ? "5 KM" : "10 KM"),
           timeStr,
           paceStr,
           tierName,
-          bibNumber: data?.bibNumber || "KRUN-1001",
+          bibNumber: data?.bibNumber || (isCancer ? "NCAD-1001" : isKinetic ? "KRUN-1001" : "1001"),
           medalSide: "front",
           isKineticEvent: isKinetic,
+          isCancerEvent: isCancer,
+          isIafEvent: isIaf,
+          eventName: data?.event,
           storyMode: "finisher",
           isPaid: true,
         });
@@ -340,7 +359,20 @@ export default function CertificateVerifyPage() {
   }, [showStoryModal, data, certificateNumber]);
 
   const getStoryCaptionText = () => {
-    return `🏆 Official Finisher of ${data?.event || "Kinetic Run Virtual Challenge 2026"}! Conquered ${data?.distance || "10 KM"}. Verified GPS Athlete. Check it out at https://runnerup.in ⚡🏅 @runnerup.in`;
+    const eventTitle = (data?.event || "").toLowerCase();
+    const bib = (data?.bibNumber || "").toUpperCase();
+    const cert = certificateNumber.toUpperCase();
+
+    const isKinetic = eventTitle.includes("kinetic") || cert.includes("KRUN") || bib.includes("KRUN") || isKineticCert;
+    const isCancer = !isKinetic && (eventTitle.includes("cancer") || cert.includes("NCAD") || bib.includes("NCAD") || isCancerCert);
+
+    if (isCancer) {
+      return `🎗️ Official Finisher of National Cancer Awareness Day Virtual Challenge 2026! Conquered ${data?.distance || "5 KM"}. Verified GPS Athlete. Check it out at https://runnerup.in 🏅🎗️ @runnerup.in`;
+    }
+    if (isKinetic) {
+      return `⚡ Official Finisher of Kinetic Run Virtual Challenge 2026! Conquered ${data?.distance || "10 KM"}. Verified GPS Athlete. Check it out at https://runnerup.in ⚡🏅 @runnerup.in`;
+    }
+    return `✈️ Official Finisher of Indian Air Force Day Virtual Challenge 2026! Conquered ${data?.distance || "10 KM"}. Touch The Sky With Glory! 🇮🇳🏅 @runnerup.in`;
   };
 
   const handleCopyStoryCaption = () => {
@@ -607,11 +639,11 @@ export default function CertificateVerifyPage() {
          ═══════════════════════════════════════════════════════════════ */}
       {showStoryModal && data && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="relative max-w-xl w-full rounded-3xl border border-orange-500/40 bg-slate-950 p-6 sm:p-7 space-y-5 shadow-2xl my-6 text-left">
+          <div className={`relative max-w-xl w-full rounded-3xl border ${isCancer ? "border-purple-500/40 shadow-purple-500/10" : isIaf ? "border-sky-500/40 shadow-sky-500/10" : "border-orange-500/40 shadow-orange-500/10"} bg-slate-950 p-6 sm:p-7 space-y-5 shadow-2xl my-6 text-left`}>
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-orange-400">
+                <div className={`flex items-center gap-1.5 text-xs font-black uppercase tracking-wider ${isCancer ? "text-purple-400" : isIaf ? "text-sky-400" : "text-orange-400"}`}>
                   <Smartphone className="h-4 w-4" />
                   <span>Official Story Card (9:16)</span>
                 </div>
@@ -628,8 +660,8 @@ export default function CertificateVerifyPage() {
             </div>
 
             {/* Explainer: Auto-Calculated From Proof */}
-            <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-2.5 flex items-center gap-2.5 text-xs text-cyan-200">
-              <Sparkles className="h-4 w-4 text-cyan-400 shrink-0" />
+            <div className={`rounded-xl border ${isCancer ? "border-purple-500/30 bg-purple-500/10 text-purple-200" : isIaf ? "border-sky-500/30 bg-sky-500/10 text-sky-200" : "border-cyan-500/30 bg-cyan-500/10 text-cyan-200"} px-3.5 py-2.5 flex items-center gap-2.5 text-xs`}>
+              <Sparkles className={`h-4 w-4 shrink-0 ${isCancer ? "text-purple-400" : isIaf ? "text-sky-400" : "text-cyan-400"}`} />
               <span>
                 <strong>100% Automated:</strong> Duration, pace, distance, and 3D medal are pulled directly from your verified finisher record.
               </span>
@@ -638,7 +670,7 @@ export default function CertificateVerifyPage() {
             {/* Split Layout: Center Phone Mockup Preview */}
             <div className="flex flex-col sm:flex-row items-center gap-6">
               {/* Smartphone Frame with 9:16 Canvas */}
-              <div className="relative rounded-[2rem] border-4 border-slate-700 bg-black p-2 shadow-2xl shadow-orange-500/10 max-w-[220px] w-full shrink-0">
+              <div className={`relative rounded-[2rem] border-4 ${isCancer ? "border-purple-900 shadow-purple-500/20" : isIaf ? "border-sky-900 shadow-sky-500/20" : "border-slate-700 shadow-orange-500/10"} bg-black p-2 shadow-2xl max-w-[220px] w-full shrink-0`}>
                 <div className="relative rounded-[1.5rem] overflow-hidden aspect-[9/16] w-full bg-slate-950">
                   <canvas
                     ref={storyCanvasRef}
@@ -649,8 +681,8 @@ export default function CertificateVerifyPage() {
                   {!storyCanvasReady && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-xs">
                       <div className="flex flex-col items-center gap-2">
-                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-                        <span className="text-[10px] font-bold text-orange-400 uppercase tracking-wider">
+                        <div className={`h-6 w-6 animate-spin rounded-full border-2 ${isCancer ? "border-purple-500" : isIaf ? "border-sky-500" : "border-orange-500"} border-t-transparent`} />
+                        <span className={`text-[10px] font-bold ${isCancer ? "text-purple-400" : isIaf ? "text-sky-400" : "text-orange-400"} uppercase tracking-wider`}>
                           Rendering Story...
                         </span>
                       </div>

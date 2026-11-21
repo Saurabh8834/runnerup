@@ -37,6 +37,9 @@ export type StoryRenderData = {
   bibNumber?: string;
   medalSide?: "front" | "back";
   isKineticEvent?: boolean;
+  isCancerEvent?: boolean;
+  isIafEvent?: boolean;
+  eventName?: string;
   storyMode?: "finisher" | "pledge"; // "finisher" = post-race achievement flex; "pledge" = pre-race commitment / I'm In
   isPaid?: boolean; // true = Paid ₹499 Finisher Kit; false = Unpaid Challenger (upsell mode)
 };
@@ -644,20 +647,54 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not acquire 2D canvas context");
 
-  // 1. Premium Midnight Carbon Canvas Background
+  const eventTitle = (data.eventName || "").toLowerCase();
+  const bib = (data.bibNumber || "").toUpperCase();
+
+  const isCancer =
+    Boolean(data.isCancerEvent) ||
+    eventTitle.includes("cancer") ||
+    bib.startsWith("NCAD") ||
+    (/^2[0-9]{3}$/.test(bib) && !bib.startsWith("1"));
+
+  const isKinetic =
+    !isCancer &&
+    (Boolean(data.isKineticEvent) ||
+      eventTitle.includes("kinetic") ||
+      bib.startsWith("KRUN"));
+
+  const isIaf = !isCancer && !isKinetic;
+
+  // 1. Premium Midnight Canvas Background (Event Themed)
   const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
-  bgGrad.addColorStop(0, "#05080c");
-  bgGrad.addColorStop(0.3, "#0b121a");
-  bgGrad.addColorStop(0.7, "#080d14");
-  bgGrad.addColorStop(1, "#040608");
+  if (isCancer) {
+    bgGrad.addColorStop(0, "#080312");
+    bgGrad.addColorStop(0.3, "#120824");
+    bgGrad.addColorStop(0.7, "#0c051a");
+    bgGrad.addColorStop(1, "#05020a");
+  } else if (isIaf) {
+    bgGrad.addColorStop(0, "#030712");
+    bgGrad.addColorStop(0.3, "#071328");
+    bgGrad.addColorStop(0.7, "#040d1a");
+    bgGrad.addColorStop(1, "#02060d");
+  } else {
+    bgGrad.addColorStop(0, "#05080c");
+    bgGrad.addColorStop(0.3, "#0b121a");
+    bgGrad.addColorStop(0.7, "#080d14");
+    bgGrad.addColorStop(1, "#040608");
+  }
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, 1080, 1920);
 
-  // 2. Dynamic Kinetic Energy Angle Streaks (Background motion lines)
+  // 2. Dynamic Energy Angle Streaks (Background motion lines)
   ctx.save();
   ctx.lineWidth = 1.5;
+  const streakColor = isCancer
+    ? "rgba(168, 85, 247, 0.05)"
+    : isIaf
+      ? "rgba(56, 189, 248, 0.05)"
+      : "rgba(255, 75, 38, 0.04)";
   for (let i = -400; i < 2000; i += 180) {
-    ctx.strokeStyle = "rgba(255, 75, 38, 0.04)";
+    ctx.strokeStyle = streakColor;
     ctx.beginPath();
     ctx.moveTo(i, 0);
     ctx.lineTo(i + 600, 1920);
@@ -665,15 +702,27 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   }
   ctx.restore();
 
-  // 3. Ambient Fiery Halo Behind Medal (Radial Glow)
+  // 3. Ambient Halo Behind Medal (Radial Glow)
   ctx.save();
   const medalCenterX = 540;
   const medalCenterY = 700;
   const radialGlow = ctx.createRadialGradient(medalCenterX, medalCenterY, 50, medalCenterX, medalCenterY, 480);
-  radialGlow.addColorStop(0, "rgba(255, 75, 38, 0.28)");
-  radialGlow.addColorStop(0.4, "rgba(245, 158, 11, 0.15)");
-  radialGlow.addColorStop(0.8, "rgba(230, 72, 51, 0.04)");
-  radialGlow.addColorStop(1, "transparent");
+  if (isCancer) {
+    radialGlow.addColorStop(0, "rgba(168, 85, 247, 0.38)");
+    radialGlow.addColorStop(0.4, "rgba(245, 158, 11, 0.22)");
+    radialGlow.addColorStop(0.8, "rgba(147, 51, 234, 0.05)");
+    radialGlow.addColorStop(1, "transparent");
+  } else if (isIaf) {
+    radialGlow.addColorStop(0, "rgba(14, 165, 233, 0.35)");
+    radialGlow.addColorStop(0.4, "rgba(3, 105, 161, 0.20)");
+    radialGlow.addColorStop(0.8, "rgba(2, 132, 199, 0.05)");
+    radialGlow.addColorStop(1, "transparent");
+  } else {
+    radialGlow.addColorStop(0, "rgba(255, 75, 38, 0.28)");
+    radialGlow.addColorStop(0.4, "rgba(245, 158, 11, 0.15)");
+    radialGlow.addColorStop(0.8, "rgba(230, 72, 51, 0.04)");
+    radialGlow.addColorStop(1, "transparent");
+  }
   ctx.fillStyle = radialGlow;
   ctx.fillRect(0, 200, 1080, 1000);
   ctx.restore();
@@ -691,7 +740,7 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
     [36, 1884],
     [1044, 1884],
   ];
-  ctx.strokeStyle = "#ff4b26";
+  ctx.strokeStyle = isCancer ? "#a855f7" : isIaf ? "#38bdf8" : "#ff4b26";
   ctx.lineWidth = 4;
   corners.forEach(([cx, cy]) => {
     const dirX = cx === 36 ? 1 : -1;
@@ -709,47 +758,104 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   const isPaid = data.isPaid !== false;
 
   ctx.save();
-  ctx.fillStyle = "#121820";
-  ctx.strokeStyle = isPledgeMode ? "rgba(59, 130, 246, 0.5)" : "rgba(245, 158, 11, 0.4)";
+  ctx.fillStyle = isCancer ? "#170c2a" : isIaf ? "#0c192c" : "#121820";
+  ctx.strokeStyle = isCancer
+    ? "rgba(168, 85, 247, 0.6)"
+    : isIaf
+      ? "rgba(56, 189, 248, 0.6)"
+      : isPledgeMode
+        ? "rgba(59, 130, 246, 0.5)"
+        : "rgba(245, 158, 11, 0.4)";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(320, 90, 440, 48, 24);
+  ctx.roundRect(280, 90, 520, 48, 24);
   ctx.fill();
   ctx.stroke();
 
   ctx.font = `bold 18px "Arial Black", "Impact", "Arial", sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = isPledgeMode ? "#60a5fa" : "#f59e0b";
+  ctx.fillStyle = isCancer ? "#fbbf24" : isIaf ? "#38bdf8" : isPledgeMode ? "#60a5fa" : "#f59e0b";
   ctx.fillText(
-    isPledgeMode ? "⚡ RUNNERUP · OFFICIAL CHALLENGE PLEDGE" : "⚡ RUNNERUP · OFFICIAL VIRTUAL RUN",
+    isCancer
+      ? "🎗️ RUNNERUP · OFFICIAL CHARITY CHALLENGE"
+      : isIaf
+        ? "✈️ RUNNERUP · OFFICIAL VIRTUAL RUN"
+        : isPledgeMode
+          ? "⚡ RUNNERUP · OFFICIAL CHALLENGE PLEDGE"
+          : "⚡ RUNNERUP · OFFICIAL VIRTUAL RUN",
     540,
     114
   );
   ctx.restore();
 
   // 6. Header Event Title
-  ctx.font = `900 48px "Arial Black", "Arial", sans-serif`;
+  ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#ffffff";
-  ctx.fillText("KINETIC RUN", 540, 185);
 
-  ctx.font = `bold 28px "Arial Black", sans-serif`;
-  ctx.fillStyle = "#ff5e3a";
-  ctx.fillText(isPledgeMode ? "I'M IN! CHALLENGE ACCEPTED" : "VIRTUAL CHALLENGE 2026", 540, 230);
+  if (isCancer) {
+    ctx.font = `900 42px "Arial Black", "Arial", sans-serif`;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("NATIONAL CANCER", 540, 182);
 
-  ctx.font = `bold 16px "Arial", sans-serif`;
-  ctx.fillStyle = "#94a3b8";
-  ctx.fillText("10–15 DECEMBER 2026 · ALL-INDIA GPS CHALLENGE", 540, 268);
+    ctx.font = `bold 30px "Arial Black", sans-serif`;
+    ctx.fillStyle = "#c084fc";
+    ctx.fillText("AWARENESS DAY 2026", 540, 228);
 
-  // 7. Render Authentic 3D Finisher Medal
-  const medalSrc =
-    data.medalSide === "back"
-      ? "/images/kinetic-run-medal-back.png"
-      : "/images/kinetic-run-medal-front.png";
+    ctx.font = `bold 16px "Arial", sans-serif`;
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText("7–15 NOVEMBER 2026 · RUN FOR AWARENESS", 540, 268);
+  } else if (isIaf) {
+    ctx.font = `900 42px "Arial Black", "Arial", sans-serif`;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("INDIAN AIR FORCE DAY", 540, 182);
+
+    ctx.font = `bold 28px "Arial Black", sans-serif`;
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillText("VIRTUAL CHALLENGE 2026", 540, 228);
+
+    ctx.font = `bold 16px "Arial", sans-serif`;
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("8 OCTOBER 2026 · TOUCH THE SKY WITH GLORY", 540, 268);
+  } else {
+    ctx.font = `900 48px "Arial Black", "Arial", sans-serif`;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("KINETIC RUN", 540, 185);
+
+    ctx.font = `bold 28px "Arial Black", sans-serif`;
+    ctx.fillStyle = "#ff5e3a";
+    ctx.fillText(isPledgeMode ? "I'M IN! CHALLENGE ACCEPTED" : "VIRTUAL CHALLENGE 2026", 540, 230);
+
+    ctx.font = `bold 16px "Arial", sans-serif`;
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText("10–15 DECEMBER 2026 · ALL-INDIA GPS CHALLENGE", 540, 268);
+  }
+  ctx.restore();
+
+  // 7. Render Authentic 3D Finisher Medal (Event Specific)
+  const medalSrc = isCancer
+    ? data.medalSide === "back"
+      ? "/images/cancer-awareness-medal-back.png"
+      : "/images/cancer-awareness-medal-front.png"
+    : isIaf
+      ? data.medalSide === "back"
+        ? "/images/iaf-medal-back.png"
+        : "/images/iaf-medal-front.png"
+      : data.medalSide === "back"
+        ? "/images/kinetic-run-medal-back.png"
+        : "/images/kinetic-run-medal-front.png";
+
   try {
-    const medalImg = await loadImage(medalSrc);
+    let medalImg: HTMLImageElement;
+    try {
+      medalImg = await loadImage(medalSrc);
+    } catch {
+      const fallbackSrc = medalSrc.endsWith(".png")
+        ? medalSrc.replace(".png", ".webp")
+        : medalSrc.replace(".webp", ".png");
+      medalImg = await loadImage(fallbackSrc);
+    }
 
     // Realistic hardware drop shadow
     ctx.save();
@@ -760,10 +866,19 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
     ctx.fill();
     ctx.restore();
 
-    // Draw high-resolution medal (490 x 735)
-    const mw = 490;
-    const mh = 735;
-    ctx.drawImage(medalImg, 540 - mw / 2, 330, mw, mh);
+    // Proportional fit within 500x740 area
+    const maxW = 500;
+    const maxH = 740;
+    const imgRatio = (medalImg.width || 500) / (medalImg.height || 740);
+    let drawW = maxW;
+    let drawH = drawW / imgRatio;
+    if (drawH > maxH) {
+      drawH = maxH;
+      drawW = drawH * imgRatio;
+    }
+    const drawX = 540 - drawW / 2;
+    const drawY = 320 + (maxH - drawH) / 2;
+    ctx.drawImage(medalImg, drawX, drawY, drawW, drawH);
   } catch (err) {
     console.warn("Could not load medal for story canvas:", err);
   }
@@ -771,8 +886,16 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   // 8. Tier Pill Floating Below Medal
   const tier = data.tierName || "SPEEDSTER";
   ctx.save();
-  const tierGrad = ctx.createLinearGradient(300, 0, 780, 0);
-  if (isPledgeMode) {
+  const tierGrad = ctx.createLinearGradient(280, 0, 800, 0);
+  if (isCancer) {
+    tierGrad.addColorStop(0, "#6b21a8");
+    tierGrad.addColorStop(0.5, "#a855f7");
+    tierGrad.addColorStop(1, "#d97706");
+  } else if (isIaf) {
+    tierGrad.addColorStop(0, "#0284c7");
+    tierGrad.addColorStop(0.5, "#38bdf8");
+    tierGrad.addColorStop(1, "#0369a1");
+  } else if (isPledgeMode) {
     if (!isPaid) {
       tierGrad.addColorStop(0, "#2563eb");
       tierGrad.addColorStop(0.5, "#38bdf8");
@@ -799,14 +922,20 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   ctx.font = `bold 20px "Arial Black", sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = "#000000";
-  if (isPledgeMode) {
+  ctx.fillStyle = "#ffffff";
+  if (isCancer) {
+    ctx.fillText("🎗️ CANCER AWARENESS FINISHER", 540, 1146);
+  } else if (isIaf) {
+    ctx.fillText("✈️ AIR FORCE DAY FINISHER", 540, 1146);
+  } else if (isPledgeMode) {
+    ctx.fillStyle = "#000000";
     ctx.fillText(
       !isPaid ? "🎯 REGISTERED CHALLENGER · PLEDGED" : "⚡ CONFIRMED ATHLETE · READY FOR GLORY",
       540,
       1146
     );
   } else {
+    ctx.fillStyle = "#000000";
     ctx.fillText(`⚡ VERIFIED ${tier} TIER ATHLETE`, 540, 1146);
   }
   ctx.restore();
@@ -819,16 +948,32 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   const cardR = 32;
 
   ctx.save();
-  ctx.fillStyle = "rgba(14, 21, 30, 0.94)";
+  ctx.fillStyle = isCancer
+    ? "rgba(18, 12, 30, 0.94)"
+    : isIaf
+      ? "rgba(8, 18, 32, 0.94)"
+      : "rgba(14, 21, 30, 0.94)";
   ctx.beginPath();
   ctx.roundRect(cardX, cardY, cardW, cardH, cardR);
   ctx.fill();
-  ctx.strokeStyle = isPledgeMode && !isPaid ? "rgba(56, 189, 248, 0.3)" : "rgba(255, 255, 255, 0.15)";
+  ctx.strokeStyle = isCancer
+    ? "rgba(168, 85, 247, 0.35)"
+    : isIaf
+      ? "rgba(56, 189, 248, 0.35)"
+      : isPledgeMode && !isPaid
+        ? "rgba(56, 189, 248, 0.3)"
+        : "rgba(255, 255, 255, 0.15)";
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // Subtle top accent line on the card
-  ctx.strokeStyle = isPledgeMode && !isPaid ? "#38bdf8" : "#ff4b26";
+  ctx.strokeStyle = isCancer
+    ? "#a855f7"
+    : isIaf
+      ? "#38bdf8"
+      : isPledgeMode && !isPaid
+        ? "#38bdf8"
+        : "#ff4b26";
   ctx.lineWidth = 4;
   ctx.beginPath();
   ctx.roundRect(cardX + 40, cardY, cardW - 80, 4, 2);
@@ -837,8 +982,18 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   // Eyebrow
   ctx.font = `bold 18px "Arial Black", sans-serif`;
   ctx.textAlign = "center";
-  ctx.fillStyle = isPledgeMode && !isPaid ? "#38bdf8" : "#f59e0b";
-  if (isPledgeMode) {
+  ctx.fillStyle = isCancer
+    ? "#fbbf24"
+    : isIaf
+      ? "#38bdf8"
+      : isPledgeMode && !isPaid
+        ? "#38bdf8"
+        : "#f59e0b";
+  if (isCancer) {
+    ctx.fillText("🎗️ RUN FOR AWARENESS · RUN FOR A HEALTHIER TOMORROW", 540, cardY + 50);
+  } else if (isIaf) {
+    ctx.fillText("✈️ TOUCH THE SKY WITH GLORY · PROUD INDIAN", 540, cardY + 50);
+  } else if (isPledgeMode) {
     ctx.fillText(
       !isPaid ? "🎯 OFFICIAL RACE PLEDGE · 10–15 DEC" : "🏁 CONFIRMED RACER · FINISHER KIT RESERVED",
       540,
@@ -865,26 +1020,33 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   const statGap = 20;
   const statStartX = cardX + (cardW - (statBoxW * 3 + statGap * 2)) / 2;
 
-  let distClean = (data.distance || "10 KM").toUpperCase().trim();
+  let distClean = (data.distance || (isCancer ? "5 KM" : "10 KM")).toUpperCase().trim();
   if (!distClean.endsWith("KM") && !distClean.endsWith("K")) distClean += " KM";
+
+  const defaultBib = isCancer ? "NCAD-1001" : isIaf ? "1001" : "KRUN-1001";
+  const bibStr = data.bibNumber || defaultBib;
 
   const stats = isPledgeMode
     ? [
         { label: "GOAL DISTANCE", val: distClean, sub: "Challenge Target" },
-        { label: "CHALLENGE DATES", val: "10–15 DEC", sub: "All-India Virtual" },
-        { label: "RACE BIB", val: data.bibNumber || "KRUN-1001", sub: isPaid ? "Confirmed Kit" : "Registered" },
+        { label: "CHALLENGE DATES", val: isCancer ? "7–15 NOV" : isIaf ? "8 OCT" : "10–15 DEC", sub: "All-India Virtual" },
+        { label: "RACE BIB", val: bibStr, sub: isPaid ? "Confirmed Kit" : "Registered" },
       ]
     : [
         { label: "DISTANCE", val: distClean, sub: "Conquered" },
-        { label: "FINISH TIME", val: data.timeStr || "00:52:14", sub: "Verified" },
-        { label: "AVG PACE", val: data.paceStr || "5:13 /KM", sub: "GPS Tracked" },
+        { label: "FINISH TIME", val: data.timeStr || "00:26:19", sub: "Verified" },
+        { label: "AVG PACE", val: data.paceStr || "5:15 /KM", sub: "GPS Tracked" },
       ];
 
   stats.forEach((s, idx) => {
     const bx = statStartX + idx * (statBoxW + statGap);
     ctx.save();
     ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.strokeStyle = isCancer
+      ? "rgba(168, 85, 247, 0.25)"
+      : isIaf
+        ? "rgba(56, 189, 248, 0.25)"
+        : "rgba(255, 255, 255, 0.1)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.roundRect(bx, statBoxY, statBoxW, statBoxH, 16);
@@ -907,7 +1069,6 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   });
 
   // Runner Bib & Authenticity Tag inside card
-  const bibStr = data.bibNumber || "KRUN-1001";
   ctx.font = `bold 18px "Arial Black", sans-serif`;
   ctx.fillStyle = "#f8fafc";
   ctx.textAlign = "center";
@@ -918,7 +1079,13 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   ctx.fillText("WORKS WITH STRAVA · GARMIN · APPLE WATCH · COROS · NRC", 540, cardY + 380);
 
   ctx.font = `bold 13px "Arial", sans-serif`;
-  if (isPledgeMode && !isPaid) {
+  if (isCancer) {
+    ctx.fillStyle = "#c084fc";
+    ctx.fillText("🎗️ 100% VERIFIED ATHLETE RECORD · OFFICIAL COMMEMORATIVE FINISHER MEDAL", 540, cardY + 418);
+  } else if (isIaf) {
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillText("🇮🇳 100% VERIFIED ATHLETE RECORD · OFFICIAL IAF FINISHER MEDAL", 540, cardY + 418);
+  } else if (isPledgeMode && !isPaid) {
     ctx.fillStyle = "#f59e0b";
     ctx.fillText("★ UPGRADE TO FINISHER KIT (₹499) TO CLAIM 3D SCULPTED PHYSICAL MEDAL ★", 540, cardY + 418);
   } else {
@@ -931,8 +1098,16 @@ export async function renderStoryCanvas(data: StoryRenderData): Promise<HTMLCanv
   ctx.save();
   ctx.font = `bold 22px "Arial Black", "Arial", sans-serif`;
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ff5e3a";
-  ctx.fillText("TAG @RUNNERUP.IN TO GET FEATURED IN HALL OF FAME 📸", 540, 1750);
+  ctx.fillStyle = isCancer ? "#fbbf24" : isIaf ? "#38bdf8" : "#ff5e3a";
+  ctx.fillText(
+    isCancer
+      ? "TAG @RUNNERUP.IN TO GET FEATURED IN HALL OF FAME 🎗️"
+      : isIaf
+        ? "TAG @RUNNERUP.IN TO GET FEATURED IN HALL OF FAME 🇮🇳"
+        : "TAG @RUNNERUP.IN TO GET FEATURED IN HALL OF FAME 📸",
+    540,
+    1750
+  );
 
   ctx.font = `bold 18px "Arial", sans-serif`;
   ctx.fillStyle = "#94a3b8";
