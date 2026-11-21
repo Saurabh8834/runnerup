@@ -344,7 +344,7 @@ export function DashboardClient() {
       const official = isIaf ? getVerifiedRunnerByBib(cleanBib) : null;
       const runnerName = (reg.shippingName || dbUser?.name || user?.fullName || user?.firstName || official?.name || "Runner").trim();
       const distance = reg.distance || official?.distance || "5 KM";
-      const certNum = reg.certificate?.certificateNumber || (isCancer ? `CERT-NCAD-${reg.bibNumber}` : `CERT-IAF26-${cleanBib}`);
+      const certNum = reg.certificate?.certificateNumber || (isCancer ? `CERT-NCAD-${cleanBib}` : `CERT-IAF26-${cleanBib}`);
       const canvas = await renderCertCanvas({
         runnerName,
         distance,
@@ -1488,7 +1488,7 @@ export function DashboardClient() {
                               </button>
 
                               <Link
-                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${reg.bibNumber}` : `CERT-IAF26-${reg.bibNumber}`)}`}
+                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${(reg.bibNumber || "").replace(/^NCAD-?/i, "").replace(/\D/g, "") || reg.bibNumber}` : `CERT-IAF26-${(reg.bibNumber || "").replace(/\D/g, "") || reg.bibNumber}`)}`}
                                 className="rounded-full border border-purple-400/50 bg-purple-500/15 hover:bg-purple-500/25 px-3 sm:px-3.5 py-1.5 sm:py-2 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-300 shadow-sm transition-all inline-flex items-center gap-1 cursor-pointer"
                                 title="Preview Official Certificate on-screen"
                               >
@@ -1903,7 +1903,7 @@ export function DashboardClient() {
                           {(reg.certificate?.certificateNumber || isCancerEvent) && (
                             <>
                               <Link
-                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${reg.bibNumber}` : `CERT-IAF26-${reg.bibNumber}`)}`}
+                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${(reg.bibNumber || "").replace(/^NCAD-?/i, "").replace(/\D/g, "") || reg.bibNumber}` : `CERT-IAF26-${(reg.bibNumber || "").replace(/\D/g, "") || reg.bibNumber}`)}`}
                                 className="rounded-full border border-purple-400/50 bg-purple-500/20 hover:bg-purple-500/30 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-purple-200 shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                                 title="Preview Official Certificate on-screen"
                               >
@@ -1912,7 +1912,7 @@ export function DashboardClient() {
                               </Link>
 
                               <Link
-                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${reg.bibNumber}` : `CERT-IAF26-${reg.bibNumber}`)}`}
+                                href={`/certificates/${reg.certificate?.certificateNumber || (isCancerEvent ? `CERT-NCAD-${(reg.bibNumber || "").replace(/^NCAD-?/i, "").replace(/\D/g, "") || reg.bibNumber}` : `CERT-IAF26-${(reg.bibNumber || "").replace(/\D/g, "") || reg.bibNumber}`)}`}
                                 className="rounded-full bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-90 px-3.5 h-10 text-[0.7rem] sm:text-xs font-black uppercase tracking-wider text-white shadow-md shadow-pink-500/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                                 title="Share Instagram & WhatsApp 9:16 Story"
                               >

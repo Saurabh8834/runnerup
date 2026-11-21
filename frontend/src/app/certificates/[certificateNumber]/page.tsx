@@ -83,6 +83,9 @@ export default function CertificateVerifyPage() {
         .replace(/^CERT-IAF26-/i, "")
         .replace(/^CERT-NCAD-/i, "")
         .replace(/^CERT-KRUN-/i, "")
+        .replace(/^CERT-/i, "")
+        .replace(/^NCAD-/i, "")
+        .replace(/^KRUN-/i, "")
         .replace(/^RU-\d+-/i, "")
         .replace(/[^0-9]/g, "") || "1001";
 

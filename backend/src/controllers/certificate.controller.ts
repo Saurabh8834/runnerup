@@ -30,6 +30,7 @@ export async function verifyCertificate(request: Request, response: Response) {
     .replace(/^CERT-/i, "")
     .trim();
   const cleanBibDigits = strippedParam.replace(/\D/g, "") || cleanDigits;
+  const prefix6 = cleanBibDigits.length === 7 ? cleanBibDigits.slice(0, 6) : null;
 
   const mode = "insensitive" as const;
 
@@ -81,10 +82,15 @@ export async function verifyCertificate(request: Request, response: Response) {
                   ...(cleanDigits ? [{ registration: { bibNumber: cleanDigits } }] : []),
                 ]
               : []),
-            ...(isCancerQuery && cleanDigits
+            ...(isCancerQuery && (cleanDigits || cleanBibDigits)
               ? [
+                  { certificateNumber: { equals: `CERT-NCAD-${cleanBibDigits}`, mode } },
                   { certificateNumber: { equals: `CERT-NCAD-${cleanDigits}`, mode } },
-                  { registration: { bibNumber: cleanDigits } },
+                  ...(prefix6 ? [{ certificateNumber: { equals: `CERT-NCAD-${prefix6}`, mode } }] : []),
+                  { registration: { bibNumber: cleanBibDigits } },
+                  { registration: { bibNumber: `NCAD-${cleanBibDigits}` } },
+                  { registration: { bibNumber: { contains: cleanBibDigits, mode } } },
+                  ...(prefix6 ? [{ registration: { bibNumber: `NCAD-${prefix6}` } }] : []),
                 ]
               : []),
             ...(isKineticQuery && cleanDigits
@@ -124,8 +130,13 @@ export async function verifyCertificate(request: Request, response: Response) {
                     { adminNote: { contains: phoneFilter } },
                   ]
                 : []),
-              { bibNumber: rawParam },
-              ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
+              { bibNumber: { equals: rawParam, mode } },
+              { bibNumber: { equals: strippedParam, mode } },
+              { bibNumber: { equals: `NCAD-${cleanBibDigits}`, mode } },
+              ...(prefix6 ? [{ bibNumber: { equals: `NCAD-${prefix6}`, mode } }] : []),
+              { bibNumber: { contains: cleanBibDigits, mode } },
+              ...(cleanDigits ? [{ bibNumber: { contains: cleanDigits, mode } }] : []),
+              ...(prefix6 ? [{ bibNumber: { contains: prefix6, mode } }] : []),
               { id: rawParam },
               ...(rawParam.includes("@") ? [{ user: { email: { equals: rawParam, mode } } }] : []),
             ],
@@ -156,10 +167,15 @@ export async function verifyCertificate(request: Request, response: Response) {
           include: certInclude,
         });
       } else {
+        const cleanBibNum = reg.bibNumber
+          .replace(/^NCAD-?/i, "")
+          .replace(/^KRUN-?/i, "")
+          .replace(/^IAF26-?/i, "")
+          .replace(/[^A-Za-z0-9]/g, "") || reg.bibNumber.replace(/[^A-Za-z0-9]/g, "");
         const prefix = eventSlug.includes("cancer")
           ? "CERT-NCAD"
           : "CERT-IAF26";
-        const certNum = `${prefix}-${reg.bibNumber.replace(/[^A-Za-z0-9]/g, "")}`;
+        const certNum = `${prefix}-${cleanBibNum}`;
         const issuedDate = eventSlug.includes("cancer")
           ? new Date("2026-11-17T18:00:00.000Z")
           : new Date("2026-10-31T06:30:00.000Z");
@@ -249,11 +265,20 @@ export async function verifyCertificate(request: Request, response: Response) {
   const rawActivity = certificate.registration.activityType || "Running";
   const categoryFormatted = rawActivity.charAt(0).toUpperCase() + rawActivity.slice(1).toLowerCase();
 
+  const resolvedName = (
+    (certificate.registration.user?.name && !/^runner|user|athlete|participant$/i.test(certificate.registration.user.name.trim())
+      ? certificate.registration.user.name
+      : "") ||
+    certificate.registration.shippingName ||
+    certificate.registration.user?.name ||
+    "Finisher"
+  ).trim();
+
   response.json({
     data: {
       certificateNumber: certificate.certificateNumber,
       status: certificate.status,
-      runnerName: (certificate.registration.shippingName || certificate.registration.user?.name || "Finisher").toUpperCase(),
+      runnerName: resolvedName.toUpperCase(),
       event: certificate.registration.event.title,
       distance: certificate.registration.distance,
       activityType: rawActivity,
