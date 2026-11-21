@@ -1042,7 +1042,7 @@ export default function AdminProofsPage() {
                 const timeObj = verifiedTimes[row.id] ?? { h: "00", m: "00", s: "00" };
                 const claimedParsed = formatSecondsToHms(row.finishTimeSeconds);
                 const contactPhone = row.user.phone || row.shippingPhone;
-                const currentStatus = row.proofUpload?.status || row.proofStatus || "SUBMITTED";
+                const currentStatus = row.proofStatus || row.proofUpload?.status || "NOT_SUBMITTED";
 
                 return (
                   <article

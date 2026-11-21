@@ -569,10 +569,10 @@ export function LeaderboardClient({
 
     const relativeUrl = getApiUrl(`/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`);
     const endpoints = [
-      `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
       relativeUrl,
       `https://www.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
       `https://api.runnerup.in/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
+      `https://runnerup-production.up.railway.app/api/registrations/leaderboard/${encodeURIComponent(selectedSlug)}${distQuery}`,
     ].filter((url, idx, arr) => arr.indexOf(url) === idx);
 
     let parsedJson: any = null;
