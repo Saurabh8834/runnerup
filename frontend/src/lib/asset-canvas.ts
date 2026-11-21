@@ -273,33 +273,33 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
     // Draw pristine master base (matching media_1795206970222_13035be4.jpg 100%)
     ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
-    // 1. Giant Official Bib Number (centered at x=512, y=360)
+    // 1. Giant Official Bib Number (perfectly centered between divider lines at x=512, y=353)
     const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
-    let fontSize = 130;
-    ctx.font = `bold ${fontSize}px "Arial", "Impact", "Segoe UI", sans-serif`;
+    let fontSize = 112;
+    ctx.font = `bold ${fontSize}px "Arial", "Segoe UI", sans-serif`;
     let numW = ctx.measureText(bibDisplay).width;
-    while (numW > 890 && fontSize > 50) {
+    while (numW > 880 && fontSize > 50) {
       fontSize -= 2;
-      ctx.font = `bold ${fontSize}px "Arial", "Impact", "Segoe UI", sans-serif`;
+      ctx.font = `bold ${fontSize}px "Arial", "Segoe UI", sans-serif`;
       numW = ctx.measureText(bibDisplay).width;
     }
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#310a66";
-    ctx.fillText(bibDisplay, 512, 360);
+    ctx.fillText(bibDisplay, 512, 353);
 
-    // 2. Athlete Data Badges Bar at bottom of card (centered at x=512, y=518)
+    // 2. Athlete Data Badges Bar at bottom of card (centered at x=512, y=515)
     const distClean = (data.distance || "5 KM").toUpperCase().trim();
     const distDisplay = distClean.endsWith("KM") || distClean.endsWith("K") ? distClean : `${distClean} KM`;
     const catDisplay = (data.category || "RUNNING").toUpperCase().trim();
-    const botText = `DISTANCE: ${distDisplay}    |    CATEGORY: ${catDisplay}`;
+    const botText = `DISTANCE: ${distDisplay}   |   CATEGORY: ${catDisplay}`;
 
     ctx.font = `bold 22px "Arial", "Segoe UI", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#291346";
-    ctx.fillText(botText, 512, 518);
+    ctx.fillText(botText, 512, 515);
 
     return canvas;
   }
