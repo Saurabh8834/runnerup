@@ -276,7 +276,23 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
     // Draw pristine master base (matching media_1795206970222_13035be4.jpg 100%)
     ctx.drawImage(baseImg, 0, 0, 1024, 682);
 
-    // 1. Giant Official Bib Number (perfectly centered between divider lines at x=512, y=353)
+    // 1. Participant Name: optically centered cleanly in the white athlete box above bib number at (512, 250)
+    const rawRunnerName = (data.runnerName || "RUNNER").trim();
+    const nameDisplay = formatCertificateRunnerName(rawRunnerName).toUpperCase();
+    let nameSize = 38;
+    ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
+    let nameW = ctx.measureText(nameDisplay).width;
+    while (nameW > 700 && nameSize > 20) {
+      nameSize -= 1;
+      ctx.font = `bold ${nameSize}px "Georgia", "Times New Roman", Times, serif`;
+      nameW = ctx.measureText(nameDisplay).width;
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#260a44";
+    ctx.fillText(nameDisplay, 512, 250);
+
+    // 2. Giant Official Bib Number (perfectly centered between divider lines at x=512, y=353)
     const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
     let fontSize = 112;
     ctx.font = `bold ${fontSize}px "Arial", "Segoe UI", sans-serif`;

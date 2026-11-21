@@ -142,9 +142,9 @@ export default function DigitalBibPage() {
                   ? "Kinetic Run Virtual Challenge 2026"
                   : "Indian Air Force Day Virtual Challenge 2026"),
             rankNumber: positionStr,
-            certificateNumber: bibNumber.toUpperCase().startsWith("NCAD")
+            certificateNumber: (isPayloadCancer || bibNumber.toUpperCase().startsWith("NCAD"))
               ? `CERT-NCAD-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
-              : bibNumber.toUpperCase().startsWith("KRUN") || bibNumber.toUpperCase().startsWith("KRVC")
+              : (isPayloadKinetic || bibNumber.toUpperCase().startsWith("KRUN") || bibNumber.toUpperCase().startsWith("KRVC"))
                 ? `CERT-KRUN-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
                 : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
             isPaid: true,

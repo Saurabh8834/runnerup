@@ -23,6 +23,13 @@ type CertificateWithRegistration = Prisma.CertificateGetPayload<{
 export async function verifyCertificate(request: Request, response: Response) {
   const rawParam = routeParam(request, "certificateNumber").trim();
   const cleanDigits = rawParam.replace(/\D/g, "");
+  const strippedParam = rawParam
+    .replace(/^CERT-IAF26-/i, "")
+    .replace(/^CERT-NCAD-/i, "")
+    .replace(/^CERT-KRUN-/i, "")
+    .replace(/^CERT-/i, "")
+    .trim();
+  const cleanBibDigits = strippedParam.replace(/\D/g, "") || cleanDigits;
 
   const mode = "insensitive" as const;
 
@@ -169,6 +176,34 @@ export async function verifyCertificate(request: Request, response: Response) {
         });
         certificate = created;
       }
+    }
+  }
+
+  // Resilient secondary fallback: if event-filtered lookup failed, search across registrations by bib number
+  if (!certificate && eventSlugFilter && (cleanBibDigits || cleanDigits)) {
+    const fallbackReg = await prisma.registration.findFirst({
+      where: {
+        OR: [
+          ...(cleanBibDigits ? [{ bibNumber: cleanBibDigits }] : []),
+          ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
+          { bibNumber: strippedParam },
+          { bibNumber: rawParam },
+          { certificate: { certificateNumber: { equals: rawParam, mode } } },
+        ],
+      },
+      include: {
+        user: true,
+        event: true,
+        payment: true,
+        certificate: true,
+      },
+    });
+
+    if (fallbackReg && fallbackReg.certificate) {
+      certificate = await prisma.certificate.findUnique({
+        where: { id: fallbackReg.certificate.id },
+        include: certInclude,
+      });
     }
   }
 

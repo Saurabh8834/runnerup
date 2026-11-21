@@ -80,14 +80,25 @@ function buildPrizeItems(
       action: null,
     });
   } else if (isCancer) {
-    items.push({
-      type: "certificate",
-      name: "E-Certificate",
-      icon: "certificate",
-      status: "processing",
-      statusLabel: "Locked · Final Audit",
-      action: null,
-    });
+    if (certificateNumber) {
+      items.push({
+        type: "certificate",
+        name: "E-Certificate",
+        icon: "certificate",
+        status: "delivered",
+        statusLabel: "Available",
+        action: { label: "View certificate", href: `/certificates/${certificateNumber}` },
+      });
+    } else {
+      items.push({
+        type: "certificate",
+        name: "E-Certificate",
+        icon: "certificate",
+        status: "processing",
+        statusLabel: "Available in Dashboard",
+        action: { label: "Go to Dashboard", href: "/dashboard" },
+      });
+    }
   } else {
     const certStatus = getPrizeStatus(null, certificateStatus, "certificate");
     items.push({
@@ -203,6 +214,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
       OR: [
         { id: query },
         { bibNumber: { equals: query, mode: "insensitive" } },
+        ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
         { bibNumber: { contains: query, mode: "insensitive" } },
         ...(alphanumeric.length >= 4 ? [{ bibNumber: { contains: alphanumeric, mode: "insensitive" as const } }] : []),
         { user: { email: query.toLowerCase() } },

@@ -97,25 +97,34 @@ export default function CertificateVerifyPage() {
         const json = await response.json();
         if (!cancelled && json.data) {
           const payload = json.data as CertificateData;
+          const evTitle = (payload.event || "").toLowerCase();
+          const isPayloadCancer = evTitle.includes("cancer");
+          const isPayloadKinetic = evTitle.includes("kinetic");
+          const isPayloadIaf = !isPayloadCancer && !isPayloadKinetic;
+
+          const runnerFromMap = isPayloadIaf ? (getVerifiedRunnerByBib(certificateNumber) || getVerifiedRunnerByBib(bibGuess)) : null;
+
           setData({
             ...payload,
-            runnerName: (payload.runnerName || officialRunner?.name || "RUNNER").toUpperCase().trim(),
-            distance: (payload.distance || officialRunner?.distance || "5 KM").toUpperCase().trim(),
+            runnerName: (payload.runnerName || runnerFromMap?.name || "RUNNER").toUpperCase().trim(),
+            distance: (payload.distance || runnerFromMap?.distance || "5 KM").toUpperCase().trim(),
             category: payload.category || (payload.activityType ? (payload.activityType.charAt(0).toUpperCase() + payload.activityType.slice(1).toLowerCase()) : "Running"),
-            bibNumber: payload.bibNumber || officialRunner?.bibNumber || bibGuess,
+            bibNumber: payload.bibNumber || runnerFromMap?.bibNumber || bibGuess,
           });
         }
       } catch {
         if (!cancelled) {
+          const cleanDigits = certificateNumber.replace(/\D/g, "");
+          const isLikelyCancer = isCancerCert || (cleanDigits.length === 4 && cleanDigits.startsWith("20"));
           const defaultEvent = isKineticCert
             ? "Kinetic Run Virtual Challenge 2026"
-            : isCancerCert
+            : isLikelyCancer
               ? "National Cancer Awareness Day Virtual Challenge 2026"
               : "Indian Air Force Day Virtual Challenge 2026";
 
           const defaultName = isKineticCert
             ? "KINETIC FINISHER"
-            : isCancerCert
+            : isLikelyCancer
               ? "CANCER AWARENESS FINISHER"
               : (officialRunner?.name || "VERIFIED FINISHER");
 
@@ -127,11 +136,11 @@ export default function CertificateVerifyPage() {
             distance: (officialRunner?.distance || "5 KM").toUpperCase().trim(),
             bibNumber: isKineticCert
               ? `KRUN-${bibGuess}`
-              : isCancerCert
-                ? `NCAD-${bibGuess}`
+              : isLikelyCancer
+                ? (cleanDigits.startsWith("20") ? cleanDigits : `NCAD-${bibGuess}`)
                 : (officialRunner?.bibNumber || bibGuess),
             issuedAt: new Date().toISOString(),
-            isEventConcluded: isIafCert,
+            isEventConcluded: !isKineticCert,
           });
         }
       } finally {
