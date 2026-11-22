@@ -64,12 +64,13 @@ function buildPrizeItems(
   medalTracking: { courier: string | null; trackingNumber: string | null; trackingUrl: string | null } | null,
   certificateNumber: string | null,
   opts: { isCancer?: boolean; isKinetic?: boolean } | boolean = false,
+  bibNumber?: string | null,
 ): PrizeItem[] {
   const isCancer = typeof opts === "boolean" ? opts : Boolean(opts?.isCancer);
   const isKinetic = typeof opts === "object" ? Boolean(opts?.isKinetic) : false;
   const items: PrizeItem[] = [];
 
-  // Certificate logic: For ongoing/upcoming challenges (Kinetic 10-15 Dec, Cancer 7-17 Nov), certificate unlocks post-event after audit
+  // Certificate logic: For ongoing/upcoming challenges (Kinetic 10-15 Dec), certificate unlocks post-event after audit
   if (isKinetic) {
     items.push({
       type: "certificate",
@@ -109,6 +110,19 @@ function buildPrizeItems(
       action: certificateStatus && certificateStatus !== "QUEUED" && certificateNumber
         ? { label: "View certificate", href: `/certificates/${certificateNumber}` }
         : null,
+    });
+  }
+
+  // Digital Race Bib
+  if (bibNumber) {
+    const cleanBib = bibNumber.trim();
+    items.push({
+      type: "bib",
+      name: "Digital Race Bib",
+      icon: "award",
+      status: "delivered",
+      statusLabel: "Available",
+      action: { label: "Download Bib (HD)", href: `/bibs/${encodeURIComponent(cleanBib)}` },
     });
   }
 
@@ -265,6 +279,7 @@ export async function lookupPrizeByBib(request: AuthenticatedRequest, response: 
           : null,
         registration.certificate?.certificateNumber ?? null,
         { isCancer, isKinetic },
+        registration.bibNumber,
       )
     : [];
 
@@ -360,6 +375,7 @@ export async function myPrizes(request: AuthenticatedRequest, response: Response
         : null,
       reg.certificate?.certificateNumber ?? null,
       { isCancer, isKinetic },
+      reg.bibNumber,
     );
 
     const hasPrizes = prizes.some((p) => p.status !== "pending" && p.status !== "not_eligible");

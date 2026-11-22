@@ -1146,8 +1146,8 @@ export function DashboardClient() {
                   const isProofSubmitted = reg.proofStatus === "SUBMITTED";
                   const isVerified = reg.proofStatus === "APPROVED";
                   const isProofRejected = reg.proofStatus === "REJECTED";
-                  // Certificates are only ready for the concluded IAF challenge; for ongoing/upcoming events (Kinetic, Cancer), certificates unlock post-event
-                  const isCertReady = isIafEvent && isPaid;
+                  // Certificates are ready for concluded challenges (IAF and Cancer challenge); for upcoming events (Kinetic), certificates unlock post-event
+                  const isCertReady = ((isIafEvent || isCancerEvent) && isPaid && (isVerified || Boolean(reg.certificate)));
                   const isMedalDispatched = Boolean(reg.medalDelivery && (reg.medalDelivery.status === "DISPATCHED" || reg.medalDelivery.status === "DELIVERED"));
                   const formOpen = proofRegId === reg.id;
 
@@ -1263,9 +1263,7 @@ export function DashboardClient() {
                               {isVerified
                                 ? "Proof Approved"
                                 : isProofSubmitted
-                                  ? isCancerEvent
-                                    ? "Audited Post-Event (17 Nov)"
-                                    : "Audited Post-Event (30 Oct)"
+                                  ? "Under Review"
                                   : isProofRejected
                                     ? "Re-upload Required"
                                     : "Upload Activity"}
@@ -1465,7 +1463,7 @@ export function DashboardClient() {
                           </Link>
 
                           {/* Concluded IAF & Cancer challenge participants can download certificate/bib */}
-                          {isPaid && (isIafEvent || isCancerEvent) && (isVerified || reg.proofStatus === "APPROVED") && (
+                          {isPaid && (isIafEvent || isCancerEvent) && (isVerified || reg.proofStatus === "APPROVED" || Boolean(reg.certificate)) && (
                             <div className="inline-flex items-center gap-1.5 sm:gap-2">
                               <button
                                 onClick={() => handleDownloadBib(reg)}
@@ -1879,7 +1877,7 @@ export function DashboardClient() {
                               </div>
                             ) : isCancerEvent ? (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">
-                                🎗️ Official 3D sculpted medals are being prepared and packaged for doorstep courier dispatch following event conclusion.
+                                🎗️ Official 3D die-cast medal is being packed and prepared for courier dispatch. Live tracking will be sent directly to your registered email.
                               </p>
                             ) : (
                               <p className="mt-1.5 text-slate-300 text-[0.72rem] leading-relaxed">

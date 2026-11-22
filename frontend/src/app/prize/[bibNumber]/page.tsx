@@ -69,6 +69,7 @@ const prizeIcons: Record<string, typeof Award> = {
   certificate: Award,
   medal: Medal,
   tshirt: Shirt,
+  bib: Award,
 };
 
 const stageIcons: Record<string, typeof Clock> = {
@@ -126,7 +127,7 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
           ) : prize.type === "medal" ? (
             isCancer ? (
               <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
-                <span className="font-semibold text-purple-300">🎗️ Finisher Medal:</span> Your official handcrafted 3D medal will dispatch following GPS proof verification after the challenge closes on 17 November 2026. Live courier tracking will be delivered directly via Email.
+                <span className="font-semibold text-purple-300">🎗️ Finisher Medal:</span> Your official handcrafted 3D medal is being packed and prepared for courier dispatch. Live courier tracking details will be sent directly to your registered email once handed over.
               </div>
             ) : (
               <div className="mt-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 p-2.5 text-xs text-amber-200/90 leading-relaxed">
@@ -134,8 +135,18 @@ function PrizeCard({ prize, index, isCancer }: { prize: PrizeItem; index: number
               </div>
             )
           ) : prize.type === "certificate" && isCancer ? (
-            <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
-              <span className="font-semibold text-purple-300">🔒 Locked Under Final Audit:</span> Official QR-verified Finisher E-Certificates and Digital Bibs are undergoing final activity audit and validation. They will unlock upon official release announcement.
+            prize.action ? (
+              <div className="mt-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2.5 text-xs text-emerald-200/90 leading-relaxed">
+                <span className="font-semibold text-emerald-300">🎉 Verified &amp; Unlocked:</span> Official QR-verified Finisher E-Certificate has passed validation and is ready to view and download!
+              </div>
+            ) : (
+              <div className="mt-2.5 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2.5 text-xs text-purple-200/90 leading-relaxed">
+                <span className="font-semibold text-purple-300">⏳ Activity In Review:</span> Your GPS activity proof is being reviewed. Your official certificate will be available once verification completes.
+              </div>
+            )
+          ) : prize.type === "bib" ? (
+            <div className="mt-2.5 rounded-lg border border-sky-500/20 bg-sky-500/10 p-2.5 text-xs text-sky-200/90 leading-relaxed">
+              <span className="font-semibold text-sky-300">🎽 Digital Race Bib:</span> Official customized high-resolution digital race placard with your name, distance, and unique bib number.
             </div>
           ) : null}
 
