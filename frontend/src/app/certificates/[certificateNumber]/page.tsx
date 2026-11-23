@@ -118,7 +118,7 @@ export default function CertificateVerifyPage() {
       } catch {
         if (!cancelled) {
           const cleanDigits = certificateNumber.replace(/\D/g, "");
-          const isLikelyCancer = isCancerCert || (cleanDigits.length === 4 && cleanDigits.startsWith("20"));
+          const isLikelyCancer = isCancerCert || (cleanDigits.length === 4 && cleanDigits.startsWith("2"));
           const defaultEvent = isKineticCert
             ? "Kinetic Run Virtual Challenge 2026"
             : isLikelyCancer

@@ -293,7 +293,10 @@ export async function renderBibCanvas(data: BibRenderData): Promise<HTMLCanvasEl
     ctx.fillText(nameDisplay, 512, 250);
 
     // 2. Giant Official Bib Number (perfectly centered between divider lines at x=512, y=353)
-    const bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
+    let bibDisplay = (data.positionStr || "NCAD-1001").toUpperCase().trim();
+    if (data.isCancerEvent && !bibDisplay.startsWith("NCAD-") && !bibDisplay.startsWith("NCAD")) {
+      bibDisplay = `NCAD-${bibDisplay}`;
+    }
     let fontSize = 112;
     ctx.font = `bold ${fontSize}px "Arial", "Segoe UI", sans-serif`;
     let numW = ctx.measureText(bibDisplay).width;

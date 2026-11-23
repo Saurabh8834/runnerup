@@ -143,10 +143,10 @@ export default function DigitalBibPage() {
                   : "Indian Air Force Day Virtual Challenge 2026"),
             rankNumber: positionStr,
             certificateNumber: (isPayloadCancer || bibNumber.toUpperCase().startsWith("NCAD"))
-              ? `CERT-NCAD-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
+              ? `CERT-NCAD-${(payload.runner?.bibNumber || bibNumber).replace(/^NCAD-?/i, "").replace(/^KRUN-?/i, "").replace(/^IAF26-?/i, "").replace(/[^A-Za-z0-9]/g, "")}`
               : (isPayloadKinetic || bibNumber.toUpperCase().startsWith("KRUN") || bibNumber.toUpperCase().startsWith("KRVC"))
-                ? `CERT-KRUN-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`
-                : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/[^A-Za-z0-9]/g, "")}`,
+                ? `CERT-KRUN-${(payload.runner?.bibNumber || bibNumber).replace(/^KRUN-?/i, "").replace(/[^A-Za-z0-9]/g, "")}`
+                : `CERT-IAF26-${(payload.runner?.bibNumber || bibNumber).replace(/^IAF26-?/i, "").replace(/[^A-Za-z0-9]/g, "")}`,
             isPaid: true,
           });
         }

@@ -143,6 +143,7 @@ export async function verifyCertificate(request: Request, response: Response) {
           },
         ],
       },
+      orderBy: { registeredAt: "desc" },
       include: {
         user: true,
         event: true,
@@ -207,6 +208,7 @@ export async function verifyCertificate(request: Request, response: Response) {
           { certificate: { certificateNumber: { equals: rawParam, mode } } },
         ],
       },
+      orderBy: { registeredAt: "desc" },
       include: {
         user: true,
         event: true,
@@ -241,7 +243,7 @@ export async function verifyCertificate(request: Request, response: Response) {
   const isCancer = eventSlug.includes("cancer");
   const now = new Date();
   const eventEndsAt = event.endsAt ? new Date(event.endsAt) : null;
-  const isEventConcluded = !isKinetic && !isCancer && (eventEndsAt ? now > eventEndsAt : true);
+  const isEventConcluded = !isKinetic && (eventEndsAt ? now > eventEndsAt : true);
   const isAdminDemo =
     rawParam.includes("1999") ||
     rawParam.toLowerCase().includes("sourav") ||
