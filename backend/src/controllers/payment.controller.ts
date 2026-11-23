@@ -38,8 +38,8 @@ export async function resolveCouponDiscount(
     return { valid: false, code, discountPaise: 0, message: "Please enter a coupon code" };
   }
 
-  // Event-specific restriction: KINETIC100 & KINETIC50 valid exclusively for Kinetic Run Challenge
-  if (code === "KINETIC100" || code === "KINETIC50") {
+  // Event-specific restriction: KINETIC100, KINETIC50 & AKASH50 valid exclusively for Kinetic Run Challenge
+  if (code === "KINETIC100" || code === "KINETIC50" || code === "AKASH50") {
     const isKinetic =
       Boolean(event.slug && event.slug.toLowerCase().includes("kinetic")) ||
       Boolean(event.title && event.title.toLowerCase().includes("kinetic"));
