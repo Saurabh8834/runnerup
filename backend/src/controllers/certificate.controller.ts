@@ -51,78 +51,206 @@ export async function verifyCertificate(request: Request, response: Response) {
         : undefined;
 
   const phoneFilter = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : null;
+  const isEmail = rawParam.includes("@");
 
-  let certificate: CertificateWithRegistration | null = await prisma.certificate.findFirst({
+  type TargetReg = Prisma.RegistrationGetPayload<{
+    include: {
+      user: true;
+      event: true;
+      payment: true;
+      certificate: true;
+    };
+  }>;
+
+  async function resolveRegCertificate(targetReg: TargetReg): Promise<CertificateWithRegistration> {
+    const evSlug = targetReg.event?.slug?.toLowerCase() || "";
+    const isTargetKinetic = evSlug.includes("kinetic");
+    if (isTargetKinetic) {
+      throw new ApiError(
+        403,
+        "Certificate locked. The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. Official verified finisher certificates unlock automatically after the challenge concludes on 15 December.",
+      );
+    }
+
+    if (targetReg.certificate) {
+      const found = await prisma.certificate.findUnique({
+        where: { id: targetReg.certificate.id },
+        include: certInclude,
+      });
+      if (found) return found;
+    }
+
+    const cleanBibNum = targetReg.bibNumber
+      .replace(/^NCAD-?/i, "")
+      .replace(/^KRUN-?/i, "")
+      .replace(/^IAF26-?/i, "")
+      .replace(/[^A-Za-z0-9]/g, "") || targetReg.bibNumber.replace(/[^A-Za-z0-9]/g, "");
+    const prefix = evSlug.includes("cancer")
+      ? "CERT-NCAD"
+      : "CERT-IAF26";
+    const certNum = `${prefix}-${cleanBibNum}`;
+    const issuedDate = evSlug.includes("cancer")
+      ? new Date("2026-11-17T18:00:00.000Z")
+      : new Date("2026-10-31T06:30:00.000Z");
+    return prisma.certificate.create({
+      data: {
+        registrationId: targetReg.id,
+        certificateNumber: certNum,
+        pdfUrl: `/certificates/${certNum}`,
+        qrPayload: JSON.stringify({ issuer: "Runner Up", certificateNumber: certNum, verifyUrl: `https://runnerup.in/certificates/${certNum}` }),
+        status: "SENT",
+        issuedAt: issuedDate,
+      },
+      include: certInclude,
+    });
+  }
+
+  let certificate: CertificateWithRegistration | null = null;
+
+  // Stage 1: Exact certificateNumber or ID match (fastest and highest priority)
+  certificate = await prisma.certificate.findFirst({
     where: {
-      AND: [
-        ...(eventSlugFilter ? [{ registration: { event: eventSlugFilter } }] : []),
-        {
-          OR: [
-            { certificateNumber: { equals: rawParam, mode } },
-            ...(legacyEntry && isIafQuery
-              ? [
-                  { registrationId: legacyEntry.registrationId },
-                  { id: legacyEntry.registrationId },
-                  { registration: { bibNumber: legacyEntry.currentBib } },
-                  { certificateNumber: { equals: legacyEntry.certNumber, mode } },
-                  { certificateNumber: { equals: `CERT-IAF26-${legacyEntry.currentBib}`, mode } },
-                ]
-              : []),
-            ...(phoneFilter
-              ? [
-                  { registration: { shippingPhone: { contains: phoneFilter } } },
-                  { registration: { user: { phone: { contains: phoneFilter } } } },
-                  { registration: { adminNote: { contains: phoneFilter } } },
-                ]
-              : []),
-            ...(isIafQuery
-              ? [
-                  { certificateNumber: { equals: `CERT-IAF26-${rawParam}`, mode } },
-                  ...(cleanDigits ? [{ certificateNumber: { equals: `CERT-IAF26-${cleanDigits}`, mode } }] : []),
-                  ...(cleanDigits ? [{ registration: { bibNumber: cleanDigits } }] : []),
-                ]
-              : []),
-            ...(isCancerQuery && (cleanDigits || cleanBibDigits)
-              ? [
-                  { certificateNumber: { equals: `CERT-NCAD-${cleanBibDigits}`, mode } },
-                  { certificateNumber: { equals: `CERT-NCAD-${cleanDigits}`, mode } },
-                  ...(prefix6 ? [{ certificateNumber: { equals: `CERT-NCAD-${prefix6}`, mode } }] : []),
-                  { registration: { bibNumber: cleanBibDigits } },
-                  { registration: { bibNumber: `NCAD-${cleanBibDigits}` } },
-                  { registration: { bibNumber: { contains: cleanBibDigits, mode } } },
-                  ...(prefix6 ? [{ registration: { bibNumber: `NCAD-${prefix6}` } }] : []),
-                ]
-              : []),
-            ...(isKineticQuery && cleanDigits
-              ? [
-                  { certificateNumber: { equals: `CERT-KRUN-${cleanDigits}`, mode } },
-                  { registration: { bibNumber: cleanDigits } },
-                ]
-              : []),
-            { registration: { bibNumber: rawParam } },
-            { id: rawParam },
-            { registrationId: rawParam },
-          ],
-        },
+      OR: [
+        { certificateNumber: { equals: rawParam, mode } },
+        { id: rawParam },
+        { registrationId: rawParam },
       ],
     },
     include: certInclude,
   });
 
-  // If still not found by certificate, search registrations directly with strict event isolation
-  if (!certificate) {
+  // Stage 2: Legacy IAF mapping
+  if (!certificate && legacyEntry && isIafQuery) {
+    certificate = await prisma.certificate.findFirst({
+      where: {
+        OR: [
+          { registrationId: legacyEntry.registrationId },
+          { id: legacyEntry.registrationId },
+          { registration: { bibNumber: legacyEntry.currentBib } },
+          { certificateNumber: { equals: legacyEntry.certNumber, mode } },
+          { certificateNumber: { equals: `CERT-IAF26-${legacyEntry.currentBib}`, mode } },
+        ],
+      },
+      include: certInclude,
+    });
+  }
+
+  // Stage 3: Email lookup (e.g. sheetalgudmewar@gmail.com)
+  if (!certificate && isEmail) {
+    const emailParam = rawParam.trim().toLowerCase();
+    certificate = await prisma.certificate.findFirst({
+      where: {
+        AND: [
+          ...(eventSlugFilter ? [{ registration: { event: eventSlugFilter } }] : []),
+          { registration: { user: { email: { equals: emailParam, mode } } } },
+        ],
+      },
+      orderBy: { issuedAt: "desc" },
+      include: certInclude,
+    });
+
+    if (!certificate) {
+      const reg = await prisma.registration.findFirst({
+        where: {
+          AND: [
+            ...(eventSlugFilter ? [{ event: eventSlugFilter }] : []),
+            { user: { email: { equals: emailParam, mode } } },
+          ],
+        },
+        orderBy: { registeredAt: "desc" },
+        include: {
+          user: true,
+          event: true,
+          payment: true,
+          certificate: true,
+        },
+      });
+
+      if (reg) {
+        certificate = await resolveRegCertificate(reg);
+      }
+    }
+  }
+
+  // Stage 4: Exact Bib Number or Event-Prefixed Certificate Candidates
+  const bibCandidates: string[] = [];
+  if (cleanBibDigits) {
+    bibCandidates.push(cleanBibDigits);
+    bibCandidates.push(`NCAD-${cleanBibDigits}`);
+    bibCandidates.push(`IAF26-${cleanBibDigits}`);
+    bibCandidates.push(`KRUN-${cleanBibDigits}`);
+  }
+  if (strippedParam && !bibCandidates.includes(strippedParam)) {
+    bibCandidates.push(strippedParam);
+  }
+  if (rawParam && !bibCandidates.includes(rawParam)) {
+    bibCandidates.push(rawParam);
+  }
+  if (prefix6) {
+    bibCandidates.push(`NCAD-${prefix6}`);
+  }
+
+  if (!certificate && !isEmail && bibCandidates.length > 0) {
+    const certNumCandidates: string[] = [];
+    if (isCancerQuery || (!isKineticQuery && !isIafQuery)) {
+      if (cleanBibDigits) certNumCandidates.push(`CERT-NCAD-${cleanBibDigits}`);
+      if (cleanDigits && cleanDigits !== cleanBibDigits) certNumCandidates.push(`CERT-NCAD-${cleanDigits}`);
+      if (prefix6) certNumCandidates.push(`CERT-NCAD-${prefix6}`);
+    }
+    if (isIafQuery || (!isKineticQuery && !isCancerQuery)) {
+      if (cleanBibDigits) certNumCandidates.push(`CERT-IAF26-${cleanBibDigits}`);
+      if (cleanDigits && cleanDigits !== cleanBibDigits) certNumCandidates.push(`CERT-IAF26-${cleanDigits}`);
+    }
+    if (isKineticQuery) {
+      if (cleanBibDigits) certNumCandidates.push(`CERT-KRUN-${cleanBibDigits}`);
+      if (cleanDigits && cleanDigits !== cleanBibDigits) certNumCandidates.push(`CERT-KRUN-${cleanDigits}`);
+    }
+
+    certificate = await prisma.certificate.findFirst({
+      where: {
+        AND: [
+          ...(eventSlugFilter ? [{ registration: { event: eventSlugFilter } }] : []),
+          {
+            OR: [
+              ...certNumCandidates.map((c) => ({ certificateNumber: { equals: c, mode } })),
+              ...bibCandidates.map((b) => ({ registration: { bibNumber: { equals: b, mode } } })),
+            ],
+          },
+        ],
+      },
+      orderBy: { issuedAt: "desc" },
+      include: certInclude,
+    });
+  }
+
+  // Stage 5: Phone number lookup (10 digits)
+  if (!certificate && phoneFilter) {
+    certificate = await prisma.certificate.findFirst({
+      where: {
+        AND: [
+          ...(eventSlugFilter ? [{ registration: { event: eventSlugFilter } }] : []),
+          {
+            OR: [
+              { registration: { shippingPhone: { contains: phoneFilter } } },
+              { registration: { user: { phone: { contains: phoneFilter } } } },
+              { registration: { adminNote: { contains: phoneFilter } } },
+            ],
+          },
+        ],
+      },
+      orderBy: { issuedAt: "desc" },
+      include: certInclude,
+    });
+  }
+
+  // Stage 6: Registration fallback by exact bib/phone if certificate wasn't found yet
+  if (!certificate && !isEmail) {
     const reg = await prisma.registration.findFirst({
       where: {
         AND: [
           ...(eventSlugFilter ? [{ event: eventSlugFilter }] : []),
           {
             OR: [
-              ...(legacyEntry
-                ? [
-                    { id: legacyEntry.registrationId },
-                    { bibNumber: legacyEntry.currentBib },
-                  ]
-                : []),
               ...(phoneFilter
                 ? [
                     { shippingPhone: { contains: phoneFilter } },
@@ -130,15 +258,8 @@ export async function verifyCertificate(request: Request, response: Response) {
                     { adminNote: { contains: phoneFilter } },
                   ]
                 : []),
-              { bibNumber: { equals: rawParam, mode } },
-              { bibNumber: { equals: strippedParam, mode } },
-              { bibNumber: { equals: `NCAD-${cleanBibDigits}`, mode } },
-              ...(prefix6 ? [{ bibNumber: { equals: `NCAD-${prefix6}`, mode } }] : []),
-              { bibNumber: { contains: cleanBibDigits, mode } },
-              ...(cleanDigits ? [{ bibNumber: { contains: cleanDigits, mode } }] : []),
-              ...(prefix6 ? [{ bibNumber: { contains: prefix6, mode } }] : []),
+              ...bibCandidates.map((b) => ({ bibNumber: { equals: b, mode } })),
               { id: rawParam },
-              ...(rawParam.includes("@") ? [{ user: { email: { equals: rawParam, mode } } }] : []),
             ],
           },
         ],
@@ -153,75 +274,7 @@ export async function verifyCertificate(request: Request, response: Response) {
     });
 
     if (reg) {
-      const eventSlug = reg.event?.slug?.toLowerCase() || "";
-      const isKinetic = eventSlug.includes("kinetic");
-      if (isKinetic) {
-        throw new ApiError(
-          403,
-          "Certificate locked. The Kinetic Run Virtual Challenge takes place on 10–15 December 2026. Official verified finisher certificates unlock automatically after the challenge concludes on 15 December.",
-        );
-      }
-
-      if (reg.certificate) {
-        certificate = await prisma.certificate.findUnique({
-          where: { id: reg.certificate.id },
-          include: certInclude,
-        });
-      } else {
-        const cleanBibNum = reg.bibNumber
-          .replace(/^NCAD-?/i, "")
-          .replace(/^KRUN-?/i, "")
-          .replace(/^IAF26-?/i, "")
-          .replace(/[^A-Za-z0-9]/g, "") || reg.bibNumber.replace(/[^A-Za-z0-9]/g, "");
-        const prefix = eventSlug.includes("cancer")
-          ? "CERT-NCAD"
-          : "CERT-IAF26";
-        const certNum = `${prefix}-${cleanBibNum}`;
-        const issuedDate = eventSlug.includes("cancer")
-          ? new Date("2026-11-17T18:00:00.000Z")
-          : new Date("2026-10-31T06:30:00.000Z");
-        const created = await prisma.certificate.create({
-          data: {
-            registrationId: reg.id,
-            certificateNumber: certNum,
-            pdfUrl: `/certificates/${certNum}`,
-            qrPayload: JSON.stringify({ issuer: "Runner Up", certificateNumber: certNum, verifyUrl: `https://runnerup.in/certificates/${certNum}` }),
-            status: "SENT",
-            issuedAt: issuedDate,
-          },
-          include: certInclude,
-        });
-        certificate = created;
-      }
-    }
-  }
-
-  // Resilient secondary fallback: if event-filtered lookup failed, search across registrations by bib number
-  if (!certificate && eventSlugFilter && (cleanBibDigits || cleanDigits)) {
-    const fallbackReg = await prisma.registration.findFirst({
-      where: {
-        OR: [
-          ...(cleanBibDigits ? [{ bibNumber: cleanBibDigits }] : []),
-          ...(cleanDigits ? [{ bibNumber: cleanDigits }] : []),
-          { bibNumber: strippedParam },
-          { bibNumber: rawParam },
-          { certificate: { certificateNumber: { equals: rawParam, mode } } },
-        ],
-      },
-      orderBy: { registeredAt: "desc" },
-      include: {
-        user: true,
-        event: true,
-        payment: true,
-        certificate: true,
-      },
-    });
-
-    if (fallbackReg && fallbackReg.certificate) {
-      certificate = await prisma.certificate.findUnique({
-        where: { id: fallbackReg.certificate.id },
-        include: certInclude,
-      });
+      certificate = await resolveRegCertificate(reg);
     }
   }
 
