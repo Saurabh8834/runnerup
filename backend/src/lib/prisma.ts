@@ -1,8 +1,57 @@
+import net from "net";
+import dns from "dns";
 import { PrismaClient } from "@prisma/client";
 import { logger } from "../utils/logger.js";
 
+let dbUrl = process.env.DATABASE_URL;
+
+// On Windows or environments where the local router DNS fails for Neon AWS endpoints,
+// transparently resolve via 8.8.8.8 and create a localhost forwarding tunnel
+if (process.platform === "win32" && dbUrl && dbUrl.includes("neon.tech")) {
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+    const targetHost = "ep-mute-resonance-b3vonmzt-pooler.c-4.ap-southeast-1.aws.neon.tech";
+    const ips = await new Promise<string[]>((res) => {
+      dns.resolve4(targetHost, (err, addrs) => {
+        if (!err && addrs && addrs.length > 0) res(addrs);
+        else res([]);
+      });
+    });
+
+    if (ips.length > 0) {
+      const server = net.createServer((clientSocket) => {
+        const remoteSocket = net.connect(5432, ips[0], () => {
+          clientSocket.pipe(remoteSocket);
+          remoteSocket.pipe(clientSocket);
+        });
+        remoteSocket.on("error", () => clientSocket.destroy());
+        clientSocket.on("error", () => remoteSocket.destroy());
+      });
+
+      await new Promise<void>((res) => {
+        server.listen(5433, "127.0.0.1", () => res());
+        server.on("error", (e: any) => {
+          if (e.code === "EADDRINUSE") {
+            server.listen(0, "127.0.0.1", () => res());
+          } else {
+            res();
+          }
+        });
+      });
+
+      const addr = server.address();
+      const localPort = typeof addr === "object" && addr ? addr.port : 5433;
+      dbUrl = `postgresql://neondb_owner:npg_qVKsEQkSf3O8@127.0.0.1:${localPort}/neondb?sslmode=require&options=endpoint%3Dep-mute-resonance-b3vonmzt`;
+      logger.info(`[Prisma] DNS resilient proxy active on 127.0.0.1:${localPort} -> ${ips[0]}`);
+    }
+  } catch (err: any) {
+    logger.warn(`[Prisma] Could not start local DNS resilient proxy: ${err?.message || err}`);
+  }
+}
+
 const basePrisma = new PrismaClient({
   log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+  ...(dbUrl ? { datasources: { db: { url: dbUrl } } } : {}),
 });
 
 function isTransientDbError(error: unknown): boolean {
